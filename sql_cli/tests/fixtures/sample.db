@@ -1,0 +1,4 @@
+# This is a placeholder - actual DB will be created by tests
+# Create empty file for initial reference
+touch /Users/Agent/py/sql_cli/tests/fixtures/sample.db 2>/dev/null
+echo "created" > /Users/Agent/py/sql_cli/tests/fixtures/sample.db
