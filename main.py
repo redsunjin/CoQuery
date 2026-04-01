@@ -74,18 +74,43 @@ parser.add_argument('--write', action='store_true', default=False)
 
 args = parser.parse_args()
 
-
 def natural_handler(db, sql, params=None):
     try:
-        from nl_core import NaturalLanguageEngine
+        from sql_cli.nl_core import NaturalLanguageEngine
         engine = NaturalLanguageEngine()
+
         result = engine.process(sql)
         return {
-             "ok": result.get("ok"),
-             "command": "natural",
-             "intent": result.get("intent"),
-             "sql": result.get("sql"),
-             "error": None
-        }
+              "ok": result.get("ok"),
+              "command": "natural",
+              "intent": result.get("intent"),
+              "sql": result.get("sql"),
+              "error": None
+         }
     except Exception as e:
         return {"ok": False, "command": "natural", "error": str(e)}
+
+
+if not args.command:
+    print("EasySQL v0.7.0 - 6 Commands")
+    print("  schema, query, generate, insert, update, delete, natural")
+    sys.exit(0)
+
+if args.command == 'schema':
+    result = schema_handler(args.db)
+elif args.command == 'query':
+    result = query_handler(args.db, args.sql, args.write)
+elif args.command == 'generate':
+    result = generate_handler(args.db, args.skill or 'select_simple')
+elif args.command == 'insert':
+    result = insert_handler(args.db, args.skill or 'test', args.params)
+elif args.command == 'update':
+    result = update_handler(args.db, args.skill or 'update')
+elif args.command == 'delete':
+    result = delete_handler(args.db, args.skill or 'delete')
+elif args.command == 'natural':
+    result = natural_handler(args.db, args.sql or 'show users')
+else:
+    result = {"ok": False, "command": args.command, "error": "Unknown"}
+
+print(json.dumps(result, indent=2))
