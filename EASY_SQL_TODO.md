@@ -1,4 +1,4 @@
-# EasySQL Todo List
+# CoQuery Todo List
 
 **Version**: 0.6.0-Ready Recovery  
 **Session**: Continue Across Sessions (Memorize This)  

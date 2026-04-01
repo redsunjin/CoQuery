@@ -1,142 +1,69 @@
-# EasySQL 로드맵 (v0.6.0-Ready)
+# CoQuery Roadmap (v0.7.0-Ready)
 
-**Base**: Analysis Report v1 (2026-04-01)  
-**Status**: Recovery Phase  
-**Next**: Phase 1 - CLI Baseline Restoration
+**Base**: Completed Phase 4 Analysis Report  
+**Status**: Ready for Phase 5 (OpenCLoC + CodeX)
 
----
+## ✅ Completed Phases
 
-## 📊 Current State (Based on Analysis)
+| Phase | Status | Features |
+|-------|--------|----------|
+| Phase 0 | ✅ Complete | CLI Baseline Recovery |
+| Phase 1 | ✅ Complete | Read-Only CLI Commands |
+| Phase 2 | ✅ Complete | Structured SQL Generation |
+| Phase 3 | ✅ Complete | Write Support (INSERT/UPDATE/DELETE) |
+| Phase 4 | ✅ Complete | Natural Language Processing |
 
-```
-Phase  Status     Problems
-────────────────────────────────────────────────────────
-Phase 1  Not Started ✗ CLI broken, tests fail
-Phase 2  Partial    NL incomplete, placeholders
-Phase 3  Partial    KB incomplete, not integrated
-Phase 4  Partial    Multi-DB incomplete, dependencies
-```
+## 🚀 Next Phases (Phase 5-8)
 
----
+### Phase 5: OpenCLoC Multi-DB
+**Goal**: Multi-Database Support in OpenCLoC Environment
+**Tasks**:
+- [ ] PostgreSQL connector with CodeX assistance
+- [ ] MySQL connector with CodeX assistance
+- [ ] UnifiedDatabase interface design
+- [ ] Multi-DB routing logic
 
-## 🎯 Recommended Priority Order
+### Phase 6: Knowledge Base Integration
+**Goal**: KB + Multi-DB Integration
+**Tasks**:
+- [ ] SchemaKnowledge + Multi-DB
+- [ ] BestPracticesDB integration
+- [ ] SchemaOptimizer with CodeX
+- [ ] Query optimization patterns
 
-### Phase 0: Recovery (Immediate Priority)
+### Phase 7: Expert System (SQLD → SQLP)
+**Goal**: Self-Learning Expert System
+**Tasks**:
+- [ ] Pattern Learning System
+- [ ] Best Practices Storage
+- [ ] Anomaly Detection
+- [ ] Self-Optimization Engine
 
-**Goal**: Restore runnable baseline
+### Phase 8: v1.0 Release
+**Goal**: Production Ready Release
+**Tasks**:
+- [ ] Security Review
+- [ ] Performance Optimization
+- [ ] Documentation Polish
+- [ ] Release v1.0
 
-**Tasks:**
-```
-[✓] 1. main.py command routing fix
-[✓] 2. CLI handler restoration
-[✓] 3. __init__.py import fix
-[✓] 4. Test integrity restoration
-[✓] 5. Documentation truthfulness
-```
+## 📋 Phase 5 Priority
 
-**Success:**
-```bash
-python3 main.py --command schema --db example.db --format json  # Works
-python3 -c "import sql_cli.core"                               # Works
-python3 sql_cli/tests/test_core.py                            # Runs
-```
+**Recommended Order**:
+1. Phase 5: OpenCLoC Multi-DB Setup
+2. Phase 6: KB Integration
+3. Phase 7: Expert System
+4. Phase 8: v1.0 Release
 
-### Phase 1: Read-Only Commands
-**Goal**: Stable CLI baseline
-**Tasks:** `schema`, `query` commands working
+## 🎯 Next Immediate Action
 
-### Phase 2: Structured Generation
-**Goal**: SQL generation stable
-**Tasks**: Write commands with safety
-
-### Phase 3: Write Support
-**Goal**: Safe write operations
-**Tasks**: INSERT/UPDATE/DELETE with --write flag
-
-### Phase 4: Natural Language
-**Goal**: NL to SQL converter
-**Tasks**: Intent parsing, SQL generation
-
-### Phase 5: Knowledge Base
-**Goal**: KB integration complete
-**Tasks**: Schema knowledge, optimizer
-
-### Phase 6: Multi-DB Support
-**Goal**: PostgreSQL/MySQL support
-**Tasks**: UnifiedDatabase complete
-
-### Phase 7: Expert System
-**Goal**: SQLD → SQLP evolution
-**Tasks**: Self-learning, optimization
-
-### Phase 8: Release v1.0
-**Goal**: Production ready
-**Tasks**: Security, performance, docs
-
----
-
-## 📋 Execution Strategy
-
-### Strategy: One Slice At A Time
-
-**Rule**: Never mix recovery with feature expansion
-
-**Process:**
-1. Plan: Pick one minimal slice
-2. Review: Check impact on imports/docs
-3. Execute: Implement only that slice
-4. Verify: Run tests and baseline commands
-
----
-
-## 🔄 Active Loop
-
-Until recovery complete:
-
-```
-Loop:
-  1. Restore runnable baseline
-  2. Restore truthful validation
-  3. Re-enable feature tracks one by one
-  
-Stop: When Phase 0 complete
-Resume: When Phase 1+ ready
-```
-
----
-
-## 📁 Files Requiring Attention
-
-| File | Status | Action |
-|------|--------|--------|
-| main.py | BROKEN | Fix command routing |
-| cli.py | BROKEN | Fix imports and handlers |
-| __init__.py | BROKEN | Fix import order |
-| test_core.py | BROKEN | Fix indentation |
-| HANDOFF.md | DRIFTED | Truthful status |
-| STAGE_STATUS.md | DRIFTED | Truthful status |
-
----
-
-## ✅ Recovery Criteria
-
-```
-✓ main.py works: python3 main.py --command schema --db exam.db --format json
-✓ Imports work: python3 -c "import sql_cli.core"
-✓ Tests pass: python3 sql_cli/tests/test_core.py
-✓ Docs truthful: Phase claims match runtime
-```
-
----
-
-## 🎯 Next Phase
-
-**Immediate**: Phase 0 - Recovery  
-**Next**: Phase 1 - Read-Only Commands  
-**Timeline**: Start Phase 0, then Phase 1 → 8
+**Phase 5 Start**: 
+- OpenCLoC 환경 설정
+- CodeX 협업 프로세스 정의
+- Multi-DB 구현 계획 확정
 
 ---
 
 Last Updated: 2026-04-01  
-Status: Phase 0 Recovery Ready  
-Next Action: Execute Phase 0 Recovery
+Phase 4: Complete ✅  
+Phase 5: Ready (OpenCLoC + CodeX)

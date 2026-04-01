@@ -1,12 +1,12 @@
 
-# EasySQL Agent Strategy Framework
+# CoQuery Agent Strategy Framework
 ## Plan → Verify → Execute → Validate (PVEV)
 
 ---
 
 ## PVEV 구조 개요
 
-EasySQL 프로젝트는 계획-검토-수행-검수 (PVEV) 사이클을 체계적으로 구현했습니다.
+CoQuery 프로젝트는 계획-검토-수행-검수 (PVEV) 사이클을 체계적으로 구현했습니다.
 
 ---
 
@@ -56,7 +56,7 @@ def validate(self, sql: str) -> List[str]:
 
 ### 실행 엔진
 ```python
-# EasySQLCore - 실행 핵심
+# CoQueryCore - 실행 핵심
 def validate_query(self, sql: str):
     return validator.validate(sql)
 
@@ -89,7 +89,7 @@ def cli_handler(command):
 
 ---
 
-## EasySQL v2.1 - PVEV Implementation
+## CoQuery v2.1 - PVEV Implementation
 
 **Status**: Plan ✅ | Verify ✅ | Execute 🚧 | Validate ✅
 

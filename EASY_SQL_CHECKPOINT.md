@@ -1,4 +1,4 @@
-# EasySQL Checkpoint Phase 0 Complete
+# CoQuery Checkpoint Phase 0 Complete
 
 **Session ID**: PHASE0-RECOVERY-COMPLETE  
 **Status**: Phase 0 Complete  ✅  

@@ -1,4 +1,4 @@
-# EasySQL - Project Summary v0.2.0
+# CoQuery - Project Summary v0.2.0
 
 **AI 기반 대화형 SQL 에이전트**  
 **Entry → Junior → Intermediate → Expert → SQL Professional(SQLP)**
@@ -72,7 +72,7 @@ order               - ORDER BY sorting
 ```bash
 $ python sql_cli/tests/test_core.py
 ==================================================
-Running EasySQL core tests
+Running CoQuery core tests
 ==================================================
 
 [Test] Skills test                 ✅
@@ -209,7 +209,7 @@ $ python main.py --command generate --db example.db \
 
 ---
 
-**EasySQL v0.2.0** - From SQLD to SQLP, one safe query at a time.
+**CoQuery v0.2.0** - From SQLD to SQLP, one safe query at a time.
 
 Last Updated: 2024-04-01  
 Status: Stable (Stage 2)  

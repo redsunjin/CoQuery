@@ -1,4 +1,4 @@
-# EasySQL Handoff v2.1 - Advanced Roadmap
+# CoQuery Handoff v2.1 - Advanced Roadmap
 ## SQL Expert System from SQLD → SQLP
 
 **Date**: 2024-04-01 (Phase 1 Progress: Write Support Started)  
@@ -878,7 +878,7 @@ def test_schema_best_practices():
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
-│                           EasySQL v0.5 (Complete)                             │
+│                           CoQuery v0.5 (Complete)                             │
 ├────────────────────────────────────────────────────────────────────────────┤
 │                                                                            │
 │  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐       │
@@ -1076,7 +1076,7 @@ class BestPracticesDB:
 
 ---
 
-**EasySQL v0.2.1 Roadmap**: From SQLD to SQLP, building a true SQL expert system.
+**CoQuery v0.2.1 Roadmap**: From SQLD to SQLP, building a true SQL expert system.
 
 **Last Updated**: 2024-04-01  
 **Version**: 0.2.1-roadmap  

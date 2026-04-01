@@ -1,4 +1,4 @@
-# EasySQL CLI
+# CoQuery CLI
 
 CLI Base: Phase 0 Complete  
 Phase 2 Status: Complete  
@@ -45,4 +45,4 @@ python3 main.py --command generate --db example.db --skill select_simple
 - README.md: This file
 
 ---
-EasySQL v0.6.0 - Read-Only + Structured Generation Ready
+CoQuery v0.6.0 - Read-Only + Structured Generation Ready

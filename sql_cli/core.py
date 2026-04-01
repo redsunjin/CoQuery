@@ -135,8 +135,8 @@ class SQLGenerator:
         }
 
 
-class EasySQLCore:
-    """EasySQL 핵심 로직"""
+class CoQueryCore:
+    """CoQuery 핵심 로직"""
 
     def __init__(self, db_path: str):
         self.db_path = db_path

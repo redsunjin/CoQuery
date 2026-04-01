@@ -64,7 +64,7 @@ def delete_handler(db, sql, params=None):
     except Exception as e:
         return {'ok': False, 'command': 'delete', 'affected_rows': 0, 'error': str(e)}
 
-parser = argparse.ArgumentParser(description='EasySQL CLI')
+parser = argparse.ArgumentParser(description='CoQuery CLI')
 parser.add_argument('--command', type=str, default=None)
 parser.add_argument('--db', type=str, default=None)
 parser.add_argument('--sql', type=str, default=None)
@@ -92,7 +92,7 @@ def natural_handler(db, sql, params=None):
 
 
 if not args.command:
-    print("EasySQL v0.7.0 - 6 Commands")
+    print("CoQuery v0.7.0 - 6 Commands")
     print("  schema, query, generate, insert, update, delete, natural")
     sys.exit(0)
 

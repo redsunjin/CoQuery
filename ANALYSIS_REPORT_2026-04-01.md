@@ -1,4 +1,4 @@
-# EasySQL Analysis Report
+# CoQuery Analysis Report
 
 Date: 2026-04-01
 
@@ -45,7 +45,7 @@ This is real progress in design direction.
 
 Current `main.py` only prints:
 
-- `EasySQL v0.4.0`
+- `CoQuery v0.4.0`
 - `Features: Write Support, NL Processing, Knowledge Base`
 
 and then exits.
@@ -59,7 +59,7 @@ python3 main.py --command schema --db example.db --format json
 Observed output:
 
 ```text
-EasySQL v0.4.0
+CoQuery v0.4.0
 Features: Write Support, NL Processing, Knowledge Base
 ```
 
