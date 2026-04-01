@@ -271,3 +271,31 @@ class NLQuery:
             'constraints': self.constraints,
             'confidence': self.confidence
         }
+
+
+# WriteCommand Support (Phase 3)
+from enum import Enum
+from typing import List, Optional, Any
+
+class WriteCommands(Enum):
+     INSERT = "insert"
+     UPDATE = "update"
+     DELETE = "delete"
+
+class WriteQueryParams:
+     def __init__(self, command, table):
+          self.command = command
+          self.table = table
+          self.columns = []
+          self.values = []
+          self.where = None
+          
+     def to_sql(self):
+          return f"SQL for {self.table}"
+          
+class WriteQueryResult:
+     def __init__(self, ok, command: str, affected_rows: int = 0):
+          self.ok = ok
+          self.command = command
+          self.affected_rows = affected_rows
+          self.error: Optional[str] = None

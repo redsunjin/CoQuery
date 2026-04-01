@@ -1,43 +1,38 @@
-# EasySQL Handoff v0.6.0
+# EasySQL Handoff v0.7.0
 
-**Phase Completion**: Phase 1 Complete ✅  
-**Next Phase**: Phase 2 - Structured Generation ⏳
+**Phase Completion**: Phase 3 Complete ✅  
+**Next Phase**: Phase 4 Natural Language ⏳
 
-## Completed Phases
+## Phase Status
 
-| Phase | Description | Status |
-|-------|-------------|--------|
-| Phase 0 | CLI Baseline Recovery | ✅ Complete |
-| Phase 1 | Read-Only Commands | ✅ Complete |
+| Phase | Status | Features |
+|-------|--------|----------|
+| Phase 0 | ✅ Complete | CLI Baseline Recovery |
+| Phase 1 | ✅ Complete | Read-Only Commands |
+| Phase 2 | ✅ Complete | Structured Generation |
+| Phase 3 | ✅ Complete | Write Support |
 
-## Phase 2 Next Steps
-
-**Goal**: Structured SQL Generation
-
-**Tasks:**
-```
-[ ] generate command working
-[ ] SQL skills defined
-[ ] Generation tests added
-```
-
-## Phase 1 Commands
+## Write Commands
 
 ```bash
-# Schema
-python3 main.py --command schema --db example.db
+# Insert
+python3 main.py --command insert --db example.db
 
-# Query (safe SELECT only)
-python3 main.py --command query --db example.db --sql "SELECT * FROM users"
+# Update
+python3 main.py --command update --db example.db
+
+# Delete
+python3 main.py --command delete --db example.db
 ```
 
-## Status
+## Next Phase
 
-- **Phase 0**: ✅ Complete (CLI Recovery)
-- **Phase 1**: ✅ Complete (Read-Only)
-- **Phase 2**: ⏳ Ready
+Phase 4: Natural Language Support
+- NL intents
+- NL → SQL conversion
+- Query optimization
 
 ---
 Last Updated: 2026-04-01
-Phase 1: Complete ✅
-Phase 2: Ready ⏳
+Phase 3: Complete ✅
+Phase 4: Ready ⏳
