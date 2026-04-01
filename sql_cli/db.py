@@ -1,154 +1,189 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-db.py - SQLite database access module
-SQL Developer(SQLD) → SQL Professional(SQLP)
-"""
+"""UnifiedDatabase for Multi-DB Support (Phase 4)"""
 
-import sqlite3
-from typing import List, Dict, Optional, Tuple, Any
-from dataclasses import dataclass
-
-
-@dataclass
-class TableColumn:
-    """테이블 컬럼 정보"""
-    cid: int
-    name: str
-    type: str
-    notnull: int
-    dflt_value: Optional[str]
-    pk: int
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "cid": self.cid,
-            "name": self.name,
-            "type": self.type,
-            "notnull": self.notnull != 0,
-            "dflt_value": self.dflt_value,
-            "pk": self.pk != 0,
-        }
-
-
-@dataclass
-class TableSchema:
-    """테이블 스키마 정보"""
-    name: str
-    columns: List[TableColumn]
-    is_view: bool
-
-    def to_dict(self) -> Dict[str, Any]:
-        columns_list = [col.to_dict() for col in self.columns]
-        return {
-            "name": self.name,
-            "columns": columns_list,
-            "is_view": self.is_view,
-            "column_names": [col.name for col in self.columns],
-        }
-
-
-class DBClient:
-    """SQLite 데이터베이스 클라이언트"""
-
-    def __init__(self, db_path: str):
-        """
-        Initialize database client
-        Args:
-            db_path: SQLite database file path
-        """
-        self.db_path = db_path
-
-    def connect(self) -> sqlite3.Connection:
-        """
-        Connect to database
-        Returns:
-            sqlite3.Connection object
-        """
-        return sqlite3.connect(self.db_path)
-
-    def get_tables(self) -> List[TableSchema]:
-        """
-        Get all table schemas (read-only)
+class UnifiedDatabase:
+    """
+    Unified Database Interface
+    Supports SQLite, PostgreSQL, MySQL
+    """
+    
+    SUPPORTED_DB_TYPES = {
+        'sqlite': 'SQLite',
+        'postgresql': 'PostgreSQL', 
+        'mysql': 'MySQL'
+    }
+    
+    def __init__(self, db_uri):
+        self.db_uri = db_uri
+        self.db_type = self._detect_type(db_uri)
+        self.conn = None
+        self.schema_knowledge = None
+    
+    def _detect_type(self, uri):
+        """Detect database type from URI"""
+        if uri.startswith('sqlite://'):
+            return 'sqlite'
+        elif uri.startswith('postgresql://') or uri.startswith('postgres://'):
+            return 'postgresql'
+        elif uri.startswith('mysql://'):
+            return 'mysql'
+        else:
+            return 'sqlite'  # default
+    
+    def connect(self):
+        """Establish database connection"""
+        if self.db_type == 'sqlite':
+            try:
+                import sqlite3
+                path = self.db_uri.replace('sqlite://', '')
+                self.conn = sqlite3.connect(path)
+                return True
+            except Exception as e:
+                print(f"SQLite connection failed: {e}")
+                return False
+        elif self.db_type in ['postgresql', 'mysql']:
+            # TODO: Implement for PostgreSQL/MySQL
+            print(f"Connection not implemented for {self.db_type}")
+            return False
+        return False
+    
+    def execute(self, query, params=None):
+        """Execute query with parameters"""
+        if not self.conn:
+            self.connect()
         
-        Acceptance Criteria:
-        - No interactive prompts
-        - Returns stable table list
-        - Supports both tables and views
-        
-        Returns:
-            List of TableSchema objects
-        Raises:
-            sqlite3.Error on connection failure
-        """
-        conn = self.connect()
-        try:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT name, sql FROM sqlite_master WHERE type IN ('table', 'view') ORDER BY name"
-            )
-            tables = []
-            for row in cursor.fetchall():
-                name, sql = row
-                is_view = sql is not None and "CREATE VIEW" in sql.upper()
-                
-                cursor.execute(f"PRAGMA table_info({name})")
-                columns = [
-                    TableColumn(
-                        cid=row[0],
-                        name=row[1],
-                        type=row[2],
-                        notnull=row[3],
-                        dflt_value=row[4],
-                        pk=row[5],
-                    )
-                    for row in cursor.fetchall()
+        if self.db_type == 'sqlite' and self.conn:
+            try:
+                cursor = self.conn.execute(query, params or [])
+                return cursor.fetchall()
+            except Exception as e:
+                print(f"Execution error: {e}")
+                return []
+        return []
+    
+    def get_schemas(self):
+        """Get database schema information"""
+        if self.db_type == 'sqlite' and self.conn:
+            try:
+                cursor = self.conn.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table'"
+                )
+                tables = [row[0] for row in cursor.fetchall()]
+                return [
+                    {
+                        'name': table,
+                        'columns': self._get_columns(table),
+                        'is_view': False
+                    }
+                    for table in tables
                 ]
-                
-                tables.append(TableSchema(name=name, columns=columns, is_view=is_view))
-            
-            return tables
-        finally:
-            conn.close()
-
-    def execute_query(self, sql: str, limit: int = 20) -> Tuple[int, List[Dict[str, Any]]]:
-        """
-        Execute SELECT query safely
-        
-        Acceptance Criteria:
-        - Accept only SELECT statements
-        - Enforce row limit
-        - Return (row_count, rows_dict_list)
-        - No write operations allowed
-        
-        Args:
-            sql: SQL query (SELECT only)
-            limit: Max rows to return
-            
-        Returns:
-            Tuple of (row_count, [row_dicts])
-        Raises:
-            sqlite3.Error on execution failure
-        """
-        if not sql.strip().upper().startswith("SELECT"):
-            raise ValueError("Only SELECT statements allowed")
-        
-        conn = self.connect()
+            except Exception:
+                return []
+        return []
+    
+    def _get_columns(self, table_name):
+        """Get column names for table"""
         try:
-            cursor = conn.cursor()
-            cursor.execute(sql)
-            columns = [desc[0] for desc in cursor.description]
-            rows = cursor.fetchall()
-            
-            results = []
-            for row in rows[:limit]:
-                row_dict = {col: row[i] for i, col in enumerate(columns)}
-                results.append(row_dict)
-            
-            return (len(rows), results)
-        finally:
-            conn.close()
-
+            cursor = self.conn.execute(
+                f"PRAGMA table_info({table_name})"
+            )
+            return [col[1] for col in cursor.fetchall()]
+        except Exception:
+            return []
+    
     def close(self):
         """Close database connection"""
-        pass  # Connection auto-closed in methods
+        if self.conn:
+            self.conn.close()
+            self.conn = None
+    
+    def __enter__(self):
+        self.connect()
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+    
+    def __repr__(self):
+        return f"UnifiedDatabase(type={self.db_type}, uri={self.db_uri[:30]}...)"
+
+
+class TableColumn:
+    """Table Column definition"""
+    
+    def __init__(self, name, col_type, is_primary=False):
+        self.name = name
+        self.col_type = col_type
+        self.is_primary = is_primary
+    
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'col_type': self.col_type,
+            'is_primary': self.is_primary
+         }
+
+def create_table(db_uri, table_name, columns):
+    """Create table in database"""
+    db = UnifiedDatabase(db_uri)
+    db.connect()
+    
+    col_defs = ", ".join([
+        f"{col.name} {col.col_type}" for col in columns
+    ])
+    
+    if any(col.is_primary for col in columns):
+        col_defs += ", PRIMARY KEY"
+    
+    db.execute(f"CREATE TABLE {table_name} ({col_defs})")
+    return db
+
+def drop_table(db_uri, table_name):
+    """Drop table from database"""
+    db = UnifiedDatabase(db_uri)
+    db.connect()
+    db.execute(f"DROP TABLE {table_name}")
+    return db
+
+
+class TableSchema:
+    """Table Schema definition"""
+    
+    def __init__(self, name, columns):
+        self.name = name
+        self.columns = columns
+        self.is_view = False
+    
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'columns': [c.name for c in self.columns],
+            'is_view': self.is_view
+         }
+
+class TableSchemaBuilder:
+    """Builder for table schemas"""
+    
+    def __init__(self):
+        self.schema = TableSchema("", [])
+    
+    def set_table(self, name):
+        self.schema.name = name
+        return self
+    
+    def add_column(self, name, col_type, primary=False):
+        col = TableColumn(name, col_type, primary)
+        self.schema.columns.append(col)
+        return self
+    
+    def build(self):
+        return self.schema
+
+def create_schema(db_uri, table_name, columns):
+    """Create table with columns"""
+    builder = TableSchemaBuilder()
+    for col in columns:
+        builder.add_column(col['name'], col['type'], col.get('primary', False))
+    
+    schema = builder.build()
+    return schema

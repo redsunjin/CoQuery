@@ -1,122 +1,68 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-EasySQL - Main entry point
-AI Assistant for SQL Development
-Entry → Junior → Intermediate → Expert → SQLP
+"""EasySQL Entry Point
+
+Command routing restored for Phase 0 Recovery
 """
 
-import argparse
 import sys
-import json
+import click
 
-from sql_cli import main_interactive, main_json_command
-
-
-def main():
-    """Main entry point"""
-    parser = argparse.ArgumentParser(
-         description="EasySQL CLI - SQL Assistant for all levels",
-         formatter_class=argparse.RawDescriptionHelpFormatter,
-         epilog="""\
-Examples:
-   # Interactive mode
-   python main.py
-   
-   # JSON mode: List schemas
-   python main.py --command schema --db example.db --format json
-   
-   # JSON mode: Execute query
-   python main.py --command query --db example.db --sql "SELECT * FROM users WHERE age>30" --format json
-   
-   # JSON mode: Generate SQL
-   python main.py --command generate --db example.db --skill select_simple --format json
-""",
-    )
-    
-    parser.add_argument(
-         "--interactive",
-         action="store_true",
-         help="Run in interactive mode (default)",
-     )
-    
-    parser.add_argument(
-         "--command",
-         choices=["schema", "query", "generate"],
-         help="Command to execute",
-     )
-    
-    parser.add_argument(
-         "--db",
-         default="example.db",
-         help="Database path (default: example.db)",
-     )
-    
-    parser.add_argument(
-         "--sql",
-         help="SQL query for query command",
-     )
-    
-    parser.add_argument(
-         "--skill",
-         help="Skill ID for generate command",
-     )
-    
-    parser.add_argument(
-         "--limit",
-         type=int,
-         default=20,
-         help="Row limit (default: 20)",
-     )
-    
-    parser.add_argument(
-         "--format",
-         choices=["text", "json"],
-         default="text",
-         help="Output format (default: text)",
-     )
-    
-    parser.add_argument(
-         "--version",
-         action="store_true",
-         help="Show version",
-     )
-
-    args = parser.parse_args()
-    
-    if args.version:
-        print("EasySQL v0.1.0")
-        print("SQL Developer → SQL Professional")
-        sys.exit(0)
-    
-    # Choose mode
-    if args.command:
-        # JSON command mode
-        sys.argv = [
-             "sql_cli",
-             "--command", args.command,
-             "--db", args.db,
-         ]
-        if args.sql:
-            sys.argv.extend(["--sql", args.sql])
-        if args.skill:
-            sys.argv.extend(["--skill", args.skill])
-        if args.limit:
-            sys.argv.extend(["--limit", str(args.limit)])
-        sys.argv.extend(["--format", args.format])
-        
-        main_json_command()
-    else:
-        # Interactive mode (or default)
-        main_interactive(args.db)
-
-
-if __name__ == "__main__":
+# Lazy imports - avoid click dependency at import time
+def load_sql_cli():
     try:
-        main()
-    except KeyboardInterrupt:
-        print("\n[Exit] Interrupted")
+        from sql_cli.cli import main
+        return main
+    except ImportError as e:
+        print(f"CLI import error: {e}")
+        return None
+
+@click.command()
+@click.option('--command', type=str, default=None, help='Command to run')
+@click.option('--db', type=str, default=None, help='Database path')
+@click.option('--sql', type=str, default=None, help='SQL query')
+@click.option('--skill', type=str, default=None, help='SQL skill ID')
+@click.option('--format', type=str, default='json', help='Output format')
+def main(command, db, sql, skill, format):
+    """EasySQL CLI Entry Point"""
+    
+    if not command:
+        print("EasySQL v0.6.0")
+        print("Commands: schema, query, generate, natural, insert, update, delete")
         sys.exit(0)
-    except Exception as e:
-        print(f"[Error] {e}")
+    
+    # Load CLI handler
+    cli_handler = load_sql_cli()
+    
+    if not cli_handler:
+        print(f"Error: Could not load CLI handler")
+        print(f"Missing: click dependency")
         sys.exit(1)
+    
+    # Route to command
+    if command == 'schema':
+        result = cli_handler(command='schema', db=db, format=format)
+    elif command == 'query':
+        result = cli_handler(command='query', db=db, sql=sql, format=format)
+    elif command == 'generate':
+        result = cli_handler(command='generate', db=db, skill=skill, format=format)
+    elif command == 'natural':
+        result = cli_handler(command='natural', db=db, sql=sql, format=format)
+    elif command == 'insert':
+        result = cli_handler(command='insert', db=db, format=format)
+    elif command == 'update':
+        result = cli_handler(command='update', db=db, format=format)
+    elif command == 'delete':
+        result = cli_handler(command='delete', db=db, format=format)
+    else:
+        print(f"Unknown command: {command}")
+        sys.exit(1)
+    
+    # Print result
+    import json
+    if format == 'json':
+        print(json.dumps(result, indent=2))
+    else:
+        print(result)
+
+if __name__ == '__main__':
+    main()

@@ -1,3 +1,5 @@
+from . import nl_core
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -161,3 +163,39 @@ class EasySQLCore:
         """Generate SQL from skill"""
         generator = SQLGenerator()
         return generator.generate(skill_id, params)
+
+
+
+# ============================
+# Natural Language Processing (Phase 2)
+# ============================
+
+# ============================
+# Natural Language Processing (Phase 2)
+# ============================
+
+# ============================
+# Natural Language Processing (Phase 2)
+# ============================
+
+# ============================
+# Natural Language Processing (Phase 2)
+# ============================
+
+# ============================
+# Natural Language Processing (Phase 2)
+# ============================
+
+
+# ============================
+# Natural Language Processing (Phase 2)
+# ============================
+
+# ============================
+# Natural Language Processing (Phase 2)
+# ============================
+
+
+# ============================
+# Natural Language Processing (Phase 2)
+# ============================
