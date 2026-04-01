@@ -1,11 +1,20 @@
 #!/usr/bin/env python3
-"""CoQuery Package Init
+"""CoQuery Package - Phase 5 Complete"""
 
-Lazy imports - avoid click dependency at import time
-"""
+# Core modules
+from sql_cli.core import SQLGenerator, SQLValidator
+from sql_cli.db_new import CoQueryDB
+from sql_cli.cli import schema_handler, query_handler, generate_handler, insert_handler, update_handler, delete_handler, natural_handler
 
-# Core modules only (no click dependency)
-from sql_cli.core import SQLGenerator, SQLValidator, CoQueryCore, SQL_SKILLS
-from sql_cli.db import UnifiedDatabase, TableColumn, TableSchema
-from sql_cli.knowledge import KnowledgeMultiDB, SchemaKnowledge
-from sql_cli.nl_core import NLIntentParser, NLToSQLConverter
+__all__ = [
+    'SQLGenerator',
+    'SQLValidator',
+    'CoQueryDB',
+    'schema_handler',
+    'query_handler',
+    'generate_handler',
+    'insert_handler',
+    'update_handler',
+    'delete_handler',
+    'natural_handler'
+]

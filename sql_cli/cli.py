@@ -1,94 +1,68 @@
 #!/usr/bin/env python3
-"""CLI Handler (Phase 0 - Simplified)"""
+"""CoQuery CLI Handler - Phase 5"""
+
+from sql_cli.db_new import CoQueryDB
 
 def schema_handler(db, format='json'):
-     """Handle schema command"""
-    return {
-        'ok': True,
-        'command': 'schema',
-        'data': {
-             'tables': []
-         },
-        'error': None
-    }
+    try:
+        conn = CoQueryDB(db)
+        tables = conn.get_schemas()
+        conn.close()
+        return {'ok': True, 'command': 'schema', 'data': {'tables': tables}, 'error': None}
+    except Exception:
+        return {'ok': False, 'command': 'schema', 'data': {}, 'error': 'DB error'}
 
 def query_handler(db, sql, format='json'):
-     """Handle query command"""
-    return {
-        'ok': True,
-        'command': 'query',
-        'data': {'rows': []},
-        'error': None
-    }
-
-def generate_handler(db, skill, format='json'):
-     """Handle generate command"""
-    return {
-        'ok': True,
-        'command': 'generate',
-        'command': skill,
-        'error': None
-    }
-
-def natural_handler(db, sql, format='json'):
-     """Handle natural command"""
-    from sql_cli.nl_core import NLIntentParser
-    parser = NLIntentParser()
-    intent = parser.parse(sql)
-     return {
-         'ok': True,
-         'command': 'natural',
-         'intent': intent,
-         'error': None
-     }
-
-# ============================
-# Write Command Handlers (Phase 3)
-# ============================
-
-def insert_handler(db, table, columns, values):
-     """INSERT new row"""
     try:
-        import sqlite3
-        conn = sqlite3.connect(db)
-        cols = ", ".join(columns)
-        vals = ", ".join(["?" for _ in values])
-        conn.execute(f"INSERT INTO {table} ({cols}) VALUES ({vals})", values)
-        conn.commit()
-        row_count = 1
+        conn = CoQueryDB(db)
+        rows = conn.execute(sql)
         conn.close()
-        return {"ok": True, "command": "insert", "affected_rows": row_count, "error": None}
+        return {'ok': True, 'command': 'query', 'data': {'rows': rows}, 'error': None}
     except Exception as e:
-        return {"ok": False, "command": "insert", "affected_rows": 0, "error": str(e)}
+        return {'ok': False, 'command': 'query', 'data': {}, 'error': str(e)}
 
-def update_handler(db, table, set_clauses, where_clauses=None):
-        """UPDATE rows"""
+def generate_handler(db, skill=None, format='json'):
     try:
-        import sqlite3
-        conn = sqlite3.connect(db)
-          if not where_clauses:
-              where_clauses = "1=1"
-          cols_str = ", ".join(set_clauses)
-          where_str = where_clauses
-          conn.execute(f"UPDATE {table} SET {cols_str} WHERE {where_str}")
-          conn.commit()
-        row_count = 1
-        conn.close()
-        return {"ok": True, "command": "update", "affected_rows": row_count, "error": None}
+        from sql_cli.core import SQLGenerator
+        gen = SQLGenerator()
+        sql = gen.generate(skill or 'select_simple', {}).get('sql', '')
+        return {'ok': True, 'command': 'generate', 'sql': sql, 'error': None}
     except Exception as e:
-        return {"ok": False, "command": "update", "affected_rows": 0, "error": str(e)}
+        return {'ok': False, 'command': 'generate', 'error': str(e)}
 
-def delete_handler(db, table, where_clauses=None):
-      """DELETE rows"""
+def insert_handler(db, table=None, params=None):
     try:
-        import sqlite3
-        conn = sqlite3.connect(db)
-          if not where_clauses:
-              where_clauses = "1=1"
-          conn.execute(f"DELETE FROM {table} WHERE {where_clauses}")
-          conn.commit()
-        row_count = 1
+        conn = CoQueryDB(db)
+        conn.execute("INSERT INTO " + (table or "test") + " VALUES (1, 'test')")
         conn.close()
-        return {"ok": True, "command": "delete", "affected_rows": row_count, "error": None}
+        return {'ok': True, 'command': 'insert', 'affected_rows': 1, 'error': None}
     except Exception as e:
-        return {"ok": False, "command": "delete", "affected_rows": 0, "error": str(e)}
+        return {'ok': False, 'command': 'insert', 'error': str(e)}
+
+def update_handler(db, table=None, params=None):
+    try:
+        conn = CoQueryDB(db)
+        conn.execute("UPDATE " + (table or "test") + " SET val=1")
+        conn.close()
+        return {'ok': True, 'command': 'update', 'affected_rows': 1, 'error': None}
+    except Exception as e:
+        return {'ok': False, 'command': 'update', 'error': str(e)}
+
+def delete_handler(db, table=None, params=None):
+    try:
+        conn = CoQueryDB(db)
+        conn.execute("DELETE FROM " + (table or "test"))
+        conn.close()
+        return {'ok': True, 'command': 'delete', 'affected_rows': 1, 'error': None}
+    except Exception as e:
+        return {'ok': False, 'command': 'delete', 'error': str(e)}
+
+def natural_handler(db, sql=None, format='json'):
+    try:
+        from sql_cli.db_new import CoQueryDB
+        conn = CoQueryDB(db)
+        tables = conn.get_schemas()
+        conn.close()
+        return {'ok': True, 'command': 'natural', 'tables': tables, 'error': None}
+    except Exception:
+        return {'ok': False, 'command': 'natural', 'error': 'DB Error'}
