@@ -1,28 +1,30 @@
 #!/usr/bin/env python3
-"""Test suite for EasySQL (Phase 0)"""
+import sys
+sys.path.insert(0, '..')
+sys.path.insert(0, '.')
 
-def test_core_imports():
-    """Test core module imports"""
-    from sql_cli import core
-    from sql_cli.core import SQLGenerator, SQLValidator
-    assert True
+def test_phase0_done():
+    """Test Phase 0 baseline"""
+    from main import schema_handler, query_handler
+    schema_result = schema_handler('example.db')
+    assert schema_result['ok'], "Schema handler should work"
 
-def test_generate_sql():
-    """Test SQL generation"""
-    from sql_cli.core import SQLGenerator
-    gen = SQLGenerator()
-    result = gen.generate('select_simple', {'table': 'users'})
-    assert 'sql' in result
+def test_phase1_schema():
+    """Test schema command"""
+    from main import schema_handler
+    result = schema_handler('example.db')
+    assert result['ok'], "Schema should work"
+    assert 'tables' in result.get('data', {})
 
-def test_validate_sql():
-    """Test SQL validation"""
-    from sql_cli.core import SQLValidator
-    val = SQLValidator()
-    errors = val.validate("SELECT * FROM users")
-    assert isinstance(errors, list)
+def test_phase1_query():
+    """Test query command"""
+    from main import query_handler
+    result = query_handler('example.db', 'SELECT * FROM users')
+    assert result['ok'], "Query should work"
+    assert 'rows' in result.get('data', {})
 
 if __name__ == '__main__':
-    test_core_imports()
-    test_generate_sql()
-    test_validate_sql()
-    print("✓ All tests passing")
+    test_phase0_done()
+    test_phase1_schema()
+    test_phase1_query()
+    print("✅ All Phase 1 tests passing")

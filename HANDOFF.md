@@ -1,48 +1,43 @@
 # EasySQL Handoff v0.6.0
 
-**Phase Completion**: Phase 0 Complete ✅  
-**Next Phase**: Phase 1 - Read-Only Commands ⏳
+**Phase Completion**: Phase 1 Complete ✅  
+**Next Phase**: Phase 2 - Structured Generation ⏳
 
 ## Completed Phases
 
 | Phase | Description | Status |
 |-------|-------------|--------|
 | Phase 0 | CLI Baseline Recovery | ✅ Complete |
+| Phase 1 | Read-Only Commands | ✅ Complete |
 
-## Next: Phase 1
+## Phase 2 Next Steps
 
-**Goal**: Read-Only Commands Working
+**Goal**: Structured SQL Generation
 
 **Tasks:**
 ```
-[ ] schema command working
-[ ] query command working
-[ ] tests passing
+[ ] generate command working
+[ ] SQL skills defined
+[ ] Generation tests added
 ```
 
-## Commands
+## Phase 1 Commands
 
 ```bash
-python3 main.py --command schema --db example.db --format json
+# Schema
+python3 main.py --command schema --db example.db
+
+# Query (safe SELECT only)
 python3 main.py --command query --db example.db --sql "SELECT * FROM users"
 ```
 
-## Files
+## Status
 
-- main.py ✅
-- cli.py ✅
-- core.py ✅
-- db.py ✅
-- tests/test_core.py ✅
-
-## Next Actions
-
-1. Implement schema command
-2. Implement query command
-3. Add tests
-4. Update documentation
+- **Phase 0**: ✅ Complete (CLI Recovery)
+- **Phase 1**: ✅ Complete (Read-Only)
+- **Phase 2**: ⏳ Ready
 
 ---
 Last Updated: 2026-04-01
-Phase 0: Complete ✅
-Phase 1: Ready ⏳
+Phase 1: Complete ✅
+Phase 2: Ready ⏳
