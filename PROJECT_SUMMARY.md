@@ -1,11 +1,11 @@
-# CoQuery - Project Summary v0.2.0
+# CoQuery - Project Summary v0.7.0
 
 **AI 기반 대화형 SQL 에이전트**  
 **Entry → Junior → Intermediate → Expert → SQL Professional(SQLP)**
 
 ---
 
-## 🎉 Current Status: STABLE
+## 🎉 Current Status: READY
 
 ```
 ✅ All tests passing (4/4)
@@ -20,7 +20,7 @@
 
 ```
 /Users/Agent/py/
-├── main.py                     # CLI Entry Point (v0.2.0)
+├── main.py                     # CLI Entry Point (v0.7.0)
 ├── README.md                   # Documentation
 ├── HANDOFF.md                  # Handoff documentation
 ├── PROJECT_SUMMARY.md          # Summary (this file)
@@ -209,8 +209,8 @@ $ python main.py --command generate --db example.db \
 
 ---
 
-**CoQuery v0.2.0** - From SQLD to SQLP, one safe query at a time.
+**CoQuery v0.7.0** - From SQLD to SQLP, one safe query at a time.
 
-Last Updated: 2024-04-01  
+Last Updated: 2026-04-02  
 Status: Stable (Stage 2)  
 Score: 4/4 tests ✅
