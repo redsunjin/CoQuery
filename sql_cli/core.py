@@ -1,5 +1,3 @@
-from . import nl_core
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -45,6 +43,14 @@ SQL_SKILLS = {
         "pattern": "SELECT {cols} FROM {table1} LEFT JOIN {table2} ON {on}",
      },
     "count": {
+        "name": "COUNT 집계",
+        "category": "AGGREGATE",
+        "level": "entry",
+        "description": "행수 계산",
+        "example": "사용자 총수",
+        "pattern": "SELECT COUNT(*) FROM {table}",
+     },
+    "count_simple": {
         "name": "COUNT 집계",
         "category": "AGGREGATE",
         "level": "entry",
@@ -109,6 +115,11 @@ class SQLValidator:
 class SQLGenerator:
     """SQL 생성기"""
 
+    def _normalize_columns(self, cols: Any) -> str:
+        if isinstance(cols, list):
+            return ", ".join(cols) if cols else "*"
+        return cols or "*"
+
     def generate(self, skill_id: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """Generate SQL from structured parameters"""
         skill = SQL_SKILLS.get(skill_id)
@@ -118,11 +129,25 @@ class SQLGenerator:
             }
 
         table = params.get("table", "users")
-        cols = params.get("cols", "*")
+        cols = self._normalize_columns(params.get("cols", "*"))
         where = params.get("where", "")
+        group = params.get("group", "department")
+        sort = params.get("sort", "id")
+        table1 = params.get("table1", table)
+        table2 = params.get("table2", "orders")
+        on = params.get("on", f"{table1}.id = {table2}.user_id")
 
         pattern = skill["pattern"]
-        sql = pattern.format(table=table, cols=cols, where=where)
+        sql = pattern.format(
+            table=table,
+            cols=cols,
+            where=where,
+            group=group,
+            sort=sort,
+            table1=table1,
+            table2=table2,
+            on=on,
+        )
 
         warnings = []
         if cols == "*":

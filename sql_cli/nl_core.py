@@ -55,5 +55,3 @@ class NaturalLanguageEngine:
             "complexity": complexity,
             "ok": bool(sql_result.get("sql"))
         }
-
-print("✅ NL Processing Clean Created")

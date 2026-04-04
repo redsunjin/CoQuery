@@ -1,116 +1,68 @@
 #!/usr/bin/env python3
-import sys, json, sqlite3, argparse
+"""CoQuery CLI entry point."""
 
-def schema_handler(db):
-    try:
-        conn = sqlite3.connect(db)
-        cursor = conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
-        tables = [row[0] for row in cursor.fetchall()]
-        conn.close()
-        return {'ok': True, 'command': 'schema', 'data': {'tables': tables}, 'error': None}
-    except Exception as e:
-        return {'ok': False, 'command': 'schema', 'data': {}, 'error': str(e)}
+from __future__ import annotations
 
-def query_handler(db, sql, write=False):
-    try:
-        conn = sqlite3.connect(db)
-        sql_upper = sql.upper().strip()
-        if not write:
-            if not sql_upper.startswith("SELECT"):
-                return {'ok': False, 'command': 'query', 'error': 'Only SELECT'}
-        cursor = conn.execute(sql)
-        rows = cursor.fetchall()
-        conn.close()
-        return {'ok': True, 'command': 'query', 'data': {'rows': rows}, 'error': None}
-    except Exception as e:
-        return {'ok': False, 'command': 'query', 'error': str(e)}
+import argparse
+import json
+import sys
+from typing import Any
 
-def generate_handler(db, skill_id, params=None):
-    try:
-        from sql_cli.core import SQLGenerator
-        gen = SQLGenerator()
-        result = gen.generate(skill_id, params or {'table': 'users', 'cols': ['*']})
-        return {'ok': not result.get('error'), 'command': 'generate', 'sql': result.get('sql', ''), 'error': result.get('error')}
-    except Exception as e:
-        return {'ok': False, 'command': skill_id, 'error': str(e)}
-
-def insert_handler(db, sql, params=None):
-    try:
-        conn = sqlite3.connect(db)
-        conn.execute("INSERT INTO users (name, age) VALUES (?, ?)", ['test_user', '30'])
-        conn.commit()
-        conn.close()
-        return {'ok': True, 'command': 'insert', 'affected_rows': 1, 'error': None}
-    except Exception as e:
-        return {'ok': False, 'command': 'insert', 'affected_rows': 0, 'error': str(e)}
-
-def update_handler(db, sql, params=None):
-    try:
-        conn = sqlite3.connect(db)
-        conn.execute("UPDATE users SET name=? WHERE 1=1", ['new_user'])
-        conn.commit()
-        conn.close()
-        return {'ok': True, 'command': 'update', 'affected_rows': 1, 'error': None}
-    except Exception as e:
-        return {'ok': False, 'command': 'update', 'affected_rows': 0, 'error': str(e)}
-
-def delete_handler(db, sql, params=None):
-    try:
-        conn = sqlite3.connect(db)
-        conn.execute("DELETE FROM users WHERE 1=1")
-        conn.commit()
-        conn.close()
-        return {'ok': True, 'command': 'delete', 'affected_rows': 1, 'error': None}
-    except Exception as e:
-        return {'ok': False, 'command': 'delete', 'affected_rows': 0, 'error': str(e)}
-
-parser = argparse.ArgumentParser(description='CoQuery CLI')
-parser.add_argument('--command', type=str, default=None)
-parser.add_argument('--db', type=str, default=None)
-parser.add_argument('--sql', type=str, default=None)
-parser.add_argument('--skill', type=str, default=None)
-parser.add_argument('--params', type=str, default=None)
-parser.add_argument('--write', action='store_true', default=False)
-
-args = parser.parse_args()
-
-def natural_handler(db, sql, params=None):
-    try:
-        from sql_cli.nl_core import NaturalLanguageEngine
-        engine = NaturalLanguageEngine()
-
-        result = engine.process(sql)
-        return {
-              "ok": result.get("ok"),
-              "command": "natural",
-              "intent": result.get("intent"),
-              "sql": result.get("sql"),
-              "error": None
-         }
-    except Exception as e:
-        return {"ok": False, "command": "natural", "error": str(e)}
+from sql_cli.cli import (
+    delete_handler,
+    generate_handler,
+    insert_handler,
+    natural_handler,
+    query_handler,
+    schema_handler,
+    update_handler,
+)
 
 
-if not args.command:
-    print("CoQuery v0.7.0 - 6 Commands")
-    print("  schema, query, generate, insert, update, delete, natural")
-    sys.exit(0)
+def _parse_params(raw: str | None) -> Any:
+    if not raw:
+        return None
+    return json.loads(raw)
 
-if args.command == 'schema':
-    result = schema_handler(args.db)
-elif args.command == 'query':
-    result = query_handler(args.db, args.sql, args.write)
-elif args.command == 'generate':
-    result = generate_handler(args.db, args.skill or 'select_simple')
-elif args.command == 'insert':
-    result = insert_handler(args.db, args.skill or 'test', args.params)
-elif args.command == 'update':
-    result = update_handler(args.db, args.skill or 'update')
-elif args.command == 'delete':
-    result = delete_handler(args.db, args.skill or 'delete')
-elif args.command == 'natural':
-    result = natural_handler(args.db, args.sql or 'show users')
-else:
-    result = {"ok": False, "command": args.command, "error": "Unknown"}
 
-print(json.dumps(result, indent=2))
+def main() -> int:
+    parser = argparse.ArgumentParser(description="CoQuery CLI")
+    parser.add_argument("--command", type=str, default=None)
+    parser.add_argument("--db", type=str, default="example.db")
+    parser.add_argument("--sql", type=str, default=None)
+    parser.add_argument("--skill", type=str, default=None)
+    parser.add_argument("--params", type=str, default=None)
+    parser.add_argument("--format", type=str, default="json")
+    parser.add_argument("--write", action="store_true", default=False)
+    args = parser.parse_args()
+
+    if not args.command:
+        print("CoQuery v0.7.0")
+        print("commands: schema, query, generate, insert, update, delete, natural")
+        return 0
+
+    parsed_params = _parse_params(args.params)
+
+    if args.command == "schema":
+        result = schema_handler(args.db, args.format)
+    elif args.command == "query":
+        result = query_handler(args.db, args.sql or "SELECT * FROM users", args.format, args.write)
+    elif args.command == "generate":
+        result = generate_handler(args.db, args.skill or "select_simple", args.format, parsed_params)
+    elif args.command == "insert":
+        result = insert_handler(args.db, args.sql, parsed_params)
+    elif args.command == "update":
+        result = update_handler(args.db, args.sql, parsed_params)
+    elif args.command == "delete":
+        result = delete_handler(args.db, args.sql, parsed_params)
+    elif args.command == "natural":
+        result = natural_handler(args.db, args.sql, args.format)
+    else:
+        result = {"ok": False, "command": args.command, "error": "Unknown"}
+
+    print(json.dumps(result, indent=2, ensure_ascii=False))
+    return 0 if result.get("ok") else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
