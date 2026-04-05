@@ -72,6 +72,7 @@ Open tasks:
 - [x] add one documented local smoke path
 - [x] prove PostgreSQL `schema`
 - [x] prove PostgreSQL `query`
+- [x] prove PostgreSQL `insert`
 
 Current output:
 
@@ -80,7 +81,7 @@ Current output:
 
 Current next step:
 
-- reduce local-environment setup friction for the PostgreSQL probe
+- keep the PostgreSQL smoke runner easy to rerun from a normal shell environment
 
 ### 5. Verification-gated backend promotion
 
@@ -107,7 +108,7 @@ Current output:
 - [x] define verification matrix and backend status policy
 - [x] add docs-example smoke coverage to the baseline test file
 - [x] add persona review checkpoint
-- [x] add first real PostgreSQL `schema` and `query` smoke
+- [x] add first real PostgreSQL `schema`, `query`, and `insert` smoke
 
 ## Reference Documents
 

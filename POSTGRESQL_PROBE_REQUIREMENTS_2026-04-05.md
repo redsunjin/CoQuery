@@ -18,7 +18,8 @@ Observed in the current codebase:
 - `sql_cli/db_new.py` returns structured `driver_not_installed` or `connection_failed` errors for PostgreSQL URIs
 - `schema` works against a real PostgreSQL database
 - `query` works against a real PostgreSQL database
-- PostgreSQL is `experimental` for the narrow `schema` and `query` probe paths
+- `insert` works against a real PostgreSQL database
+- PostgreSQL is `experimental` for the narrow `schema`, `query`, and `insert` probe paths
 
 ## 3. Dependency declaration
 
@@ -90,10 +91,10 @@ Currently proven on PostgreSQL:
 
 - `schema`
 - `query`
+- `insert`
 
 Not proven:
 
-- `insert`
 - `update`
 - `delete`
 - natural-language PostgreSQL behavior
@@ -124,7 +125,7 @@ Current truthful label:
 
 `experimental`
 
-This is appropriate because real `schema` and `query` commands now succeed, but the environment and coverage are still narrow.
+This is appropriate because real `schema`, `query`, and `insert` commands now succeed, but the environment and coverage are still narrow.
 
 ## 10. MySQL policy for now
 
@@ -142,7 +143,7 @@ This decision matches the persona review:
 
 - Planner: one backend family is enough to validate real need
 - Developer: one driver path keeps implementation pressure smaller
-- Manager: two proven commands are still not broad support
+- Manager: three proven commands are still not broad support
 - QA: proof is clearer when tied to one smoke runner
 
 ## 12. Next follow-up
@@ -150,5 +151,5 @@ This decision matches the persona review:
 The next stabilization slice after this document should be:
 
 1. make the PostgreSQL smoke environment less ad hoc
-2. decide MySQL status more explicitly
-3. only then consider widening PostgreSQL beyond read-oriented probes
+2. keep MySQL at `stub` until a dedicated proof track exists
+3. only then consider widening PostgreSQL beyond the current narrow proof set

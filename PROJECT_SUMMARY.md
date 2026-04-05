@@ -9,12 +9,12 @@
 
 ```text
 Verified on 2026-04-05
-- 32 executable baseline tests pass
+- 33 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
 - explicit write contract is enforced
 - shared DB URI contract is implemented
-- PostgreSQL schema and query smoke have succeeded
+- PostgreSQL schema, query, and insert smoke have succeeded
 ```
 
 ---
@@ -68,7 +68,7 @@ Current executable baseline:
 python3 sql_cli/tests/test_core.py
 ```
 
-This passes 32 baseline tests covering:
+This passes 33 baseline tests covering:
 
 - SQL generation
 - SQL validation
@@ -78,14 +78,14 @@ This passes 32 baseline tests covering:
 - explicit write safety and warning behavior
 - DB URI parsing and structured backend errors
 - documented CLI example smoke coverage
-- mocked PostgreSQL schema and query success paths
+- mocked PostgreSQL schema, query, and insert success paths
 
 ---
 
 ## Current Limits
 
 - SQLite is the only broadly verified backend
-- PostgreSQL is experimental for the narrow `schema` and `query` paths
+- PostgreSQL is experimental for the narrow `schema`, `query`, and `insert` paths
 - MySQL is still a stub, not a working backend
 - no transaction or dry-run layer exists yet
 - natural-language behavior is lightweight and heuristic
@@ -102,7 +102,7 @@ This passes 32 baseline tests covering:
 | Phase 2 | Complete enough | structured generation works |
 | Phase 3 | Complete enough | write contract is explicit, but still baseline-only |
 | Phase 4 | Partial | NL path exists, but is intentionally lightweight |
-| Phase 5 | Early experimental | first PostgreSQL `schema` and `query` proofs exist, but broader support is not implemented |
+| Phase 5 | Early experimental | first PostgreSQL `schema`, `query`, and `insert` proofs exist, but broader support is not implemented |
 
 ---
 
@@ -142,6 +142,10 @@ python3 sql_cli/tests/test_core.py
 2. keep the PostgreSQL probe runner repeatable and less ad hoc
 3. use the verification matrix before changing any broader multi-DB status claim
 
+Current runner improvement:
+
+- `scripts/run_postgresql_local_smoke.sh` now prefers PostgreSQL binaries from `PATH` and only falls back to known Homebrew paths when needed
+
 ---
 
 ## References
@@ -158,4 +162,4 @@ python3 sql_cli/tests/test_core.py
 ---
 
 Last Updated: 2026-04-05
-Status: SQLite-first baseline verified with experimental PostgreSQL schema and query proof
+Status: SQLite-first baseline verified with experimental PostgreSQL schema, query, and insert proof

@@ -11,12 +11,12 @@ The verified state is now a working SQLite-first CLI baseline.
 
 - `main.py` is a thin entry point that routes to `sql_cli/cli.py`
 - the executable command set is `schema`, `query`, `generate`, `insert`, `update`, `delete`, and `natural`
-- `python3 sql_cli/tests/test_core.py` passes with 32 baseline tests
+- `python3 sql_cli/tests/test_core.py` passes with 33 baseline tests
 - `python3 main.py --help` works in the current environment
 - `CoQueryDB` works for SQLite file paths and `sqlite://` URIs
 - `--db-uri` is now the shared multi-backend connection contract
 - write commands require explicit `--write` confirmation and explicit SQL
-- PostgreSQL `schema` and `query` have verified local smoke results
+- PostgreSQL `schema`, `query`, and `insert` have verified local smoke results
 
 ## What You Can Rely On
 
@@ -41,7 +41,7 @@ The verified state is now a working SQLite-first CLI baseline.
 - `insert`, `update`, and `delete` require both `--write` and explicit SQL
 - `update` and `delete` surface a high-risk warning when no `WHERE` clause exists
 - `natural` is heuristic and currently maps intents to simple fixed SQL shapes
-- PostgreSQL is proven only for read-only paths through local smoke runs
+- PostgreSQL is proven only for narrow `schema`, `query`, and `insert` paths through local smoke runs
 - MySQL URIs return a structured `unsupported_backend` placeholder error
 
 ## Official Next Work
@@ -49,6 +49,10 @@ The verified state is now a working SQLite-first CLI baseline.
 1. Keep top-level docs aligned with the verified baseline
 2. Keep the PostgreSQL smoke runner repeatable and repo-managed
 3. Use the verification matrix to gate any broader Phase 5 claim changes
+
+Current runner note:
+
+- `bash scripts/run_postgresql_local_smoke.sh` now checks `PATH` for PostgreSQL binaries before falling back to Homebrew-specific paths
 
 ## Key Files
 
@@ -74,5 +78,5 @@ bash scripts/run_postgresql_local_smoke.sh
 ```
 
 Last Updated: 2026-04-05
-Status: SQLite-first baseline verified with PostgreSQL schema and query smoke proof
+Status: SQLite-first baseline verified with PostgreSQL schema, query, and insert smoke proof
 Next: harden the PostgreSQL probe harness, not broad Phase 5 completion

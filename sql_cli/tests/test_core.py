@@ -278,22 +278,29 @@ print("25. test_mysql_stub_error ✓")
 
 
 class _FakeCursor:
-    def __init__(self, rows: list[tuple[str]]):
+    def __init__(self, rows: list[tuple[object, ...]] | None = None, rowcount: int = 0):
         self._rows = rows
+        self.rowcount = rowcount
 
-    def fetchall(self) -> list[tuple[str]]:
-        return self._rows
+    def fetchall(self) -> list[tuple[object, ...]]:
+        return self._rows or []
 
 
 class _FakePsycopgConnection:
     def __init__(self):
         self.last_query = ""
+        self.committed = False
 
     def execute(self, query: str, params: object | None = None) -> _FakeCursor:
         self.last_query = query
         if "information_schema.tables" in query:
             return _FakeCursor([("users",)])
-        return _FakeCursor([("probe_user", 34)])
+        if query.strip().upper().startswith("SELECT"):
+            return _FakeCursor([("probe_user", 34)])
+        return _FakeCursor(rowcount=1)
+
+    def commit(self) -> None:
+        self.committed = True
 
     def close(self) -> None:
         return None
@@ -327,24 +334,39 @@ assert _FakePsycopgSuccessModule.last_connection is not None
 assert "SELECT name, age FROM users" in _FakePsycopgSuccessModule.last_connection.last_query
 print("27. test_postgresql_query_success_path ✓")
 
+with patch("sql_cli.db_new.importlib.import_module", return_value=_FakePsycopgSuccessModule()):
+    postgres_insert = insert_handler(
+        "postgresql://user:pass@localhost:5432/dbname",
+        "INSERT INTO users (name, age) VALUES ('pg_insert_user', 35)",
+        write=True,
+    )
+assert postgres_insert["ok"] is True
+assert postgres_insert["data"]["affected_rows"] == 1
+assert postgres_insert["data"]["warnings"] == []
+assert postgres_insert["data"]["safety_level"] == "low"
+assert _FakePsycopgSuccessModule.last_connection is not None
+assert _FakePsycopgSuccessModule.last_connection.committed is True
+assert "INSERT INTO users" in _FakePsycopgSuccessModule.last_connection.last_query
+print("28. test_postgresql_insert_success_path ✓")
+
 rc, payload = run_cli(["--command", "schema", "--db", "example.db", "--format", "json"])
 assert rc == 0
 assert payload["ok"] is True
 assert "users" in payload["data"]["tables"]
-print("28. test_docs_schema_example_db ✓")
+print("29. test_docs_schema_example_db ✓")
 
 sqlite_uri = f"sqlite://{FIXTURE_DB}"
 rc, payload = run_cli(["--command", "schema", "--db-uri", sqlite_uri, "--format", "json"])
 assert rc == 0
 assert payload["ok"] is True
 assert "users" in payload["data"]["tables"]
-print("29. test_docs_schema_example_db_uri ✓")
+print("30. test_docs_schema_example_db_uri ✓")
 
 rc, payload = run_cli(["--command", "generate", "--db", "example.db", "--skill", "select_simple", "--format", "json"])
 assert rc == 0
 assert payload["ok"] is True
 assert payload["sql"] == "SELECT * FROM USERS"
-print("30. test_docs_generate_example ✓")
+print("31. test_docs_generate_example ✓")
 
 tmpdir, db_path = make_temp_db()
 rc, payload = run_cli(
@@ -365,13 +387,13 @@ rows = db.execute("SELECT name, age FROM users WHERE name = 'docs_user'")
 assert rows == [("docs_user", 20)]
 db.close()
 tmpdir.cleanup()
-print("31. test_docs_insert_example ✓")
+print("32. test_docs_insert_example ✓")
 
 rc, payload = run_cli(["--command", "natural", "--db", "example.db", "--sql", "show users"])
 assert rc == 0
 assert payload["ok"] is True
 assert payload["intent"] == "select"
-print("32. test_docs_natural_example ✓")
+print("33. test_docs_natural_example ✓")
 
 print("")
-print("=== ALL 32 TESTS PASS ✅ ===")
+print("=== ALL 33 TESTS PASS ✅ ===")

@@ -5,11 +5,11 @@ Date: 2026-04-05
 ## Result
 
 ```text
-32/32 executable baseline tests pass
+33/33 executable baseline tests pass
 SQLite-first CLI verified
 Explicit write contract verified
 Shared DB URI contract verified
-PostgreSQL schema and query smoke verified
+PostgreSQL schema, query, and insert smoke verified
 ```
 
 ## Verified Commands
@@ -27,13 +27,14 @@ PostgreSQL schema and query smoke verified
 | Area | Status | Notes |
 |------|--------|-------|
 | SQLite CLI path | Working | current verified runtime |
-| PostgreSQL | Experimental (read-only) | local smoke proof succeeded for `schema` and `query` |
+| PostgreSQL | Experimental (narrow read + insert) | local smoke proof succeeded for `schema`, `query`, and `insert` |
 | MySQL | Stub | returns structured placeholder error |
 | Write contract | Working baseline | `--write` plus explicit SQL is enforced |
 | DB URI contract | Working baseline | `--db-uri` is available and validated |
 | Phase 5 verification matrix | Working baseline | backend promotion is now proof-gated |
 | PostgreSQL schema smoke | Working baseline | local proof recorded on 2026-04-05 |
 | PostgreSQL query smoke | Working baseline | local proof recorded on 2026-04-05 |
+| PostgreSQL insert smoke | Working baseline | local proof recorded on 2026-04-05 |
 | Docs example smoke | Working baseline | key documented CLI examples are exercised in tests |
 | Natural language | Baseline only | heuristic intent mapping |
 
@@ -54,9 +55,10 @@ bash scripts/run_postgresql_local_smoke.sh
 - full-table `update` and `delete` return a high-risk warning
 - `--db-uri` is preferred for future multi-backend commands
 - `natural` currently emits simple fixed SQL patterns
+- the PostgreSQL smoke runner checks `PATH` for PostgreSQL binaries before falling back to known Homebrew paths
 
 Version: v0.7.0
 Last Updated: 2026-04-05
-Status: Baseline verified with experimental PostgreSQL schema and query proof
+Status: Baseline verified with experimental PostgreSQL schema, query, and insert proof
 Reference: `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 Smoke Result: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`

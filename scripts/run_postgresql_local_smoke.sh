@@ -10,12 +10,23 @@ SOCKET_DIR="${TMP_DIR}/pg-socket"
 PORT="${COQUERY_PG_PORT:-49251}"
 DB_NAME="${COQUERY_PG_DB:-coquery_probe}"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
-POSTGRES_BIN_DIR="${POSTGRES_BIN_DIR:-/Users/Agent/homebrew/opt/postgresql@18/bin}"
+POSTGRES_BIN_DIR="${POSTGRES_BIN_DIR:-}"
+
+if [[ -z "${POSTGRES_BIN_DIR}" ]]; then
+  if command -v pg_ctl >/dev/null 2>&1; then
+    POSTGRES_BIN_DIR="$(cd "$(dirname "$(command -v pg_ctl)")" && pwd)"
+  elif [[ -d "/Users/Agent/homebrew/opt/postgresql@18/bin" ]]; then
+    POSTGRES_BIN_DIR="/Users/Agent/homebrew/opt/postgresql@18/bin"
+  elif [[ -d "/opt/homebrew/opt/postgresql@18/bin" ]]; then
+    POSTGRES_BIN_DIR="/opt/homebrew/opt/postgresql@18/bin"
+  fi
+fi
 
 mkdir -p "${TMP_DIR}" "${SOCKET_DIR}"
 
 if [[ ! -x "${POSTGRES_BIN_DIR}/pg_ctl" || ! -x "${POSTGRES_BIN_DIR}/psql" || ! -x "${POSTGRES_BIN_DIR}/initdb" ]]; then
-  echo "PostgreSQL binaries not found under ${POSTGRES_BIN_DIR}" >&2
+  echo "PostgreSQL binaries not found. Add them to PATH or set POSTGRES_BIN_DIR." >&2
+  echo "Current PATH lookup failed; tried POSTGRES_BIN_DIR='${POSTGRES_BIN_DIR}'." >&2
   exit 1
 fi
 
@@ -70,6 +81,12 @@ fi
   -d "${DB_NAME}" \
   -c "INSERT INTO users (name, age) SELECT 'probe_user', 34 WHERE NOT EXISTS (SELECT 1 FROM users WHERE name = 'probe_user');" >/dev/null
 
+"${POSTGRES_BIN_DIR}/psql" \
+  -h "${SOCKET_DIR}" \
+  -p "${PORT}" \
+  -d "${DB_NAME}" \
+  -c "DELETE FROM users WHERE name = 'insert_probe_user';" >/dev/null
+
 DB_URI="postgresql://localhost/${DB_NAME}?host=${SOCKET_DIR}&port=${PORT}"
 
 echo "== PostgreSQL schema smoke =="
@@ -84,4 +101,21 @@ echo "== PostgreSQL query smoke =="
   --command query \
   --db-uri "${DB_URI}" \
   --sql "SELECT name, age FROM users ORDER BY id LIMIT 5" \
+  --format json
+
+echo ""
+echo "== PostgreSQL insert smoke =="
+"${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command insert \
+  --db-uri "${DB_URI}" \
+  --write \
+  --sql "INSERT INTO users (name, age) VALUES ('insert_probe_user', 45)" \
+  --format json
+
+echo ""
+echo "== PostgreSQL insert verification query =="
+"${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command query \
+  --db-uri "${DB_URI}" \
+  --sql "SELECT name, age FROM users WHERE name = 'insert_probe_user' ORDER BY id DESC LIMIT 1" \
   --format json

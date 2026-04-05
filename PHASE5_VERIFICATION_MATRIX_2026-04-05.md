@@ -32,6 +32,7 @@ Use these meanings consistently:
 | PostgreSQL | connection failure error | yes | yes | stub | returns `connection_failed` on connect failure |
 | PostgreSQL | `schema` against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
 | PostgreSQL | `query` against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
+| PostgreSQL | `insert` against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
 | MySQL | URI detection | yes | yes | stub | `mysql://` scheme is recognized and validated |
 | MySQL | runtime execution | no | yes | stub | returns structured `unsupported_backend` placeholder |
 
@@ -40,7 +41,7 @@ Use these meanings consistently:
 What this matrix means today:
 
 - SQLite is the only backend with broad proof across multiple command types
-- PostgreSQL is `experimental` for the narrow `schema` and `query` paths
+- PostgreSQL is `experimental` for the narrow `schema`, `query`, and `insert` paths
 - MySQL is still a placeholder backend and should not be described as supported
 - broader PostgreSQL support is still unproven beyond the documented smoke
 
@@ -54,7 +55,7 @@ PostgreSQL moved from `stub` to `experimental` because all of the following are 
 4. one verification command is recorded in this matrix
 5. at least one repeatable smoke note exists
 
-The next promotion beyond this should require more than one command family and less ad hoc setup.
+The next promotion beyond this should require more than one command family and a less ad hoc probe path.
 
 ## 6. MySQL policy
 
@@ -83,8 +84,15 @@ This runner proves:
 
 - `schema`
 - `query`
+- `insert`
 
 against a real local PostgreSQL target.
+
+Runner behavior:
+
+- checks `PATH` for PostgreSQL binaries first
+- falls back to known Homebrew paths when needed
+- still allows `POSTGRES_BIN_DIR` as an explicit override
 
 ## 8. Current status note
 
@@ -94,9 +102,9 @@ The first real PostgreSQL smoke result is recorded in:
 
 Current limits:
 
-- the proof uses a dedicated local probe environment
-- writes are not proven
-- the probe depends on local PostgreSQL binaries outside the repo
+- the proof still uses a dedicated local probe environment
+- only one write family is proven
+- the probe still depends on local PostgreSQL binaries outside the repo
 
 ## 9. Persona checkpoint
 

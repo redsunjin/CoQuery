@@ -23,7 +23,7 @@ The roadmap should be read conservatively:
 | Phase 2 | Complete enough | built-in SQL generation works for baseline skills |
 | Phase 3 | Baseline stabilized | explicit write contract is enforced |
 | Phase 4 | In stabilization | NL path exists but is heuristic and not advanced |
-| Phase 5 | Early experimental | PostgreSQL `schema` and `query` have local smoke proof; broader backend support is not complete |
+| Phase 5 | Early experimental | PostgreSQL `schema`, `query`, and `insert` have local smoke proof; broader backend support is not complete |
 
 ## Official Active Loop
 
@@ -95,7 +95,7 @@ Goal:
 Current result:
 
 - the first PostgreSQL `query` smoke is now recorded
-- the repo-managed smoke runner now exercises both `schema` and `query`
+- the repo-managed smoke runner now exercises `schema`, `query`, and `insert`
 
 ### Slice E. Verification-gated backend promotion
 
@@ -105,7 +105,7 @@ Goal:
 
 Current decision:
 
-- PostgreSQL stays `experimental (read-only)`
+- PostgreSQL stays `experimental` for a narrow `schema/query/insert` slice
 - MySQL stays `stub`
 
 ## Multi-DB Phase Boundary
@@ -117,4 +117,4 @@ Phase 5 should not be described as active implementation until:
 - unavailable-driver errors are defined
 - one verification matrix exists
 
-Phase 5 should still be treated as narrow and experimental until more than the current PostgreSQL read path is proven.
+Phase 5 should still be treated as narrow and experimental until more than the current PostgreSQL `schema/query/insert` slice is proven.

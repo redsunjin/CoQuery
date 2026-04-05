@@ -18,7 +18,7 @@ The goal is to define what must be true before Phase 5 can honestly begin.
 As of this document:
 
 - SQLite is the only broadly verified backend
-- PostgreSQL has narrow experimental `schema` and `query` probes
+- PostgreSQL has narrow experimental `schema`, `query`, and `insert` probes
 - PostgreSQL is not implemented as a broad working runtime path
 - MySQL is not implemented as a working runtime path
 - multi-DB remains an early experimental phase, not a complete capability
@@ -101,7 +101,7 @@ To describe PostgreSQL as `experimental`, all of the following must be true:
 
 - dependency is declared
 - one connection path runs
-- `schema` or `query` works against a real PostgreSQL target
+- `schema`, `query`, or `insert` works against a real PostgreSQL target
 - one verification command is documented
 
 ### MySQL
@@ -155,6 +155,6 @@ The answer should be conservative unless runtime evidence exists.
 
 The next stabilization slice after this document should be:
 
-1. define the shared backend selection and DB URI contract
-2. document dependency expectations for PostgreSQL and MySQL
-3. decide whether MySQL begins as `stub` or `planned`
+1. keep the shared backend contract aligned with executable behavior
+2. keep the PostgreSQL smoke runner repeatable before broadening backend claims
+3. keep MySQL at `stub` until a dedicated proof slice starts

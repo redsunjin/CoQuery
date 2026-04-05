@@ -19,7 +19,7 @@ python3 main.py --command natural --db example.db --sql "show users"
 ## Verified Baseline
 
 - `main.py` routes to the package handlers in `sql_cli/cli.py`
-- `python3 sql_cli/tests/test_core.py` passes with 32 tests
+- `python3 sql_cli/tests/test_core.py` passes with 33 tests
 - SQLite is the working backend
 - `--db-uri` is the preferred multi-backend connection contract
 - `query` is read-only unless `--write` is provided
@@ -27,7 +27,7 @@ python3 main.py --command natural --db example.db --sql "show users"
 
 ## Current Limits
 
-- PostgreSQL is experimental for the documented `schema` and `query` probe paths only
+- PostgreSQL is experimental for the documented `schema`, `query`, and `insert` probe paths only
 - MySQL is a stub with a structured placeholder error
 - write commands do not yet have dry-run or transaction support
 - natural-language support is lightweight and heuristic
@@ -41,6 +41,10 @@ python3 sql_cli/tests/test_core.py
 bash scripts/run_postgresql_local_smoke.sh
 ```
 
+Runner note:
+
+- `scripts/run_postgresql_local_smoke.sh` checks `PATH` for PostgreSQL binaries before falling back to known Homebrew paths
+
 Version: v0.7.0
 Last Updated: 2026-04-05
-Status: SQLite-first baseline verified with experimental PostgreSQL schema and query proof
+Status: SQLite-first baseline verified with experimental PostgreSQL schema, query, and insert proof
