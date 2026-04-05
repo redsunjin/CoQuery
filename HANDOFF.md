@@ -1,54 +1,78 @@
 # CoQuery Handoff v0.7.0
 
-**Phase Completion**: Phase 4 Complete ✅  
-**Next Phase**: Phase 5 Multi-DB ⏠
+Date: 2026-04-05
 
-## 📊 Phase Status (Updated)
+## Current Handoff State
 
-| Phase | Status | Features | Working |
-|-------|--------|----------|---------|
-| Phase 0 | ✅ Complete | CLI Baseline | ✓ |
-| Phase 1 | ✅ Complete | Read-Only | ✓ |
-| Phase 2 | ✅ Complete | Structured Generation | ✓ |
-| Phase 3 | ✅ Complete | Write Support | ✓ |
-| Phase 4 | ✅ Complete | Natural Language | ✓ |
+CoQuery is no longer in emergency repair.
+The verified state is now a working SQLite-first CLI baseline.
 
-## 🔧 Phase 4 Features (Complete)
+## Verified Baseline
 
-- **CLI Routing**: Fixed
-- **natural_handler**: Moved to correct position
-- **Imports**: Fixed (sql_cli.nl_core)
-- **All Commands**: 5/5 Working!
+- `main.py` is a thin entry point that routes to `sql_cli/cli.py`
+- the executable command set is `schema`, `query`, `generate`, `insert`, `update`, `delete`, and `natural`
+- `python3 sql_cli/tests/test_core.py` passes with 32 baseline tests
+- `python3 main.py --help` works in the current environment
+- `CoQueryDB` works for SQLite file paths and `sqlite://` URIs
+- `--db-uri` is now the shared multi-backend connection contract
+- write commands require explicit `--write` confirmation and explicit SQL
+- PostgreSQL `schema` and `query` have verified local smoke results
 
-## 📝 Commands Working
+## What You Can Rely On
 
-| Command | Example | Status |
-|---------|---------|--------|
-| schema | `--command schema` | ✅ |
-| insert | `--command insert` | ✅ |
-| update | `--command update` | ✅ |
-| delete | `--command delete` | ✅ |
-| natural | `--command natural --sql "..."` | ✅ |
+- SQLite schema inspection
+- SQLite query execution
+- shared DB URI parsing with structured backend errors
+- SQL generation from the built-in skill set
+- explicit write handlers for `insert`, `update`, and `delete`
+- lightweight natural-language intent-to-SQL conversion
+- structured write results with `affected_rows`, `warnings`, and `safety_level`
 
-## 🚀 Next Phase
+## What Is Not Complete
 
-### Phase 5: OpenCLoC Multi-DB
+- broad PostgreSQL support
+- MySQL support
+- production-grade natural-language behavior
+- a stable multi-DB interface
 
-**Goal**: Multi-Database Support in OpenCLoC Environment
-- PostgreSQL integration
-- MySQL integration
-- CodeX assisted development
-- UnifiedDatabase interface
+## Important Cautions
 
-## 📦 Files
+- `query` blocks non-`SELECT` SQL unless `--write` is provided
+- `insert`, `update`, and `delete` require both `--write` and explicit SQL
+- `update` and `delete` surface a high-risk warning when no `WHERE` clause exists
+- `natural` is heuristic and currently maps intents to simple fixed SQL shapes
+- PostgreSQL is proven only for read-only paths through local smoke runs
+- MySQL URIs return a structured `unsupported_backend` placeholder error
 
-- main.py ✅ (Updated)
-- sql_cli/ ✅ (NLCore working)
-- HANDOFF.md ✅ (Current)
-- PHASE4_COMPLETE.md ✅ (Summary)
+## Official Next Work
 
----
+1. Keep top-level docs aligned with the verified baseline
+2. Keep the PostgreSQL smoke runner repeatable and repo-managed
+3. Use the verification matrix to gate any broader Phase 5 claim changes
 
-Last Updated: 2026-04-02  
-Phase 4: Complete ✅  
-Phase 5: Next (OpenCLoC + CodeX)
+## Key Files
+
+- `main.py`
+- `sql_cli/cli.py`
+- `sql_cli/db_new.py`
+- `sql_cli/core.py`
+- `sql_cli/nl_core.py`
+- `sql_cli/tests/test_core.py`
+- `STATUS_AUDIT_2026-04-04.md`
+- `STABILIZATION_PLAN_2026-04-04.md`
+- `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
+- `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
+
+## Recommended Verification
+
+```bash
+python3 main.py --help
+python3 main.py --command schema --db example.db --format json
+python3 sql_cli/tests/test_core.py
+python3 -c "import sql_cli.cli, sql_cli.core, sql_cli.db_new"
+bash scripts/run_postgresql_local_smoke.sh
+```
+
+Last Updated: 2026-04-05
+Status: SQLite-first baseline verified with PostgreSQL schema and query smoke proof
+Next: harden the PostgreSQL probe harness, not broad Phase 5 completion

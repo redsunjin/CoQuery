@@ -53,13 +53,13 @@ python3 main.py --command query --db example.db --sql "SELECT * FROM users"
 python3 main.py --command generate --db example.db --skill select_simple
 
 # Insert data
-python3 main.py --command insert --db example.db
+python3 main.py --command insert --db example.db --write --sql "INSERT INTO users (name, age) VALUES ('a', 20)"
 
 # Update data
-python3 main.py --command update --db example.db
+python3 main.py --command update --db example.db --write --sql "UPDATE users SET age = 21 WHERE id = 1"
 
 # Delete data
-python3 main.py --command delete --db example.db
+python3 main.py --command delete --db example.db --write --sql "DELETE FROM users WHERE id = 1"
 
 # Natural language
 python3 main.py --command natural --sql "count users"

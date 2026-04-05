@@ -1,185 +1,137 @@
 # CoQuery Todo List
 
-**Version**: 0.6.0-Ready Recovery  
-**Session**: Continue Across Sessions (Memorize This)  
-**Next Action**: Phase 0 - CLI Baseline Recovery
+Version: v0.7.x stabilization
+Last Updated: 2026-04-05
 
----
+## Official Next Tasks
 
-## 🎯 Phase 0: CLI Baseline Recovery
+These tasks reflect the current stabilization loop.
+Do not treat old recovery steps as active work anymore.
 
-### Priority 1: Fix main.py
+### 1. Shared backend selector and DB URI contract
 
-**Goal**: CLI command routing restored
+Goal:
 
-**Tasks:**
-```
-[ ] 1. Fix command routing in main.py
-    - Handle --command flag
-    - Dispatch to appropriate handler
-    - Support schema, query, generate commands
-    
-[ ] 2. Verify single test case
-    python3 main.py --command schema --db example.db --format json
-    
-[ ] 3. Add error handling
-    - Invalid command handling
-    - Missing parameter handling
-```
+- define one connection contract that can describe SQLite, PostgreSQL, and MySQL without overstating support
 
-**Success:** Commands work correctly
+Open tasks:
 
----
+- [x] choose the backend selector field or flag
+- [x] define the DB URI shape or equivalent connection fields
+- [x] define invalid-backend and invalid-URI errors
 
-### Priority 2: Fix CLI Handler
+Current output:
 
-**Goal**: CLI stable and importable
+- `BACKEND_CONNECTION_CONTRACT_2026-04-05.md`
+- runtime implementation in `main.py` and `sql_cli/db_new.py`
 
-**Tasks:**
-```
-[ ] 1. Fix click dependency issue
-    - Use optional import pattern
-    - Move CLI imports to runtime
-    
-[ ] 2. Fix imports in __init__.py
-    - Remove eager CLI import
-    - Use lazy import pattern
-    
-[ ] 3. Fix handlers in cli.py
-    - Fix format_json reference
-    - Fix UnifiedDatabase reference
-```
+### 2. Driver dependency declaration
 
-**Success:** `python3 -c "import sql_cli.core"` works
+Goal:
 
----
+- document what PostgreSQL and MySQL require before they can be called experimental
 
-### Priority 3: Fix Tests
+Open tasks:
 
-**Goal**: Test core module runnable
+- [x] declare PostgreSQL driver expectations
+- [ ] declare MySQL driver expectations
+- [x] define missing-driver error wording
+- [x] define connection-failure error wording
 
-**Tasks:**
-```
-[ ] 1. Fix indentation errors in test_core.py
-    - line 140 and other errors
-    
-[ ] 2. Add minimal working test
-    - One simple test case
-    
-[ ] 3. Document test command
-    python3 sql_cli/tests/test_core.py
-```
+Current output:
 
-**Success:** Tests pass without errors
+- `POSTGRESQL_PROBE_REQUIREMENTS_2026-04-05.md`
 
----
+### 3. Phase 5 backend status policy
 
-### Priority 4: Update Docs
+Goal:
 
-**Goal**: Docs reflect actual state
+- prevent placeholder code from being described as real support
 
-**Tasks:**
-```
-[ ] 1. Update HANDOFF.md
-    - Phase claims to actual state
-    - Remove false completion claims
-    
-[ ] 2. Update STAGE_STATUS.md
-    - Phase status based on tests
-    - Accurate Phase claims
-    
-[ ] 3. Document working baseline
-```
+Open tasks:
 
-**Success:** Docs truthful and accurate
+- [x] define when a backend is `planned`
+- [x] define when a backend is `stub`
+- [x] define when a backend is `experimental`
+- [x] define when a backend is `working`
 
----
+Current outputs:
 
-## ✅ Phase 0 Completion Criteria
+- `MULTI_DB_ENTRY_CRITERIA_2026-04-05.md`
+- `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 
-```
-✓ main.py --command schema works
-✓ Imports work without click
-✓ Tests runnable
-✓ Docs truthful
-```
+### 4. First real Phase 5 verification slice
 
----
+Goal:
 
-## 📝 Next Phases (After Phase 0)
+- prove one non-SQLite backend path with one real command and one real verification step
 
-### Phase 1: Read-Only Commands
-```
-[ ] schema command working
-[ ] query command working
-```
+Open tasks:
 
-### Phase 2: Structured Generation
-```
-[ ] SQL generation stable
-[ ] Write safe (if enabled)
-```
+- [x] pick PostgreSQL as the first probe
+- [x] add one documented local smoke path
+- [x] prove PostgreSQL `schema`
+- [x] prove PostgreSQL `query`
 
-### Phase 3: Write Support
-```
-[ ] INSERT/UPDATE/DELETE
-[ ] Write flag safety
-```
+Current output:
 
-### Phase 4: Natural Language
-```
-[ ] Intent parser
-[ ] NL to SQL converter
-```
+- `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
+- `scripts/run_postgresql_local_smoke.sh`
 
-### Phase 5: Knowledge Base
-```
-[ ] KB integration
-[ ] Optimizer
-```
+Current next step:
 
-### Phase 6: Multi-DB
-```
-[ ] UnifiedDatabase
-[ ] Postgres/MySQL
-```
+- reduce local-environment setup friction for the PostgreSQL probe
 
----
+### 5. Verification-gated backend promotion
 
-## 🔄 Session Continuation
+Goal:
 
-### How to Continue
-1. Remember this file: `EASY_SQL_TODO.md`
-2. Remember this file: `EASY_SQL_CHECKPOINT.md`
-3. Remember next step: Phase 0 Priority 1
+- ensure backend labels change only after proof exists
 
-### Checkpoint Summary
-```
-Phase: 0 - Recovery
-Next: main.py command routing
-Status: Ready to start
-```
+Open tasks:
 
----
+- [x] publish the initial Phase 5 verification matrix
+- [x] promote PostgreSQL from `stub` to `experimental` only after real proof
+- [ ] decide whether MySQL remains `stub` or drops to `planned`
 
-## 📋 Quick Start Commands
+## Recently Closed Stabilization Slices
 
-**Test Status:**
+- [x] truth-align top-level status docs
+- [x] freeze write-command contract
+- [x] define Phase 5 entry criteria
+- [x] implement shared DB URI validation and structured backend errors
+- [x] define verification matrix and backend status policy
+- [x] add docs-example smoke coverage to the baseline test file
+- [x] add persona review checkpoint
+- [x] add first real PostgreSQL `schema` and `query` smoke
+
+## Reference Documents
+
+- `STATUS_AUDIT_2026-04-04.md`
+- `STABILIZATION_PLAN_2026-04-04.md`
+- `WRITE_COMMAND_CONTRACT_2026-04-05.md`
+- `PERSONA_REVIEW_2026-04-05.md`
+- `MULTI_DB_ENTRY_CRITERIA_2026-04-05.md`
+- `BACKEND_CONNECTION_CONTRACT_2026-04-05.md`
+- `POSTGRESQL_PROBE_REQUIREMENTS_2026-04-05.md`
+- `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
+- `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
+
+## Verification Baseline
+
 ```bash
-# Test CLI
+python3 main.py --help
 python3 main.py --command schema --db example.db --format json
-
-# Test Import
-python3 -c "import sql_cli.core"
-
-# Test Tests
 python3 sql_cli/tests/test_core.py
+python3 -c "import sql_cli.cli, sql_cli.core, sql_cli.db_new"
 ```
 
-**Expected:** All commands work without errors
+## Current Direction
 
----
+Current work is about stabilization and honest phase boundaries.
 
-Last Updated: 2026-04-01  
-Session Safe: This file continues across sessions  
-Next Action: Execute Phase 0 Priority 1
+It is not about:
+
+- broad new feature count
+- claiming multi-DB support early
+- expanding AI behavior before the current contracts are stable

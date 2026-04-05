@@ -2,7 +2,7 @@
 
 Date: 2026-04-01
 
-Repository: `/Users/Agent/py`
+Repository: `/Users/Agent/ps-workspace/CoQuery`
 
 ## 1. Executive summary
 

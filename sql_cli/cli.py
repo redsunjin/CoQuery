@@ -5,40 +5,156 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from sql_cli.db_new import CoQueryDB
+from sql_cli.db_new import CoQueryDB, CoQueryDBError
+
+WRITE_OPERATIONS = {"INSERT", "UPDATE", "DELETE"}
 
 
-def _default_write_sql(command: str) -> str:
-    defaults = {
-        "insert": "INSERT INTO users (name, age) VALUES ('test_user', 30)",
-        "update": "UPDATE users SET name='new_user' WHERE id = 1",
-        "delete": "DELETE FROM users WHERE id = 1",
+def _success(command: str, data: dict[str, Any]) -> dict[str, Any]:
+    return {"ok": True, "command": command, "data": data, "error": None}
+
+
+def _error(
+    command: str,
+    code: str,
+    message: str,
+    data: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
+    return {
+        "ok": False,
+        "command": command,
+        "data": data or {},
+        "error": {"code": code, "message": message},
     }
-    return defaults[command]
+
+
+def _sql_operation(sql: Optional[str]) -> str:
+    if not sql or not sql.strip():
+        return ""
+    return sql.strip().split(None, 1)[0].upper()
+
+
+def _normalize_write_params(params: Optional[Any]) -> Optional[list[Any]]:
+    if params is None:
+        return None
+    if isinstance(params, list):
+        return params
+    if isinstance(params, tuple):
+        return list(params)
+    raise TypeError("Write params must be a JSON array")
+
+
+def _write_metadata(operation: str, sql: str) -> tuple[list[str], str]:
+    sql_upper = sql.strip().upper()
+    warnings: list[str] = []
+
+    if operation == "INSERT":
+        return warnings, "low"
+
+    if operation in {"UPDATE", "DELETE"}:
+        if "WHERE" not in sql_upper:
+            warnings.append(f"{operation} without WHERE may affect all rows.")
+            return warnings, "high"
+        return warnings, "low"
+
+    return warnings, "medium"
+
+
+def _db_error(command: str, exc: CoQueryDBError) -> dict[str, Any]:
+    return _error(command, exc.code, exc.message)
+
+
+def _run_write_command(
+    command: str,
+    db: str,
+    sql: Optional[str],
+    params: Optional[Any],
+    write: bool,
+    expected_operation: Optional[str] = None,
+) -> dict[str, Any]:
+    operation = _sql_operation(sql) or expected_operation or command.upper()
+
+    if not write:
+        return _error(
+            command,
+            "write_flag_required",
+            f"{operation} requires explicit --write confirmation.",
+        )
+
+    if not sql or not sql.strip():
+        return _error(
+            command,
+            "invalid_write_sql",
+            f"{operation} requires explicit SQL.",
+        )
+
+    if expected_operation and _sql_operation(sql) != expected_operation:
+        return _error(
+            command,
+            "invalid_write_sql",
+            f"{expected_operation} command requires {expected_operation} SQL.",
+        )
+
+    if _sql_operation(sql) not in WRITE_OPERATIONS:
+        return _error(
+            command,
+            "unsupported_write_mode",
+            f"{_sql_operation(sql)} is not supported by the baseline write contract.",
+        )
+
+    try:
+        normalized_params = _normalize_write_params(params)
+        warnings, safety_level = _write_metadata(_sql_operation(sql), sql)
+        with CoQueryDB(db) as conn:
+            affected_rows = conn.execute(sql, normalized_params)
+        return _success(
+            command,
+            {
+                "affected_rows": affected_rows,
+                "warnings": warnings,
+                "safety_level": safety_level,
+            },
+        )
+    except CoQueryDBError as e:
+        return _db_error(command, e)
+    except NotImplementedError as e:
+        return _error(command, "unsupported_write_mode", str(e))
+    except RuntimeError as e:
+        code = "database_connection_failed" if "Database connection failed" in str(e) else "execution_error"
+        return _error(command, code, str(e))
+    except TypeError as e:
+        return _error(command, "unsupported_write_mode", str(e))
+    except Exception as e:
+        return _error(command, "execution_error", str(e))
 
 
 def schema_handler(db: str, format: str = "json") -> dict[str, Any]:
     try:
         with CoQueryDB(db) as conn:
             tables = conn.get_schemas()
-        return {"ok": True, "command": "schema", "data": {"tables": tables}, "error": None}
+        return _success("schema", {"tables": tables})
+    except CoQueryDBError as e:
+        return _db_error("schema", e)
     except Exception as e:
-        return {"ok": False, "command": "schema", "data": {}, "error": str(e)}
+        return _error("schema", "execution_error", str(e))
 
 
 def query_handler(db: str, sql: str, format: str = "json", write: bool = False) -> dict[str, Any]:
-    try:
-        sql_upper = sql.strip().upper()
-        if not write and not sql_upper.startswith("SELECT"):
-            return {"ok": False, "command": "query", "data": {}, "error": "Only SELECT"}
+    operation = _sql_operation(sql)
 
+    if operation != "SELECT":
+        return _run_write_command("query", db, sql, None, write)
+
+    try:
         with CoQueryDB(db) as conn:
             result = conn.execute(sql)
 
         payload = {"rows": result} if isinstance(result, list) else {"affected_rows": result}
-        return {"ok": True, "command": "query", "data": payload, "error": None}
+        return _success("query", payload)
+    except CoQueryDBError as e:
+        return _db_error("query", e)
     except Exception as e:
-        return {"ok": False, "command": "query", "data": {}, "error": str(e)}
+        return _error("query", "execution_error", str(e))
 
 
 def generate_handler(
@@ -63,31 +179,31 @@ def generate_handler(
         return {"ok": False, "command": "generate", "error": str(e)}
 
 
-def insert_handler(db: str, sql: Optional[str] = None, params: Optional[list[Any]] = None) -> dict[str, Any]:
-    try:
-        with CoQueryDB(db) as conn:
-            affected_rows = conn.execute(sql or _default_write_sql("insert"), params)
-        return {"ok": True, "command": "insert", "affected_rows": affected_rows, "error": None}
-    except Exception as e:
-        return {"ok": False, "command": "insert", "affected_rows": 0, "error": str(e)}
+def insert_handler(
+    db: str,
+    sql: Optional[str] = None,
+    params: Optional[list[Any]] = None,
+    write: bool = False,
+) -> dict[str, Any]:
+    return _run_write_command("insert", db, sql, params, write, expected_operation="INSERT")
 
 
-def update_handler(db: str, sql: Optional[str] = None, params: Optional[list[Any]] = None) -> dict[str, Any]:
-    try:
-        with CoQueryDB(db) as conn:
-            affected_rows = conn.execute(sql or _default_write_sql("update"), params)
-        return {"ok": True, "command": "update", "affected_rows": affected_rows, "error": None}
-    except Exception as e:
-        return {"ok": False, "command": "update", "affected_rows": 0, "error": str(e)}
+def update_handler(
+    db: str,
+    sql: Optional[str] = None,
+    params: Optional[list[Any]] = None,
+    write: bool = False,
+) -> dict[str, Any]:
+    return _run_write_command("update", db, sql, params, write, expected_operation="UPDATE")
 
 
-def delete_handler(db: str, sql: Optional[str] = None, params: Optional[list[Any]] = None) -> dict[str, Any]:
-    try:
-        with CoQueryDB(db) as conn:
-            affected_rows = conn.execute(sql or _default_write_sql("delete"), params)
-        return {"ok": True, "command": "delete", "affected_rows": affected_rows, "error": None}
-    except Exception as e:
-        return {"ok": False, "command": "delete", "affected_rows": 0, "error": str(e)}
+def delete_handler(
+    db: str,
+    sql: Optional[str] = None,
+    params: Optional[list[Any]] = None,
+    write: bool = False,
+) -> dict[str, Any]:
+    return _run_write_command("delete", db, sql, params, write, expected_operation="DELETE")
 
 
 def natural_handler(db: str, sql: Optional[str] = None, format: str = "json") -> dict[str, Any]:

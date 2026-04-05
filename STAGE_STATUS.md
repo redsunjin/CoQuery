@@ -1,43 +1,66 @@
 # CoQuery Stage Status Report
 
-**Version**: v0.7.0  
-**Last Update**: 2026-04-02 (Phase 4 Complete)
+Version: v0.7.0
+Last Update: 2026-04-05
 
-## 📊 Phase Completion Overview
+## Current Status
 
-| Phase | Status | Tasks | Working |
-|-------|--------|-------|---------|
-| Phase 0 | ✅ | CLI Recovery | ✓ 6/6 |
-| Phase 1 | ✅ | Read-Only | ✓ 1/1 |
-| Phase 2 | ✅ | Structured Gen | ✓ 1/1 |
-| Phase 3 | ✅ | Write Support | ✓ 3/3 |
-| Phase 4 | ✅ | Natural Lang | ✓ 1/1 |
-
-## 🎯 Current Status
-
-```
-✅ Phase 4 Complete: All 5 Commands Working!
-⏠ Phase 5: Next (Multi-DB OpenCLoC)
+```text
+SQLite-first baseline verified
+Explicit write contract frozen
+Shared DB URI contract implemented
+PostgreSQL schema and query smoke proved
+Phase 5 remains narrow and experimental
 ```
 
-## ✅ Verified Commands
+## Phase Overview
 
-All 5 commands tested and working:
-1. schema ✅
-2. insert ✅
-3. update ✅
-4. delete ✅
-5. natural ✅
+| Phase | Status | Notes |
+|-------|--------|-------|
+| Phase 0 | Complete | CLI recovery and command routing are working |
+| Phase 1 | Complete enough | `schema` and `query` work on SQLite |
+| Phase 2 | Complete enough | structured SQL generation works for built-in skills |
+| Phase 3 | Baseline stabilized | explicit `--write` plus explicit SQL is enforced |
+| Phase 4 | In stabilization | natural-language path exists, but it is heuristic only |
+| Phase 5 | Early experimental | PostgreSQL `schema` and `query` smoke succeeded; broader backend support is not proven |
 
-## Next Phase
+## Verified Commands
 
-**Phase 5**: OpenCLoC + CodeX Multi-DB
-- PostgreSQL support
-- MySQL support
-- UnifiedInterface
-- CodeX-assisted implementation
+- `schema`
+- `query`
+- `generate`
+- `insert`
+- `update`
+- `delete`
+- `natural`
 
----
+Write-command baseline:
 
-Last Updated: 2026-04-02  
-Phase Status: Phase 4 Complete ✅
+- `insert`, `update`, and `delete` require `--write` and explicit SQL
+- full-table `update` and `delete` return a high-risk warning
+
+## Backend Support
+
+| Backend | Status | Notes |
+|---------|--------|-------|
+| SQLite | Working | current verified runtime path |
+| PostgreSQL | Experimental (read-only) | local smoke proof succeeded for `schema` and `query`; writes are not proven |
+| MySQL | Stub | URI contract exists; runtime returns structured placeholder error |
+
+## Verification Commands
+
+```bash
+python3 main.py --help
+python3 main.py --command schema --db example.db --format json
+python3 sql_cli/tests/test_core.py
+bash scripts/run_postgresql_local_smoke.sh
+```
+
+## Active Loop
+
+1. align docs to executable behavior
+2. keep the PostgreSQL smoke runner repeatable and repo-managed
+3. use the verification matrix before changing any broader multi-DB status claim
+
+Last Updated: 2026-04-05
+Phase Status: SQLite-first baseline verified with PostgreSQL schema and query smoke proof

@@ -1,216 +1,161 @@
 # CoQuery - Project Summary v0.7.0
 
-**AI 기반 대화형 SQL 에이전트**  
-**Entry → Junior → Intermediate → Expert → SQL Professional(SQLP)**
+**AI-assisted SQL CLI baseline**
+**Current focus: stabilization after CLI repair**
 
 ---
 
-## 🎉 Current Status: READY
+## Current Status
 
-```
-✅ All tests passing (4/4)
-✅ JSON contracts stable
-✅ Read-only enforced
-✅ CLI ready for all modes
-```
-
----
-
-## 📁 Project Structure
-
-```
-/Users/Agent/py/
-├── main.py                     # CLI Entry Point (v0.7.0)
-├── README.md                   # Documentation
-├── HANDOFF.md                  # Handoff documentation
-├── PROJECT_SUMMARY.md          # Summary (this file)
-└── sql_cli/                    # Core modules
-     ├── __init__.py          # Package exports
-     ├── db.py                # SQLite access layer
-     ├── contracts.py         # JSON payload models
-     ├── core.py              # SQL generation & validation
-     ├── cli.py               # CLI handler
-     └── tests/
-         └── test_core.py     # Test suite (4 tests)
+```text
+Verified on 2026-04-05
+- 32 executable baseline tests pass
+- SQLite-first command surface works
+- package handlers are the canonical runtime path
+- explicit write contract is enforced
+- shared DB URI contract is implemented
+- PostgreSQL schema and query smoke have succeeded
 ```
 
 ---
 
-## 🚀 Features Implemented
+## Current Harness
 
-### 1. Interactive CLI
-- Menu-driven interface
-- SQL generation from structured inputs
-- Skill-based query builder
+- Delivery harness: `Plan -> Review -> Execute -> Verify` in `STABILIZATION_PLAN_2026-04-04.md`
+- Runtime harness: `main.py` routes one command into `sql_cli/cli.py`, which fans into `sql_cli/db_new.py`, `sql_cli/core.py`, or `sql_cli/nl_core.py`
+- Verification harness: baseline CLI checks, `python3 sql_cli/tests/test_core.py`, and `bash scripts/run_postgresql_local_smoke.sh`
 
-### 2. Stable JSON Commands
-- `schema` - List table schemas
-- `query` - Execute SELECT queries (read-only)
-- `generate` - Generate SQL from skill ID
+---
 
-### 3. Safety Measures
-- **Read-only default** (no write without flag)
-- **Row limits** (limit 20 by default)
-- **Explicit DB path** (no hidden mutations)
-- **Validation layer** (syntax checks)
+## Project Structure
 
-### 4. SQL Skills (7 total)
-```
-select_simple       - Basic SELECT
-select_where        - WHERE-based filtering
-join_inner          - INNER JOIN
-join_left           - LEFT JOIN
-count               - COUNT aggregation
-aggregate_group     - GROUP BY
-order               - ORDER BY sorting
+```text
+/Users/Agent/ps-workspace/CoQuery/
+├── main.py                     # CLI entry point
+├── HANDOFF.md                  # Current handoff status
+├── PROJECT_SUMMARY.md          # This summary
+├── README_COQ.md               # Baseline verification notes
+├── STATUS_AUDIT_2026-04-04.md  # Audit of the repaired baseline
+├── STABILIZATION_PLAN_2026-04-04.md
+└── sql_cli/
+    ├── cli.py                  # Canonical command handlers
+    ├── core.py                 # SQL generation and validation
+    ├── db_new.py               # SQLite-first DB wrapper
+    ├── nl_core.py              # Lightweight NL processing
+    └── tests/test_core.py      # Executable baseline tests
 ```
 
 ---
 
-## 📊 Test Results
+## Verified Command Surface
+
+- `schema`: list SQLite tables
+- `query`: execute `SELECT` statements by default; non-`SELECT` requires `--write`
+- `generate`: build SQL from built-in skill IDs
+- `insert`: requires explicit `INSERT` SQL and `--write`
+- `update`: requires explicit `UPDATE` SQL and `--write`
+- `delete`: requires explicit `DELETE` SQL and `--write`
+- `natural`: parse simple intent and return simple SQL
+- `--db-uri`: preferred shared connection input for non-SQLite backends
+
+---
+
+## Tests
+
+Current executable baseline:
 
 ```bash
-$ python sql_cli/tests/test_core.py
-==================================================
-Running CoQuery core tests
-==================================================
-
-[Test] Skills test                 ✅
-[Test] Generate test               ✅
-[Test] Classification test         ✅
-[Test] Validation test             ✅
-
-Results: 4 passed, 0 failed
-==================================================
+python3 sql_cli/tests/test_core.py
 ```
 
----
+This passes 32 baseline tests covering:
 
-## 🎯 Usage Examples
-
-### Interactive Mode
-```bash
-$ python main.py
-
-### Menu
-1. 테이블 목록 (schema)
-2. 쿼리 실행 (query)
-3. SQL 생성 (generate)
-4. 스킬 목록
-0. 종료
-```
-
-### JSON Commands
-```bash
-# Schema listing
-$ python main.py --command schema --db example.db --format json
-# Output: JSON with table info
-
-# Query execution
-$ python main.py --command query --db example.db \
-   --sql "SELECT * FROM users WHERE age>30" --format json
-# Output: JSON with result rows
-
-# SQL generation
-$ python main.py --command generate --db example.db \
-   --skill select_simple --format json
-# Output: Generated SQL with warnings
-```
+- SQL generation
+- SQL validation
+- SQLite connection and execution
+- CLI handlers
+- natural-language processing
+- explicit write safety and warning behavior
+- DB URI parsing and structured backend errors
+- documented CLI example smoke coverage
+- mocked PostgreSQL schema and query success paths
 
 ---
 
-## 📈 Progress Stages
+## Current Limits
 
-### ✅ Stage 1: Read-Only (Complete)
-- Schema command
-- Query execution (read-only)
-- Read/write enforcement
-
-### ✅ Stage 2: SQL Generation (Complete)  
-- Skill-based generation
-- 7 SQL skills
-- Validation & warnings
-
-### ⏳ Stage 3: Write Support (To Do)
-- INSERT/UPDATE/DELETE
-- Explicit write flag
-- Transaction support
-
-### ⏳ Stage 4: AI Natural Language (To Do)
-- Natural → SQL conversion
-- LLM integration
-- Model routing
-
-### ⏳ Stage 5: Multi-DB Support (To Do)
-- PostgreSQL
-- MySQL
-- Unified API
+- SQLite is the only broadly verified backend
+- PostgreSQL is experimental for the narrow `schema` and `query` paths
+- MySQL is still a stub, not a working backend
+- no transaction or dry-run layer exists yet
+- natural-language behavior is lightweight and heuristic
+- older docs before the 2026-04-04 repair may overstate completion
 
 ---
 
-## 🔒 Safety Profile
+## Phase Interpretation
 
-| Feature | Status |
-|---------|--------|
-| Read-only default | ✅ Enforced |
-| Row limits | ✅ Max 20 |
-| Explicit DB path | ✅ Required |
-| Validation | ✅ Syntax checks |
-| Write flag | ⏳ Pending |
+| Phase | Status | Interpretation |
+|-------|--------|----------------|
+| Phase 0 | Complete | CLI baseline repaired |
+| Phase 1 | Complete enough | read-oriented SQLite commands work |
+| Phase 2 | Complete enough | structured generation works |
+| Phase 3 | Complete enough | write contract is explicit, but still baseline-only |
+| Phase 4 | Partial | NL path exists, but is intentionally lightweight |
+| Phase 5 | Early experimental | first PostgreSQL `schema` and `query` proofs exist, but broader support is not implemented |
 
 ---
 
-## 📖 Quick Start
+## Quick Start
 
 ```bash
-# 1. Run interactive mode
-$ python main.py
+# show help
+python3 main.py --help
 
-# 2. List schemas (JSON)
-$ python main.py --command schema --db example.db --format json
+# list schemas
+python3 main.py --command schema --db example.db --format json
 
-# 3. Execute query (JSON)
-$ python main.py --command query --db example.db \
-   --sql "SELECT * FROM users LIMIT 10" --format json
+# preferred multi-backend form
+python3 main.py --command schema --db-uri sqlite:///Users/Agent/ps-workspace/CoQuery/example.db --format json
 
-# 4. Generate SQL (JSON)
-$ python main.py --command generate --db example.db \
-   --skill select_simple --format json
+# run a read query
+python3 main.py --command query --db example.db \
+  --sql "SELECT * FROM users LIMIT 10" --format json
+
+# generate SQL from a skill
+python3 main.py --command generate --db example.db \
+  --skill select_simple --format json
+
+# run an explicit write
+python3 main.py --command insert --db example.db --write \
+  --sql "INSERT INTO users (name, age) VALUES ('alice', 30)"
+
+# run the baseline tests
+python3 sql_cli/tests/test_core.py
 ```
 
 ---
 
-## 🤝 Contributing
+## Next Steps
 
-- Small slices only
-- Tests required  
-- No breaking changes
-- Follow 4-stage harness
-
----
-
-## 📝 Next Steps
-
-1. Implement write commands (INSERT/UPDATE/DELETE)
-2. Add natural language support
-3. Integrate with RFS-CLI
-4. Add multi-database support
-5. Performance benchmarks
+1. keep status docs aligned with observed behavior
+2. keep the PostgreSQL probe runner repeatable and less ad hoc
+3. use the verification matrix before changing any broader multi-DB status claim
 
 ---
 
-## 📎 References
+## References
 
-- [main.py](./main.py) - CLI Entry Point
-- [HANDOFF.md](./HANDOFF.md) - Project Roadmap
-- [README.md](./README.md) - User Guide
-- [contracts.py](./sql_cli/contracts.py) - JSON Spec
-- [test_core.py](./sql_cli/tests/test_core.py) - Tests
+- `main.py`
+- `sql_cli/cli.py`
+- `sql_cli/db_new.py`
+- `sql_cli/tests/test_core.py`
+- `STATUS_AUDIT_2026-04-04.md`
+- `STABILIZATION_PLAN_2026-04-04.md`
+- `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
+- `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
 
 ---
 
-**CoQuery v0.7.0** - From SQLD to SQLP, one safe query at a time.
-
-Last Updated: 2026-04-02  
-Status: Stable (Stage 2)  
-Score: 4/4 tests ✅
+Last Updated: 2026-04-05
+Status: SQLite-first baseline verified with experimental PostgreSQL schema and query proof

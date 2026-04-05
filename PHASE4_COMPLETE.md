@@ -11,9 +11,9 @@
 | Command | Status | Example |
 |---------|--------|---------|
 | **schema** | ✅ | `python3 main.py --command schema` |
-| **insert** | ✅ | `python3 main.py --command insert` |
-| **update** | ✅ | `python3 main.py --command update` |
-| **delete** | ✅ | `python3 main.py --command delete` |
+| **insert** | ✅ | `python3 main.py --command insert --write --sql "INSERT INTO users (name, age) VALUES ('a', 20)"` |
+| **update** | ✅ | `python3 main.py --command update --write --sql "UPDATE users SET age = 21 WHERE id = 1"` |
+| **delete** | ✅ | `python3 main.py --command delete --write --sql "DELETE FROM users WHERE id = 1"` |
 | **natural** | ✅ | `python3 main.py --command natural --sql "count users"` |
 
 ### 🔧 Fixes Applied

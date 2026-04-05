@@ -25,38 +25,53 @@ def _parse_params(raw: str | None) -> Any:
     return json.loads(raw)
 
 
+def _resolve_db_target(db: str, db_uri: str | None) -> str:
+    if db_uri is not None:
+        return db_uri
+    return db
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="CoQuery CLI")
-    parser.add_argument("--command", type=str, default=None)
-    parser.add_argument("--db", type=str, default="example.db")
-    parser.add_argument("--sql", type=str, default=None)
-    parser.add_argument("--skill", type=str, default=None)
-    parser.add_argument("--params", type=str, default=None)
-    parser.add_argument("--format", type=str, default="json")
-    parser.add_argument("--write", action="store_true", default=False)
+    parser.add_argument("--command", type=str, default=None, help="schema, query, generate, insert, update, delete, natural")
+    parser.add_argument("--db", type=str, default="example.db", help="Legacy SQLite path or DB URI")
+    parser.add_argument("--db-uri", type=str, default=None, help="Preferred multi-backend database URI")
+    parser.add_argument("--sql", type=str, default=None, help="Raw SQL or natural-language text for natural")
+    parser.add_argument("--skill", type=str, default=None, help="SQL generation skill id")
+    parser.add_argument("--params", type=str, default=None, help="JSON array of SQL parameters")
+    parser.add_argument("--format", type=str, default="json", help="Output format")
+    parser.add_argument(
+        "--write",
+        action="store_true",
+        default=False,
+        help="Required for state-changing SQL in query/insert/update/delete",
+    )
     args = parser.parse_args()
 
     if not args.command:
         print("CoQuery v0.7.0")
         print("commands: schema, query, generate, insert, update, delete, natural")
+        print("write commands require explicit --write and --sql")
+        print("prefer --db-uri for multi-backend contracts; --db remains SQLite-first compatibility")
         return 0
 
     parsed_params = _parse_params(args.params)
+    db_target = _resolve_db_target(args.db, args.db_uri)
 
     if args.command == "schema":
-        result = schema_handler(args.db, args.format)
+        result = schema_handler(db_target, args.format)
     elif args.command == "query":
-        result = query_handler(args.db, args.sql or "SELECT * FROM users", args.format, args.write)
+        result = query_handler(db_target, args.sql or "SELECT * FROM users", args.format, args.write)
     elif args.command == "generate":
-        result = generate_handler(args.db, args.skill or "select_simple", args.format, parsed_params)
+        result = generate_handler(db_target, args.skill or "select_simple", args.format, parsed_params)
     elif args.command == "insert":
-        result = insert_handler(args.db, args.sql, parsed_params)
+        result = insert_handler(db_target, args.sql, parsed_params, args.write)
     elif args.command == "update":
-        result = update_handler(args.db, args.sql, parsed_params)
+        result = update_handler(db_target, args.sql, parsed_params, args.write)
     elif args.command == "delete":
-        result = delete_handler(args.db, args.sql, parsed_params)
+        result = delete_handler(db_target, args.sql, parsed_params, args.write)
     elif args.command == "natural":
-        result = natural_handler(args.db, args.sql, args.format)
+        result = natural_handler(db_target, args.sql, args.format)
     else:
         result = {"ok": False, "command": args.command, "error": "Unknown"}
 

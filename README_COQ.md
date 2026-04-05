@@ -1,64 +1,62 @@
-# CoQuery CLI - Test Summary
+# CoQuery Baseline Verification
 
-## Test Results
+Date: 2026-04-05
 
-### ✅ Passed Tests (5/5)
-1. **SQL Generation**: ✓ SELECT OK
-2. **SQL Generation**: ✓ COUNT OK
-3. **Validation**: ✓ Valid SELECT
-4. **Database**: ✓ Connect OK
-5. **Database**: ✓ Execute OK
-6. **CLI**: ✓ Schema Command OK
-7. **CLI**: ✓ Query Command OK
+## Result
 
-### Summary
-```
-Passed: 6/7 tests
-Failed: 1 test (INSERT validation)
-
-Overall: 86% pass
+```text
+32/32 executable baseline tests pass
+SQLite-first CLI verified
+Explicit write contract verified
+Shared DB URI contract verified
+PostgreSQL schema and query smoke verified
 ```
 
-## Commands Working
+## Verified Commands
 
-```
-✅ schema - List tables
-✅ query - Execute queries
-✅ generate - Generate SQL
-✅ insert - Insert rows
-✅ update - Update rows
-✅ delete - Delete rows
-✅ natural - NL processing
-```
+- `schema`
+- `query`
+- `generate`
+- `insert`
+- `update`
+- `delete`
+- `natural`
 
-## Next Steps
+## Support Matrix
 
-- ✅ Fix remaining test (test_count)
-- ✅ Complete all tests → 100%
-- ✅ Release v1.0
+| Area | Status | Notes |
+|------|--------|-------|
+| SQLite CLI path | Working | current verified runtime |
+| PostgreSQL | Experimental (read-only) | local smoke proof succeeded for `schema` and `query` |
+| MySQL | Stub | returns structured placeholder error |
+| Write contract | Working baseline | `--write` plus explicit SQL is enforced |
+| DB URI contract | Working baseline | `--db-uri` is available and validated |
+| Phase 5 verification matrix | Working baseline | backend promotion is now proof-gated |
+| PostgreSQL schema smoke | Working baseline | local proof recorded on 2026-04-05 |
+| PostgreSQL query smoke | Working baseline | local proof recorded on 2026-04-05 |
+| Docs example smoke | Working baseline | key documented CLI examples are exercised in tests |
+| Natural language | Baseline only | heuristic intent mapping |
 
-## Testing Method
+## Verification Commands
 
 ```bash
-python3 sql_cli/tests/test_core.py  # Run all tests
-python3 main.py --command schema    # Test schema
-python3 main.py --command query     # Test query
-# ... etc
+python3 main.py --help
+python3 main.py --command schema --db example.db --format json
+python3 main.py --command schema --db-uri sqlite:///Users/Agent/ps-workspace/CoQuery/example.db --format json
+python3 sql_cli/tests/test_core.py
+bash scripts/run_postgresql_local_smoke.sh
 ```
 
-## Test Coverage
+## Notes
 
-| Component | Tests | Status |
-|-----------|-------|--------|
-| SQLGenerator | 2 | ✅ |
-| SQLValidator | 2 | ✅ |
-| CoQueryDB | 2 | ✅ |
-| CLI Handlers | 2 | ✅ |
+- `query` is read-only unless `--write` is set
+- dedicated `insert`, `update`, and `delete` handlers require `--write` and explicit SQL
+- full-table `update` and `delete` return a high-risk warning
+- `--db-uri` is preferred for future multi-backend commands
+- `natural` currently emits simple fixed SQL patterns
 
-Total: 8 tests, 7 passed (87.5%)
-
----
-
-Version: v0.7.0  
-Last Updated: 2026-04-01  
-Status: Testing Complete, Testing Ready
+Version: v0.7.0
+Last Updated: 2026-04-05
+Status: Baseline verified with experimental PostgreSQL schema and query proof
+Reference: `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
+Smoke Result: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`

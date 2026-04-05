@@ -51,3 +51,4 @@ htmlcov/
 LOG*
 *.log
 *.bak
+.tmp/
