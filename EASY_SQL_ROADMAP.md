@@ -103,6 +103,11 @@ Goal:
 
 - move backend labels only when the verification matrix justifies it
 
+Current decision:
+
+- PostgreSQL stays `experimental (read-only)`
+- MySQL stays `stub`
+
 ## Multi-DB Phase Boundary
 
 Phase 5 should not be described as active implementation until:

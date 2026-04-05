@@ -92,7 +92,11 @@ Open tasks:
 
 - [x] publish the initial Phase 5 verification matrix
 - [x] promote PostgreSQL from `stub` to `experimental` only after real proof
-- [ ] decide whether MySQL remains `stub` or drops to `planned`
+- [x] decide whether MySQL remains `stub` or drops to `planned`
+
+Current output:
+
+- `MYSQL_STATUS_DECISION_2026-04-05.md`
 
 ## Recently Closed Stabilization Slices
 
@@ -116,6 +120,7 @@ Open tasks:
 - `POSTGRESQL_PROBE_REQUIREMENTS_2026-04-05.md`
 - `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 - `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
+- `MYSQL_STATUS_DECISION_2026-04-05.md`
 
 ## Verification Baseline
 

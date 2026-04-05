@@ -66,6 +66,11 @@ Use these rules:
 - do not add MySQL-specific docs beyond placeholder status unless a dedicated slice starts
 - keep MySQL labelled `stub` or `planned` until real proof exists
 
+Current decision:
+
+- MySQL stays `stub`
+- reason: URI recognition and structured placeholder behavior already exist
+
 ## 7. Verified PostgreSQL smoke runner
 
 The current repeatable local proof is:
@@ -107,5 +112,5 @@ This matrix supports the four persona views:
 The next slice after this matrix should be:
 
 1. make the PostgreSQL probe environment less ad hoc
-2. decide whether MySQL remains `stub` or drops to `planned`
+2. keep MySQL at `stub` until a dedicated proof track exists
 3. keep PostgreSQL scope narrow until another command family is proven
