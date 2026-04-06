@@ -1,6 +1,6 @@
 # CoQuery Handoff v0.7.0
 
-Date: 2026-04-05
+Date: 2026-04-07
 
 ## Current Handoff State
 
@@ -11,12 +11,12 @@ The verified state is now a working SQLite-first CLI baseline.
 
 - `main.py` is a thin entry point that routes to `sql_cli/cli.py`
 - the executable command set is `schema`, `query`, `generate`, `insert`, `update`, `delete`, and `natural`
-- `python3 sql_cli/tests/test_core.py` passes with 33 baseline tests
+- `python3 sql_cli/tests/test_core.py` passes with 34 baseline tests
 - `python3 main.py --help` works in the current environment
 - `CoQueryDB` works for SQLite file paths and `sqlite://` URIs
 - `--db-uri` is now the shared multi-backend connection contract
 - write commands require explicit `--write` confirmation and explicit SQL
-- PostgreSQL `schema`, `query`, and `insert` have verified local smoke results
+- PostgreSQL `schema`, `query`, `insert`, and `update` have verified local smoke results
 
 ## What You Can Rely On
 
@@ -41,14 +41,14 @@ The verified state is now a working SQLite-first CLI baseline.
 - `insert`, `update`, and `delete` require both `--write` and explicit SQL
 - `update` and `delete` surface a high-risk warning when no `WHERE` clause exists
 - `natural` is heuristic and currently maps intents to simple fixed SQL shapes
-- PostgreSQL is proven only for narrow `schema`, `query`, and `insert` paths through local smoke runs
+- PostgreSQL is proven only for narrow `schema`, `query`, `insert`, and `update` paths through local smoke runs
 - MySQL URIs return a structured `unsupported_backend` placeholder error
 
 ## Official Next Work
 
 1. Keep top-level docs aligned with the verified baseline
 2. Keep the PostgreSQL smoke runner repeatable and repo-managed
-3. Use the verification matrix to gate any broader Phase 5 claim changes
+3. Use the verification matrix and scope lock to gate any broader Phase 5 claim changes
 
 Current runner note:
 
@@ -66,6 +66,7 @@ Current runner note:
 - `STABILIZATION_PLAN_2026-04-04.md`
 - `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 - `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
+- `POSTGRESQL_SCOPE_LOCK_2026-04-07.md`
 
 ## Recommended Verification
 
@@ -77,6 +78,6 @@ python3 -c "import sql_cli.cli, sql_cli.core, sql_cli.db_new"
 bash scripts/run_postgresql_local_smoke.sh
 ```
 
-Last Updated: 2026-04-05
-Status: SQLite-first baseline verified with PostgreSQL schema, query, and insert smoke proof
-Next: harden the PostgreSQL probe harness, not broad Phase 5 completion
+Last Updated: 2026-04-07
+Status: SQLite-first baseline verified with PostgreSQL schema, query, insert, and update smoke proof
+Next: keep the PostgreSQL probe harness stable and keep PostgreSQL scope locked to the current narrow proof set

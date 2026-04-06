@@ -9,7 +9,7 @@ Last Update: 2026-04-05
 SQLite-first baseline verified
 Explicit write contract frozen
 Shared DB URI contract implemented
-PostgreSQL schema, query, and insert smoke proved
+PostgreSQL schema, query, insert, and update smoke proved
 Phase 5 remains narrow and experimental
 ```
 
@@ -22,7 +22,7 @@ Phase 5 remains narrow and experimental
 | Phase 2 | Complete enough | structured SQL generation works for built-in skills |
 | Phase 3 | Baseline stabilized | explicit `--write` plus explicit SQL is enforced |
 | Phase 4 | In stabilization | natural-language path exists, but it is heuristic only |
-| Phase 5 | Early experimental | PostgreSQL `schema`, `query`, and `insert` smoke succeeded; broader backend support is not proven |
+| Phase 5 | Early experimental | PostgreSQL `schema`, `query`, `insert`, and `update` smoke succeeded; broader backend support is not proven |
 
 ## Verified Commands
 
@@ -44,7 +44,7 @@ Write-command baseline:
 | Backend | Status | Notes |
 |---------|--------|-------|
 | SQLite | Working | current verified runtime path |
-| PostgreSQL | Experimental (narrow read + insert) | local smoke proof succeeded for `schema`, `query`, and `insert`; broader write coverage is not proven |
+| PostgreSQL | Experimental (narrow read + write) | local smoke proof succeeded for `schema`, `query`, `insert`, and `update`; broader write coverage is not proven |
 | MySQL | Stub | URI contract exists; runtime returns structured placeholder error |
 
 ## Verification Commands
@@ -63,4 +63,4 @@ bash scripts/run_postgresql_local_smoke.sh
 3. use the verification matrix before changing any broader multi-DB status claim
 
 Last Updated: 2026-04-05
-Phase Status: SQLite-first baseline verified with PostgreSQL schema, query, and insert smoke proof
+Phase Status: SQLite-first baseline verified with PostgreSQL schema, query, insert, and update smoke proof

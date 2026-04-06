@@ -1,0 +1,89 @@
+# CoQuery PostgreSQL Scope Lock
+
+Date: 2026-04-07
+
+Workspace: `/Users/Agent/ps-workspace/CoQuery`
+
+## 1. Purpose
+
+Freeze the current truthful PostgreSQL boundary before widening Phase 5 further.
+
+This document exists so the project does not drift from:
+
+- one verified SQLite-first baseline
+- one narrow PostgreSQL experimental slice
+- one explicit gate before broader backend claims
+
+## 2. Current PostgreSQL scope
+
+As of 2026-04-07, the PostgreSQL slice is:
+
+- status: `experimental`
+- proven commands: `schema`, `query`, `insert`, `update`
+- proof path: `bash scripts/run_postgresql_local_smoke.sh`
+- proof note: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
+
+What this means:
+
+- PostgreSQL is no longer just a placeholder
+- PostgreSQL is still not broad backend support
+- the current proof is enough for a narrow experimental claim only
+
+## 3. What is explicitly out of scope now
+
+Do not treat these as current PostgreSQL support:
+
+- `delete`
+- natural-language PostgreSQL execution
+- transaction handling
+- parity with the SQLite baseline
+- broad multi-DB completion claims
+
+## 4. Current project rule
+
+Until a new verification slice is opened, keep PostgreSQL language limited to:
+
+- `experimental`
+- `schema`, `query`, `insert`, and `update` are proven
+- broader PostgreSQL support is not proven
+
+Do not:
+
+- call PostgreSQL `working`
+- imply full write parity
+- imply multi-DB completion
+- widen docs from `schema/query/insert/update` to generic PostgreSQL support
+
+## 5. Unlock condition for the next PostgreSQL slice
+
+The next widening slice may start only when all of the following are true:
+
+1. the current smoke runner remains repeatable
+2. docs still match the current narrow proof
+3. the next command family is named explicitly in advance
+4. the new command gets both runtime proof and recorded verification
+
+Recommended order:
+
+1. keep the runner easy to rerun
+2. only then consider `delete`
+3. only then consider broader PostgreSQL parity
+
+## 6. Persona checkpoint
+
+This scope lock matches the project personas:
+
+- Planner: prevents ambition from replacing proof
+- Developer: keeps Phase 5 pressure small and bounded
+- Manager: avoids overstating support from one successful smoke path
+- QA: preserves a clear contract for what must be re-proven before expansion
+
+## 7. Current recommendation
+
+The next immediate work is not broader PostgreSQL functionality.
+
+The next immediate work is:
+
+1. keep the PostgreSQL probe harness stable
+2. keep docs aligned with the current proof boundary
+3. open a new widening slice only with an explicit verification target

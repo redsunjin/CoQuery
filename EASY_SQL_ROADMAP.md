@@ -1,7 +1,7 @@
 # CoQuery Roadmap
 
 Version: v0.7.x stabilization
-Last Updated: 2026-04-05
+Last Updated: 2026-04-07
 
 ## Current Position
 
@@ -23,7 +23,7 @@ The roadmap should be read conservatively:
 | Phase 2 | Complete enough | built-in SQL generation works for baseline skills |
 | Phase 3 | Baseline stabilized | explicit write contract is enforced |
 | Phase 4 | In stabilization | NL path exists but is heuristic and not advanced |
-| Phase 5 | Early experimental | PostgreSQL `schema`, `query`, and `insert` have local smoke proof; broader backend support is not complete |
+| Phase 5 | Early experimental | PostgreSQL `schema`, `query`, `insert`, and `update` have local smoke proof; broader backend support is not complete |
 
 ## Official Active Loop
 
@@ -44,6 +44,7 @@ The current roadmap priority is:
 - `POSTGRESQL_PROBE_REQUIREMENTS_2026-04-05.md`
 - `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 - `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
+- `POSTGRESQL_SCOPE_LOCK_2026-04-07.md`
 
 ## Next Roadmap Slices
 
@@ -105,8 +106,20 @@ Goal:
 
 Current decision:
 
-- PostgreSQL stays `experimental` for a narrow `schema/query/insert` slice
+- PostgreSQL stays `experimental` for a narrow `schema/query/insert/update` slice
 - MySQL stays `stub`
+
+### Slice F. PostgreSQL scope lock
+
+Goal:
+
+- keep PostgreSQL claims frozen at the currently proven narrow slice until a new verification target is opened
+
+Current decision:
+
+- PostgreSQL remains locked to `schema`, `query`, `insert`, and `update`
+- `delete` is not part of the current Phase 5 claim
+- widening requires a new explicit verification slice
 
 ## Multi-DB Phase Boundary
 
@@ -117,4 +130,4 @@ Phase 5 should not be described as active implementation until:
 - unavailable-driver errors are defined
 - one verification matrix exists
 
-Phase 5 should still be treated as narrow and experimental until more than the current PostgreSQL `schema/query/insert` slice is proven.
+Phase 5 should still be treated as narrow and experimental until more than the current PostgreSQL `schema/query/insert/update` slice is proven.

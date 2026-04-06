@@ -9,12 +9,12 @@
 
 ```text
 Verified on 2026-04-05
-- 33 executable baseline tests pass
+- 34 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
 - explicit write contract is enforced
 - shared DB URI contract is implemented
-- PostgreSQL schema, query, and insert smoke have succeeded
+- PostgreSQL schema, query, insert, and update smoke have succeeded
 ```
 
 ---
@@ -68,7 +68,7 @@ Current executable baseline:
 python3 sql_cli/tests/test_core.py
 ```
 
-This passes 33 baseline tests covering:
+This passes 34 baseline tests covering:
 
 - SQL generation
 - SQL validation
@@ -78,14 +78,14 @@ This passes 33 baseline tests covering:
 - explicit write safety and warning behavior
 - DB URI parsing and structured backend errors
 - documented CLI example smoke coverage
-- mocked PostgreSQL schema, query, and insert success paths
+- mocked PostgreSQL schema, query, insert, and update success paths
 
 ---
 
 ## Current Limits
 
 - SQLite is the only broadly verified backend
-- PostgreSQL is experimental for the narrow `schema`, `query`, and `insert` paths
+- PostgreSQL is experimental for the narrow `schema`, `query`, `insert`, and `update` paths
 - MySQL is still a stub, not a working backend
 - no transaction or dry-run layer exists yet
 - natural-language behavior is lightweight and heuristic
@@ -102,7 +102,7 @@ This passes 33 baseline tests covering:
 | Phase 2 | Complete enough | structured generation works |
 | Phase 3 | Complete enough | write contract is explicit, but still baseline-only |
 | Phase 4 | Partial | NL path exists, but is intentionally lightweight |
-| Phase 5 | Early experimental | first PostgreSQL `schema`, `query`, and `insert` proofs exist, but broader support is not implemented |
+| Phase 5 | Early experimental | first PostgreSQL `schema`, `query`, `insert`, and `update` proofs exist, but broader support is not implemented |
 
 ---
 
@@ -162,4 +162,4 @@ Current runner improvement:
 ---
 
 Last Updated: 2026-04-05
-Status: SQLite-first baseline verified with experimental PostgreSQL schema, query, and insert proof
+Status: SQLite-first baseline verified with experimental PostgreSQL schema, query, insert, and update proof

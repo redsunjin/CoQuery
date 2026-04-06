@@ -1,7 +1,7 @@
 # CoQuery Todo List
 
 Version: v0.7.x stabilization
-Last Updated: 2026-04-05
+Last Updated: 2026-04-07
 
 ## Official Next Tasks
 
@@ -73,6 +73,7 @@ Open tasks:
 - [x] prove PostgreSQL `schema`
 - [x] prove PostgreSQL `query`
 - [x] prove PostgreSQL `insert`
+- [x] prove PostgreSQL `update`
 
 Current output:
 
@@ -99,6 +100,22 @@ Current output:
 
 - `MYSQL_STATUS_DECISION_2026-04-05.md`
 
+### 6. PostgreSQL scope lock
+
+Goal:
+
+- freeze the current truthful PostgreSQL claim before any broader Phase 5 work begins
+
+Open tasks:
+
+- [x] state the currently proven PostgreSQL command set explicitly
+- [x] state what is still out of scope
+- [x] require a fresh verification slice before broadening PostgreSQL claims
+
+Current output:
+
+- `POSTGRESQL_SCOPE_LOCK_2026-04-07.md`
+
 ## Recently Closed Stabilization Slices
 
 - [x] truth-align top-level status docs
@@ -108,7 +125,7 @@ Current output:
 - [x] define verification matrix and backend status policy
 - [x] add docs-example smoke coverage to the baseline test file
 - [x] add persona review checkpoint
-- [x] add first real PostgreSQL `schema`, `query`, and `insert` smoke
+- [x] add first real PostgreSQL `schema`, `query`, `insert`, and `update` smoke
 
 ## Reference Documents
 
@@ -122,6 +139,7 @@ Current output:
 - `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 - `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
 - `MYSQL_STATUS_DECISION_2026-04-05.md`
+- `POSTGRESQL_SCOPE_LOCK_2026-04-07.md`
 
 ## Verification Baseline
 
