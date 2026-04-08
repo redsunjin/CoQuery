@@ -18,7 +18,7 @@ The goal is to define what must be true before Phase 5 can honestly begin.
 As of this document:
 
 - SQLite is the only broadly verified backend
-- PostgreSQL has narrow experimental `schema`, `query`, `insert`, and `update` probes
+- PostgreSQL has narrow experimental `schema`, `query`, `insert`, `update`, and `delete` probes
 - PostgreSQL is not implemented as a broad working runtime path
 - MySQL is not implemented as a working runtime path
 - multi-DB remains an early experimental phase, not a complete capability

@@ -34,6 +34,7 @@ Use these meanings consistently:
 | PostgreSQL | `query` against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
 | PostgreSQL | `insert` against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
 | PostgreSQL | `update` against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
+| PostgreSQL | `delete` against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
 | MySQL | URI detection | yes | yes | stub | `mysql://` scheme is recognized and validated |
 | MySQL | runtime execution | no | yes | stub | returns structured `unsupported_backend` placeholder |
 
@@ -42,7 +43,7 @@ Use these meanings consistently:
 What this matrix means today:
 
 - SQLite is the only backend with broad proof across multiple command types
-- PostgreSQL is `experimental` for the narrow `schema`, `query`, `insert`, and `update` paths
+- PostgreSQL is `experimental` for the narrow `schema`, `query`, `insert`, `update`, and `delete` paths
 - MySQL is still a placeholder backend and should not be described as supported
 - broader PostgreSQL support is still unproven beyond the documented smoke
 
@@ -87,6 +88,7 @@ This runner proves:
 - `query`
 - `insert`
 - `update`
+- `delete`
 
 against a real local PostgreSQL target.
 
@@ -123,7 +125,7 @@ The next slice after this matrix should be:
 
 1. make the PostgreSQL probe environment less ad hoc
 2. keep MySQL at `stub` until a dedicated proof track exists
-3. keep PostgreSQL scope narrow until another command family is proven
+3. decide whether the current PostgreSQL proof set is enough before broadening further
 
 The current scope freeze is recorded in:
 

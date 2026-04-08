@@ -20,7 +20,8 @@ Observed in the current codebase:
 - `query` works against a real PostgreSQL database
 - `insert` works against a real PostgreSQL database
 - `update` works against a real PostgreSQL database
-- PostgreSQL is `experimental` for the narrow `schema`, `query`, `insert`, and `update` probe paths
+- `delete` works against a real PostgreSQL database
+- PostgreSQL is `experimental` for the narrow `schema`, `query`, `insert`, `update`, and `delete` probe paths
 
 ## 3. Dependency declaration
 
@@ -94,10 +95,10 @@ Currently proven on PostgreSQL:
 - `query`
 - `insert`
 - `update`
+- `delete`
 
 Not proven:
 
-- `delete`
 - natural-language PostgreSQL behavior
 - broader multi-command parity
 
@@ -126,7 +127,7 @@ Current truthful label:
 
 `experimental`
 
-This is appropriate because real `schema`, `query`, `insert`, and `update` commands now succeed, but the environment and coverage are still narrow.
+This is appropriate because real `schema`, `query`, `insert`, `update`, and `delete` commands now succeed, but the environment and coverage are still narrow.
 
 ## 10. MySQL policy for now
 
@@ -144,7 +145,7 @@ This decision matches the persona review:
 
 - Planner: one backend family is enough to validate real need
 - Developer: one driver path keeps implementation pressure smaller
-- Manager: four proven commands are still not broad support
+- Manager: five proven commands are still not broad support
 - QA: proof is clearer when tied to one smoke runner
 
 ## 12. Next follow-up
@@ -153,4 +154,4 @@ The next stabilization slice after this document should be:
 
 1. make the PostgreSQL smoke environment less ad hoc
 2. keep MySQL at `stub` until a dedicated proof track exists
-3. only then consider widening PostgreSQL beyond the current narrow proof set, likely `delete` next
+3. only then consider whether the current narrow proof set is sufficient or whether broader parity should start

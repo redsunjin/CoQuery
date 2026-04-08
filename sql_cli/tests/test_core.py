@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from shutil import copy2
@@ -18,6 +19,11 @@ from sql_cli.cli import (
     delete_handler,
     generate_handler,
     insert_handler,
+    natural_handler,
+    provider_add_handler,
+    provider_list_handler,
+    provider_remove_handler,
+    provider_test_handler,
     query_handler,
     schema_handler,
     update_handler,
@@ -364,24 +370,39 @@ assert _FakePsycopgSuccessModule.last_connection.committed is True
 assert "UPDATE users SET age = 36" in _FakePsycopgSuccessModule.last_connection.last_query
 print("29. test_postgresql_update_success_path ✓")
 
+with patch("sql_cli.db_new.importlib.import_module", return_value=_FakePsycopgSuccessModule()):
+    postgres_delete = delete_handler(
+        "postgresql://user:pass@localhost:5432/dbname",
+        "DELETE FROM users WHERE name = 'pg_delete_user'",
+        write=True,
+    )
+assert postgres_delete["ok"] is True
+assert postgres_delete["data"]["affected_rows"] == 1
+assert postgres_delete["data"]["warnings"] == []
+assert postgres_delete["data"]["safety_level"] == "low"
+assert _FakePsycopgSuccessModule.last_connection is not None
+assert _FakePsycopgSuccessModule.last_connection.committed is True
+assert "DELETE FROM users WHERE name = 'pg_delete_user'" in _FakePsycopgSuccessModule.last_connection.last_query
+print("30. test_postgresql_delete_success_path ✓")
+
 rc, payload = run_cli(["--command", "schema", "--db", "example.db", "--format", "json"])
 assert rc == 0
 assert payload["ok"] is True
 assert "users" in payload["data"]["tables"]
-print("30. test_docs_schema_example_db ✓")
+print("31. test_docs_schema_example_db ✓")
 
 sqlite_uri = f"sqlite://{FIXTURE_DB}"
 rc, payload = run_cli(["--command", "schema", "--db-uri", sqlite_uri, "--format", "json"])
 assert rc == 0
 assert payload["ok"] is True
 assert "users" in payload["data"]["tables"]
-print("31. test_docs_schema_example_db_uri ✓")
+print("32. test_docs_schema_example_db_uri ✓")
 
 rc, payload = run_cli(["--command", "generate", "--db", "example.db", "--skill", "select_simple", "--format", "json"])
 assert rc == 0
 assert payload["ok"] is True
 assert payload["sql"] == "SELECT * FROM USERS"
-print("32. test_docs_generate_example ✓")
+print("33. test_docs_generate_example ✓")
 
 tmpdir, db_path = make_temp_db()
 rc, payload = run_cli(
@@ -402,13 +423,107 @@ rows = db.execute("SELECT name, age FROM users WHERE name = 'docs_user'")
 assert rows == [("docs_user", 20)]
 db.close()
 tmpdir.cleanup()
-print("33. test_docs_insert_example ✓")
+print("34. test_docs_insert_example ✓")
 
 rc, payload = run_cli(["--command", "natural", "--db", "example.db", "--sql", "show users"])
 assert rc == 0
 assert payload["ok"] is True
 assert payload["intent"] == "select"
-print("34. test_docs_natural_example ✓")
+print("35. test_docs_natural_example ✓")
+
+
+class _FakeHTTPResponse:
+    def __init__(self, payload: dict[str, object]):
+        self.payload = payload
+
+    def read(self) -> bytes:
+        return json.dumps(self.payload).encode("utf-8")
+
+    def __enter__(self) -> "_FakeHTTPResponse":
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        return None
+
+
+def _fake_llm_urlopen(request: object, timeout: int = 60) -> _FakeHTTPResponse:
+    url = request.full_url  # type: ignore[attr-defined]
+    if url.endswith("/api/tags"):
+        return _FakeHTTPResponse({"models": [{"name": "qwen3.5:4b-nvfp4"}]})
+
+    payload = json.loads(request.data.decode("utf-8"))  # type: ignore[attr-defined]
+    prompt = payload.get("prompt", "")
+    if "Return exactly the text OK." in prompt:
+        return _FakeHTTPResponse({"response": "OK"})
+
+    return _FakeHTTPResponse(
+        {
+            "response": json.dumps(
+                {
+                    "intent": "select",
+                    "sql": "SELECT * FROM users",
+                    "confidence": 0.91,
+                }
+            )
+        }
+    )
+
+
+with TemporaryDirectory() as tmpdir:
+    registry_path = Path(tmpdir) / "llm_registry.json"
+    with patch.dict(os.environ, {"COQUERY_LLM_REGISTRY_PATH": str(registry_path)}):
+        ollama_provider = provider_add_handler(
+            "local_ollama",
+            "ollama",
+            "qwen3.5:4b-nvfp4",
+            "http://127.0.0.1:11434",
+        )
+        openai_provider = provider_add_handler(
+            "remote_api",
+            "openai_compatible",
+            "gpt-oss-20b",
+            "http://127.0.0.1:8000",
+            "OPENAI_COMPAT_API_KEY",
+        )
+        listed = provider_list_handler()
+assert ollama_provider["ok"] is True
+assert openai_provider["ok"] is True
+assert listed["ok"] is True
+assert [provider["name"] for provider in listed["data"]["providers"]] == ["local_ollama", "remote_api"]
+print("36. test_provider_registry_add_and_list ✓")
+
+with TemporaryDirectory() as tmpdir:
+    registry_path = Path(tmpdir) / "llm_registry.json"
+    with patch.dict(os.environ, {"COQUERY_LLM_REGISTRY_PATH": str(registry_path)}):
+        provider_add_handler("local_ollama", "ollama", "qwen3.5:4b-nvfp4", "http://127.0.0.1:11434")
+        removed = provider_remove_handler("local_ollama")
+        listed = provider_list_handler()
+assert removed["ok"] is True
+assert listed["data"]["providers"] == []
+print("37. test_provider_registry_remove ✓")
+
+with TemporaryDirectory() as tmpdir:
+    registry_path = Path(tmpdir) / "llm_registry.json"
+    with patch.dict(os.environ, {"COQUERY_LLM_REGISTRY_PATH": str(registry_path)}):
+        provider_add_handler("local_ollama", "ollama", "qwen3.5:4b-nvfp4", "http://127.0.0.1:11434")
+        with patch("sql_cli.llm_registry.urlopen", side_effect=_fake_llm_urlopen):
+            provider_test = provider_test_handler("local_ollama")
+assert provider_test["ok"] is True
+assert provider_test["data"]["provider_name"] == "local_ollama"
+assert provider_test["data"]["response_preview"] == "OK"
+print("38. test_provider_test_ollama ✓")
+
+with TemporaryDirectory() as tmpdir:
+    registry_path = Path(tmpdir) / "llm_registry.json"
+    with patch.dict(os.environ, {"COQUERY_LLM_REGISTRY_PATH": str(registry_path)}):
+        provider_add_handler("local_ollama", "ollama", "qwen3.5:4b-nvfp4", "http://127.0.0.1:11434")
+        with patch("sql_cli.llm_registry.urlopen", side_effect=_fake_llm_urlopen):
+            llm_natural = natural_handler("example.db", "show users", provider_name="local_ollama")
+assert llm_natural["ok"] is True
+assert llm_natural["mode"] == "provider"
+assert llm_natural["provider_name"] == "local_ollama"
+assert llm_natural["sql"] == "SELECT * FROM users"
+print("39. test_natural_with_registered_provider ✓")
 
 print("")
-print("=== ALL 34 TESTS PASS ✅ ===")
+print("=== ALL 39 TESTS PASS ✅ ===")

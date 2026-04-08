@@ -23,7 +23,7 @@ The roadmap should be read conservatively:
 | Phase 2 | Complete enough | built-in SQL generation works for baseline skills |
 | Phase 3 | Baseline stabilized | explicit write contract is enforced |
 | Phase 4 | In stabilization | NL path exists but is heuristic and not advanced |
-| Phase 5 | Early experimental | PostgreSQL `schema`, `query`, `insert`, and `update` have local smoke proof; broader backend support is not complete |
+| Phase 5 | Early experimental | PostgreSQL `schema`, `query`, `insert`, `update`, and `delete` have local smoke proof; broader backend support is not complete |
 
 ## Official Active Loop
 
@@ -106,7 +106,7 @@ Goal:
 
 Current decision:
 
-- PostgreSQL stays `experimental` for a narrow `schema/query/insert/update` slice
+- PostgreSQL stays `experimental` for a narrow `schema/query/insert/update/delete` slice
 - MySQL stays `stub`
 
 ### Slice F. PostgreSQL scope lock
@@ -117,8 +117,8 @@ Goal:
 
 Current decision:
 
-- PostgreSQL remains locked to `schema`, `query`, `insert`, and `update`
-- `delete` is not part of the current Phase 5 claim
+- PostgreSQL remains locked to `schema`, `query`, `insert`, `update`, and `delete`
+- broader PostgreSQL parity is not part of the current Phase 5 claim
 - widening requires a new explicit verification slice
 
 ## Multi-DB Phase Boundary
@@ -130,4 +130,4 @@ Phase 5 should not be described as active implementation until:
 - unavailable-driver errors are defined
 - one verification matrix exists
 
-Phase 5 should still be treated as narrow and experimental until more than the current PostgreSQL `schema/query/insert/update` slice is proven.
+Phase 5 should still be treated as narrow and experimental until more than the current PostgreSQL `schema/query/insert/update/delete` slice is proven.

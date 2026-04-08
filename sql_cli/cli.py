@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from sql_cli.db_new import CoQueryDB, CoQueryDBError
+from sql_cli.llm_registry import CoQueryLLMError, LLMProviderClient, LLMProviderRegistry
 
 WRITE_OPERATIONS = {"INSERT", "UPDATE", "DELETE"}
 
@@ -61,6 +62,10 @@ def _write_metadata(operation: str, sql: str) -> tuple[list[str], str]:
 
 
 def _db_error(command: str, exc: CoQueryDBError) -> dict[str, Any]:
+    return _error(command, exc.code, exc.message)
+
+
+def _llm_error(command: str, exc: CoQueryLLMError) -> dict[str, Any]:
     return _error(command, exc.code, exc.message)
 
 
@@ -179,6 +184,81 @@ def generate_handler(
         return {"ok": False, "command": "generate", "error": str(e)}
 
 
+def provider_add_handler(
+    provider_name: Optional[str],
+    provider_kind: Optional[str],
+    model_name: Optional[str],
+    base_url: Optional[str] = None,
+    api_key_env: Optional[str] = None,
+) -> dict[str, Any]:
+    try:
+        registry = LLMProviderRegistry()
+        provider = registry.upsert_profile(
+            name=provider_name or "",
+            kind=provider_kind or "",
+            model_name=model_name or "",
+            base_url=base_url or "",
+            api_key_env=api_key_env,
+        )
+        return _success(
+            "provider_add",
+            {
+                "provider": provider,
+                "registry_path": str(registry.path),
+            },
+        )
+    except CoQueryLLMError as e:
+        return _llm_error("provider_add", e)
+    except Exception as e:
+        return _error("provider_add", "execution_error", str(e))
+
+
+def provider_list_handler() -> dict[str, Any]:
+    try:
+        registry = LLMProviderRegistry()
+        return _success(
+            "provider_list",
+            {
+                "providers": registry.list_profiles(),
+                "registry_path": str(registry.path),
+            },
+        )
+    except CoQueryLLMError as e:
+        return _llm_error("provider_list", e)
+    except Exception as e:
+        return _error("provider_list", "execution_error", str(e))
+
+
+def provider_remove_handler(provider_name: Optional[str]) -> dict[str, Any]:
+    try:
+        registry = LLMProviderRegistry()
+        removed = registry.remove_profile(provider_name or "")
+        return _success(
+            "provider_remove",
+            {
+                "provider": removed,
+                "registry_path": str(registry.path),
+            },
+        )
+    except CoQueryLLMError as e:
+        return _llm_error("provider_remove", e)
+    except Exception as e:
+        return _error("provider_remove", "execution_error", str(e))
+
+
+def provider_test_handler(provider_name: Optional[str]) -> dict[str, Any]:
+    try:
+        registry = LLMProviderRegistry()
+        profile = registry.get_profile(provider_name or "")
+        result = LLMProviderClient(profile).test_connection()
+        result["registry_path"] = str(registry.path)
+        return _success("provider_test", result)
+    except CoQueryLLMError as e:
+        return _llm_error("provider_test", e)
+    except Exception as e:
+        return _error("provider_test", "execution_error", str(e))
+
+
 def insert_handler(
     db: str,
     sql: Optional[str] = None,
@@ -206,18 +286,30 @@ def delete_handler(
     return _run_write_command("delete", db, sql, params, write, expected_operation="DELETE")
 
 
-def natural_handler(db: str, sql: Optional[str] = None, format: str = "json") -> dict[str, Any]:
+def natural_handler(
+    db: str,
+    sql: Optional[str] = None,
+    format: str = "json",
+    provider_name: Optional[str] = None,
+) -> dict[str, Any]:
     try:
         from sql_cli.nl_core import NaturalLanguageEngine
 
-        result = NaturalLanguageEngine().process(sql or "show users")
+        result = NaturalLanguageEngine(provider_name=provider_name).process(sql or "show users")
         return {
             "ok": result.get("ok"),
             "command": "natural",
             "intent": result.get("intent"),
             "sql": result.get("sql"),
             "complexity": result.get("complexity"),
+            "confidence": result.get("confidence"),
+            "mode": result.get("mode"),
+            "provider_name": result.get("provider_name"),
+            "provider_kind": result.get("provider_kind"),
+            "model_name": result.get("model_name"),
             "error": None,
         }
+    except CoQueryLLMError as e:
+        return _llm_error("natural", e)
     except Exception as e:
         return {"ok": False, "command": "natural", "error": str(e)}
