@@ -1,7 +1,7 @@
 # CoQuery Stage Status Report
 
 Version: v0.7.0
-Last Update: 2026-04-05
+Last Update: 2026-04-09
 
 ## Current Status
 
@@ -21,7 +21,7 @@ Phase 5 remains narrow and experimental
 | Phase 1 | Complete enough | `schema` and `query` work on SQLite |
 | Phase 2 | Complete enough | structured SQL generation works for built-in skills |
 | Phase 3 | Baseline stabilized | explicit `--write` plus explicit SQL is enforced |
-| Phase 4 | In stabilization | natural-language path exists, but it is heuristic only |
+| Phase 4 | In stabilization | natural-language path is heuristic by default and can optionally use a registered provider |
 | Phase 5 | Early experimental | PostgreSQL `schema`, `query`, `insert`, `update`, and `delete` smoke succeeded; broader backend support is not proven |
 
 ## Verified Commands
@@ -33,6 +33,10 @@ Phase 5 remains narrow and experimental
 - `update`
 - `delete`
 - `natural`
+- `provider_add`
+- `provider_list`
+- `provider_remove`
+- `provider_test`
 
 Write-command baseline:
 
@@ -46,6 +50,11 @@ Write-command baseline:
 | SQLite | Working | current verified runtime path |
 | PostgreSQL | Experimental (narrow read + write) | local smoke proof succeeded for `schema`, `query`, `insert`, `update`, and `delete`; broader backend support is still not proven |
 | MySQL | Stub | URI contract exists; runtime returns structured placeholder error |
+
+Natural-language note:
+
+- heuristic by default
+- registered-provider routing exists as a secondary experimental track
 
 ## Verification Commands
 
@@ -62,5 +71,5 @@ bash scripts/run_postgresql_local_smoke.sh
 2. keep the PostgreSQL smoke runner repeatable and repo-managed
 3. use the verification matrix before changing any broader multi-DB status claim
 
-Last Updated: 2026-04-05
+Last Updated: 2026-04-09
 Phase Status: SQLite-first baseline verified with PostgreSQL schema, query, insert, update, and delete smoke proof

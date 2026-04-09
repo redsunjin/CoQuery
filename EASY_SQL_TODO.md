@@ -1,7 +1,7 @@
 # CoQuery Todo List
 
 Version: v0.7.x stabilization
-Last Updated: 2026-04-07
+Last Updated: 2026-04-09
 
 ## Official Next Tasks
 
@@ -34,13 +34,14 @@ Goal:
 Open tasks:
 
 - [x] declare PostgreSQL driver expectations
-- [ ] declare MySQL driver expectations
+- [x] declare MySQL driver expectations
 - [x] define missing-driver error wording
 - [x] define connection-failure error wording
 
 Current output:
 
 - `POSTGRESQL_PROBE_REQUIREMENTS_2026-04-05.md`
+- `MYSQL_PROBE_REQUIREMENTS_2026-04-09.md`
 
 ### 3. Phase 5 backend status policy
 
@@ -117,6 +118,24 @@ Current output:
 
 - `POSTGRESQL_SCOPE_LOCK_2026-04-07.md`
 
+### 7. Provider registry direction decision
+
+Goal:
+
+- decide whether provider-backed natural remains a sidecar experiment or enters the official active loop
+
+Open tasks:
+
+- [x] decide whether the provider registry is an official roadmap track
+- [x] label provider-backed natural as primary or secondary relative to the PostgreSQL track
+- [x] truth-align official docs with that decision
+
+Current output:
+
+- `LLM_PROVIDER_REGISTRY_2026-04-07.md`
+- `PROVIDER_TRACK_DECISION_2026-04-09.md`
+- `STATE_REVIEW_2026-04-09.md`
+
 ## Recently Closed Stabilization Slices
 
 - [x] truth-align top-level status docs
@@ -140,7 +159,11 @@ Current output:
 - `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 - `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
 - `MYSQL_STATUS_DECISION_2026-04-05.md`
+- `MYSQL_PROBE_REQUIREMENTS_2026-04-09.md`
 - `POSTGRESQL_SCOPE_LOCK_2026-04-07.md`
+- `LLM_PROVIDER_REGISTRY_2026-04-07.md`
+- `PROVIDER_TRACK_DECISION_2026-04-09.md`
+- `STATE_REVIEW_2026-04-09.md`
 
 ## Verification Baseline
 
@@ -159,4 +182,4 @@ It is not about:
 
 - broad new feature count
 - claiming multi-DB support early
-- expanding AI behavior before the current contracts are stable
+- expanding backend and provider scope in parallel unless the primary and secondary tracks stay explicit

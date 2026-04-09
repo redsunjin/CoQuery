@@ -6,7 +6,7 @@ Workspace: `/Users/Agent/ps-workspace/CoQuery`
 
 ## Purpose
 
-Freeze the truthful status label for MySQL after PostgreSQL read-only proof was completed.
+Freeze the truthful status label for MySQL after PostgreSQL became the first real non-SQLite proof track.
 
 ## Decision
 
@@ -41,8 +41,8 @@ This is the current MySQL state.
 
 MySQL still lacks:
 
-- driver dependency declaration
 - real connection implementation
+- structured missing-driver and connection-failure behavior
 - schema proof
 - query proof
 - write proof
@@ -69,6 +69,6 @@ This decision keeps product language honest:
 
 The next MySQL-related slice should only happen if one of these becomes true:
 
-1. PostgreSQL moves beyond read-only proof
-2. MySQL gets a real driver/dependency decision
-3. a dedicated MySQL proof track is intentionally opened
+1. PostgreSQL still justifies keeping MySQL behind the current narrow proof track
+2. a dedicated MySQL implementation slice is intentionally opened
+3. a real MySQL smoke path is ready to gate any status promotion

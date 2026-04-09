@@ -26,7 +26,7 @@ Use these meanings consistently:
 | SQLite | `schema` | yes | yes | working | `python3 main.py --command schema --db example.db --format json` |
 | SQLite | `query` | yes | yes | working | baseline read query path verified |
 | SQLite | `insert/update/delete` | yes | yes | working | explicit `--write`, warnings, and `affected_rows` verified |
-| SQLite | `natural` | yes | yes | working baseline | heuristic NL path only |
+| SQLite | `natural` | yes | yes | working baseline | heuristic by default; optional registered provider path exists |
 | PostgreSQL | URI detection | yes | yes | stub | `postgresql://` URIs are parsed and validated |
 | PostgreSQL | missing driver error | yes | yes | stub | returns `driver_not_installed` when `psycopg` is unavailable |
 | PostgreSQL | connection failure error | yes | yes | stub | returns `connection_failed` on connect failure |
@@ -66,7 +66,7 @@ MySQL should remain behind PostgreSQL in priority.
 Use these rules:
 
 - do not claim MySQL support before PostgreSQL has broader working proof
-- do not add MySQL-specific docs beyond placeholder status unless a dedicated slice starts
+- MySQL-specific docs may define dependency expectations, but must not imply runtime support without proof
 - keep MySQL labelled `stub` or `planned` until real proof exists
 
 Current decision:

@@ -1,7 +1,7 @@
 # CoQuery Roadmap
 
 Version: v0.7.x stabilization
-Last Updated: 2026-04-07
+Last Updated: 2026-04-09
 
 ## Current Position
 
@@ -11,7 +11,7 @@ The roadmap should be read conservatively:
 
 - SQLite baseline: working
 - write path: baseline stabilized
-- natural-language path: assistive, lightweight
+- natural-language path: assistive, lightweight, and optionally provider-backed
 - multi-DB: early experimental
 
 ## Phase Overview
@@ -22,7 +22,7 @@ The roadmap should be read conservatively:
 | Phase 1 | Complete enough | `schema` and `query` are usable on SQLite |
 | Phase 2 | Complete enough | built-in SQL generation works for baseline skills |
 | Phase 3 | Baseline stabilized | explicit write contract is enforced |
-| Phase 4 | In stabilization | NL path exists but is heuristic and not advanced |
+| Phase 4 | In stabilization | NL path is heuristic by default and can optionally use a registered provider |
 | Phase 5 | Early experimental | PostgreSQL `schema`, `query`, `insert`, `update`, and `delete` have local smoke proof; broader backend support is not complete |
 
 ## Official Active Loop
@@ -31,7 +31,7 @@ The current roadmap priority is:
 
 1. keep docs aligned with executable behavior
 2. keep PostgreSQL claims limited to what the smoke result actually proves
-3. keep the PostgreSQL smoke runner repeatable before widening backend claims
+3. keep provider-backed natural explicitly secondary while PostgreSQL remains the primary experimental track
 
 ## Current Stabilization Outputs
 
@@ -42,9 +42,13 @@ The current roadmap priority is:
 - `MULTI_DB_ENTRY_CRITERIA_2026-04-05.md`
 - `BACKEND_CONNECTION_CONTRACT_2026-04-05.md`
 - `POSTGRESQL_PROBE_REQUIREMENTS_2026-04-05.md`
+- `MYSQL_PROBE_REQUIREMENTS_2026-04-09.md`
 - `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 - `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
 - `POSTGRESQL_SCOPE_LOCK_2026-04-07.md`
+- `LLM_PROVIDER_REGISTRY_2026-04-07.md`
+- `PROVIDER_TRACK_DECISION_2026-04-09.md`
+- `STATE_REVIEW_2026-04-09.md`
 
 ## Next Roadmap Slices
 
@@ -71,7 +75,8 @@ Current decision:
 
 - PostgreSQL is the first driver path to document
 - first probe uses `psycopg[binary]`
-- MySQL stays later and should not split the first probe
+- MySQL driver expectations are now documented with one conservative future path: `PyMySQL`
+- MySQL runtime still stays later and should not split the first probe
 - PostgreSQL missing-driver and connection-failure wording is now implemented
 
 ### Slice C. First real Phase 5 probe
@@ -120,6 +125,18 @@ Current decision:
 - PostgreSQL remains locked to `schema`, `query`, `insert`, `update`, and `delete`
 - broader PostgreSQL parity is not part of the current Phase 5 claim
 - widening requires a new explicit verification slice
+
+### Slice G. Provider registry track decision
+
+Goal:
+
+- keep provider-backed natural explicitly labelled relative to the PostgreSQL proof track
+
+Current decision:
+
+- provider-backed natural is an official secondary experimental track
+- PostgreSQL remains the primary experimental extension
+- do not broaden backend and provider work in parallel without a fresh loop decision
 
 ## Multi-DB Phase Boundary
 

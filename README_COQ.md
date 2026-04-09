@@ -1,6 +1,6 @@
 # CoQuery Baseline Verification
 
-Date: 2026-04-05
+Date: 2026-04-09
 
 ## Result
 
@@ -21,6 +21,10 @@ PostgreSQL schema, query, insert, update, and delete smoke verified
 - `update`
 - `delete`
 - `natural`
+- `provider_add`
+- `provider_list`
+- `provider_remove`
+- `provider_test`
 
 ## Support Matrix
 
@@ -38,7 +42,7 @@ PostgreSQL schema, query, insert, update, and delete smoke verified
 | PostgreSQL update smoke | Working baseline | local proof recorded on 2026-04-07 |
 | PostgreSQL delete smoke | Working baseline | local proof recorded on 2026-04-08 |
 | Docs example smoke | Working baseline | key documented CLI examples are exercised in tests |
-| Natural language | Baseline only | heuristic intent mapping |
+| Natural language | Baseline only | heuristic by default; optional registered provider path exists |
 
 ## Verification Commands
 
@@ -56,11 +60,13 @@ bash scripts/run_postgresql_local_smoke.sh
 - dedicated `insert`, `update`, and `delete` handlers require `--write` and explicit SQL
 - full-table `update` and `delete` return a high-risk warning
 - `--db-uri` is preferred for future multi-backend commands
-- `natural` currently emits simple fixed SQL patterns
+- `natural` defaults to simple fixed SQL patterns
+- `natural --provider-name ...` can route through a registered provider for structured SQL drafting
+- provider-backed natural is experimental and secondary to the PostgreSQL proof track
 - the PostgreSQL smoke runner checks `PATH` for PostgreSQL binaries before falling back to known Homebrew paths
 
 Version: v0.7.0
-Last Updated: 2026-04-05
+Last Updated: 2026-04-09
 Status: Baseline verified with experimental PostgreSQL schema, query, insert, update, and delete proof
 Reference: `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 Smoke Result: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`

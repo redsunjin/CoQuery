@@ -14,6 +14,8 @@ python3 main.py --command insert --db example.db --write --sql "INSERT INTO user
 python3 main.py --command update --db example.db --write --sql "UPDATE users SET age = 21 WHERE id = 1"
 python3 main.py --command delete --db example.db --write --sql "DELETE FROM users WHERE id = 1"
 python3 main.py --command natural --db example.db --sql "show users"
+python3 main.py --command provider_list
+python3 main.py --command provider_test --provider-name local_ollama
 ```
 
 ## Verified Baseline
@@ -24,13 +26,15 @@ python3 main.py --command natural --db example.db --sql "show users"
 - `--db-uri` is the preferred multi-backend connection contract
 - `query` is read-only unless `--write` is provided
 - `insert`, `update`, and `delete` require both `--write` and explicit SQL
+- provider registry commands are available for optional `natural` routing
 
 ## Current Limits
 
 - PostgreSQL is experimental for the documented `schema`, `query`, `insert`, `update`, and `delete` probe paths only
 - MySQL is a stub with a structured placeholder error
 - write commands do not yet have dry-run or transaction support
-- natural-language support is lightweight and heuristic
+- natural-language support is lightweight by default; provider-backed quality is not broadly proven
+- provider-backed natural is currently a secondary experimental track
 
 ## Recommended Verification
 
@@ -46,5 +50,5 @@ Runner note:
 - `scripts/run_postgresql_local_smoke.sh` checks `PATH` for PostgreSQL binaries before falling back to known Homebrew paths
 
 Version: v0.7.0
-Last Updated: 2026-04-05
+Last Updated: 2026-04-09
 Status: SQLite-first baseline verified with experimental PostgreSQL schema, query, insert, update, and delete proof

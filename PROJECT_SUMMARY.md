@@ -8,7 +8,7 @@
 ## Current Status
 
 ```text
-Verified on 2026-04-05
+Verified on 2026-04-09
 - 39 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
@@ -41,6 +41,7 @@ Verified on 2026-04-05
     ├── cli.py                  # Canonical command handlers
     ├── core.py                 # SQL generation and validation
     ├── db_new.py               # SQLite-first DB wrapper
+    ├── llm_registry.py         # Repo-local provider registry and lightweight clients
     ├── nl_core.py              # Lightweight NL processing
     └── tests/test_core.py      # Executable baseline tests
 ```
@@ -55,7 +56,11 @@ Verified on 2026-04-05
 - `insert`: requires explicit `INSERT` SQL and `--write`
 - `update`: requires explicit `UPDATE` SQL and `--write`
 - `delete`: requires explicit `DELETE` SQL and `--write`
-- `natural`: parse simple intent and return simple SQL
+- `natural`: uses heuristic intent mapping by default and can optionally route through a registered provider
+- `provider_add`: add or update one repo-local LLM provider profile
+- `provider_list`: list registered provider profiles
+- `provider_remove`: remove one provider profile
+- `provider_test`: test one provider connection
 - `--db-uri`: preferred shared connection input for non-SQLite backends
 
 ---
@@ -75,6 +80,7 @@ This passes 39 baseline tests covering:
 - SQLite connection and execution
 - CLI handlers
 - natural-language processing
+- provider registry handlers and provider-backed natural routing
 - explicit write safety and warning behavior
 - DB URI parsing and structured backend errors
 - documented CLI example smoke coverage
@@ -88,7 +94,8 @@ This passes 39 baseline tests covering:
 - PostgreSQL is experimental for the narrow `schema`, `query`, `insert`, `update`, and `delete` paths
 - MySQL is still a stub, not a working backend
 - no transaction or dry-run layer exists yet
-- natural-language behavior is lightweight and heuristic
+- natural-language behavior is lightweight by default; provider-backed quality and backend parity are not broadly proven
+- provider-backed natural is currently a secondary experimental track
 - older docs before the 2026-04-04 repair may overstate completion
 
 ---
@@ -101,7 +108,7 @@ This passes 39 baseline tests covering:
 | Phase 1 | Complete enough | read-oriented SQLite commands work |
 | Phase 2 | Complete enough | structured generation works |
 | Phase 3 | Complete enough | write contract is explicit, but still baseline-only |
-| Phase 4 | Partial | NL path exists, but is intentionally lightweight |
+| Phase 4 | Partial | NL path is intentionally lightweight and can optionally use a registered provider |
 | Phase 5 | Early experimental | first PostgreSQL `schema`, `query`, `insert`, `update`, and `delete` proofs exist, but broader support is not implemented |
 
 ---
@@ -153,7 +160,11 @@ Current runner improvement:
 - `main.py`
 - `sql_cli/cli.py`
 - `sql_cli/db_new.py`
+- `sql_cli/llm_registry.py`
 - `sql_cli/tests/test_core.py`
+- `LLM_PROVIDER_REGISTRY_2026-04-07.md`
+- `MYSQL_PROBE_REQUIREMENTS_2026-04-09.md`
+- `PROVIDER_TRACK_DECISION_2026-04-09.md`
 - `STATUS_AUDIT_2026-04-04.md`
 - `STABILIZATION_PLAN_2026-04-04.md`
 - `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
@@ -161,5 +172,5 @@ Current runner improvement:
 
 ---
 
-Last Updated: 2026-04-05
+Last Updated: 2026-04-09
 Status: SQLite-first baseline verified with experimental PostgreSQL schema, query, insert, update, and delete proof
