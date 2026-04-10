@@ -74,6 +74,7 @@ Open tasks:
 - [x] prove PostgreSQL `query`
 - [x] prove PostgreSQL `insert`
 - [x] prove PostgreSQL `update`
+- [x] prove PostgreSQL `delete`
 
 Current output:
 
@@ -125,7 +126,7 @@ Current output:
 - [x] define verification matrix and backend status policy
 - [x] add docs-example smoke coverage to the baseline test file
 - [x] add persona review checkpoint
-- [x] add first real PostgreSQL `schema`, `query`, `insert`, and `update` smoke
+- [x] add first real PostgreSQL `schema`, `query`, `insert`, `update`, and `delete` smoke
 
 ## Reference Documents
 

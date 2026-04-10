@@ -93,6 +93,12 @@ fi
   -d "${DB_NAME}" \
   -c "DELETE FROM users WHERE name = 'update_probe_user';" >/dev/null
 
+"${POSTGRES_BIN_DIR}/psql" \
+  -h "${SOCKET_DIR}" \
+  -p "${PORT}" \
+  -d "${DB_NAME}" \
+  -c "DELETE FROM users WHERE name = 'delete_probe_user';" >/dev/null
+
 DB_URI="postgresql://localhost/${DB_NAME}?host=${SOCKET_DIR}&port=${PORT}"
 
 echo "== PostgreSQL schema smoke =="
@@ -148,4 +154,28 @@ echo "== PostgreSQL update verification query =="
   --command query \
   --db-uri "${DB_URI}" \
   --sql "SELECT name, age FROM users WHERE name = 'update_probe_user' ORDER BY id DESC LIMIT 1" \
+  --format json
+
+echo ""
+echo "== PostgreSQL delete smoke =="
+"${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command insert \
+  --db-uri "${DB_URI}" \
+  --write \
+  --sql "INSERT INTO users (name, age) VALUES ('delete_probe_user', 27)" \
+  --format json >/dev/null
+
+"${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command delete \
+  --db-uri "${DB_URI}" \
+  --write \
+  --sql "DELETE FROM users WHERE name = 'delete_probe_user'" \
+  --format json
+
+echo ""
+echo "== PostgreSQL delete verification query =="
+"${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command query \
+  --db-uri "${DB_URI}" \
+  --sql "SELECT COUNT(*) FROM users WHERE name = 'delete_probe_user'" \
   --format json

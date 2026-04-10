@@ -27,7 +27,7 @@ python3 main.py --command natural --db example.db --sql "show users"
 
 ## Current Limits
 
-- PostgreSQL is experimental for the documented `schema`, `query`, `insert`, and `update` probe paths only
+- PostgreSQL is experimental for the documented `schema`, `query`, `insert`, `update`, and `delete` probe paths only
 - MySQL is a stub with a structured placeholder error
 - write commands do not yet have dry-run or transaction support
 - natural-language support is lightweight and heuristic
@@ -47,4 +47,4 @@ Runner note:
 
 Version: v0.7.0
 Last Updated: 2026-04-05
-Status: SQLite-first baseline verified with experimental PostgreSQL schema, query, insert, and update proof
+Status: SQLite-first baseline verified with experimental PostgreSQL schema, query, insert, update, and delete proof

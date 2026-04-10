@@ -6,7 +6,7 @@ Workspace: `/Users/Agent/ps-workspace/CoQuery`
 
 ## Purpose
 
-Record one repeatable local PostgreSQL smoke path that proves CoQuery can run `schema`, `query`, `insert`, and `update` against a real non-SQLite backend.
+Record one repeatable local PostgreSQL smoke path that proves CoQuery can run `schema`, `query`, `insert`, `update`, and `delete` against a real non-SQLite backend.
 
 This is a narrow probe environment, not the default baseline runtime.
 
@@ -36,7 +36,7 @@ This script:
 - initializes a temporary local PostgreSQL cluster
 - starts PostgreSQL on a non-default port
 - seeds a `users` table
-- runs CoQuery `schema`, `query`, `insert`, and `update`
+- runs CoQuery `schema`, `query`, `insert`, `update`, and `delete`
 - stops the cluster when finished
 
 ## Observed commands and results
@@ -145,6 +145,32 @@ Observed output:
 }
 ```
 
+### Delete proof
+
+```bash
+/Users/Agent/ps-workspace/CoQuery/.tmp/pg-venv/bin/python main.py \
+  --command delete \
+  --db-uri "postgresql://localhost/coquery_probe?host=/Users/Agent/ps-workspace/CoQuery/.tmp/pg-socket&port=49251" \
+  --write \
+  --sql "DELETE FROM users WHERE name = 'delete_probe_user'" \
+  --format json
+```
+
+Observed output:
+
+```json
+{
+  "ok": true,
+  "command": "delete",
+  "data": {
+    "affected_rows": 1,
+    "warnings": [],
+    "safety_level": "low"
+  },
+  "error": null
+}
+```
+
 ## Interpretation
 
 What is proven:
@@ -155,10 +181,10 @@ What is proven:
 - `query` works against a real PostgreSQL database
 - `insert` works against a real PostgreSQL database with the baseline write contract
 - `update` works against a real PostgreSQL database with the baseline write contract
+- `delete` works against a real PostgreSQL database with the baseline write contract
 
 What is not proven yet:
 
-- PostgreSQL `delete`
 - PostgreSQL natural-language flows
 - CI-backed PostgreSQL automation
 - stable one-command bootstrap inside the default developer baseline
@@ -168,6 +194,6 @@ What is not proven yet:
 This supports:
 
 - PostgreSQL status: `experimental`
-- proven scope: `schema`, `query`, `insert`, and `update`
+- proven scope: `schema`, `query`, `insert`, `update`, and `delete`
 
 This does not justify claiming broad multi-DB completion.

@@ -16,10 +16,10 @@ This document exists so the project does not drift from:
 
 ## 2. Current PostgreSQL scope
 
-As of 2026-04-07, the PostgreSQL slice is:
+As of 2026-04-10, the PostgreSQL slice is:
 
 - status: `experimental`
-- proven commands: `schema`, `query`, `insert`, `update`
+- proven commands: `schema`, `query`, `insert`, `update`, `delete`
 - proof path: `bash scripts/run_postgresql_local_smoke.sh`
 - proof note: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
 
@@ -33,7 +33,6 @@ What this means:
 
 Do not treat these as current PostgreSQL support:
 
-- `delete`
 - natural-language PostgreSQL execution
 - transaction handling
 - parity with the SQLite baseline
@@ -44,7 +43,7 @@ Do not treat these as current PostgreSQL support:
 Until a new verification slice is opened, keep PostgreSQL language limited to:
 
 - `experimental`
-- `schema`, `query`, `insert`, and `update` are proven
+- `schema`, `query`, `insert`, `update`, and `delete` are proven
 - broader PostgreSQL support is not proven
 
 Do not:
@@ -52,7 +51,7 @@ Do not:
 - call PostgreSQL `working`
 - imply full write parity
 - imply multi-DB completion
-- widen docs from `schema/query/insert/update` to generic PostgreSQL support
+- widen docs from `schema/query/insert/update/delete` to generic PostgreSQL support
 
 ## 5. Unlock condition for the next PostgreSQL slice
 
@@ -66,7 +65,7 @@ The next widening slice may start only when all of the following are true:
 Recommended order:
 
 1. keep the runner easy to rerun
-2. only then consider `delete`
+2. decide whether the current proof set is enough for this phase
 3. only then consider broader PostgreSQL parity
 
 ## 6. Persona checkpoint
