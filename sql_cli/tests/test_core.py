@@ -709,5 +709,21 @@ assert sqlite_operators["ok"] is True
 assert "LIKE" in sqlite_operators["data"]["value"]["value"]["pattern"]
 print("52. test_db_knowledge_sqlite_operators ✓")
 
+knowledge_coverage = db_knowledge_handler(topic="coverage")
+assert knowledge_coverage["ok"] is True
+assert knowledge_coverage["data"]["kind"] == "coverage"
+assert knowledge_coverage["data"]["value"]["coverage_level"] == "structured_reference_seed"
+assert "sqlite" in knowledge_coverage["data"]["value"]["summary"]["dialects"]
+assert "jpql" in knowledge_coverage["data"]["value"]["summary"]["dialects"]
+assert knowledge_coverage["data"]["value"]["remaining_gaps"]
+print("53. test_db_knowledge_coverage_report ✓")
+
+rc, payload = run_cli(["--command", "db_knowledge", "--topic", "coverage"])
+assert rc == 0
+assert payload["ok"] is True
+assert payload["data"]["kind"] == "coverage"
+assert payload["data"]["value"]["next_gate"]["name"] == "local_knowledge_first_generation"
+print("54. test_docs_db_knowledge_coverage_example ✓")
+
 print("")
-print("=== ALL 52 TESTS PASS ✅ ===")
+print("=== ALL 54 TESTS PASS ✅ ===")

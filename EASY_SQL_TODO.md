@@ -187,6 +187,7 @@ Open tasks:
 - [x] add structured machine-readable dialect rules
 - [x] add a deterministic `db_knowledge` lookup command
 - [x] add first type/operator/join/constraint knowledge topics
+- [x] add an inspectable coverage and gap report
 - [ ] wire local knowledge lookup into generation before provider calls
 
 Current output:
@@ -198,6 +199,8 @@ Current output:
 - `knowledge/dialects/mysql.json`
 - `knowledge/dialects/jpql.json`
 - `knowledge/safety/write_rules.json`
+- `knowledge/coverage.json`
+- `python3 main.py --command db_knowledge --topic coverage`
 
 ## Recently Closed Stabilization Slices
 
@@ -213,6 +216,7 @@ Current output:
 - [x] add first JPA entity source introspection slice
 - [x] add first DB knowledge audit and reference seed
 - [x] add structured DB/JPA rules and `db_knowledge` lookup
+- [x] add DB knowledge coverage reporting
 
 ## Reference Documents
 

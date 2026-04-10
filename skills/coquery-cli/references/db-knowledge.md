@@ -4,9 +4,15 @@ This is a compact offline reference for CoQuery agents. Use it before asking an 
 
 ## Coverage Label
 
-Current level: `reference_seed`
+Current level: `structured_reference_seed`
 
 This file is enough for basic routing and safety decisions. It is not enough for full SQL dialect generation, query optimization, or JPQL runtime execution.
+
+For a machine-readable status, run:
+
+```bash
+python3 main.py --command db_knowledge --topic coverage
+```
 
 ## Official Sources
 
@@ -89,10 +95,12 @@ python3 main.py --command db_knowledge --dialect postgresql --topic types
 python3 main.py --command db_knowledge --dialect mysql --topic constraints
 python3 main.py --command db_knowledge --dialect jpql --topic joins
 python3 main.py --command db_knowledge --topic write_safety
+python3 main.py --command db_knowledge --topic coverage
 ```
 
 ## Missing Knowledge Still Needed
 
+- generation and natural-language paths wired to consult local rules before providers
 - per-dialect syntax snippets for common commands
 - per-dialect placeholder conventions by Python driver
 - date/time function matrix

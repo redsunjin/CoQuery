@@ -4,7 +4,7 @@ Date: 2026-04-10
 
 ## Short Answer
 
-No. CoQuery has enough project-status knowledge to avoid overclaiming support, but it does not yet have enough reusable SQL/JPA/DB reference knowledge to minimize LLM use across real database work.
+Partially. CoQuery now has a structured, inspectable SQL/JPA reference seed that can reduce LLM/provider calls for covered dialect, safety, schema, and JPQL boundary questions. It is still not a complete offline SQL/JPA knowledge base.
 
 ## What Exists Now
 
@@ -45,12 +45,14 @@ Structured machine-readable rules now live at:
 - `knowledge/dialects/mysql.json`
 - `knowledge/dialects/jpql.json`
 - `knowledge/safety/write_rules.json`
+- `knowledge/coverage.json`
 
 Lookup command:
 
 ```bash
 python3 main.py --command db_knowledge --dialect sqlite --topic schema
 python3 main.py --command db_knowledge --topic write_safety
+python3 main.py --command db_knowledge --topic coverage
 ```
 
 The current structured topics include:
@@ -67,6 +69,22 @@ The current structured topics include:
 - `upsert`
 - `safety`
 - `write_safety`
+- `coverage`
+- `gaps`
+
+Coverage command:
+
+```bash
+python3 main.py --command db_knowledge --topic coverage
+```
+
+This returns:
+
+- current coverage label
+- dialect matrix for SQLite, PostgreSQL, MySQL, and JPQL
+- structured topic matrix
+- what can be answered locally before using an LLM/provider
+- remaining gaps and the next proof gate
 
 ## Reference Sources
 
@@ -83,8 +101,8 @@ To materially reduce LLM use, add:
 
 1. a query planner that consults the local rules before calling any provider
 2. a larger fixture set proving common SQL and JPQL generation paths
-3. source-linked reference refresh policy
-4. richer dialect coverage for functions, transactions, indexes, and optimizer behavior
+3. source-linked reference refresh policy and tooling gate
+4. richer dialect coverage for functions, transactions, indexes, schema details, and optimizer behavior
 
 Until then, the correct label is:
 

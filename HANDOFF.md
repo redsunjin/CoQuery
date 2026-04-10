@@ -1,6 +1,6 @@
 # CoQuery Handoff v0.7.0
 
-Date: 2026-04-09
+Date: 2026-04-10
 
 ## Current Handoff State
 
@@ -11,7 +11,7 @@ The verified state is now a working SQLite-first CLI baseline.
 
 - `main.py` is a thin entry point that routes to `sql_cli/cli.py`
 - the executable command set is `schema`, `query`, `generate`, `insert`, `update`, `delete`, `natural`, `jpa_schema`, `provider_add`, `provider_list`, `provider_remove`, and `provider_test`
-- `python3 sql_cli/tests/test_core.py` passes with 52 baseline tests
+- `python3 sql_cli/tests/test_core.py` passes with 54 baseline tests
 - `python3 main.py --help` works in the current environment
 - `CoQueryDB` works for SQLite file paths and `sqlite://` URIs
 - `--db-uri` is now the shared multi-backend connection contract
@@ -28,6 +28,7 @@ The verified state is now a working SQLite-first CLI baseline.
 - repo-local LLM provider registration and connectivity checks
 - lightweight natural-language intent-to-SQL conversion with optional registered provider routing
 - JPA annotation-based entity source introspection through `jpa_schema`
+- inspectable SQL/JPA knowledge coverage through `db_knowledge --topic coverage`
 - structured write results with `affected_rows`, `warnings`, and `safety_level`
 
 ## What Is Not Complete
@@ -83,9 +84,10 @@ python3 main.py --help
 python3 main.py --command schema --db example.db --format json
 python3 sql_cli/tests/test_core.py
 python3 -c "import sql_cli.cli, sql_cli.core, sql_cli.db_new"
+python3 main.py --command db_knowledge --topic coverage
 bash scripts/run_postgresql_local_smoke.sh
 ```
 
 Last Updated: 2026-04-10
-Status: SQLite-first baseline verified with PostgreSQL schema, query, insert, update, and delete smoke proof
+Status: SQLite-first baseline verified with PostgreSQL schema, query, insert, update, delete smoke proof, and DB knowledge coverage reporting
 Next: keep the PostgreSQL probe harness stable and decide whether the current narrow proof set is enough before broadening further

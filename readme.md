@@ -17,6 +17,7 @@ python3 main.py --command natural --db example.db --sql "show users"
 python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
 python3 main.py --command db_knowledge --dialect sqlite --topic schema
 python3 main.py --command db_knowledge --topic write_safety
+python3 main.py --command db_knowledge --topic coverage
 python3 main.py --command provider_list
 python3 main.py --command provider_test --provider-name local_ollama
 ```
@@ -24,7 +25,7 @@ python3 main.py --command provider_test --provider-name local_ollama
 ## Verified Baseline
 
 - `main.py` routes to the package handlers in `sql_cli/cli.py`
-- `python3 sql_cli/tests/test_core.py` passes with 52 tests
+- `python3 sql_cli/tests/test_core.py` passes with 54 tests
 - SQLite is the working backend
 - `--db-uri` is the preferred multi-backend connection contract
 - `query` is read-only unless `--write` is provided
@@ -47,7 +48,7 @@ python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge -
 The skill is also installable under `~/.codex/skills/coquery-cli` for `$coquery-cli` discovery in future Codex sessions.
 
 The skill includes a compact DB knowledge seed at `skills/coquery-cli/references/db-knowledge.md`.
-Structured machine-readable rules now live under `knowledge/`.
+Structured machine-readable rules and coverage metadata now live under `knowledge/`.
 This is enough for basic SQL/JPA boundary decisions and deterministic lookup, but not a complete offline SQL dialect knowledge base.
 
 ## Current Limits
@@ -68,6 +69,7 @@ python3 main.py --command schema --db example.db --format json
 python3 sql_cli/tests/test_core.py
 python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
 python3 main.py --command db_knowledge --dialect postgresql --topic pagination
+python3 main.py --command db_knowledge --topic coverage
 bash scripts/run_postgresql_local_smoke.sh
 ```
 

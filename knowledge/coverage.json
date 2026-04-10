@@ -1,0 +1,202 @@
+{
+  "coverage_report": "coquery_db_knowledge_coverage",
+  "generated_on": "2026-04-10",
+  "coverage_level": "structured_reference_seed",
+  "purpose": "Make the current SQL/JPA knowledge layer inspectable so agents can use local facts before asking an LLM/provider.",
+  "summary": {
+    "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
+    "structured_rule_files": [
+      "knowledge/dialects/sqlite.json",
+      "knowledge/dialects/postgresql.json",
+      "knowledge/dialects/mysql.json",
+      "knowledge/dialects/jpql.json"
+    ],
+    "safety_rule_files": ["knowledge/safety/write_rules.json"],
+    "agent_reference_files": ["skills/coquery-cli/references/db-knowledge.md"],
+    "deterministic_commands": [
+      "python3 main.py --command db_knowledge --dialect sqlite --topic schema",
+      "python3 main.py --command db_knowledge --dialect postgresql --topic pagination",
+      "python3 main.py --command db_knowledge --dialect mysql --topic constraints",
+      "python3 main.py --command db_knowledge --dialect jpql --topic joins",
+      "python3 main.py --command db_knowledge --topic write_safety",
+      "python3 main.py --command db_knowledge --topic coverage"
+    ]
+  },
+  "topic_matrix": [
+    {
+      "topic": "status",
+      "coverage": "implemented",
+      "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
+      "notes": "Keeps runtime capability claims separate from dialect language facts."
+    },
+    {
+      "topic": "statements",
+      "coverage": "implemented",
+      "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
+      "notes": "Classifies core read/write statements and CoQuery support boundaries."
+    },
+    {
+      "topic": "schema",
+      "coverage": "implemented",
+      "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
+      "notes": "Provides table/source introspection templates or JPA source-command guidance."
+    },
+    {
+      "topic": "pagination",
+      "coverage": "implemented",
+      "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
+      "notes": "Separates SQL LIMIT/OFFSET templates from JPQL API-level pagination."
+    },
+    {
+      "topic": "parameters",
+      "coverage": "implemented",
+      "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
+      "notes": "Captures driver/API placeholder conventions for basic generated examples."
+    },
+    {
+      "topic": "types",
+      "coverage": "implemented_seed",
+      "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
+      "notes": "Covers common scalar mappings; not yet a complete DDL or conversion matrix."
+    },
+    {
+      "topic": "operators",
+      "coverage": "implemented_seed",
+      "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
+      "notes": "Covers common comparison, logical, pattern, null, and membership operators."
+    },
+    {
+      "topic": "joins",
+      "coverage": "implemented_seed",
+      "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
+      "notes": "Provides basic SQL joins and JPQL relationship/fetch join patterns."
+    },
+    {
+      "topic": "constraints",
+      "coverage": "implemented_seed",
+      "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
+      "notes": "Covers common database constraints and first JPA mapping annotations."
+    },
+    {
+      "topic": "upsert",
+      "coverage": "implemented_seed",
+      "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
+      "notes": "Documents dialect templates and marks unsupported CoQuery execution paths."
+    },
+    {
+      "topic": "write_safety",
+      "coverage": "implemented",
+      "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
+      "notes": "Defines read-only default, explicit write gate, and risky UPDATE/DELETE warnings."
+    }
+  ],
+  "dialect_matrix": {
+    "sqlite": {
+      "coquery_status": "working",
+      "runtime_status": "verified_baseline",
+      "structured_topics": ["statements", "schema", "pagination", "parameters", "types", "operators", "joins", "constraints", "upsert", "safety"],
+      "source_files": ["knowledge/dialects/sqlite.json"]
+    },
+    "postgresql": {
+      "coquery_status": "experimental_narrow",
+      "runtime_status": "schema_query_insert_update_delete_smoke",
+      "structured_topics": ["statements", "schema", "pagination", "parameters", "types", "operators", "joins", "constraints", "upsert", "safety"],
+      "source_files": ["knowledge/dialects/postgresql.json"]
+    },
+    "mysql": {
+      "coquery_status": "stub",
+      "runtime_status": "not_implemented",
+      "structured_topics": ["statements", "schema", "pagination", "parameters", "types", "operators", "joins", "constraints", "upsert", "safety"],
+      "source_files": ["knowledge/dialects/mysql.json"]
+    },
+    "jpql": {
+      "coquery_status": "source_introspection_only",
+      "runtime_status": "jpa_schema_only",
+      "structured_topics": ["statements", "schema", "pagination", "parameters", "types", "operators", "joins", "constraints", "upsert", "safety"],
+      "source_files": ["knowledge/dialects/jpql.json"]
+    }
+  },
+  "llm_minimization": {
+    "can_answer_locally": [
+      "which SQL/JPA capability claims are safe",
+      "which common statements are reads or writes",
+      "which CoQuery write commands require --write",
+      "basic schema introspection templates by supported/planned dialect",
+      "basic pagination templates by dialect",
+      "basic parameter placeholder conventions",
+      "common scalar type mappings",
+      "common operator, join, constraint, and upsert patterns",
+      "JPQL vs SQL naming and runtime boundaries"
+    ],
+    "still_needs_llm_or_external_docs": [
+      "complex query rewrites",
+      "query optimization advice",
+      "vendor-specific function coverage beyond the seed topics",
+      "DDL generation for production migrations",
+      "Spring Data repository method parsing",
+      "Criteria API generation",
+      "runtime-specific JPA provider behavior"
+    ]
+  },
+  "remaining_gaps": [
+    {
+      "id": "generation_integration",
+      "severity": "high",
+      "description": "SQL generation and natural routing do not yet consult local knowledge before provider calls.",
+      "next_step": "Add a planner/validator that retrieves db_knowledge by dialect and topic before generation."
+    },
+    {
+      "id": "schema_detail",
+      "severity": "medium",
+      "description": "Schema knowledge has table/source templates but no normalized cross-backend column, index, foreign-key, and constraint model.",
+      "next_step": "Add a schema-detail command and fixtures for SQLite plus PostgreSQL."
+    },
+    {
+      "id": "function_matrix",
+      "severity": "medium",
+      "description": "Date/time, string, aggregate, JSON, and null-handling function differences are not yet structured.",
+      "next_step": "Add source-linked function rules per dialect."
+    },
+    {
+      "id": "transaction_rules",
+      "severity": "medium",
+      "description": "Transaction, isolation, locking, and dry-run behavior are not yet represented.",
+      "next_step": "Add transaction safety rules before broadening write workflows."
+    },
+    {
+      "id": "jpql_generation",
+      "severity": "medium",
+      "description": "JPQL knowledge covers boundaries and common patterns but does not generate or execute JPQL.",
+      "next_step": "Add a Java/JPA runner proof before claiming JPQL execution support."
+    },
+    {
+      "id": "refresh_policy",
+      "severity": "low",
+      "description": "Official source refresh cadence is documented informally, not enforced by tooling.",
+      "next_step": "Add a source-audit checklist or metadata gate for knowledge changes."
+    }
+  ],
+  "next_gate": {
+    "name": "local_knowledge_first_generation",
+    "pass_condition": "Generation, natural, and write planning paths consult local DB knowledge for dialect, safety, and schema decisions before any provider call.",
+    "verification": "Add tests proving a local rule can answer a request and that provider invocation is skipped for that covered topic."
+  },
+  "official_sources": [
+    {
+      "title": "SQLite SQL Language Reference",
+      "url": "https://www.sqlite.org/lang.html"
+    },
+    {
+      "title": "PostgreSQL SQL Commands",
+      "url": "https://www.postgresql.org/docs/current/sql-commands.html"
+    },
+    {
+      "title": "MySQL 8.4 SQL Statements",
+      "url": "https://dev.mysql.com/doc/refman/8.4/en/sql-statements.html"
+    },
+    {
+      "title": "Jakarta Persistence 3.2 Specification",
+      "url": "https://jakarta.ee/specifications/persistence/3.2/jakarta-persistence-spec-3.2"
+    }
+  ]
+}

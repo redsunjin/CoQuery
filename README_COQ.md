@@ -1,11 +1,11 @@
 # CoQuery Baseline Verification
 
-Date: 2026-04-09
+Date: 2026-04-10
 
 ## Result
 
 ```text
-52/52 executable baseline tests pass
+54/54 executable baseline tests pass
 SQLite-first CLI verified
 Explicit write contract verified
 Shared DB URI contract verified
@@ -70,6 +70,6 @@ bash scripts/run_postgresql_local_smoke.sh
 
 Version: v0.7.0
 Last Updated: 2026-04-10
-Status: Baseline verified with experimental PostgreSQL schema, query, insert, update, and delete proof
+Status: Baseline verified with experimental PostgreSQL schema, query, insert, update, delete proof, and inspectable DB knowledge coverage
 Reference: `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 Smoke Result: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`

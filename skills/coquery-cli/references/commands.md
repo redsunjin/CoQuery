@@ -10,6 +10,7 @@ python3 main.py --command natural --db example.db --sql "show users" --format js
 python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
 python3 main.py --command db_knowledge --dialect sqlite --topic schema
 python3 main.py --command db_knowledge --topic write_safety
+python3 main.py --command db_knowledge --topic coverage
 ```
 
 SQLite URI example:

@@ -12,6 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 KNOWLEDGE_ROOT = REPO_ROOT / "knowledge"
 DIALECT_DIR = KNOWLEDGE_ROOT / "dialects"
 SAFETY_DIR = KNOWLEDGE_ROOT / "safety"
+COVERAGE_PATH = KNOWLEDGE_ROOT / "coverage.json"
 DIALECT_ALIASES = {
     "postgres": "postgresql",
     "postgresql": "postgresql",
@@ -69,6 +70,14 @@ def load_write_rules() -> dict[str, Any]:
     return payload
 
 
+def load_coverage_report() -> dict[str, Any]:
+    if not COVERAGE_PATH.exists():
+        raise CoQueryKnowledgeError("knowledge_not_found", "DB knowledge coverage report not found.")
+    payload = _read_json(COVERAGE_PATH)
+    payload["rule_path"] = str(COVERAGE_PATH.relative_to(REPO_ROOT))
+    return payload
+
+
 def _topic_from_dialect(payload: dict[str, Any], topic: str) -> dict[str, Any]:
     topic_map = {
         "statements": "statement_support",
@@ -102,6 +111,13 @@ def _topic_from_dialect(payload: dict[str, Any], topic: str) -> dict[str, Any]:
 def lookup_knowledge(dialect: str | None = None, topic: Optional[str] = None) -> dict[str, Any]:
     normalized_topic = (topic or "overview").strip().lower()
 
+    if normalized_topic in {"coverage", "audit", "gaps"}:
+        return {
+            "kind": "coverage",
+            "topic": normalized_topic,
+            "value": load_coverage_report(),
+        }
+
     if normalized_topic in {"write_safety", "write_rules"}:
         return {
             "kind": "safety",
@@ -114,6 +130,7 @@ def lookup_knowledge(dialect: str | None = None, topic: Optional[str] = None) ->
             return {
                 "kind": "overview",
                 "available_dialects": list_dialects(),
+                "global_topics": ["coverage", "gaps", "write_safety"],
                 "safety_topics": ["write_safety"],
                 "knowledge_root": str(KNOWLEDGE_ROOT.relative_to(REPO_ROOT)),
             }

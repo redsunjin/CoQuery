@@ -4,7 +4,7 @@ Current truthful product state:
 
 - Version line: v0.7.x stabilization.
 - SQLite-first CLI baseline is verified.
-- Baseline tests pass with 52 executable tests.
+- Baseline tests pass with 54 executable tests.
 - Explicit write contract is frozen: `insert`, `update`, and `delete` require `--write` and explicit SQL.
 - `--db-uri` is the preferred multi-backend connection contract.
 - PostgreSQL is experimental for a narrow `schema`, `query`, `insert`, `update`, and `delete` smoke slice.
@@ -14,6 +14,7 @@ Current truthful product state:
 - JPA entity source introspection exists through `jpa_schema`.
 - A compact DB knowledge seed exists at `references/db-knowledge.md`.
 - Structured DB/JPA rules exist under `knowledge/` and are queryable through `db_knowledge`.
+- DB knowledge coverage and gaps are queryable through `db_knowledge --topic coverage`.
 
 Avoid overclaims:
 
@@ -32,5 +33,6 @@ python3 main.py --command schema --db example.db --format json
 python3 sql_cli/tests/test_core.py
 python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
 python3 main.py --command db_knowledge --dialect sqlite --topic schema
+python3 main.py --command db_knowledge --topic coverage
 bash scripts/run_postgresql_local_smoke.sh
 ```

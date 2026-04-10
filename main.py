@@ -57,7 +57,7 @@ def main() -> int:
     parser.add_argument("--api-key-env", type=str, default=None, help="Environment variable name for API key")
     parser.add_argument("--jpa-project", type=str, default=None, help="Path to a Java/JPA project or .java entity file")
     parser.add_argument("--dialect", type=str, default=None, help="Knowledge dialect: sqlite, postgresql, mysql, jpql")
-    parser.add_argument("--topic", type=str, default=None, help="Knowledge topic, such as overview, statements, schema, pagination, write_safety")
+    parser.add_argument("--topic", type=str, default=None, help="Knowledge topic, such as overview, statements, schema, pagination, coverage, write_safety")
     parser.add_argument("--format", type=str, default="json", help="Output format")
     parser.add_argument(
         "--write",

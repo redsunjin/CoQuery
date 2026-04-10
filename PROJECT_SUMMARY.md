@@ -8,8 +8,8 @@
 ## Current Status
 
 ```text
-Verified on 2026-04-09
-- 52 executable baseline tests pass
+Verified on 2026-04-10
+- 54 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
 - explicit write contract is enforced
@@ -75,7 +75,7 @@ Current executable baseline:
 python3 sql_cli/tests/test_core.py
 ```
 
-This passes 52 baseline tests covering:
+This passes 54 baseline tests covering:
 
 - SQL generation
 - SQL validation
@@ -88,6 +88,7 @@ This passes 52 baseline tests covering:
 - DB URI parsing and structured backend errors
 - documented CLI example smoke coverage
 - mocked PostgreSQL schema, query, insert, update, and delete success paths
+- DB/JPA knowledge lookup and coverage reporting
 
 ---
 

@@ -18,6 +18,7 @@ python3 skills/coquery-cli/scripts/coquery_agent.py run --command schema --db ex
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command query --db example.db --sql "SELECT * FROM users"
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command jpa_schema --jpa-project /path/to/java-project
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --dialect sqlite --topic schema
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --topic coverage
 ```
 
 If the skill has been installed outside the repository, pass `--repo /path/to/CoQuery` or set `COQUERY_REPO=/path/to/CoQuery`.
@@ -71,6 +72,7 @@ Look up local DB/JPA knowledge before using an LLM:
 ```bash
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --dialect postgresql --topic pagination
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --topic write_safety
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --topic coverage
 ```
 
 Call a write command only when the user has intentionally requested a state-changing operation:
