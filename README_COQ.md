@@ -5,7 +5,7 @@ Date: 2026-04-09
 ## Result
 
 ```text
-42/42 executable baseline tests pass
+52/52 executable baseline tests pass
 SQLite-first CLI verified
 Explicit write contract verified
 Shared DB URI contract verified

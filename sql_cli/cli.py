@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from sql_cli.db_new import CoQueryDB, CoQueryDBError
+from sql_cli.dialect_rules import CoQueryKnowledgeError, lookup_knowledge
 from sql_cli.jpa import CoQueryJPAError, scan_jpa_project
 from sql_cli.llm_registry import CoQueryLLMError, LLMProviderClient, LLMProviderRegistry
 
@@ -71,6 +72,10 @@ def _llm_error(command: str, exc: CoQueryLLMError) -> dict[str, Any]:
 
 
 def _jpa_error(command: str, exc: CoQueryJPAError) -> dict[str, Any]:
+    return _error(command, exc.code, exc.message)
+
+
+def _knowledge_error(command: str, exc: CoQueryKnowledgeError) -> dict[str, Any]:
     return _error(command, exc.code, exc.message)
 
 
@@ -271,6 +276,15 @@ def jpa_schema_handler(project_path: Optional[str], format: str = "json") -> dic
         return _jpa_error("jpa_schema", e)
     except Exception as e:
         return _error("jpa_schema", "execution_error", str(e))
+
+
+def db_knowledge_handler(dialect: Optional[str] = None, topic: Optional[str] = None) -> dict[str, Any]:
+    try:
+        return _success("db_knowledge", lookup_knowledge(dialect=dialect, topic=topic))
+    except CoQueryKnowledgeError as e:
+        return _knowledge_error("db_knowledge", e)
+    except Exception as e:
+        return _error("db_knowledge", "execution_error", str(e))
 
 
 def insert_handler(

@@ -174,6 +174,31 @@ Current output:
 - `sql_cli/jpa.py`
 - `python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json`
 
+### 10. Offline DB knowledge base
+
+Goal:
+
+- reduce LLM/provider calls by keeping local SQL, dialect, and JPA reference knowledge
+
+Open tasks:
+
+- [x] audit whether current DB knowledge is sufficient
+- [x] add a compact source-linked DB knowledge seed
+- [x] add structured machine-readable dialect rules
+- [x] add a deterministic `db_knowledge` lookup command
+- [x] add first type/operator/join/constraint knowledge topics
+- [ ] wire local knowledge lookup into generation before provider calls
+
+Current output:
+
+- `DB_KNOWLEDGE_AUDIT_2026-04-10.md`
+- `skills/coquery-cli/references/db-knowledge.md`
+- `knowledge/dialects/sqlite.json`
+- `knowledge/dialects/postgresql.json`
+- `knowledge/dialects/mysql.json`
+- `knowledge/dialects/jpql.json`
+- `knowledge/safety/write_rules.json`
+
 ## Recently Closed Stabilization Slices
 
 - [x] truth-align top-level status docs
@@ -186,6 +211,8 @@ Current output:
 - [x] add first real PostgreSQL `schema`, `query`, `insert`, `update`, and `delete` smoke
 - [x] package CoQuery as an agent-usable Codex skill
 - [x] add first JPA entity source introspection slice
+- [x] add first DB knowledge audit and reference seed
+- [x] add structured DB/JPA rules and `db_knowledge` lookup
 
 ## Reference Documents
 
@@ -214,6 +241,7 @@ python3 sql_cli/tests/test_core.py
 python3 -c "import sql_cli.cli, sql_cli.core, sql_cli.db_new"
 python3 skills/coquery-cli/scripts/coquery_agent.py verify
 python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
+python3 main.py --command db_knowledge --dialect sqlite --topic schema
 ```
 
 ## Current Direction

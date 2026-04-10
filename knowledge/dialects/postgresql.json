@@ -1,0 +1,75 @@
+{
+  "dialect": "postgresql",
+  "label": "PostgreSQL",
+  "coquery_status": "experimental_narrow",
+  "query_language": "sql",
+  "official_sources": [
+    {
+      "title": "PostgreSQL SQL Commands",
+      "url": "https://www.postgresql.org/docs/current/sql-commands.html"
+    }
+  ],
+  "identifier_quote": "\"",
+  "parameter_styles": ["pyformat", "numeric"],
+  "parameter_examples": ["SELECT * FROM users WHERE id = %s", "SELECT * FROM users WHERE id = $1"],
+  "statement_support": {
+    "select": {"supported": true, "write": false, "coquery_supported": true},
+    "insert": {"supported": true, "write": true, "coquery_supported": true, "requires_write_flag": true},
+    "update": {"supported": true, "write": true, "coquery_supported": true, "requires_write_flag": true, "where_recommended": true},
+    "delete": {"supported": true, "write": true, "coquery_supported": true, "requires_write_flag": true, "where_recommended": true},
+    "create_table": {"supported": true, "write": true, "coquery_supported": false},
+    "alter_table": {"supported": true, "write": true, "coquery_supported": false},
+    "drop_table": {"supported": true, "write": true, "coquery_supported": false}
+  },
+  "schema_introspection": {
+    "tables": "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' ORDER BY table_name",
+    "columns_template": "SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_schema = 'public' AND table_name = %s ORDER BY ordinal_position",
+    "constraints_template": "SELECT constraint_name, constraint_type FROM information_schema.table_constraints WHERE table_schema = 'public' AND table_name = %s"
+  },
+  "pagination": {
+    "template": "LIMIT %s OFFSET %s",
+    "notes": ["PostgreSQL supports LIMIT/OFFSET and richer cursor/window alternatives."]
+  },
+  "type_mappings": {
+    "string": "text",
+    "bounded_string": "varchar(n)",
+    "integer": "integer",
+    "long": "bigint",
+    "decimal": "numeric",
+    "boolean": "boolean",
+    "date": "date",
+    "timestamp": "timestamp",
+    "timestamp_with_timezone": "timestamptz",
+    "binary": "bytea",
+    "uuid": "uuid",
+    "json": "jsonb"
+  },
+  "operators": {
+    "comparison": ["=", "<>", "!=", "<", "<=", ">", ">="],
+    "logical": ["AND", "OR", "NOT"],
+    "pattern": ["LIKE", "ILIKE", "SIMILAR TO"],
+    "null_checks": ["IS NULL", "IS NOT NULL"],
+    "membership": ["IN", "NOT IN"],
+    "json": ["->", "->>", "@>", "?"]
+  },
+  "joins": {
+    "inner": "SELECT ... FROM left_table INNER JOIN right_table ON ...",
+    "left": "SELECT ... FROM left_table LEFT JOIN right_table ON ...",
+    "right": "SELECT ... FROM left_table RIGHT JOIN right_table ON ...",
+    "full": "SELECT ... FROM left_table FULL JOIN right_table ON ...",
+    "cross": "SELECT ... FROM left_table CROSS JOIN right_table",
+    "lateral": "SELECT ... FROM left_table JOIN LATERAL (...) alias ON true"
+  },
+  "constraints": {
+    "common": ["PRIMARY KEY", "FOREIGN KEY", "UNIQUE", "NOT NULL", "CHECK", "DEFAULT", "EXCLUDE"],
+    "notes": ["Use information_schema or pg_catalog when detailed metadata is needed."]
+  },
+  "upsert": {
+    "template": "INSERT INTO table_name (...) VALUES (...) ON CONFLICT (...) DO UPDATE SET ...",
+    "coquery_supported": false
+  },
+  "safety_notes": [
+    "CoQuery PostgreSQL support is limited to schema/query/insert/update/delete smoke-proven paths.",
+    "Do not claim broad PostgreSQL parity."
+  ]
+}

@@ -9,7 +9,7 @@
 
 ```text
 Verified on 2026-04-09
-- 42 executable baseline tests pass
+- 52 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
 - explicit write contract is enforced
@@ -75,7 +75,7 @@ Current executable baseline:
 python3 sql_cli/tests/test_core.py
 ```
 
-This passes 42 baseline tests covering:
+This passes 52 baseline tests covering:
 
 - SQL generation
 - SQL validation

@@ -1,0 +1,72 @@
+{
+  "dialect": "jpql",
+  "label": "JPQL",
+  "coquery_status": "source_introspection_only",
+  "query_language": "jpql",
+  "official_sources": [
+    {
+      "title": "Jakarta Persistence 3.2 Specification",
+      "url": "https://jakarta.ee/specifications/persistence/3.2/jakarta-persistence-spec-3.2"
+    }
+  ],
+  "identifier_quote": null,
+  "parameter_styles": ["named", "positional"],
+  "parameter_examples": ["SELECT u FROM User u WHERE u.id = :id", "SELECT u FROM User u WHERE u.id = ?1"],
+  "statement_support": {
+    "select": {"supported": true, "write": false, "coquery_supported": false},
+    "update": {"supported": true, "write": true, "coquery_supported": false, "requires_write_flag": true, "where_recommended": true},
+    "delete": {"supported": true, "write": true, "coquery_supported": false, "requires_write_flag": true, "where_recommended": true},
+    "insert": {"supported": false, "write": true, "coquery_supported": false},
+    "create_table": {"supported": false, "write": true, "coquery_supported": false},
+    "alter_table": {"supported": false, "write": true, "coquery_supported": false},
+    "drop_table": {"supported": false, "write": true, "coquery_supported": false}
+  },
+  "schema_introspection": {
+    "source_command": "python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json",
+    "model_names": "entities_and_persistent_attributes"
+  },
+  "pagination": {
+    "template": "Use Query.setFirstResult(...) and Query.setMaxResults(...) at the API layer.",
+    "notes": ["JPQL text does not use SQL LIMIT/OFFSET syntax portably."]
+  },
+  "type_mappings": {
+    "string": "java.lang.String",
+    "integer": "java.lang.Integer",
+    "long": "java.lang.Long",
+    "decimal": "java.math.BigDecimal",
+    "boolean": "java.lang.Boolean",
+    "date": "java.time.LocalDate",
+    "timestamp": "java.time.LocalDateTime",
+    "instant": "java.time.Instant",
+    "uuid": "java.util.UUID",
+    "enum": "@Enumerated",
+    "notes": ["JPQL reasons over Java persistent attributes, not SQL storage types."]
+  },
+  "operators": {
+    "comparison": ["=", "<>", "<", "<=", ">", ">="],
+    "logical": ["AND", "OR", "NOT"],
+    "pattern": ["LIKE"],
+    "null_checks": ["IS NULL", "IS NOT NULL"],
+    "membership": ["IN", "NOT IN"],
+    "collection": ["IS EMPTY", "IS NOT EMPTY", "MEMBER OF"]
+  },
+  "joins": {
+    "inner": "SELECT e FROM Entity e JOIN e.relationship r",
+    "left": "SELECT e FROM Entity e LEFT JOIN e.relationship r",
+    "fetch": "SELECT e FROM Entity e JOIN FETCH e.relationship",
+    "notes": ["JPQL joins navigate mapped relationships instead of raw foreign-key columns."]
+  },
+  "constraints": {
+    "common_annotations": ["@Id", "@EmbeddedId", "@Column(nullable = false)", "@ManyToOne(optional = false)", "@OneToOne(optional = false)"],
+    "notes": ["JPA mapping annotations are not a complete substitute for database constraints."]
+  },
+  "upsert": {
+    "template": null,
+    "coquery_supported": false
+  },
+  "safety_notes": [
+    "JPQL uses entity names and persistent attributes, not table and column names.",
+    "CoQuery can inspect source entities but cannot execute JPQL yet.",
+    "Do not claim Spring Data JPA support."
+  ]
+}

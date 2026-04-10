@@ -17,6 +17,7 @@ python3 skills/coquery-cli/scripts/coquery_agent.py demo
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command schema --db example.db
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command query --db example.db --sql "SELECT * FROM users"
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command jpa_schema --jpa-project /path/to/java-project
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --dialect sqlite --topic schema
 ```
 
 If the skill has been installed outside the repository, pass `--repo /path/to/CoQuery` or set `COQUERY_REPO=/path/to/CoQuery`.
@@ -65,6 +66,13 @@ Inspect JPA entity source:
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command jpa_schema --jpa-project /path/to/java-project
 ```
 
+Look up local DB/JPA knowledge before using an LLM:
+
+```bash
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --dialect postgresql --topic pagination
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --topic write_safety
+```
+
 Call a write command only when the user has intentionally requested a state-changing operation:
 
 ```bash
@@ -79,3 +87,5 @@ python3 skills/coquery-cli/scripts/coquery_agent.py run \
 
 - Read `references/status.md` for the current truthful capability boundaries.
 - Read `references/commands.md` for command examples and demo flow.
+- Read `references/db-knowledge.md` before asking an LLM for common SQL, dialect, or JPA rules.
+- Use `knowledge/dialects/*.json` and `knowledge/safety/write_rules.json` through `db_knowledge` for deterministic lookup.

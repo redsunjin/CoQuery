@@ -16,6 +16,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from sql_cli.cli import (
+    db_knowledge_handler,
     delete_handler,
     generate_handler,
     insert_handler,
@@ -651,5 +652,62 @@ assert payload["data"]["entity_count"] == 1
 assert payload["data"]["entities"][0]["class_name"] == "User"
 print("42. test_docs_jpa_schema_example ✓")
 
+knowledge_overview = db_knowledge_handler()
+assert knowledge_overview["ok"] is True
+assert knowledge_overview["data"]["kind"] == "overview"
+assert "sqlite" in knowledge_overview["data"]["available_dialects"]
+assert "jpql" in knowledge_overview["data"]["available_dialects"]
+print("43. test_db_knowledge_overview ✓")
+
+sqlite_knowledge = db_knowledge_handler("sqlite", "schema")
+assert sqlite_knowledge["ok"] is True
+assert sqlite_knowledge["data"]["kind"] == "dialect_topic"
+assert "sqlite_master" in sqlite_knowledge["data"]["value"]["value"]["tables"]
+print("44. test_db_knowledge_sqlite_schema_topic ✓")
+
+jpql_knowledge = db_knowledge_handler("jpa", "parameters")
+assert jpql_knowledge["ok"] is True
+assert jpql_knowledge["data"]["value"]["dialect"] == "jpql"
+assert "named" in jpql_knowledge["data"]["value"]["value"]
+print("45. test_db_knowledge_jpa_alias ✓")
+
+write_knowledge = db_knowledge_handler(topic="write_safety")
+assert write_knowledge["ok"] is True
+assert write_knowledge["data"]["kind"] == "safety"
+assert "UPDATE" in write_knowledge["data"]["value"]["write_operations"]
+print("46. test_db_knowledge_write_safety ✓")
+
+unknown_knowledge = db_knowledge_handler("db2", "schema")
+assert unknown_knowledge["ok"] is False
+assert unknown_knowledge["error"]["code"] == "unknown_dialect"
+print("47. test_db_knowledge_unknown_dialect ✓")
+
+rc, payload = run_cli(["--command", "db_knowledge", "--dialect", "postgresql", "--topic", "pagination"])
+assert rc == 0
+assert payload["ok"] is True
+assert payload["data"]["value"]["dialect"] == "postgresql"
+assert "LIMIT" in payload["data"]["value"]["value"]["template"]
+print("48. test_docs_db_knowledge_example ✓")
+
+postgres_types = db_knowledge_handler("postgresql", "types")
+assert postgres_types["ok"] is True
+assert postgres_types["data"]["value"]["value"]["json"] == "jsonb"
+print("49. test_db_knowledge_postgresql_types ✓")
+
+mysql_constraints = db_knowledge_handler("mysql", "constraints")
+assert mysql_constraints["ok"] is True
+assert "FOREIGN KEY" in mysql_constraints["data"]["value"]["value"]["common"]
+print("50. test_db_knowledge_mysql_constraints ✓")
+
+jpql_joins = db_knowledge_handler("jpql", "joins")
+assert jpql_joins["ok"] is True
+assert "JOIN FETCH" in jpql_joins["data"]["value"]["value"]["fetch"]
+print("51. test_db_knowledge_jpql_joins ✓")
+
+sqlite_operators = db_knowledge_handler("sqlite", "operators")
+assert sqlite_operators["ok"] is True
+assert "LIKE" in sqlite_operators["data"]["value"]["value"]["pattern"]
+print("52. test_db_knowledge_sqlite_operators ✓")
+
 print("")
-print("=== ALL 42 TESTS PASS ✅ ===")
+print("=== ALL 52 TESTS PASS ✅ ===")

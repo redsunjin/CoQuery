@@ -8,6 +8,8 @@ python3 main.py --command query --db example.db --sql "SELECT * FROM users" --fo
 python3 main.py --command generate --db example.db --skill select_simple --format json
 python3 main.py --command natural --db example.db --sql "show users" --format json
 python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
+python3 main.py --command db_knowledge --dialect sqlite --topic schema
+python3 main.py --command db_knowledge --topic write_safety
 ```
 
 SQLite URI example:

@@ -233,6 +233,10 @@ def command_run(args: argparse.Namespace) -> int:
         cli_args.extend(["--api-key-env", args.api_key_env])
     if args.jpa_project is not None:
         cli_args.extend(["--jpa-project", args.jpa_project])
+    if args.dialect is not None:
+        cli_args.extend(["--dialect", args.dialect])
+    if args.topic is not None:
+        cli_args.extend(["--topic", args.topic])
     if args.write:
         cli_args.append("--write")
 
@@ -271,6 +275,8 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--base-url", default=None, help="Provider base URL")
     run.add_argument("--api-key-env", default=None, help="Provider API key environment variable name")
     run.add_argument("--jpa-project", default=None, help="Path to a Java/JPA project or .java entity file")
+    run.add_argument("--dialect", default=None, help="Knowledge dialect")
+    run.add_argument("--topic", default=None, help="Knowledge topic")
     run.add_argument("--format", default="json", help="Output format")
     run.add_argument("--write", action="store_true", help="Confirm state-changing SQL")
     run.set_defaults(func=command_run)

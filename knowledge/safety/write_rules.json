@@ -1,0 +1,39 @@
+{
+  "rule_set": "coquery_write_safety",
+  "default_policy": "read_only_unless_explicit_write",
+  "write_operations": ["INSERT", "UPDATE", "DELETE", "CREATE", "ALTER", "DROP", "TRUNCATE", "MERGE", "CALL"],
+  "coquery_write_operations": ["INSERT", "UPDATE", "DELETE"],
+  "requires_write_flag": true,
+  "rules": [
+    {
+      "id": "write_flag_required",
+      "severity": "block",
+      "description": "State-changing SQL requires explicit --write confirmation."
+    },
+    {
+      "id": "explicit_sql_required",
+      "severity": "block",
+      "description": "State-changing commands require explicit SQL; implicit fallback SQL is not allowed."
+    },
+    {
+      "id": "update_without_where",
+      "severity": "high",
+      "description": "UPDATE without WHERE may affect all rows."
+    },
+    {
+      "id": "delete_without_where",
+      "severity": "high",
+      "description": "DELETE without WHERE may affect all rows."
+    },
+    {
+      "id": "prefer_parameters",
+      "severity": "medium",
+      "description": "Prefer parameterized values instead of interpolating user text into SQL."
+    },
+    {
+      "id": "prefer_specific_columns",
+      "severity": "low",
+      "description": "Prefer explicit column lists over SELECT * when generating SQL."
+    }
+  ]
+}

@@ -11,7 +11,7 @@ The verified state is now a working SQLite-first CLI baseline.
 
 - `main.py` is a thin entry point that routes to `sql_cli/cli.py`
 - the executable command set is `schema`, `query`, `generate`, `insert`, `update`, `delete`, `natural`, `jpa_schema`, `provider_add`, `provider_list`, `provider_remove`, and `provider_test`
-- `python3 sql_cli/tests/test_core.py` passes with 42 baseline tests
+- `python3 sql_cli/tests/test_core.py` passes with 52 baseline tests
 - `python3 main.py --help` works in the current environment
 - `CoQueryDB` works for SQLite file paths and `sqlite://` URIs
 - `--db-uri` is now the shared multi-backend connection contract
