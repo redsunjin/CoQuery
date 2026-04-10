@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from sql_cli.db_new import CoQueryDB, CoQueryDBError
+from sql_cli.jpa import CoQueryJPAError, scan_jpa_project
 from sql_cli.llm_registry import CoQueryLLMError, LLMProviderClient, LLMProviderRegistry
 
 WRITE_OPERATIONS = {"INSERT", "UPDATE", "DELETE"}
@@ -66,6 +67,10 @@ def _db_error(command: str, exc: CoQueryDBError) -> dict[str, Any]:
 
 
 def _llm_error(command: str, exc: CoQueryLLMError) -> dict[str, Any]:
+    return _error(command, exc.code, exc.message)
+
+
+def _jpa_error(command: str, exc: CoQueryJPAError) -> dict[str, Any]:
     return _error(command, exc.code, exc.message)
 
 
@@ -257,6 +262,15 @@ def provider_test_handler(provider_name: Optional[str]) -> dict[str, Any]:
         return _llm_error("provider_test", e)
     except Exception as e:
         return _error("provider_test", "execution_error", str(e))
+
+
+def jpa_schema_handler(project_path: Optional[str], format: str = "json") -> dict[str, Any]:
+    try:
+        return _success("jpa_schema", scan_jpa_project(project_path))
+    except CoQueryJPAError as e:
+        return _jpa_error("jpa_schema", e)
+    except Exception as e:
+        return _error("jpa_schema", "execution_error", str(e))
 
 
 def insert_handler(

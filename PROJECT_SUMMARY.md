@@ -9,7 +9,7 @@
 
 ```text
 Verified on 2026-04-09
-- 39 executable baseline tests pass
+- 42 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
 - explicit write contract is enforced
@@ -42,6 +42,7 @@ Verified on 2026-04-09
     ├── core.py                 # SQL generation and validation
     ├── db_new.py               # SQLite-first DB wrapper
     ├── llm_registry.py         # Repo-local provider registry and lightweight clients
+    ├── jpa.py                  # Annotation-based JPA entity source scanner
     ├── nl_core.py              # Lightweight NL processing
     └── tests/test_core.py      # Executable baseline tests
 ```
@@ -61,6 +62,7 @@ Verified on 2026-04-09
 - `provider_list`: list registered provider profiles
 - `provider_remove`: remove one provider profile
 - `provider_test`: test one provider connection
+- `jpa_schema`: inspect annotation-based JPA entity source as ORM/model context
 - `--db-uri`: preferred shared connection input for non-SQLite backends
 
 ---
@@ -73,7 +75,7 @@ Current executable baseline:
 python3 sql_cli/tests/test_core.py
 ```
 
-This passes 39 baseline tests covering:
+This passes 42 baseline tests covering:
 
 - SQL generation
 - SQL validation
@@ -81,6 +83,7 @@ This passes 39 baseline tests covering:
 - CLI handlers
 - natural-language processing
 - provider registry handlers and provider-backed natural routing
+- JPA entity source introspection and CLI routing
 - explicit write safety and warning behavior
 - DB URI parsing and structured backend errors
 - documented CLI example smoke coverage
@@ -96,6 +99,7 @@ This passes 39 baseline tests covering:
 - no transaction or dry-run layer exists yet
 - natural-language behavior is lightweight by default; provider-backed quality and backend parity are not broadly proven
 - provider-backed natural is currently a secondary experimental track
+- JPA support is source introspection only; JPQL runtime execution is not implemented
 - older docs before the 2026-04-04 repair may overstate completion
 
 ---
@@ -172,5 +176,5 @@ Current runner improvement:
 
 ---
 
-Last Updated: 2026-04-09
+Last Updated: 2026-04-10
 Status: SQLite-first baseline verified with experimental PostgreSQL schema, query, insert, update, and delete proof

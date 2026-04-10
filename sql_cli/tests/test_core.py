@@ -19,6 +19,7 @@ from sql_cli.cli import (
     delete_handler,
     generate_handler,
     insert_handler,
+    jpa_schema_handler,
     natural_handler,
     provider_add_handler,
     provider_list_handler,
@@ -525,5 +526,130 @@ assert llm_natural["provider_name"] == "local_ollama"
 assert llm_natural["sql"] == "SELECT * FROM users"
 print("39. test_natural_with_registered_provider ✓")
 
+with TemporaryDirectory() as tmpdir:
+    project_root = Path(tmpdir)
+    source_root = project_root / "src" / "main" / "java" / "com" / "example"
+    source_root.mkdir(parents=True)
+    (source_root / "User.java").write_text(
+        """
+package com.example;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "users")
+public class User {
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Column(name = "user_name")
+    private String name;
+
+    private int age;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
+
+    @Transient
+    private String displayLabel;
+}
+""",
+        encoding="utf-8",
+    )
+    (source_root / "Department.java").write_text(
+        """
+package com.example;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity(name = "DepartmentEntity")
+public class Department {
+    @Id
+    private Long id;
+    private String name;
+}
+""",
+        encoding="utf-8",
+    )
+    (source_root / "Account.java").write_text(
+        """
+package com.example;
+
+import jakarta.persistence.*;
+
+@Entity
+public class Account {
+    private Long id;
+    private String email;
+    private String internalCode;
+
+    @Id
+    public Long getId() {
+        return id;
+    }
+
+    @Column(name = "email_address")
+    public String getEmail() {
+        return email;
+    }
+}
+""",
+        encoding="utf-8",
+    )
+
+    jpa_schema = jpa_schema_handler(str(project_root))
+
+assert jpa_schema["ok"] is True
+assert jpa_schema["data"]["entity_count"] == 3
+entities = {entity["class_name"]: entity for entity in jpa_schema["data"]["entities"]}
+assert entities["User"]["table_name"] == "users"
+assert entities["User"]["access"] == "field"
+assert entities["User"]["id_attributes"] == ["id"]
+user_attrs = {attr["name"]: attr for attr in entities["User"]["attributes"]}
+assert user_attrs["name"]["column_name"] == "user_name"
+assert user_attrs["department"]["relationship"] == "ManyToOne"
+assert "displayLabel" not in user_attrs
+assert entities["Department"]["entity_name"] == "DepartmentEntity"
+assert entities["Account"]["access"] == "property"
+account_attrs = {attr["name"]: attr for attr in entities["Account"]["attributes"]}
+assert account_attrs["email"]["column_name"] == "email_address"
+assert "internalCode" not in account_attrs
+print("40. test_jpa_schema_source_scan ✓")
+
+missing_jpa_project = jpa_schema_handler("")
+assert missing_jpa_project["ok"] is False
+assert missing_jpa_project["error"]["code"] == "missing_jpa_project"
+print("41. test_jpa_schema_missing_project_error ✓")
+
+with TemporaryDirectory() as tmpdir:
+    project_root = Path(tmpdir)
+    source_root = project_root / "src" / "main" / "java" / "com" / "example"
+    source_root.mkdir(parents=True)
+    (source_root / "User.java").write_text(
+        """
+package com.example;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "users")
+public class User {
+    @Id
+    private Long id;
+}
+""",
+        encoding="utf-8",
+    )
+    rc, payload = run_cli(["--command", "jpa_schema", "--jpa-project", str(project_root), "--format", "json"])
+
+assert rc == 0
+assert payload["ok"] is True
+assert payload["data"]["entity_count"] == 1
+assert payload["data"]["entities"][0]["class_name"] == "User"
+print("42. test_docs_jpa_schema_example ✓")
+
 print("")
-print("=== ALL 39 TESTS PASS ✅ ===")
+print("=== ALL 42 TESTS PASS ✅ ===")

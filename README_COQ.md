@@ -5,7 +5,7 @@ Date: 2026-04-09
 ## Result
 
 ```text
-39/39 executable baseline tests pass
+42/42 executable baseline tests pass
 SQLite-first CLI verified
 Explicit write contract verified
 Shared DB URI contract verified
@@ -21,6 +21,7 @@ PostgreSQL schema, query, insert, update, and delete smoke verified
 - `update`
 - `delete`
 - `natural`
+- `jpa_schema`
 - `provider_add`
 - `provider_list`
 - `provider_remove`
@@ -43,6 +44,7 @@ PostgreSQL schema, query, insert, update, and delete smoke verified
 | PostgreSQL delete smoke | Working baseline | local proof recorded on 2026-04-08 |
 | Docs example smoke | Working baseline | key documented CLI examples are exercised in tests |
 | Natural language | Baseline only | heuristic by default; optional registered provider path exists |
+| JPA | Source introspection only | `jpa_schema` scans annotation-based entity source; JPQL runtime execution is not implemented |
 
 ## Verification Commands
 
@@ -63,10 +65,11 @@ bash scripts/run_postgresql_local_smoke.sh
 - `natural` defaults to simple fixed SQL patterns
 - `natural --provider-name ...` can route through a registered provider for structured SQL drafting
 - provider-backed natural is experimental and secondary to the PostgreSQL proof track
+- `jpa_schema --jpa-project ...` can provide entity model context for Java/JPA projects
 - the PostgreSQL smoke runner checks `PATH` for PostgreSQL binaries before falling back to known Homebrew paths
 
 Version: v0.7.0
-Last Updated: 2026-04-09
+Last Updated: 2026-04-10
 Status: Baseline verified with experimental PostgreSQL schema, query, insert, update, and delete proof
 Reference: `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 Smoke Result: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`

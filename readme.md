@@ -14,6 +14,7 @@ python3 main.py --command insert --db example.db --write --sql "INSERT INTO user
 python3 main.py --command update --db example.db --write --sql "UPDATE users SET age = 21 WHERE id = 1"
 python3 main.py --command delete --db example.db --write --sql "DELETE FROM users WHERE id = 1"
 python3 main.py --command natural --db example.db --sql "show users"
+python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
 python3 main.py --command provider_list
 python3 main.py --command provider_test --provider-name local_ollama
 ```
@@ -21,12 +22,25 @@ python3 main.py --command provider_test --provider-name local_ollama
 ## Verified Baseline
 
 - `main.py` routes to the package handlers in `sql_cli/cli.py`
-- `python3 sql_cli/tests/test_core.py` passes with 39 tests
+- `python3 sql_cli/tests/test_core.py` passes with 42 tests
 - SQLite is the working backend
 - `--db-uri` is the preferred multi-backend connection contract
 - `query` is read-only unless `--write` is provided
 - `insert`, `update`, and `delete` require both `--write` and explicit SQL
 - provider registry commands are available for optional `natural` routing
+- `jpa_schema` can inspect annotation-based JPA entity source as an ORM/model context
+
+## Agent Skill
+
+CoQuery can now be used as a Codex skill through `skills/coquery-cli`.
+
+```bash
+python3 skills/coquery-cli/scripts/coquery_agent.py verify
+python3 skills/coquery-cli/scripts/coquery_agent.py demo
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command schema --db example.db
+```
+
+The skill is also installable under `~/.codex/skills/coquery-cli` for `$coquery-cli` discovery in future Codex sessions.
 
 ## Current Limits
 
@@ -35,6 +49,7 @@ python3 main.py --command provider_test --provider-name local_ollama
 - write commands do not yet have dry-run or transaction support
 - natural-language support is lightweight by default; provider-backed quality is not broadly proven
 - provider-backed natural is currently a secondary experimental track
+- JPA support is source introspection only; it does not execute JPQL or run a Java persistence unit
 
 ## Recommended Verification
 
@@ -42,6 +57,7 @@ python3 main.py --command provider_test --provider-name local_ollama
 python3 main.py --help
 python3 main.py --command schema --db example.db --format json
 python3 sql_cli/tests/test_core.py
+python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
 bash scripts/run_postgresql_local_smoke.sh
 ```
 
@@ -50,5 +66,5 @@ Runner note:
 - `scripts/run_postgresql_local_smoke.sh` checks `PATH` for PostgreSQL binaries before falling back to known Homebrew paths
 
 Version: v0.7.0
-Last Updated: 2026-04-09
+Last Updated: 2026-04-10
 Status: SQLite-first baseline verified with experimental PostgreSQL schema, query, insert, update, and delete proof

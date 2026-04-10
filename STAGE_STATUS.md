@@ -1,7 +1,7 @@
 # CoQuery Stage Status Report
 
 Version: v0.7.0
-Last Update: 2026-04-09
+Last Update: 2026-04-10
 
 ## Current Status
 
@@ -10,6 +10,8 @@ SQLite-first baseline verified
 Explicit write contract frozen
 Shared DB URI contract implemented
 PostgreSQL schema, query, insert, update, and delete smoke proved
+Codex skill package added for agent-side reuse
+JPA entity source introspection added as an ORM/model track
 Phase 5 remains narrow and experimental
 ```
 
@@ -33,6 +35,7 @@ Phase 5 remains narrow and experimental
 - `update`
 - `delete`
 - `natural`
+- `jpa_schema`
 - `provider_add`
 - `provider_list`
 - `provider_remove`
@@ -51,6 +54,12 @@ Write-command baseline:
 | PostgreSQL | Experimental (narrow read + write) | local smoke proof succeeded for `schema`, `query`, `insert`, `update`, and `delete`; broader backend support is still not proven |
 | MySQL | Stub | URI contract exists; runtime returns structured placeholder error |
 
+ORM/model support:
+
+| Track | Status | Notes |
+|-------|--------|-------|
+| JPA | Experimental source introspection | `jpa_schema` scans annotation-based entity source; JPQL runtime execution is not implemented |
+
 Natural-language note:
 
 - heuristic by default
@@ -62,6 +71,7 @@ Natural-language note:
 python3 main.py --help
 python3 main.py --command schema --db example.db --format json
 python3 sql_cli/tests/test_core.py
+python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
 bash scripts/run_postgresql_local_smoke.sh
 ```
 
@@ -69,7 +79,9 @@ bash scripts/run_postgresql_local_smoke.sh
 
 1. align docs to executable behavior
 2. keep the PostgreSQL smoke runner repeatable and repo-managed
-3. use the verification matrix before changing any broader multi-DB status claim
+3. keep `skills/coquery-cli` aligned with runnable CLI behavior
+4. keep JPA labelled as ORM/model support until JPQL runtime proof exists
+5. use the verification matrix before changing any broader multi-DB status claim
 
-Last Updated: 2026-04-09
-Phase Status: SQLite-first baseline verified with PostgreSQL schema, query, insert, update, and delete smoke proof
+Last Updated: 2026-04-10
+Phase Status: SQLite-first baseline verified with PostgreSQL schema, query, insert, update, and delete smoke proof plus agent skill packaging and JPA source introspection

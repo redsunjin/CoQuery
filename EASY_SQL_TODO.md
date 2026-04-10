@@ -1,7 +1,7 @@
 # CoQuery Todo List
 
 Version: v0.7.x stabilization
-Last Updated: 2026-04-09
+Last Updated: 2026-04-10
 
 ## Official Next Tasks
 
@@ -136,6 +136,44 @@ Current output:
 - `PROVIDER_TRACK_DECISION_2026-04-09.md`
 - `STATE_REVIEW_2026-04-09.md`
 
+### 8. Agent reuse package
+
+Goal:
+
+- make the verified CoQuery CLI usable by other Codex sessions as an agent skill
+
+Open tasks:
+
+- [x] create repo-local `skills/coquery-cli` skill package
+- [x] add a JSON-oriented agent wrapper for `verify`, `demo`, and single-command `run`
+- [x] validate the skill package
+- [x] install the skill under `~/.codex/skills/coquery-cli`
+
+Current output:
+
+- `skills/coquery-cli/SKILL.md`
+- `skills/coquery-cli/scripts/coquery_agent.py`
+- `skills/coquery-cli/references/status.md`
+- `skills/coquery-cli/references/commands.md`
+
+### 9. JPA ORM/model support
+
+Goal:
+
+- support Java/JPA projects without pretending JPA is a direct database backend
+
+Open tasks:
+
+- [x] define JPA as an ORM/model track
+- [x] add annotation-based source introspection through `jpa_schema`
+- [x] keep JPQL runtime execution out of scope until a Java runner proof exists
+
+Current output:
+
+- `JPA_SUPPORT_PLAN_2026-04-10.md`
+- `sql_cli/jpa.py`
+- `python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json`
+
 ## Recently Closed Stabilization Slices
 
 - [x] truth-align top-level status docs
@@ -146,6 +184,8 @@ Current output:
 - [x] add docs-example smoke coverage to the baseline test file
 - [x] add persona review checkpoint
 - [x] add first real PostgreSQL `schema`, `query`, `insert`, `update`, and `delete` smoke
+- [x] package CoQuery as an agent-usable Codex skill
+- [x] add first JPA entity source introspection slice
 
 ## Reference Documents
 
@@ -172,6 +212,8 @@ python3 main.py --help
 python3 main.py --command schema --db example.db --format json
 python3 sql_cli/tests/test_core.py
 python3 -c "import sql_cli.cli, sql_cli.core, sql_cli.db_new"
+python3 skills/coquery-cli/scripts/coquery_agent.py verify
+python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
 ```
 
 ## Current Direction

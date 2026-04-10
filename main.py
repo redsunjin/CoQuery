@@ -12,6 +12,7 @@ from sql_cli.cli import (
     delete_handler,
     generate_handler,
     insert_handler,
+    jpa_schema_handler,
     natural_handler,
     provider_add_handler,
     provider_list_handler,
@@ -41,7 +42,7 @@ def main() -> int:
         "--command",
         type=str,
         default=None,
-        help="schema, query, generate, insert, update, delete, natural, provider_add, provider_list, provider_remove, provider_test",
+        help="schema, query, generate, insert, update, delete, natural, jpa_schema, provider_add, provider_list, provider_remove, provider_test",
     )
     parser.add_argument("--db", type=str, default="example.db", help="Legacy SQLite path or DB URI")
     parser.add_argument("--db-uri", type=str, default=None, help="Preferred multi-backend database URI")
@@ -53,6 +54,7 @@ def main() -> int:
     parser.add_argument("--model-name", type=str, default=None, help="LLM model name for provider registration")
     parser.add_argument("--base-url", type=str, default=None, help="Base URL for provider registration")
     parser.add_argument("--api-key-env", type=str, default=None, help="Environment variable name for API key")
+    parser.add_argument("--jpa-project", type=str, default=None, help="Path to a Java/JPA project or .java entity file")
     parser.add_argument("--format", type=str, default="json", help="Output format")
     parser.add_argument(
         "--write",
@@ -64,7 +66,7 @@ def main() -> int:
 
     if not args.command:
         print("CoQuery v0.7.0")
-        print("commands: schema, query, generate, insert, update, delete, natural, provider_add, provider_list, provider_remove, provider_test")
+        print("commands: schema, query, generate, insert, update, delete, natural, jpa_schema, provider_add, provider_list, provider_remove, provider_test")
         print("write commands require explicit --write and --sql")
         print("prefer --db-uri for multi-backend contracts; --db remains SQLite-first compatibility")
         return 0
@@ -86,6 +88,8 @@ def main() -> int:
         result = delete_handler(db_target, args.sql, parsed_params, args.write)
     elif args.command == "natural":
         result = natural_handler(db_target, args.sql, args.format, args.provider_name)
+    elif args.command == "jpa_schema":
+        result = jpa_schema_handler(args.jpa_project, args.format)
     elif args.command == "provider_add":
         result = provider_add_handler(
             args.provider_name,
