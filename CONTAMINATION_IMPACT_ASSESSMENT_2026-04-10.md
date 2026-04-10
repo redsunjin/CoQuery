@@ -203,3 +203,21 @@ Recommended next action:
 4. Decide which post-`178c823` tracks are CoQuery roadmap items versus misplaced `rfs-cli` work.
 
 This keeps all work recoverable while giving reviewers a clean place to rebuild the intended CoQuery boundary.
+
+## 9. Follow-Up Decision
+
+After review, the reduced cleanup PR was closed unmerged:
+
+- PR: `#1` `Review reduced CoQuery core stabilization branch`
+- branch: `cleanup/core-stabilization-2026-04-10`
+- result: closed, not merged
+
+The current active direction is to keep `main` as the active CoQuery line and preserve the DB/JPA knowledge layer, JPA source introspection, and Codex skill packaging.
+
+Provider-backed natural remains secondary and experimental.
+
+The reduced cleanup branch remains useful as a comparison point, but it is not the active direction unless a future explicit decision reverses this one.
+
+Decision record:
+
+- `SCOPE_DECISION_2026-04-10.md`

@@ -17,6 +17,12 @@ Verified on 2026-04-10
 - PostgreSQL schema, query, insert, update, and delete smoke have succeeded
 ```
 
+Scope decision:
+
+- `main` remains the active line.
+- PR `#1` for the reduced cleanup branch was closed unmerged.
+- DB/JPA knowledge, JPA source introspection, and Codex skill packaging are retained experimental tracks.
+
 ---
 
 ## Current Harness

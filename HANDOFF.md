@@ -6,6 +6,7 @@ Date: 2026-04-10
 
 CoQuery is no longer in emergency repair.
 The verified state is now a working SQLite-first CLI baseline.
+The reduced cleanup PR was closed unmerged; current `main` remains the active line with DB/JPA knowledge retained.
 
 ## Verified Baseline
 
@@ -55,9 +56,10 @@ The verified state is now a working SQLite-first CLI baseline.
 
 ## Official Next Work
 
-1. Keep top-level docs aligned with the verified baseline
-2. Keep the PostgreSQL smoke runner repeatable and repo-managed
-3. Use the verification matrix and scope lock to gate any broader Phase 5 claim changes
+1. Add schema-detail knowledge for columns, indexes, foreign keys, and constraints
+2. Keep top-level docs aligned with the verified baseline
+3. Keep the PostgreSQL smoke runner repeatable and repo-managed
+4. Use the verification matrix and scope lock to gate any broader Phase 5 claim changes
 
 Current runner note:
 
@@ -79,6 +81,7 @@ Current runner note:
 - `PROVIDER_TRACK_DECISION_2026-04-09.md`
 - `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
 - `POSTGRESQL_SCOPE_LOCK_2026-04-07.md`
+- `SCOPE_DECISION_2026-04-10.md`
 
 ## Recommended Verification
 

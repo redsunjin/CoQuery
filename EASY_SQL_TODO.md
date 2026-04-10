@@ -8,6 +8,12 @@ Last Updated: 2026-04-10
 These tasks reflect the current stabilization loop.
 Do not treat old recovery steps as active work anymore.
 
+Scope decision:
+
+- `main` remains active after closing the reduced cleanup PR unmerged.
+- DB/JPA knowledge, JPA source introspection, and Codex skill packaging are retained experimental tracks.
+- Provider-backed natural remains secondary and experimental.
+
 ### 1. Shared backend selector and DB URI contract
 
 Goal:

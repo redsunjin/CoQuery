@@ -13,6 +13,12 @@ PostgreSQL schema, query, insert, update, and delete smoke verified
 Local DB/JPA knowledge-first generation planning verified
 ```
 
+Scope decision:
+
+- current `main` is retained as the active line
+- reduced cleanup PR `#1` was closed unmerged
+- DB/JPA knowledge, JPA source introspection, and Codex skill packaging stay in scope as retained experimental tracks
+
 ## Verified Commands
 
 - `schema`
