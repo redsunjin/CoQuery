@@ -26,7 +26,7 @@ python3 main.py --command provider_test --provider-name local_ollama
 ## Verified Baseline
 
 - `main.py` routes to the package handlers in `sql_cli/cli.py`
-- `python3 sql_cli/tests/test_core.py` passes with 63 tests
+- `python3 sql_cli/tests/test_core.py` passes with 67 tests
 - SQLite is the working backend
 - `--db-uri` is the preferred multi-backend connection contract
 - `query` is read-only unless `--write` is provided
@@ -35,6 +35,7 @@ python3 main.py --command provider_test --provider-name local_ollama
 - `jpa_schema` can inspect annotation-based JPA entity source as an ORM/model context
 - `db_knowledge` can retrieve local SQL/JPA dialect and write-safety rules before using an LLM/provider
 - `schema_detail` exposes normalized columns, keys, indexes, constraints, and SQLite create SQL for agent-side knowledge use
+- `generate` and simple `natural` requests validate table and simple column identifiers against `schema_detail`
 - generation, natural-language, and write-planning paths attach local DB/JPA knowledge context first
 
 ## Agent Skill
@@ -53,7 +54,7 @@ The skill is also installable under `~/.codex/skills/coquery-cli` for `$coquery-
 
 The skill includes a compact DB knowledge seed at `skills/coquery-cli/references/db-knowledge.md`.
 Structured machine-readable rules and coverage metadata now live under `knowledge/`.
-This is enough for basic SQL/JPA boundary decisions, deterministic lookup, normalized schema-detail lookup, and simple local-first planning, but not a complete offline SQL dialect knowledge base.
+This is enough for basic SQL/JPA boundary decisions, deterministic lookup, normalized schema-detail lookup, simple identifier validation, and simple local-first planning, but not a complete offline SQL dialect knowledge base.
 
 ## Current Limits
 
@@ -62,7 +63,7 @@ This is enough for basic SQL/JPA boundary decisions, deterministic lookup, norma
 - write commands do not yet have dry-run or transaction support
 - natural-language support is lightweight by default; provider-backed quality is not broadly proven
 - provider-backed natural is currently a secondary experimental track
-- schema detail can be queried separately, but generated SQL templates do not yet use it for identifier validation
+- generated SQL templates validate basic identifiers, but are not yet relationship-aware, join-aware, or expression-aware
 - JPA support is source introspection only; it does not execute JPQL or run a Java persistence unit
 - DB reference knowledge is currently a seed pack, not a complete local replacement for SQL/JPA documentation
 
@@ -72,6 +73,7 @@ This is enough for basic SQL/JPA boundary decisions, deterministic lookup, norma
 python3 main.py --help
 python3 main.py --command schema --db example.db --format json
 python3 main.py --command schema_detail --db example.db --table users --format json
+python3 main.py --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}' --format json
 python3 sql_cli/tests/test_core.py
 python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
 python3 main.py --command db_knowledge --dialect postgresql --topic pagination
@@ -85,4 +87,4 @@ Runner note:
 
 Version: v0.7.0
 Last Updated: 2026-04-10
-Status: SQLite-first baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete proof, and schema-detail knowledge
+Status: SQLite-first baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete proof, and schema-detail-aware identifier validation

@@ -102,7 +102,7 @@ def build_knowledge_context(
 
 
 def build_generation_context(db_target: str | None, skill_id: str | None) -> dict[str, Any]:
-    topics = ["status", "statements", "schema", "parameters", "safety"]
+    topics = ["status", "statements", "schema", "schema_detail", "parameters", "safety"]
     normalized_skill = (skill_id or "").strip().lower()
     if "join" in normalized_skill:
         topics.append("joins")
@@ -111,8 +111,8 @@ def build_generation_context(db_target: str | None, skill_id: str | None) -> dic
 
 def build_natural_context(db_target: str | None, intent: str, complexity: str) -> dict[str, Any]:
     topics = ["status", "statements", "parameters", "safety"]
-    if intent in {"select", "count"}:
-        topics.append("schema")
+    if intent in {"select", "count", "insert", "update", "delete"}:
+        topics.extend(["schema", "schema_detail"])
     if intent in {"insert", "update", "delete"}:
         topics.append("write_safety")
     if complexity == "high":

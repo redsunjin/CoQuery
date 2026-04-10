@@ -10,6 +10,12 @@ from sql_cli.dialect_rules import CoQueryKnowledgeError, lookup_knowledge
 from sql_cli.jpa import CoQueryJPAError, scan_jpa_project
 from sql_cli.knowledge_planner import build_generation_context, build_write_context
 from sql_cli.llm_registry import CoQueryLLMError, LLMProviderClient, LLMProviderRegistry
+from sql_cli.schema_guard import (
+    generation_schema_requirements,
+    schema_validation_failed,
+    schema_validation_message,
+    validate_schema_identifiers,
+)
 
 WRITE_OPERATIONS = {"INSERT", "UPDATE", "DELETE"}
 
@@ -201,12 +207,54 @@ def generate_handler(
 
         gen = SQLGenerator()
         result = gen.generate(skill or "select_simple", params or {})
+        warnings = result.get("warnings", [])
+        if "error" in result:
+            return {
+                "ok": False,
+                "command": "generate",
+                "sql": result.get("sql", ""),
+                "warnings": warnings,
+                "knowledge_context": knowledge_context,
+                "schema_validation": {
+                    "source": "schema_detail",
+                    "status": "not_checked",
+                    "reason": "generation_error",
+                    "errors": [],
+                    "warnings": [],
+                },
+                "error": result.get("error"),
+            }
+
+        requirements = generation_schema_requirements(skill or "select_simple", params)
+        schema_validation = validate_schema_identifiers(
+            db,
+            requirements["tables"],
+            requirements["columns_by_table"],
+        )
+        warnings.extend(
+            f"schema_validation_unavailable:{warning['code']}"
+            for warning in schema_validation.get("warnings", [])
+        )
+        if schema_validation_failed(schema_validation):
+            return {
+                "ok": False,
+                "command": "generate",
+                "sql": "",
+                "warnings": warnings,
+                "knowledge_context": knowledge_context,
+                "schema_validation": schema_validation,
+                "error": {
+                    "code": "schema_validation_failed",
+                    "message": schema_validation_message(schema_validation),
+                },
+            }
         return {
             "ok": "error" not in result,
             "command": "generate",
             "sql": result.get("sql", ""),
-            "warnings": result.get("warnings", []),
+            "warnings": warnings,
             "knowledge_context": knowledge_context,
+            "schema_validation": schema_validation,
             "error": result.get("error"),
         }
     except Exception as e:
@@ -357,7 +405,9 @@ def natural_handler(
             "requested_provider_name": result.get("requested_provider_name"),
             "provider_skipped": result.get("provider_skipped"),
             "knowledge_context": result.get("knowledge_context"),
-            "error": None,
+            "schema_validation": result.get("schema_validation"),
+            "table_inference": result.get("table_inference"),
+            "error": result.get("error"),
         }
     except CoQueryLLMError as e:
         return _llm_error("natural", e)

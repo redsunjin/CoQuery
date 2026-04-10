@@ -5,13 +5,14 @@ Date: 2026-04-10
 ## Result
 
 ```text
-63/63 executable baseline tests pass
+67/67 executable baseline tests pass
 SQLite-first CLI verified
 Explicit write contract verified
 Shared DB URI contract verified
 PostgreSQL schema, schema_detail, query, insert, update, and delete smoke verified
 Local DB/JPA knowledge-first generation planning verified
 Schema-detail knowledge command verified
+Schema-detail-aware generation and natural identifier validation verified
 ```
 
 Scope decision:
@@ -56,6 +57,7 @@ Scope decision:
 | JPA | Source introspection only | `jpa_schema` scans annotation-based entity source; JPQL runtime execution is not implemented |
 | DB knowledge planner | Seed | generation, natural, and write planning attach local dialect/safety context |
 | Schema detail knowledge | Seed | `schema_detail` exposes normalized columns, keys, indexes, constraints, and SQLite create SQL for verified paths |
+| Schema validation | Seed | `generate` and simple `natural` requests validate table and simple column identifiers against `schema_detail` |
 
 ## Verification Commands
 
@@ -63,6 +65,7 @@ Scope decision:
 python3 main.py --help
 python3 main.py --command schema --db example.db --format json
 python3 main.py --command schema_detail --db example.db --table users --format json
+python3 main.py --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}' --format json
 python3 main.py --command schema --db-uri sqlite:///Users/Agent/ps-workspace/CoQuery/example.db --format json
 python3 sql_cli/tests/test_core.py
 bash scripts/run_postgresql_local_smoke.sh
@@ -75,6 +78,7 @@ bash scripts/run_postgresql_local_smoke.sh
 - full-table `update` and `delete` return a high-risk warning
 - `--db-uri` is preferred for future multi-backend commands
 - `schema_detail` provides normalized schema metadata for agent-side DB knowledge use
+- `generate` and simple `natural` requests can reject unknown tables before returning local SQL
 - `natural` defaults to simple fixed SQL patterns
 - `natural --provider-name ...` skips provider calls for simple covered requests and can route complex requests through a registered provider
 - provider-backed natural is experimental and secondary to the PostgreSQL proof track
@@ -83,6 +87,6 @@ bash scripts/run_postgresql_local_smoke.sh
 
 Version: v0.7.0
 Last Updated: 2026-04-10
-Status: Baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete proof, local DB knowledge-first planning, and schema-detail knowledge
+Status: Baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete proof, local DB knowledge-first planning, and schema-detail-aware identifier validation
 Reference: `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 Smoke Result: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`

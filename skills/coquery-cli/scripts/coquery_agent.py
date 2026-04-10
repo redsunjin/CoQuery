@@ -281,7 +281,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--sql", default=None, help="SQL or natural-language text")
     run.add_argument("--table", default=None, help="Optional table name for schema_detail")
     run.add_argument("--skill", default=None, help="SQL generation skill id")
-    run.add_argument("--params", default=None, help="JSON array of SQL parameters")
+    run.add_argument("--params", default=None, help="JSON parameters payload")
     run.add_argument("--provider-name", default=None, help="Registered provider name")
     run.add_argument("--provider-kind", default=None, help="Provider kind")
     run.add_argument("--model-name", default=None, help="Provider model name")

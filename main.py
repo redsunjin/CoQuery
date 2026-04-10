@@ -51,7 +51,7 @@ def main() -> int:
     parser.add_argument("--sql", type=str, default=None, help="Raw SQL or natural-language text for natural")
     parser.add_argument("--table", type=str, default=None, help="Optional table name for schema_detail")
     parser.add_argument("--skill", type=str, default=None, help="SQL generation skill id")
-    parser.add_argument("--params", type=str, default=None, help="JSON array of SQL parameters")
+    parser.add_argument("--params", type=str, default=None, help="JSON parameters payload")
     parser.add_argument("--provider-name", type=str, default=None, help="Registered LLM provider name")
     parser.add_argument("--provider-kind", type=str, default=None, help="LLM provider kind: ollama, openai_compatible")
     parser.add_argument("--model-name", type=str, default=None, help="LLM model name for provider registration")

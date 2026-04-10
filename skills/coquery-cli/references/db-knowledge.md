@@ -4,9 +4,9 @@ This is a compact offline reference for CoQuery agents. Use it before asking an 
 
 ## Coverage Label
 
-Current level: `schema_detail_seed`
+Current level: `schema_detail_aware_generation_seed`
 
-This file is enough for basic routing, safety decisions, deterministic lookup, normalized schema-detail lookup, and simple local-first planning. It is not enough for full SQL dialect generation, query optimization, or JPQL runtime execution.
+This file is enough for basic routing, safety decisions, deterministic lookup, normalized schema-detail lookup, simple identifier validation, and simple local-first planning. It is not enough for full SQL dialect generation, query optimization, or JPQL runtime execution.
 
 For a machine-readable status, run:
 
@@ -95,6 +95,7 @@ Useful deterministic lookup topics:
 python3 main.py --command db_knowledge --dialect sqlite --topic schema
 python3 main.py --command db_knowledge --dialect sqlite --topic schema_detail
 python3 main.py --command schema_detail --db example.db --table users --format json
+python3 main.py --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}' --format json
 python3 main.py --command db_knowledge --dialect postgresql --topic types
 python3 main.py --command db_knowledge --dialect mysql --topic constraints
 python3 main.py --command db_knowledge --dialect jpql --topic joins
@@ -104,7 +105,7 @@ python3 main.py --command db_knowledge --topic coverage
 
 ## Missing Knowledge Still Needed
 
-- schema-detail-aware generated SQL and identifier validation
+- relationship-aware and join-aware generation from schema_detail foreign keys and constraints
 - deeper dialect-specific generation templates
 - per-dialect syntax snippets for common commands
 - per-dialect placeholder conventions by Python driver

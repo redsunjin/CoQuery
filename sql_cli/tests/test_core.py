@@ -739,7 +739,7 @@ print("52. test_db_knowledge_sqlite_operators ✓")
 knowledge_coverage = db_knowledge_handler(topic="coverage")
 assert knowledge_coverage["ok"] is True
 assert knowledge_coverage["data"]["kind"] == "coverage"
-assert knowledge_coverage["data"]["value"]["coverage_level"] == "schema_detail_seed"
+assert knowledge_coverage["data"]["value"]["coverage_level"] == "schema_detail_aware_generation_seed"
 assert "sqlite" in knowledge_coverage["data"]["value"]["summary"]["dialects"]
 assert "jpql" in knowledge_coverage["data"]["value"]["summary"]["dialects"]
 assert knowledge_coverage["data"]["value"]["remaining_gaps"]
@@ -855,5 +855,42 @@ assert schema_detail_knowledge["data"]["kind"] == "dialect_topic"
 assert "PRAGMA table_info" in schema_detail_knowledge["data"]["value"]["value"]["columns"]
 print("63. test_db_knowledge_schema_detail_topic ✓")
 
+schema_valid_generated = generate_handler(
+    "example.db",
+    "select_simple",
+    params={"table": "users", "cols": ["id", "name"]},
+)
+assert schema_valid_generated["ok"] is True
+assert schema_valid_generated["sql"] == "SELECT ID, NAME FROM USERS"
+assert schema_valid_generated["schema_validation"]["status"] == "validated"
+assert "schema_detail" in schema_valid_generated["knowledge_context"]["topic_names"]
+assert {"table": "users", "column": "id"} in schema_valid_generated["schema_validation"]["validated_columns"]
+print("64. test_generate_validates_schema_detail_columns ✓")
+
+schema_invalid_generated = generate_handler(
+    "example.db",
+    "select_simple",
+    params={"table": "missing_table"},
+)
+assert schema_invalid_generated["ok"] is False
+assert schema_invalid_generated["error"]["code"] == "schema_validation_failed"
+assert schema_invalid_generated["schema_validation"]["errors"][0]["code"] == "unknown_table"
+print("65. test_generate_rejects_unknown_schema_table ✓")
+
+natural_count = natural_handler("example.db", "count users")
+assert natural_count["ok"] is True
+assert natural_count["sql"] == "SELECT COUNT(*) FROM users"
+assert natural_count["schema_validation"]["status"] == "validated"
+assert natural_count["table_inference"]["table"] == "users"
+assert "schema_detail" in natural_count["knowledge_context"]["topic_names"]
+print("66. test_natural_uses_schema_detail_table_inference ✓")
+
+natural_missing_table = natural_handler("example.db", "show missing_table")
+assert natural_missing_table["ok"] is False
+assert natural_missing_table["sql"] is None
+assert natural_missing_table["error"]["code"] == "schema_validation_failed"
+assert natural_missing_table["schema_validation"]["errors"][0]["code"] == "unknown_table"
+print("67. test_natural_rejects_unknown_schema_table ✓")
+
 print("")
-print("=== ALL 63 TESTS PASS ✅ ===")
+print("=== ALL 67 TESTS PASS ✅ ===")

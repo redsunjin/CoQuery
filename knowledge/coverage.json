@@ -1,8 +1,8 @@
 {
   "coverage_report": "coquery_db_knowledge_coverage",
   "generated_on": "2026-04-10",
-  "coverage_level": "schema_detail_seed",
-  "purpose": "Make the current SQL/JPA knowledge layer inspectable, expose normalized schema-detail metadata for supported proof paths, and wire covered generation paths to local facts before asking an LLM/provider.",
+  "coverage_level": "schema_detail_aware_generation_seed",
+  "purpose": "Make the current SQL/JPA knowledge layer inspectable, expose normalized schema-detail metadata for supported proof paths, and validate simple generated and natural-language identifiers locally before asking an LLM/provider.",
   "summary": {
     "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
     "structured_rule_files": [
@@ -16,6 +16,8 @@
     "deterministic_commands": [
       "python3 main.py --command db_knowledge --dialect sqlite --topic schema",
       "python3 main.py --command schema_detail --db example.db --table users --format json",
+      "python3 main.py --command generate --db example.db --skill select_simple --params '{\"table\":\"users\",\"cols\":[\"id\",\"name\"]}' --format json",
+      "python3 main.py --command natural --db example.db --sql 'count users' --format json",
       "python3 main.py --command db_knowledge --dialect postgresql --topic pagination",
       "python3 main.py --command db_knowledge --dialect mysql --topic constraints",
       "python3 main.py --command db_knowledge --dialect jpql --topic joins",
@@ -46,7 +48,7 @@
       "topic": "schema_detail",
       "coverage": "implemented_seed",
       "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
-      "notes": "Exposes normalized columns, primary keys, foreign keys, indexes, constraints, and SQLite create SQL for verified SQLite plus mocked and smoke-testable PostgreSQL paths; MySQL and JPQL remain guidance only."
+      "notes": "Exposes normalized columns, primary keys, foreign keys, indexes, constraints, and SQLite create SQL for verified SQLite plus mocked and smoke-testable PostgreSQL paths; simple generation and natural-language paths now use it for identifier validation."
     },
     {
       "topic": "pagination",
@@ -130,6 +132,7 @@
       "which CoQuery write commands require --write",
       "basic schema introspection templates by supported/planned dialect",
       "normalized schema-detail metadata for SQLite and the PostgreSQL proof path",
+      "simple schema-backed table and column validation for generate and natural",
       "basic pagination templates by dialect",
       "basic parameter placeholder conventions",
       "common scalar type mappings",
@@ -169,14 +172,25 @@
         "test_schema_detail_postgresql_success_path",
         "test_db_knowledge_schema_detail_topic"
       ]
+    },
+    {
+      "name": "schema_detail_aware_generation",
+      "status": "implemented_seed",
+      "description": "CoQuery generation and simple natural-language drafting validate table and simple column identifiers against schema_detail output before returning local SQL.",
+      "verification": [
+        "test_generate_validates_schema_detail_columns",
+        "test_generate_rejects_unknown_schema_table",
+        "test_natural_uses_schema_detail_table_inference",
+        "test_natural_rejects_unknown_schema_table"
+      ]
     }
   ],
   "remaining_gaps": [
     {
       "id": "generation_depth",
       "severity": "high",
-      "description": "Local knowledge is consulted before covered generation paths, and schema-detail metadata can be queried, but generated SQL templates do not yet validate identifiers against schema_detail output.",
-      "next_step": "Use schema_detail output to select dialect-specific templates and validate table/column identifiers before returning generated SQL."
+      "description": "Local generation and simple natural-language paths now validate basic identifiers with schema_detail, but templates are still shallow and not relationship-aware, join-aware, or expression-aware.",
+      "next_step": "Use schema_detail relationships and constraints to build safer join templates and better column selection."
     },
     {
       "id": "function_matrix",
@@ -204,9 +218,9 @@
     }
   ],
   "next_gate": {
-    "name": "schema_detail_aware_generation",
-    "pass_condition": "CoQuery generation and natural-language drafting can consume schema_detail metadata to validate identifiers and shape safe SELECT templates.",
-    "verification": "Add tests showing generated SQL uses schema_detail output for table and column validation without provider calls on covered simple requests."
+    "name": "relationship_aware_generation",
+    "pass_condition": "CoQuery can use schema_detail foreign keys, indexes, and constraints to shape join templates and safer column selection for covered simple requests.",
+    "verification": "Add fixtures and tests showing join generation uses schema_detail relationships without provider calls."
   },
   "official_sources": [
     {

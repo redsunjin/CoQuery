@@ -32,6 +32,7 @@ If the skill has been installed outside the repository, pass `--repo /path/to/Co
 - Treat JPA as ORM/model source introspection unless a Java runtime proof exists.
 - Use explicit SQL plus `--write` for `insert`, `update`, and `delete`.
 - Use `natural` as an assistive drafting path; simple covered requests use local knowledge first, and provider-backed natural is a fallback for more complex requests.
+- Expect `generate` and simple `natural` requests to validate basic identifiers against `schema_detail`; do not claim relationship-aware join generation yet.
 - Prefer JSON output for agent consumption.
 
 ## Common Tasks
@@ -66,6 +67,7 @@ Inspect normalized schema detail:
 
 ```bash
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command schema_detail --db example.db --table users
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}'
 ```
 
 Inspect JPA entity source:

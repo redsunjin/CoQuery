@@ -5,6 +5,12 @@ from __future__ import annotations
 
 from sql_cli.knowledge_planner import build_natural_context, can_answer_natural_locally
 from sql_cli.llm_registry import LLMProviderClient, LLMProviderRegistry
+from sql_cli.schema_guard import (
+    infer_table_from_natural_text,
+    schema_validation_failed,
+    schema_validation_message,
+    validate_schema_identifiers,
+)
 
 
 class NLIntentParser:
@@ -29,20 +35,20 @@ class NLIntentParser:
 
 
 class NLToSQLConverter:
-    def convert(self, nl_text: str, intent: str | None = None) -> dict[str, str]:
+    def convert(self, nl_text: str, intent: str | None = None, table: str = "users") -> dict[str, str]:
         if intent is None:
             intent = NLIntentParser().parse(nl_text)
         if intent == "count":
-            return {"sql": "SELECT COUNT(*) FROM users"}
+            return {"sql": f"SELECT COUNT(*) FROM {table}"}
         if intent == "select":
-            return {"sql": "SELECT * FROM users"}
+            return {"sql": f"SELECT * FROM {table}"}
         if intent == "insert":
-            return {"sql": "INSERT INTO users VALUES (?, ?)"}
+            return {"sql": f"INSERT INTO {table} VALUES (?, ?)"}
         if intent == "update":
-            return {"sql": "UPDATE users SET age = ?"}
+            return {"sql": f"UPDATE {table} SET age = ?"}
         if intent == "delete":
-            return {"sql": "DELETE FROM users"}
-        return {"sql": "SELECT * FROM users"}
+            return {"sql": f"DELETE FROM {table}"}
+        return {"sql": f"SELECT * FROM {table}"}
 
 
 class NaturalLanguageEngine:
@@ -55,9 +61,45 @@ class NaturalLanguageEngine:
     def process(self, nl_text: str) -> dict[str, object]:
         complexity = self.parser.estimate_complexity(nl_text)
         intent = self.parser.parse(nl_text)
-        sql_result = self.converter.convert(nl_text, intent)
+        table_inference = infer_table_from_natural_text(self.db_target, nl_text)
+        table = str(table_inference.get("table") or "users")
+        sql_result = self.converter.convert(nl_text, intent, table)
         sql = sql_result.get("sql")
         knowledge_context = build_natural_context(self.db_target, intent, complexity)
+        schema_validation = (
+            validate_schema_identifiers(self.db_target, [table])
+            if complexity == "low"
+            else {
+                "source": "schema_detail",
+                "status": "not_checked",
+                "reason": "high_complexity_request",
+                "checked_tables": [],
+                "errors": [],
+                "warnings": [],
+            }
+        )
+
+        if schema_validation_failed(schema_validation):
+            return {
+                "intent": intent,
+                "sql": None,
+                "complexity": complexity,
+                "confidence": 0.0,
+                "provider_name": None,
+                "provider_kind": None,
+                "model_name": None,
+                "requested_provider_name": self.provider_name,
+                "provider_skipped": True,
+                "knowledge_context": knowledge_context,
+                "schema_validation": schema_validation,
+                "table_inference": table_inference,
+                "mode": "local_knowledge",
+                "ok": False,
+                "error": {
+                    "code": "schema_validation_failed",
+                    "message": schema_validation_message(schema_validation),
+                },
+            }
 
         if self.provider_name and can_answer_natural_locally(intent, complexity, sql, knowledge_context):
             return {
@@ -71,8 +113,11 @@ class NaturalLanguageEngine:
                 "requested_provider_name": self.provider_name,
                 "provider_skipped": True,
                 "knowledge_context": knowledge_context,
+                "schema_validation": schema_validation,
+                "table_inference": table_inference,
                 "mode": "local_knowledge",
                 "ok": bool(sql),
+                "error": None,
             }
 
         if self.provider_name:
@@ -89,8 +134,11 @@ class NaturalLanguageEngine:
                 "requested_provider_name": self.provider_name,
                 "provider_skipped": False,
                 "knowledge_context": knowledge_context,
+                "schema_validation": schema_validation,
+                "table_inference": table_inference,
                 "mode": "provider",
                 "ok": bool(result["sql"]),
+                "error": None,
             }
 
         return {
@@ -104,6 +152,9 @@ class NaturalLanguageEngine:
             "requested_provider_name": None,
             "provider_skipped": False,
             "knowledge_context": knowledge_context,
+            "schema_validation": schema_validation,
+            "table_inference": table_inference,
             "mode": "heuristic",
             "ok": bool(sql),
+            "error": None,
         }

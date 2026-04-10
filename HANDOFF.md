@@ -12,13 +12,14 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 
 - `main.py` is a thin entry point that routes to `sql_cli/cli.py`
 - the executable command set is `schema`, `schema_detail`, `query`, `generate`, `insert`, `update`, `delete`, `natural`, `jpa_schema`, `provider_add`, `provider_list`, `provider_remove`, and `provider_test`
-- `python3 sql_cli/tests/test_core.py` passes with 63 baseline tests
+- `python3 sql_cli/tests/test_core.py` passes with 67 baseline tests
 - `python3 main.py --help` works in the current environment
 - `CoQueryDB` works for SQLite file paths and `sqlite://` URIs
 - `--db-uri` is now the shared multi-backend connection contract
 - write commands require explicit `--write` confirmation and explicit SQL
 - PostgreSQL `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` have verified local smoke results
 - `schema_detail` exposes normalized columns, keys, indexes, constraints, and SQLite create SQL
+- `generate` and simple `natural` requests validate basic identifiers against `schema_detail`
 
 ## What You Can Rely On
 
@@ -34,6 +35,7 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 - inspectable SQL/JPA knowledge coverage through `db_knowledge --topic coverage`
 - inspectable schema-detail topic through `db_knowledge --topic schema_detail`
 - local DB/JPA knowledge context attached to generation, natural, and write planning
+- schema-detail-backed table and simple column validation for covered generation and natural requests
 - structured write results with `affected_rows`, `warnings`, and `safety_level`
 
 ## What Is Not Complete
@@ -44,7 +46,7 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 - provider-backed natural as a primary product track
 - JPQL runtime execution or Spring Data JPA integration
 - a stable multi-DB interface
-- schema-detail-aware SQL generation and identifier validation
+- relationship-aware SQL generation and join inference from schema detail
 
 ## Important Cautions
 
@@ -59,7 +61,7 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 
 ## Official Next Work
 
-1. Wire schema_detail output into SQL generation and natural-language identifier validation
+1. Use schema_detail relationships and constraints for safer join generation
 2. Keep top-level docs aligned with the verified baseline
 3. Keep the PostgreSQL smoke runner repeatable and repo-managed
 4. Use the verification matrix and scope lock to gate any broader Phase 5 claim changes
@@ -92,6 +94,7 @@ Current runner note:
 python3 main.py --help
 python3 main.py --command schema --db example.db --format json
 python3 main.py --command schema_detail --db example.db --table users --format json
+python3 main.py --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}' --format json
 python3 sql_cli/tests/test_core.py
 python3 -c "import sql_cli.cli, sql_cli.core, sql_cli.db_new"
 python3 main.py --command db_knowledge --topic coverage
@@ -99,5 +102,5 @@ bash scripts/run_postgresql_local_smoke.sh
 ```
 
 Last Updated: 2026-04-10
-Status: SQLite-first baseline verified with PostgreSQL schema, schema_detail, query, insert, update, delete smoke proof, local DB knowledge-first planning, and schema-detail knowledge
-Next: wire schema_detail into generation and natural-language identifier validation before broadening generation claims
+Status: SQLite-first baseline verified with PostgreSQL schema, schema_detail, query, insert, update, delete smoke proof, local DB knowledge-first planning, and schema-detail-aware identifier validation
+Next: use schema_detail relationships for join generation before broadening generation claims

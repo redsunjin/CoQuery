@@ -9,13 +9,14 @@
 
 ```text
 Verified on 2026-04-10
-- 63 executable baseline tests pass
+- 67 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
 - explicit write contract is enforced
 - shared DB URI contract is implemented
 - PostgreSQL schema, schema_detail, query, insert, update, and delete smoke have succeeded
 - schema-detail knowledge command is verified for SQLite and the PostgreSQL proof path
+- schema-detail-aware identifier validation is verified for generate and simple natural paths
 ```
 
 Scope decision:
@@ -84,7 +85,7 @@ Current executable baseline:
 python3 sql_cli/tests/test_core.py
 ```
 
-This passes 63 baseline tests covering:
+This passes 67 baseline tests covering:
 
 - SQL generation
 - SQL validation
@@ -100,6 +101,7 @@ This passes 63 baseline tests covering:
 - DB/JPA knowledge lookup and coverage reporting
 - local DB/JPA knowledge context for generation, natural, and write planning
 - normalized schema-detail metadata for SQLite and mocked PostgreSQL paths
+- schema-detail-backed table and simple column validation for generate and natural
 
 ---
 
@@ -111,7 +113,7 @@ This passes 63 baseline tests covering:
 - no transaction or dry-run layer exists yet
 - natural-language behavior is lightweight by default; provider-backed quality and backend parity are not broadly proven
 - provider-backed natural is currently a secondary experimental track
-- schema detail can be queried separately, but generated SQL templates do not yet use it for identifier validation
+- generated SQL templates validate basic identifiers, but are not yet relationship-aware, join-aware, or expression-aware
 - JPA support is source introspection only; JPQL runtime execution is not implemented
 - older docs before the 2026-04-04 repair may overstate completion
 
@@ -142,6 +144,10 @@ python3 main.py --command schema --db example.db --format json
 # inspect normalized schema detail
 python3 main.py --command schema_detail --db example.db --table users --format json
 
+# generate with schema-detail validation
+python3 main.py --command generate --db example.db --skill select_simple \
+  --params '{"table":"users","cols":["id","name"]}' --format json
+
 # preferred multi-backend form
 python3 main.py --command schema --db-uri sqlite:///Users/Agent/ps-workspace/CoQuery/example.db --format json
 
@@ -165,7 +171,7 @@ python3 sql_cli/tests/test_core.py
 
 ## Next Steps
 
-1. wire schema_detail output into generation and natural-language identifier validation
+1. use schema_detail relationships and constraints for safer join generation
 2. keep status docs aligned with observed behavior
 3. keep the PostgreSQL probe runner repeatable and less ad hoc
 4. use the verification matrix before changing any broader multi-DB status claim
