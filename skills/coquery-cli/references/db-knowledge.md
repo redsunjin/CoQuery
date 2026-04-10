@@ -4,9 +4,9 @@ This is a compact offline reference for CoQuery agents. Use it before asking an 
 
 ## Coverage Label
 
-Current level: `structured_reference_seed`
+Current level: `local_knowledge_first_seed`
 
-This file is enough for basic routing and safety decisions. It is not enough for full SQL dialect generation, query optimization, or JPQL runtime execution.
+This file is enough for basic routing, safety decisions, deterministic lookup, and simple local-first planning. It is not enough for full SQL dialect generation, query optimization, or JPQL runtime execution.
 
 For a machine-readable status, run:
 
@@ -85,7 +85,7 @@ Use this order:
 1. Read `status.md` to avoid overclaims.
 2. Read `commands.md` for exact runnable command shapes.
 3. Read this file for dialect/JPA boundaries.
-4. Use an LLM/provider only if the needed rule is absent or the user asks for generative help.
+4. Use an LLM/provider only if the needed rule is absent, the request is complex, or the user asks for generative help.
 
 Useful deterministic lookup topics:
 
@@ -100,7 +100,8 @@ python3 main.py --command db_knowledge --topic coverage
 
 ## Missing Knowledge Still Needed
 
-- generation and natural-language paths wired to consult local rules before providers
+- schema-detail knowledge for columns, indexes, foreign keys, and constraints
+- deeper dialect-specific generation templates
 - per-dialect syntax snippets for common commands
 - per-dialect placeholder conventions by Python driver
 - date/time function matrix

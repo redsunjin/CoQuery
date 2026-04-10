@@ -36,6 +36,8 @@ python3 main.py --command provider_test --provider-name local_ollama
 python3 main.py --command natural --db example.db --sql "show users" --provider-name local_ollama --format json
 ```
 
+For simple covered natural-language requests, `natural --provider-name ...` returns `mode: local_knowledge` and `provider_skipped: true`. More complex requests can still fall back to provider mode.
+
 PostgreSQL smoke:
 
 ```bash

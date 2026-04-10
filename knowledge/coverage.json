@@ -1,8 +1,8 @@
 {
   "coverage_report": "coquery_db_knowledge_coverage",
   "generated_on": "2026-04-10",
-  "coverage_level": "structured_reference_seed",
-  "purpose": "Make the current SQL/JPA knowledge layer inspectable so agents can use local facts before asking an LLM/provider.",
+  "coverage_level": "local_knowledge_first_seed",
+  "purpose": "Make the current SQL/JPA knowledge layer inspectable and wire covered generation paths to local facts before asking an LLM/provider.",
   "summary": {
     "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
     "structured_rule_files": [
@@ -126,7 +126,9 @@
       "basic parameter placeholder conventions",
       "common scalar type mappings",
       "common operator, join, constraint, and upsert patterns",
-      "JPQL vs SQL naming and runtime boundaries"
+      "JPQL vs SQL naming and runtime boundaries",
+      "simple natural-language SQL drafting without provider calls",
+      "generation and write planning context for dialect and safety rules"
     ],
     "still_needs_llm_or_external_docs": [
       "complex query rewrites",
@@ -138,12 +140,24 @@
       "runtime-specific JPA provider behavior"
     ]
   },
+  "implemented_gates": [
+    {
+      "name": "local_knowledge_first_generation",
+      "status": "implemented_seed",
+      "description": "Generation, natural, and write planning paths now attach local DB/JPA knowledge context before provider use; simple covered natural requests skip provider calls.",
+      "verification": [
+        "test_natural_skips_provider_for_local_knowledge",
+        "test_generate_uses_local_knowledge_context",
+        "test_write_uses_local_knowledge_context"
+      ]
+    }
+  ],
   "remaining_gaps": [
     {
-      "id": "generation_integration",
+      "id": "generation_depth",
       "severity": "high",
-      "description": "SQL generation and natural routing do not yet consult local knowledge before provider calls.",
-      "next_step": "Add a planner/validator that retrieves db_knowledge by dialect and topic before generation."
+      "description": "Local knowledge is consulted before covered generation paths, but generated SQL templates are still basic and not schema-detail aware.",
+      "next_step": "Use the knowledge context to select dialect-specific templates and validate identifiers against richer schema details."
     },
     {
       "id": "schema_detail",
@@ -177,9 +191,9 @@
     }
   ],
   "next_gate": {
-    "name": "local_knowledge_first_generation",
-    "pass_condition": "Generation, natural, and write planning paths consult local DB knowledge for dialect, safety, and schema decisions before any provider call.",
-    "verification": "Add tests proving a local rule can answer a request and that provider invocation is skipped for that covered topic."
+    "name": "schema_detail_knowledge",
+    "pass_condition": "CoQuery can expose normalized column, index, foreign-key, and constraint metadata for SQLite plus one non-SQLite proof path.",
+    "verification": "Add schema-detail fixtures and tests that consume the local knowledge context during generation."
   },
   "official_sources": [
     {

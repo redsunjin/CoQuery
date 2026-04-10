@@ -30,7 +30,7 @@ If the skill has been installed outside the repository, pass `--repo /path/to/Co
 - Treat MySQL as a stub unless the repository status documents have been updated with a real verification slice.
 - Treat JPA as ORM/model source introspection unless a Java runtime proof exists.
 - Use explicit SQL plus `--write` for `insert`, `update`, and `delete`.
-- Use `natural` as an assistive drafting path; do not describe provider-backed natural output as production-grade unless a provider smoke has passed in the current environment.
+- Use `natural` as an assistive drafting path; simple covered requests use local knowledge first, and provider-backed natural is a fallback for more complex requests.
 - Prefer JSON output for agent consumption.
 
 ## Common Tasks

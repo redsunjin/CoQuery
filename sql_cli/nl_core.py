@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from sql_cli.knowledge_planner import build_natural_context, can_answer_natural_locally
 from sql_cli.llm_registry import LLMProviderClient, LLMProviderRegistry
 
 
@@ -45,13 +46,34 @@ class NLToSQLConverter:
 
 
 class NaturalLanguageEngine:
-    def __init__(self, provider_name: str | None = None):
+    def __init__(self, provider_name: str | None = None, db_target: str | None = "example.db"):
         self.provider_name = provider_name
+        self.db_target = db_target
         self.parser = NLIntentParser()
         self.converter = NLToSQLConverter()
 
     def process(self, nl_text: str) -> dict[str, object]:
         complexity = self.parser.estimate_complexity(nl_text)
+        intent = self.parser.parse(nl_text)
+        sql_result = self.converter.convert(nl_text, intent)
+        sql = sql_result.get("sql")
+        knowledge_context = build_natural_context(self.db_target, intent, complexity)
+
+        if self.provider_name and can_answer_natural_locally(intent, complexity, sql, knowledge_context):
+            return {
+                "intent": intent,
+                "sql": sql,
+                "complexity": complexity,
+                "confidence": 0.35,
+                "provider_name": None,
+                "provider_kind": None,
+                "model_name": None,
+                "requested_provider_name": self.provider_name,
+                "provider_skipped": True,
+                "knowledge_context": knowledge_context,
+                "mode": "local_knowledge",
+                "ok": bool(sql),
+            }
 
         if self.provider_name:
             profile = LLMProviderRegistry().get_profile(self.provider_name)
@@ -64,20 +86,24 @@ class NaturalLanguageEngine:
                 "provider_name": result["provider_name"],
                 "provider_kind": result["provider_kind"],
                 "model_name": result["model_name"],
+                "requested_provider_name": self.provider_name,
+                "provider_skipped": False,
+                "knowledge_context": knowledge_context,
                 "mode": "provider",
                 "ok": bool(result["sql"]),
             }
 
-        intent = self.parser.parse(nl_text)
-        sql_result = self.converter.convert(nl_text, intent)
         return {
             "intent": intent,
-            "sql": sql_result.get("sql"),
+            "sql": sql,
             "complexity": complexity,
             "confidence": 0.25,
             "provider_name": None,
             "provider_kind": None,
             "model_name": None,
+            "requested_provider_name": None,
+            "provider_skipped": False,
+            "knowledge_context": knowledge_context,
             "mode": "heuristic",
-            "ok": bool(sql_result.get("sql")),
+            "ok": bool(sql),
         }

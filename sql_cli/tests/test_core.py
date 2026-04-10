@@ -519,13 +519,17 @@ with TemporaryDirectory() as tmpdir:
     registry_path = Path(tmpdir) / "llm_registry.json"
     with patch.dict(os.environ, {"COQUERY_LLM_REGISTRY_PATH": str(registry_path)}):
         provider_add_handler("local_ollama", "ollama", "qwen3.5:4b-nvfp4", "http://127.0.0.1:11434")
-        with patch("sql_cli.llm_registry.urlopen", side_effect=_fake_llm_urlopen):
+        with patch("sql_cli.llm_registry.urlopen", side_effect=AssertionError("provider should be skipped")) as provider_urlopen:
             llm_natural = natural_handler("example.db", "show users", provider_name="local_ollama")
 assert llm_natural["ok"] is True
-assert llm_natural["mode"] == "provider"
-assert llm_natural["provider_name"] == "local_ollama"
+assert llm_natural["mode"] == "local_knowledge"
+assert llm_natural["provider_skipped"] is True
+assert llm_natural["requested_provider_name"] == "local_ollama"
+assert llm_natural["provider_name"] is None
 assert llm_natural["sql"] == "SELECT * FROM users"
-print("39. test_natural_with_registered_provider ✓")
+assert "schema" in llm_natural["knowledge_context"]["topic_names"]
+assert provider_urlopen.call_count == 0
+print("39. test_natural_skips_provider_for_local_knowledge ✓")
 
 with TemporaryDirectory() as tmpdir:
     project_root = Path(tmpdir)
@@ -712,7 +716,7 @@ print("52. test_db_knowledge_sqlite_operators ✓")
 knowledge_coverage = db_knowledge_handler(topic="coverage")
 assert knowledge_coverage["ok"] is True
 assert knowledge_coverage["data"]["kind"] == "coverage"
-assert knowledge_coverage["data"]["value"]["coverage_level"] == "structured_reference_seed"
+assert knowledge_coverage["data"]["value"]["coverage_level"] == "local_knowledge_first_seed"
 assert "sqlite" in knowledge_coverage["data"]["value"]["summary"]["dialects"]
 assert "jpql" in knowledge_coverage["data"]["value"]["summary"]["dialects"]
 assert knowledge_coverage["data"]["value"]["remaining_gaps"]
@@ -722,8 +726,43 @@ rc, payload = run_cli(["--command", "db_knowledge", "--topic", "coverage"])
 assert rc == 0
 assert payload["ok"] is True
 assert payload["data"]["kind"] == "coverage"
-assert payload["data"]["value"]["next_gate"]["name"] == "local_knowledge_first_generation"
+assert payload["data"]["value"]["implemented_gates"][0]["name"] == "local_knowledge_first_generation"
 print("54. test_docs_db_knowledge_coverage_example ✓")
 
+with TemporaryDirectory() as tmpdir:
+    registry_path = Path(tmpdir) / "llm_registry.json"
+    with patch.dict(os.environ, {"COQUERY_LLM_REGISTRY_PATH": str(registry_path)}):
+        provider_add_handler("local_ollama", "ollama", "qwen3.5:4b-nvfp4", "http://127.0.0.1:11434")
+        with patch("sql_cli.llm_registry.urlopen", side_effect=_fake_llm_urlopen):
+            complex_natural = natural_handler("example.db", "join users and orders", provider_name="local_ollama")
+assert complex_natural["ok"] is True
+assert complex_natural["mode"] == "provider"
+assert complex_natural["provider_skipped"] is False
+assert complex_natural["provider_name"] == "local_ollama"
+assert "joins" in complex_natural["knowledge_context"]["topic_names"]
+print("55. test_natural_provider_fallback_for_complex_request ✓")
+
+generated_with_context = generate_handler("postgresql://user:pass@localhost:5432/dbname", "join_inner")
+assert generated_with_context["ok"] is True
+assert generated_with_context["knowledge_context"]["knowledge_first"] is True
+assert generated_with_context["knowledge_context"]["dialect"] == "postgresql"
+assert "statements" in generated_with_context["knowledge_context"]["topic_names"]
+assert "joins" in generated_with_context["knowledge_context"]["topic_names"]
+print("56. test_generate_uses_local_knowledge_context ✓")
+
+tmpdir, db_path = make_temp_db()
+write_context_result = insert_handler(
+    str(db_path),
+    "INSERT INTO users (name, age) VALUES (?, ?)",
+    ["knowledge_write_user", 45],
+    write=True,
+)
+assert write_context_result["ok"] is True
+assert write_context_result["data"]["knowledge_context"]["knowledge_first"] is True
+assert write_context_result["data"]["knowledge_context"]["dialect"] == "sqlite"
+assert "write_safety" in write_context_result["data"]["knowledge_context"]["topic_names"]
+tmpdir.cleanup()
+print("57. test_write_uses_local_knowledge_context ✓")
+
 print("")
-print("=== ALL 54 TESTS PASS ✅ ===")
+print("=== ALL 57 TESTS PASS ✅ ===")

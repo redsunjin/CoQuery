@@ -4,7 +4,7 @@ Date: 2026-04-10
 
 ## Short Answer
 
-Partially. CoQuery now has a structured, inspectable SQL/JPA reference seed that can reduce LLM/provider calls for covered dialect, safety, schema, and JPQL boundary questions. It is still not a complete offline SQL/JPA knowledge base.
+Partially. CoQuery now has a structured, inspectable SQL/JPA reference seed and a local-knowledge-first planning path for covered generation, natural-language, and write-planning flows. It can skip provider calls for simple covered natural-language requests, but it is still not a complete offline SQL/JPA knowledge base.
 
 ## What Exists Now
 
@@ -14,10 +14,11 @@ Partially. CoQuery now has a structured, inspectable SQL/JPA reference seed that
 - MySQL status and dependency expectations
 - JPA source introspection plan and `jpa_schema`
 - a Codex skill wrapper with command/status references
+- a local knowledge planner in `sql_cli/knowledge_planner.py`
 
 ## Current Gap
 
-The repository still lacks a proper reference layer for:
+The repository still lacks a complete reference layer for:
 
 - SQL statement families and safe generation rules
 - dialect differences across SQLite, PostgreSQL, and MySQL
@@ -26,9 +27,10 @@ The repository still lacks a proper reference layer for:
 - schema introspection differences
 - JPQL vs SQL differences
 - JPA entity mapping rules beyond the first source scanner
-- deterministic retrieval/search over the reference knowledge
+- detailed normalized schema metadata for columns, indexes, foreign keys, and constraints
+- dialect-specific generation templates beyond the current seed
 
-The existing `sql_cli/knowledge.py` is only a small skeleton and is not wired into command generation or validation.
+The local planner is wired into covered generation, natural, and write-planning paths, but generated SQL is still basic and not schema-detail aware.
 
 ## Minimum Knowledge Pack Added In This Slice
 
@@ -84,7 +86,14 @@ This returns:
 - dialect matrix for SQLite, PostgreSQL, MySQL, and JPQL
 - structured topic matrix
 - what can be answered locally before using an LLM/provider
+- implemented gates such as `local_knowledge_first_generation`
 - remaining gaps and the next proof gate
+
+Planner behavior:
+
+- `generate` attaches local dialect/topic context before returning SQL.
+- write commands attach local dialect and write-safety context before execution.
+- `natural --provider-name ...` skips provider calls for simple covered requests and only falls back to provider mode for more complex requests.
 
 ## Reference Sources
 
@@ -97,14 +106,14 @@ Use official primary docs first:
 
 ## Next Work Required
 
-To materially reduce LLM use, add:
+To materially reduce LLM use further, add:
 
-1. a query planner that consults the local rules before calling any provider
+1. normalized schema-detail knowledge for columns, indexes, foreign keys, and constraints
 2. a larger fixture set proving common SQL and JPQL generation paths
 3. source-linked reference refresh policy and tooling gate
 4. richer dialect coverage for functions, transactions, indexes, schema details, and optimizer behavior
 
 Until then, the correct label is:
 
-- `structured reference seed exists`
+- `local knowledge first seed exists`
 - not yet `sufficient offline DB knowledge base`

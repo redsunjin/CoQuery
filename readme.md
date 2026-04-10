@@ -25,14 +25,15 @@ python3 main.py --command provider_test --provider-name local_ollama
 ## Verified Baseline
 
 - `main.py` routes to the package handlers in `sql_cli/cli.py`
-- `python3 sql_cli/tests/test_core.py` passes with 54 tests
+- `python3 sql_cli/tests/test_core.py` passes with 57 tests
 - SQLite is the working backend
 - `--db-uri` is the preferred multi-backend connection contract
 - `query` is read-only unless `--write` is provided
 - `insert`, `update`, and `delete` require both `--write` and explicit SQL
-- provider registry commands are available for optional `natural` routing
+- provider registry commands are available for optional `natural` fallback routing
 - `jpa_schema` can inspect annotation-based JPA entity source as an ORM/model context
 - `db_knowledge` can retrieve local SQL/JPA dialect and write-safety rules before using an LLM/provider
+- generation, natural-language, and write-planning paths attach local DB/JPA knowledge context first
 
 ## Agent Skill
 
@@ -49,7 +50,7 @@ The skill is also installable under `~/.codex/skills/coquery-cli` for `$coquery-
 
 The skill includes a compact DB knowledge seed at `skills/coquery-cli/references/db-knowledge.md`.
 Structured machine-readable rules and coverage metadata now live under `knowledge/`.
-This is enough for basic SQL/JPA boundary decisions and deterministic lookup, but not a complete offline SQL dialect knowledge base.
+This is enough for basic SQL/JPA boundary decisions, deterministic lookup, and simple local-first planning, but not a complete offline SQL dialect knowledge base.
 
 ## Current Limits
 
@@ -58,6 +59,7 @@ This is enough for basic SQL/JPA boundary decisions and deterministic lookup, bu
 - write commands do not yet have dry-run or transaction support
 - natural-language support is lightweight by default; provider-backed quality is not broadly proven
 - provider-backed natural is currently a secondary experimental track
+- generated SQL templates are not yet schema-detail aware
 - JPA support is source introspection only; it does not execute JPQL or run a Java persistence unit
 - DB reference knowledge is currently a seed pack, not a complete local replacement for SQL/JPA documentation
 

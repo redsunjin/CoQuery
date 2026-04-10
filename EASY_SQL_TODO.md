@@ -188,7 +188,8 @@ Open tasks:
 - [x] add a deterministic `db_knowledge` lookup command
 - [x] add first type/operator/join/constraint knowledge topics
 - [x] add an inspectable coverage and gap report
-- [ ] wire local knowledge lookup into generation before provider calls
+- [x] wire local knowledge lookup into generation before provider calls
+- [ ] add schema-detail knowledge for columns, indexes, foreign keys, and constraints
 
 Current output:
 
@@ -200,6 +201,7 @@ Current output:
 - `knowledge/dialects/jpql.json`
 - `knowledge/safety/write_rules.json`
 - `knowledge/coverage.json`
+- `sql_cli/knowledge_planner.py`
 - `python3 main.py --command db_knowledge --topic coverage`
 
 ## Recently Closed Stabilization Slices
@@ -217,6 +219,7 @@ Current output:
 - [x] add first DB knowledge audit and reference seed
 - [x] add structured DB/JPA rules and `db_knowledge` lookup
 - [x] add DB knowledge coverage reporting
+- [x] add local-knowledge-first planning for generation, natural, and write flows
 
 ## Reference Documents
 

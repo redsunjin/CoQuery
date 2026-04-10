@@ -8,6 +8,7 @@ from typing import Any, Optional
 from sql_cli.db_new import CoQueryDB, CoQueryDBError
 from sql_cli.dialect_rules import CoQueryKnowledgeError, lookup_knowledge
 from sql_cli.jpa import CoQueryJPAError, scan_jpa_project
+from sql_cli.knowledge_planner import build_generation_context, build_write_context
 from sql_cli.llm_registry import CoQueryLLMError, LLMProviderClient, LLMProviderRegistry
 
 WRITE_OPERATIONS = {"INSERT", "UPDATE", "DELETE"}
@@ -88,12 +89,14 @@ def _run_write_command(
     expected_operation: Optional[str] = None,
 ) -> dict[str, Any]:
     operation = _sql_operation(sql) or expected_operation or command.upper()
+    knowledge_context = build_write_context(db, operation)
 
     if not write:
         return _error(
             command,
             "write_flag_required",
             f"{operation} requires explicit --write confirmation.",
+            {"knowledge_context": knowledge_context},
         )
 
     if not sql or not sql.strip():
@@ -101,6 +104,7 @@ def _run_write_command(
             command,
             "invalid_write_sql",
             f"{operation} requires explicit SQL.",
+            {"knowledge_context": knowledge_context},
         )
 
     if expected_operation and _sql_operation(sql) != expected_operation:
@@ -108,6 +112,7 @@ def _run_write_command(
             command,
             "invalid_write_sql",
             f"{expected_operation} command requires {expected_operation} SQL.",
+            {"knowledge_context": knowledge_context},
         )
 
     if _sql_operation(sql) not in WRITE_OPERATIONS:
@@ -115,6 +120,7 @@ def _run_write_command(
             command,
             "unsupported_write_mode",
             f"{_sql_operation(sql)} is not supported by the baseline write contract.",
+            {"knowledge_context": knowledge_context},
         )
 
     try:
@@ -128,6 +134,7 @@ def _run_write_command(
                 "affected_rows": affected_rows,
                 "warnings": warnings,
                 "safety_level": safety_level,
+                "knowledge_context": knowledge_context,
             },
         )
     except CoQueryDBError as e:
@@ -178,6 +185,7 @@ def generate_handler(
     format: str = "json",
     params: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
+    knowledge_context = build_generation_context(db, skill or "select_simple")
     try:
         from sql_cli.core import SQLGenerator
 
@@ -188,10 +196,11 @@ def generate_handler(
             "command": "generate",
             "sql": result.get("sql", ""),
             "warnings": result.get("warnings", []),
+            "knowledge_context": knowledge_context,
             "error": result.get("error"),
         }
     except Exception as e:
-        return {"ok": False, "command": "generate", "error": str(e)}
+        return {"ok": False, "command": "generate", "knowledge_context": knowledge_context, "error": str(e)}
 
 
 def provider_add_handler(
@@ -323,7 +332,7 @@ def natural_handler(
     try:
         from sql_cli.nl_core import NaturalLanguageEngine
 
-        result = NaturalLanguageEngine(provider_name=provider_name).process(sql or "show users")
+        result = NaturalLanguageEngine(provider_name=provider_name, db_target=db).process(sql or "show users")
         return {
             "ok": result.get("ok"),
             "command": "natural",
@@ -335,6 +344,9 @@ def natural_handler(
             "provider_name": result.get("provider_name"),
             "provider_kind": result.get("provider_kind"),
             "model_name": result.get("model_name"),
+            "requested_provider_name": result.get("requested_provider_name"),
+            "provider_skipped": result.get("provider_skipped"),
+            "knowledge_context": result.get("knowledge_context"),
             "error": None,
         }
     except CoQueryLLMError as e:

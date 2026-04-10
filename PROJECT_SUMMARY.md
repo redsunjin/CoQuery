@@ -9,7 +9,7 @@
 
 ```text
 Verified on 2026-04-10
-- 54 executable baseline tests pass
+- 57 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
 - explicit write contract is enforced
@@ -42,6 +42,7 @@ Verified on 2026-04-10
     ├── core.py                 # SQL generation and validation
     ├── db_new.py               # SQLite-first DB wrapper
     ├── llm_registry.py         # Repo-local provider registry and lightweight clients
+    ├── knowledge_planner.py    # Local-knowledge-first planning context
     ├── jpa.py                  # Annotation-based JPA entity source scanner
     ├── nl_core.py              # Lightweight NL processing
     └── tests/test_core.py      # Executable baseline tests
@@ -57,7 +58,7 @@ Verified on 2026-04-10
 - `insert`: requires explicit `INSERT` SQL and `--write`
 - `update`: requires explicit `UPDATE` SQL and `--write`
 - `delete`: requires explicit `DELETE` SQL and `--write`
-- `natural`: uses heuristic intent mapping by default and can optionally route through a registered provider
+- `natural`: uses heuristic intent mapping with local knowledge first and can optionally fall back to a registered provider
 - `provider_add`: add or update one repo-local LLM provider profile
 - `provider_list`: list registered provider profiles
 - `provider_remove`: remove one provider profile
@@ -75,20 +76,21 @@ Current executable baseline:
 python3 sql_cli/tests/test_core.py
 ```
 
-This passes 54 baseline tests covering:
+This passes 57 baseline tests covering:
 
 - SQL generation
 - SQL validation
 - SQLite connection and execution
 - CLI handlers
 - natural-language processing
-- provider registry handlers and provider-backed natural routing
+- provider registry handlers, local provider skipping, and provider-backed natural fallback
 - JPA entity source introspection and CLI routing
 - explicit write safety and warning behavior
 - DB URI parsing and structured backend errors
 - documented CLI example smoke coverage
 - mocked PostgreSQL schema, query, insert, update, and delete success paths
 - DB/JPA knowledge lookup and coverage reporting
+- local DB/JPA knowledge context for generation, natural, and write planning
 
 ---
 
@@ -100,6 +102,7 @@ This passes 54 baseline tests covering:
 - no transaction or dry-run layer exists yet
 - natural-language behavior is lightweight by default; provider-backed quality and backend parity are not broadly proven
 - provider-backed natural is currently a secondary experimental track
+- generated SQL templates are not yet schema-detail aware
 - JPA support is source introspection only; JPQL runtime execution is not implemented
 - older docs before the 2026-04-04 repair may overstate completion
 
@@ -113,7 +116,7 @@ This passes 54 baseline tests covering:
 | Phase 1 | Complete enough | read-oriented SQLite commands work |
 | Phase 2 | Complete enough | structured generation works |
 | Phase 3 | Complete enough | write contract is explicit, but still baseline-only |
-| Phase 4 | Partial | NL path is intentionally lightweight and can optionally use a registered provider |
+| Phase 4 | Partial | NL path is intentionally lightweight, uses local knowledge first for covered simple requests, and can optionally use a registered provider as fallback |
 | Phase 5 | Early experimental | first PostgreSQL `schema`, `query`, `insert`, `update`, and `delete` proofs exist, but broader support is not implemented |
 
 ---
