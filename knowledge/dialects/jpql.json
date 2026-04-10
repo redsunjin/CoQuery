@@ -25,6 +25,12 @@
     "source_command": "python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json",
     "model_names": "entities_and_persistent_attributes"
   },
+  "schema_detail_introspection": {
+    "source_command": "python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json",
+    "model_names": "entities_and_persistent_attributes",
+    "normalized_output": ["entities", "attributes", "id_attributes", "relationships", "table_names", "column_names"],
+    "runtime_schema_detail_command": "not implemented"
+  },
   "pagination": {
     "template": "Use Query.setFirstResult(...) and Query.setMaxResults(...) at the API layer.",
     "notes": ["JPQL text does not use SQL LIMIT/OFFSET syntax portably."]

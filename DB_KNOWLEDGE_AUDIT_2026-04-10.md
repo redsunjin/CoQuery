@@ -4,7 +4,7 @@ Date: 2026-04-10
 
 ## Short Answer
 
-Partially. CoQuery now has a structured, inspectable SQL/JPA reference seed and a local-knowledge-first planning path for covered generation, natural-language, and write-planning flows. It can skip provider calls for simple covered natural-language requests, but it is still not a complete offline SQL/JPA knowledge base.
+Partially. CoQuery now has a structured, inspectable SQL/JPA reference seed, a normalized schema-detail lookup path, and a local-knowledge-first planning path for covered generation, natural-language, and write-planning flows. It can skip provider calls for simple covered natural-language requests, but it is still not a complete offline SQL/JPA knowledge base.
 
 ## What Exists Now
 
@@ -15,6 +15,7 @@ Partially. CoQuery now has a structured, inspectable SQL/JPA reference seed and 
 - JPA source introspection plan and `jpa_schema`
 - a Codex skill wrapper with command/status references
 - a local knowledge planner in `sql_cli/knowledge_planner.py`
+- a `schema_detail` command for normalized columns, keys, indexes, constraints, and SQLite create SQL
 
 ## Current Gap
 
@@ -27,10 +28,9 @@ The repository still lacks a complete reference layer for:
 - schema introspection differences
 - JPQL vs SQL differences
 - JPA entity mapping rules beyond the first source scanner
-- detailed normalized schema metadata for columns, indexes, foreign keys, and constraints
 - dialect-specific generation templates beyond the current seed
 
-The local planner is wired into covered generation, natural, and write-planning paths, but generated SQL is still basic and not schema-detail aware.
+The local planner is wired into covered generation, natural, and write-planning paths, and `schema_detail` can expose normalized metadata. Generated SQL is still basic and does not yet validate identifiers against schema_detail output.
 
 ## Minimum Knowledge Pack Added In This Slice
 
@@ -53,6 +53,7 @@ Lookup command:
 
 ```bash
 python3 main.py --command db_knowledge --dialect sqlite --topic schema
+python3 main.py --command schema_detail --db example.db --table users --format json
 python3 main.py --command db_knowledge --topic write_safety
 python3 main.py --command db_knowledge --topic coverage
 ```
@@ -62,6 +63,7 @@ The current structured topics include:
 - `overview`
 - `statements`
 - `schema`
+- `schema_detail`
 - `pagination`
 - `parameters`
 - `types`
@@ -108,12 +110,12 @@ Use official primary docs first:
 
 To materially reduce LLM use further, add:
 
-1. normalized schema-detail knowledge for columns, indexes, foreign keys, and constraints
+1. schema-detail-aware generation and natural-language identifier validation
 2. a larger fixture set proving common SQL and JPQL generation paths
 3. source-linked reference refresh policy and tooling gate
 4. richer dialect coverage for functions, transactions, indexes, schema details, and optimizer behavior
 
 Until then, the correct label is:
 
-- `local knowledge first seed exists`
+- `schema detail seed exists`
 - not yet `sufficient offline DB knowledge base`

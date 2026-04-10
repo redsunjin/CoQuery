@@ -84,6 +84,8 @@ def _topic_from_dialect(payload: dict[str, Any], topic: str) -> dict[str, Any]:
         "statement_support": "statement_support",
         "schema": "schema_introspection",
         "schema_introspection": "schema_introspection",
+        "schema_detail": "schema_detail_introspection",
+        "schema_detail_introspection": "schema_detail_introspection",
         "pagination": "pagination",
         "upsert": "upsert",
         "parameters": "parameter_styles",

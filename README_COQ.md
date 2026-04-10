@@ -5,12 +5,13 @@ Date: 2026-04-10
 ## Result
 
 ```text
-57/57 executable baseline tests pass
+63/63 executable baseline tests pass
 SQLite-first CLI verified
 Explicit write contract verified
 Shared DB URI contract verified
-PostgreSQL schema, query, insert, update, and delete smoke verified
+PostgreSQL schema, schema_detail, query, insert, update, and delete smoke verified
 Local DB/JPA knowledge-first generation planning verified
+Schema-detail knowledge command verified
 ```
 
 Scope decision:
@@ -22,6 +23,7 @@ Scope decision:
 ## Verified Commands
 
 - `schema`
+- `schema_detail`
 - `query`
 - `generate`
 - `insert`
@@ -39,7 +41,7 @@ Scope decision:
 | Area | Status | Notes |
 |------|--------|-------|
 | SQLite CLI path | Working | current verified runtime |
-| PostgreSQL | Experimental (narrow read + write) | local smoke proof succeeded for `schema`, `query`, `insert`, `update`, and `delete` |
+| PostgreSQL | Experimental (narrow read + write) | local smoke proof succeeded for `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` |
 | MySQL | Stub | returns structured placeholder error |
 | Write contract | Working baseline | `--write` plus explicit SQL is enforced |
 | DB URI contract | Working baseline | `--db-uri` is available and validated |
@@ -53,12 +55,14 @@ Scope decision:
 | Natural language | Baseline only | simple covered requests use local knowledge first; optional provider path remains fallback |
 | JPA | Source introspection only | `jpa_schema` scans annotation-based entity source; JPQL runtime execution is not implemented |
 | DB knowledge planner | Seed | generation, natural, and write planning attach local dialect/safety context |
+| Schema detail knowledge | Seed | `schema_detail` exposes normalized columns, keys, indexes, constraints, and SQLite create SQL for verified paths |
 
 ## Verification Commands
 
 ```bash
 python3 main.py --help
 python3 main.py --command schema --db example.db --format json
+python3 main.py --command schema_detail --db example.db --table users --format json
 python3 main.py --command schema --db-uri sqlite:///Users/Agent/ps-workspace/CoQuery/example.db --format json
 python3 sql_cli/tests/test_core.py
 bash scripts/run_postgresql_local_smoke.sh
@@ -70,6 +74,7 @@ bash scripts/run_postgresql_local_smoke.sh
 - dedicated `insert`, `update`, and `delete` handlers require `--write` and explicit SQL
 - full-table `update` and `delete` return a high-risk warning
 - `--db-uri` is preferred for future multi-backend commands
+- `schema_detail` provides normalized schema metadata for agent-side DB knowledge use
 - `natural` defaults to simple fixed SQL patterns
 - `natural --provider-name ...` skips provider calls for simple covered requests and can route complex requests through a registered provider
 - provider-backed natural is experimental and secondary to the PostgreSQL proof track
@@ -78,6 +83,6 @@ bash scripts/run_postgresql_local_smoke.sh
 
 Version: v0.7.0
 Last Updated: 2026-04-10
-Status: Baseline verified with experimental PostgreSQL schema, query, insert, update, delete proof, and local DB knowledge-first planning
+Status: Baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete proof, local DB knowledge-first planning, and schema-detail knowledge
 Reference: `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 Smoke Result: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`

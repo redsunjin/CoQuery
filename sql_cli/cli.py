@@ -161,6 +161,16 @@ def schema_handler(db: str, format: str = "json") -> dict[str, Any]:
         return _error("schema", "execution_error", str(e))
 
 
+def schema_detail_handler(db: str, table: Optional[str] = None, format: str = "json") -> dict[str, Any]:
+    try:
+        with CoQueryDB(db) as conn:
+            return _success("schema_detail", conn.get_schema_detail(table))
+    except CoQueryDBError as e:
+        return _db_error("schema_detail", e)
+    except Exception as e:
+        return _error("schema_detail", "execution_error", str(e))
+
+
 def query_handler(db: str, sql: str, format: str = "json", write: bool = False) -> dict[str, Any]:
     operation = _sql_operation(sql)
 

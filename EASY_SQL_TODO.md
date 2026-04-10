@@ -195,7 +195,8 @@ Open tasks:
 - [x] add first type/operator/join/constraint knowledge topics
 - [x] add an inspectable coverage and gap report
 - [x] wire local knowledge lookup into generation before provider calls
-- [ ] add schema-detail knowledge for columns, indexes, foreign keys, and constraints
+- [x] add schema-detail knowledge for columns, indexes, foreign keys, and constraints
+- [ ] wire schema-detail output into generation and natural-language identifier validation
 
 Current output:
 
@@ -208,6 +209,7 @@ Current output:
 - `knowledge/safety/write_rules.json`
 - `knowledge/coverage.json`
 - `sql_cli/knowledge_planner.py`
+- `python3 main.py --command schema_detail --db example.db --table users --format json`
 - `python3 main.py --command db_knowledge --topic coverage`
 
 ## Recently Closed Stabilization Slices
@@ -226,6 +228,7 @@ Current output:
 - [x] add structured DB/JPA rules and `db_knowledge` lookup
 - [x] add DB knowledge coverage reporting
 - [x] add local-knowledge-first planning for generation, natural, and write flows
+- [x] add normalized schema-detail knowledge for columns, indexes, foreign keys, and constraints
 
 ## Reference Documents
 
@@ -250,6 +253,7 @@ Current output:
 ```bash
 python3 main.py --help
 python3 main.py --command schema --db example.db --format json
+python3 main.py --command schema_detail --db example.db --table users --format json
 python3 sql_cli/tests/test_core.py
 python3 -c "import sql_cli.cli, sql_cli.core, sql_cli.db_new"
 python3 skills/coquery-cli/scripts/coquery_agent.py verify

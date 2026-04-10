@@ -94,6 +94,11 @@ def command_verify(args: argparse.Namespace) -> int:
     checks = [
         coquery_command(repo, ["--help"], "help"),
         coquery_command(repo, ["--command", "schema", "--db", "example.db", "--format", "json"], "sqlite_schema"),
+        coquery_command(
+            repo,
+            ["--command", "schema_detail", "--db", "example.db", "--table", "users", "--format", "json"],
+            "sqlite_schema_detail",
+        ),
         run_process(repo, [sys.executable, "sql_cli/tests/test_core.py"], "baseline_tests"),
     ]
 
@@ -121,6 +126,11 @@ def command_demo(args: argparse.Namespace) -> int:
 
         checks = [
             coquery_command(repo, ["--command", "schema", "--db", str(demo_db), "--format", "json"], "schema"),
+            coquery_command(
+                repo,
+                ["--command", "schema_detail", "--db", str(demo_db), "--table", "users", "--format", "json"],
+                "schema_detail",
+            ),
             coquery_command(repo, ["--command", "generate", "--db", str(demo_db), "--skill", "select_simple", "--format", "json"], "generate"),
             coquery_command(repo, ["--command", "natural", "--db", str(demo_db), "--sql", "show users", "--format", "json"], "natural"),
             coquery_command(
@@ -217,6 +227,8 @@ def command_run(args: argparse.Namespace) -> int:
         cli_args.extend(["--db-uri", args.db_uri])
     if args.sql is not None:
         cli_args.extend(["--sql", args.sql])
+    if args.table is not None:
+        cli_args.extend(["--table", args.table])
     if args.skill is not None:
         cli_args.extend(["--skill", args.skill])
     if args.params is not None:
@@ -267,6 +279,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--db", default=None, help="SQLite path or legacy DB target")
     run.add_argument("--db-uri", default=None, help="Preferred multi-backend database URI")
     run.add_argument("--sql", default=None, help="SQL or natural-language text")
+    run.add_argument("--table", default=None, help="Optional table name for schema_detail")
     run.add_argument("--skill", default=None, help="SQL generation skill id")
     run.add_argument("--params", default=None, help="JSON array of SQL parameters")
     run.add_argument("--provider-name", default=None, help="Registered provider name")

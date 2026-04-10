@@ -108,6 +108,14 @@ echo "== PostgreSQL schema smoke =="
   --format json
 
 echo ""
+echo "== PostgreSQL schema detail smoke =="
+"${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command schema_detail \
+  --db-uri "${DB_URI}" \
+  --table users \
+  --format json
+
+echo ""
 echo "== PostgreSQL query smoke =="
 "${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
   --command query \

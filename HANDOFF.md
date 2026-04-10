@@ -11,17 +11,19 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 ## Verified Baseline
 
 - `main.py` is a thin entry point that routes to `sql_cli/cli.py`
-- the executable command set is `schema`, `query`, `generate`, `insert`, `update`, `delete`, `natural`, `jpa_schema`, `provider_add`, `provider_list`, `provider_remove`, and `provider_test`
-- `python3 sql_cli/tests/test_core.py` passes with 57 baseline tests
+- the executable command set is `schema`, `schema_detail`, `query`, `generate`, `insert`, `update`, `delete`, `natural`, `jpa_schema`, `provider_add`, `provider_list`, `provider_remove`, and `provider_test`
+- `python3 sql_cli/tests/test_core.py` passes with 63 baseline tests
 - `python3 main.py --help` works in the current environment
 - `CoQueryDB` works for SQLite file paths and `sqlite://` URIs
 - `--db-uri` is now the shared multi-backend connection contract
 - write commands require explicit `--write` confirmation and explicit SQL
-- PostgreSQL `schema`, `query`, `insert`, `update`, and `delete` have verified local smoke results
+- PostgreSQL `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` have verified local smoke results
+- `schema_detail` exposes normalized columns, keys, indexes, constraints, and SQLite create SQL
 
 ## What You Can Rely On
 
 - SQLite schema inspection
+- SQLite schema-detail inspection
 - SQLite query execution
 - shared DB URI parsing with structured backend errors
 - SQL generation from the built-in skill set
@@ -30,6 +32,7 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 - lightweight natural-language intent-to-SQL conversion with local knowledge first and optional registered provider fallback
 - JPA annotation-based entity source introspection through `jpa_schema`
 - inspectable SQL/JPA knowledge coverage through `db_knowledge --topic coverage`
+- inspectable schema-detail topic through `db_knowledge --topic schema_detail`
 - local DB/JPA knowledge context attached to generation, natural, and write planning
 - structured write results with `affected_rows`, `warnings`, and `safety_level`
 
@@ -41,7 +44,7 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 - provider-backed natural as a primary product track
 - JPQL runtime execution or Spring Data JPA integration
 - a stable multi-DB interface
-- schema-detail-aware SQL generation
+- schema-detail-aware SQL generation and identifier validation
 
 ## Important Cautions
 
@@ -50,13 +53,13 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 - `update` and `delete` surface a high-risk warning when no `WHERE` clause exists
 - `natural` is heuristic by default, skips provider calls for simple covered requests, and can optionally route complex requests through a registered provider
 - provider-backed natural is currently a secondary experimental track, not the primary loop
-- PostgreSQL is proven only for narrow `schema`, `query`, `insert`, `update`, and `delete` paths through local smoke runs
+- PostgreSQL is proven only for narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` paths through local smoke runs
 - MySQL URIs return a structured `unsupported_backend` placeholder error
 - JPA support is source introspection only and does not execute JPQL
 
 ## Official Next Work
 
-1. Add schema-detail knowledge for columns, indexes, foreign keys, and constraints
+1. Wire schema_detail output into SQL generation and natural-language identifier validation
 2. Keep top-level docs aligned with the verified baseline
 3. Keep the PostgreSQL smoke runner repeatable and repo-managed
 4. Use the verification matrix and scope lock to gate any broader Phase 5 claim changes
@@ -88,6 +91,7 @@ Current runner note:
 ```bash
 python3 main.py --help
 python3 main.py --command schema --db example.db --format json
+python3 main.py --command schema_detail --db example.db --table users --format json
 python3 sql_cli/tests/test_core.py
 python3 -c "import sql_cli.cli, sql_cli.core, sql_cli.db_new"
 python3 main.py --command db_knowledge --topic coverage
@@ -95,5 +99,5 @@ bash scripts/run_postgresql_local_smoke.sh
 ```
 
 Last Updated: 2026-04-10
-Status: SQLite-first baseline verified with PostgreSQL schema, query, insert, update, delete smoke proof, and local DB knowledge-first planning
-Next: add schema-detail knowledge for columns, indexes, foreign keys, and constraints before broadening generation claims
+Status: SQLite-first baseline verified with PostgreSQL schema, schema_detail, query, insert, update, delete smoke proof, local DB knowledge-first planning, and schema-detail knowledge
+Next: wire schema_detail into generation and natural-language identifier validation before broadening generation claims

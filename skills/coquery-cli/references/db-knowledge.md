@@ -4,9 +4,9 @@ This is a compact offline reference for CoQuery agents. Use it before asking an 
 
 ## Coverage Label
 
-Current level: `local_knowledge_first_seed`
+Current level: `schema_detail_seed`
 
-This file is enough for basic routing, safety decisions, deterministic lookup, and simple local-first planning. It is not enough for full SQL dialect generation, query optimization, or JPQL runtime execution.
+This file is enough for basic routing, safety decisions, deterministic lookup, normalized schema-detail lookup, and simple local-first planning. It is not enough for full SQL dialect generation, query optimization, or JPQL runtime execution.
 
 For a machine-readable status, run:
 
@@ -39,7 +39,8 @@ SQLite:
 - Status: working baseline.
 - Connection forms: file path or `sqlite://...`.
 - Current schema query: `SELECT name FROM sqlite_master WHERE type='table' ORDER BY name`.
-- Current command coverage: `schema`, `query`, `generate`, `insert`, `update`, `delete`, `natural`.
+- Current schema-detail query path: `schema_detail` combines PRAGMA table, foreign-key, index, and `sqlite_master` metadata.
+- Current command coverage: `schema`, `schema_detail`, `query`, `generate`, `insert`, `update`, `delete`, `natural`.
 
 PostgreSQL:
 
@@ -47,7 +48,8 @@ PostgreSQL:
 - Connection form: `postgresql://...`.
 - Driver path: `psycopg`.
 - Current schema query uses `information_schema.tables` for `public` base tables.
-- Current proven commands: `schema`, `query`, `insert`, `update`, `delete`.
+- Current schema-detail query path uses `information_schema` plus `pg_catalog` metadata.
+- Current proven commands: `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`.
 - Do not claim broad PostgreSQL support beyond the smoke-proven commands.
 
 MySQL:
@@ -75,7 +77,7 @@ JPA:
 | Runtime target | DB file | DB server | planned DB server | Java persistence unit |
 | Query language | SQL | SQL | SQL | JPQL/Criteria |
 | Main model names | tables/columns | tables/columns | tables/columns | entities/attributes |
-| Current schema source | `sqlite_master` | `information_schema.tables` | not implemented | Java annotations |
+| Current schema source | `sqlite_master`, PRAGMA detail | `information_schema`, `pg_catalog` | not implemented | Java annotations |
 | Current write gate | `--write` | `--write` | not supported | not supported |
 
 ## Retrieval Guidance For Agents
@@ -91,6 +93,8 @@ Useful deterministic lookup topics:
 
 ```bash
 python3 main.py --command db_knowledge --dialect sqlite --topic schema
+python3 main.py --command db_knowledge --dialect sqlite --topic schema_detail
+python3 main.py --command schema_detail --db example.db --table users --format json
 python3 main.py --command db_knowledge --dialect postgresql --topic types
 python3 main.py --command db_knowledge --dialect mysql --topic constraints
 python3 main.py --command db_knowledge --dialect jpql --topic joins
@@ -100,7 +104,7 @@ python3 main.py --command db_knowledge --topic coverage
 
 ## Missing Knowledge Still Needed
 
-- schema-detail knowledge for columns, indexes, foreign keys, and constraints
+- schema-detail-aware generated SQL and identifier validation
 - deeper dialect-specific generation templates
 - per-dialect syntax snippets for common commands
 - per-dialect placeholder conventions by Python driver
@@ -110,7 +114,7 @@ python3 main.py --command db_knowledge --topic coverage
 - upsert/merge differences
 - transaction and isolation rules
 - identifier quoting rules with examples
-- deeper schema introspection for indexes, constraints, and foreign keys
+- deeper schema introspection for views, composite constraints, generated columns, and backend-specific metadata
 - JPQL generation patterns
 - Criteria API generation patterns
 - Spring Data repository method-name parsing rules

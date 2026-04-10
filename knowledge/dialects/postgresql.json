@@ -26,6 +26,13 @@
     "columns_template": "SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_schema = 'public' AND table_name = %s ORDER BY ordinal_position",
     "constraints_template": "SELECT constraint_name, constraint_type FROM information_schema.table_constraints WHERE table_schema = 'public' AND table_name = %s"
   },
+  "schema_detail_introspection": {
+    "command": "python3 main.py --command schema_detail --db-uri postgresql://... --table users --format json",
+    "columns": "information_schema.columns filtered by table_schema='public' and table_name=%s",
+    "constraints": "information_schema.table_constraints joined to key_column_usage and constraint_column_usage",
+    "indexes": "pg_class joined to pg_index, pg_attribute, and pg_namespace",
+    "normalized_output": ["columns", "primary_key", "foreign_keys", "indexes", "constraints"]
+  },
   "pagination": {
     "template": "LIMIT %s OFFSET %s",
     "notes": ["PostgreSQL supports LIMIT/OFFSET and richer cursor/window alternatives."]
@@ -69,7 +76,7 @@
     "coquery_supported": false
   },
   "safety_notes": [
-    "CoQuery PostgreSQL support is limited to schema/query/insert/update/delete smoke-proven paths.",
+    "CoQuery PostgreSQL support is limited to schema/schema_detail/query/insert/update/delete smoke-proven paths.",
     "Do not claim broad PostgreSQL parity."
   ]
 }

@@ -26,6 +26,14 @@
     "columns_template": "SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = %s ORDER BY ordinal_position",
     "constraints_template": "SELECT constraint_name, constraint_type FROM information_schema.table_constraints WHERE table_schema = DATABASE() AND table_name = %s"
   },
+  "schema_detail_introspection": {
+    "command": "not implemented",
+    "columns": "information_schema.columns filtered by table_schema=DATABASE() and table_name=%s",
+    "constraints": "information_schema.table_constraints and key_column_usage",
+    "indexes": "information_schema.statistics",
+    "normalized_output": ["columns", "primary_key", "foreign_keys", "indexes", "constraints"],
+    "coquery_supported": false
+  },
   "pagination": {
     "template": "LIMIT %s OFFSET %s",
     "notes": ["MySQL also accepts LIMIT offset, row_count syntax, but CoQuery should prefer the clearer LIMIT/OFFSET form."]

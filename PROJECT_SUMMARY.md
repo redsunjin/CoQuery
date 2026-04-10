@@ -9,12 +9,13 @@
 
 ```text
 Verified on 2026-04-10
-- 57 executable baseline tests pass
+- 63 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
 - explicit write contract is enforced
 - shared DB URI contract is implemented
-- PostgreSQL schema, query, insert, update, and delete smoke have succeeded
+- PostgreSQL schema, schema_detail, query, insert, update, and delete smoke have succeeded
+- schema-detail knowledge command is verified for SQLite and the PostgreSQL proof path
 ```
 
 Scope decision:
@@ -59,6 +60,7 @@ Scope decision:
 ## Verified Command Surface
 
 - `schema`: list SQLite tables
+- `schema_detail`: expose normalized columns, primary keys, foreign keys, indexes, constraints, and SQLite create SQL
 - `query`: execute `SELECT` statements by default; non-`SELECT` requires `--write`
 - `generate`: build SQL from built-in skill IDs
 - `insert`: requires explicit `INSERT` SQL and `--write`
@@ -82,7 +84,7 @@ Current executable baseline:
 python3 sql_cli/tests/test_core.py
 ```
 
-This passes 57 baseline tests covering:
+This passes 63 baseline tests covering:
 
 - SQL generation
 - SQL validation
@@ -94,21 +96,22 @@ This passes 57 baseline tests covering:
 - explicit write safety and warning behavior
 - DB URI parsing and structured backend errors
 - documented CLI example smoke coverage
-- mocked PostgreSQL schema, query, insert, update, and delete success paths
+- mocked PostgreSQL schema, schema_detail, query, insert, update, and delete success paths
 - DB/JPA knowledge lookup and coverage reporting
 - local DB/JPA knowledge context for generation, natural, and write planning
+- normalized schema-detail metadata for SQLite and mocked PostgreSQL paths
 
 ---
 
 ## Current Limits
 
 - SQLite is the only broadly verified backend
-- PostgreSQL is experimental for the narrow `schema`, `query`, `insert`, `update`, and `delete` paths
+- PostgreSQL is experimental for the narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` paths
 - MySQL is still a stub, not a working backend
 - no transaction or dry-run layer exists yet
 - natural-language behavior is lightweight by default; provider-backed quality and backend parity are not broadly proven
 - provider-backed natural is currently a secondary experimental track
-- generated SQL templates are not yet schema-detail aware
+- schema detail can be queried separately, but generated SQL templates do not yet use it for identifier validation
 - JPA support is source introspection only; JPQL runtime execution is not implemented
 - older docs before the 2026-04-04 repair may overstate completion
 
@@ -123,7 +126,7 @@ This passes 57 baseline tests covering:
 | Phase 2 | Complete enough | structured generation works |
 | Phase 3 | Complete enough | write contract is explicit, but still baseline-only |
 | Phase 4 | Partial | NL path is intentionally lightweight, uses local knowledge first for covered simple requests, and can optionally use a registered provider as fallback |
-| Phase 5 | Early experimental | first PostgreSQL `schema`, `query`, `insert`, `update`, and `delete` proofs exist, but broader support is not implemented |
+| Phase 5 | Early experimental | first PostgreSQL `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` proofs exist, but broader support is not implemented |
 
 ---
 
@@ -135,6 +138,9 @@ python3 main.py --help
 
 # list schemas
 python3 main.py --command schema --db example.db --format json
+
+# inspect normalized schema detail
+python3 main.py --command schema_detail --db example.db --table users --format json
 
 # preferred multi-backend form
 python3 main.py --command schema --db-uri sqlite:///Users/Agent/ps-workspace/CoQuery/example.db --format json
@@ -159,9 +165,10 @@ python3 sql_cli/tests/test_core.py
 
 ## Next Steps
 
-1. keep status docs aligned with observed behavior
-2. keep the PostgreSQL probe runner repeatable and less ad hoc
-3. use the verification matrix before changing any broader multi-DB status claim
+1. wire schema_detail output into generation and natural-language identifier validation
+2. keep status docs aligned with observed behavior
+3. keep the PostgreSQL probe runner repeatable and less ad hoc
+4. use the verification matrix before changing any broader multi-DB status claim
 
 Current runner improvement:
 
@@ -187,4 +194,4 @@ Current runner improvement:
 ---
 
 Last Updated: 2026-04-10
-Status: SQLite-first baseline verified with experimental PostgreSQL schema, query, insert, update, and delete proof
+Status: SQLite-first baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, and delete proof

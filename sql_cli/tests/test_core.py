@@ -27,6 +27,7 @@ from sql_cli.cli import (
     provider_remove_handler,
     provider_test_handler,
     query_handler,
+    schema_detail_handler,
     schema_handler,
     update_handler,
 )
@@ -303,6 +304,28 @@ class _FakePsycopgConnection:
         self.last_query = query
         if "information_schema.tables" in query:
             return _FakeCursor([("users",)])
+        if "information_schema.columns" in query:
+            return _FakeCursor(
+                [
+                    ("id", "integer", "NO", "nextval('users_id_seq'::regclass)", 1),
+                    ("name", "text", "YES", None, 2),
+                    ("org_id", "integer", "YES", None, 3),
+                ]
+            )
+        if "information_schema.table_constraints" in query:
+            return _FakeCursor(
+                [
+                    ("users_pkey", "PRIMARY KEY", "id", None, None),
+                    ("users_org_id_fkey", "FOREIGN KEY", "org_id", "orgs", "id"),
+                ]
+            )
+        if "JOIN pg_index" in query:
+            return _FakeCursor(
+                [
+                    ("users_name_idx", False, False, ["name"]),
+                    ("users_pkey", True, True, ["id"]),
+                ]
+            )
         if query.strip().upper().startswith("SELECT"):
             return _FakeCursor([("probe_user", 34)])
         return _FakeCursor(rowcount=1)
@@ -716,7 +739,7 @@ print("52. test_db_knowledge_sqlite_operators ✓")
 knowledge_coverage = db_knowledge_handler(topic="coverage")
 assert knowledge_coverage["ok"] is True
 assert knowledge_coverage["data"]["kind"] == "coverage"
-assert knowledge_coverage["data"]["value"]["coverage_level"] == "local_knowledge_first_seed"
+assert knowledge_coverage["data"]["value"]["coverage_level"] == "schema_detail_seed"
 assert "sqlite" in knowledge_coverage["data"]["value"]["summary"]["dialects"]
 assert "jpql" in knowledge_coverage["data"]["value"]["summary"]["dialects"]
 assert knowledge_coverage["data"]["value"]["remaining_gaps"]
@@ -764,5 +787,73 @@ assert "write_safety" in write_context_result["data"]["knowledge_context"]["topi
 tmpdir.cleanup()
 print("57. test_write_uses_local_knowledge_context ✓")
 
+schema_detail = schema_detail_handler("example.db", "users")
+assert schema_detail["ok"] is True
+assert schema_detail["data"]["backend"] == "sqlite"
+assert schema_detail["data"]["table_count"] == 1
+users_detail = schema_detail["data"]["tables"][0]
+assert users_detail["name"] == "users"
+assert [column["name"] for column in users_detail["columns"]] == ["id", "name", "age"]
+assert users_detail["primary_key"] == ["id"]
+assert users_detail["constraints"]["foreign_keys"] == []
+print("58. test_schema_detail_sqlite_users ✓")
+
+with TemporaryDirectory() as tmpdir:
+    db_path = Path(tmpdir) / "schema-detail.db"
+    db = CoQueryDB(str(db_path))
+    db.execute("PRAGMA foreign_keys = ON")
+    db.execute("CREATE TABLE orgs (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE)")
+    db.execute(
+        "CREATE TABLE members ("
+        "id INTEGER PRIMARY KEY, "
+        "org_id INTEGER NOT NULL, "
+        "email TEXT NOT NULL, "
+        "FOREIGN KEY (org_id) REFERENCES orgs(id) ON DELETE CASCADE"
+        ")"
+    )
+    db.execute("CREATE UNIQUE INDEX members_email_idx ON members(email)")
+    db.close()
+
+    detail = schema_detail_handler(str(db_path), "members")
+
+assert detail["ok"] is True
+member_detail = detail["data"]["tables"][0]
+assert member_detail["primary_key"] == ["id"]
+assert member_detail["foreign_keys"][0]["referenced_table"] == "orgs"
+assert member_detail["foreign_keys"][0]["on_delete"] == "CASCADE"
+assert member_detail["indexes"][0]["name"] == "members_email_idx"
+assert member_detail["indexes"][0]["unique"] is True
+assert "org_id" in member_detail["constraints"]["not_null"]
+print("59. test_schema_detail_sqlite_fk_index_fixture ✓")
+
+missing_detail = schema_detail_handler("example.db", "missing_table")
+assert missing_detail["ok"] is False
+assert missing_detail["error"]["code"] == "table_not_found"
+print("60. test_schema_detail_missing_table_error ✓")
+
+with patch("sql_cli.db_new.importlib.import_module", return_value=_FakePsycopgSuccessModule()):
+    pg_detail = schema_detail_handler("postgresql://user:pass@localhost:5432/dbname", "users")
+assert pg_detail["ok"] is True
+pg_users = pg_detail["data"]["tables"][0]
+assert pg_detail["data"]["backend"] == "postgresql"
+assert pg_users["primary_key"] == ["id"]
+assert pg_users["columns"][0]["primary_key"] is True
+assert pg_users["foreign_keys"][0]["referenced_table"] == "orgs"
+assert pg_users["indexes"][1]["primary"] is True
+print("61. test_schema_detail_postgresql_success_path ✓")
+
+rc, payload = run_cli(["--command", "schema_detail", "--db", "example.db", "--table", "users", "--format", "json"])
+assert rc == 0
+assert payload["ok"] is True
+assert payload["data"]["tables"][0]["name"] == "users"
+assert payload["data"]["tables"][0]["primary_key"] == ["id"]
+print("62. test_docs_schema_detail_example ✓")
+
+schema_detail_knowledge = db_knowledge_handler("sqlite", "schema_detail")
+assert schema_detail_knowledge["ok"] is True
+assert schema_detail_knowledge["data"]["kind"] == "dialect_topic"
+assert "PRAGMA table_info" in schema_detail_knowledge["data"]["value"]["value"]["columns"]
+print("63. test_db_knowledge_schema_detail_topic ✓")
+
 print("")
-print("=== ALL 57 TESTS PASS ✅ ===")
+print("=== ALL 63 TESTS PASS ✅ ===")

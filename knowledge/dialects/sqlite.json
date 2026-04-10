@@ -27,6 +27,14 @@
     "foreign_keys_template": "PRAGMA foreign_key_list({table})",
     "indexes_template": "PRAGMA index_list({table})"
   },
+  "schema_detail_introspection": {
+    "command": "python3 main.py --command schema_detail --db example.db --table users --format json",
+    "columns": "PRAGMA table_info({table})",
+    "foreign_keys": "PRAGMA foreign_key_list({table})",
+    "indexes": "PRAGMA index_list({table}) plus PRAGMA index_info({index})",
+    "create_sql": "SELECT sql FROM sqlite_master WHERE type='table' AND name=?",
+    "normalized_output": ["columns", "primary_key", "foreign_keys", "indexes", "constraints", "create_sql"]
+  },
   "pagination": {
     "template": "LIMIT ? OFFSET ?",
     "notes": ["Use parameter binding for limit and offset values when the driver supports it."]

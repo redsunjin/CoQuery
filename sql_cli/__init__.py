@@ -16,6 +16,7 @@ from sql_cli.cli import (
     provider_remove_handler,
     provider_test_handler,
     query_handler,
+    schema_detail_handler,
     schema_handler,
     update_handler,
 )
@@ -26,6 +27,7 @@ __all__ = [
     'CoQueryDB',
     'db_knowledge_handler',
     'schema_handler',
+    'schema_detail_handler',
     'query_handler',
     'generate_handler',
     'insert_handler',

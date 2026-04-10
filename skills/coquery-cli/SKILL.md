@@ -15,6 +15,7 @@ Prefer the bundled wrapper for repeatable agent use:
 python3 skills/coquery-cli/scripts/coquery_agent.py verify
 python3 skills/coquery-cli/scripts/coquery_agent.py demo
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command schema --db example.db
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command schema_detail --db example.db --table users
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command query --db example.db --sql "SELECT * FROM users"
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command jpa_schema --jpa-project /path/to/java-project
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --dialect sqlite --topic schema
@@ -26,7 +27,7 @@ If the skill has been installed outside the repository, pass `--repo /path/to/Co
 ## Operating Rules
 
 - Treat SQLite as the working backend.
-- Treat PostgreSQL as experimental and limited to the documented `schema`, `query`, `insert`, `update`, and `delete` smoke paths.
+- Treat PostgreSQL as experimental and limited to the documented `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` smoke paths.
 - Treat MySQL as a stub unless the repository status documents have been updated with a real verification slice.
 - Treat JPA as ORM/model source introspection unless a Java runtime proof exists.
 - Use explicit SQL plus `--write` for `insert`, `update`, and `delete`.
@@ -61,6 +62,12 @@ Call one CoQuery command:
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command natural --db example.db --sql "show users"
 ```
 
+Inspect normalized schema detail:
+
+```bash
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command schema_detail --db example.db --table users
+```
+
 Inspect JPA entity source:
 
 ```bash
@@ -71,6 +78,7 @@ Look up local DB/JPA knowledge before using an LLM:
 
 ```bash
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --dialect postgresql --topic pagination
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --dialect sqlite --topic schema_detail
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --topic write_safety
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --topic coverage
 ```

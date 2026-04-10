@@ -1,8 +1,8 @@
 {
   "coverage_report": "coquery_db_knowledge_coverage",
   "generated_on": "2026-04-10",
-  "coverage_level": "local_knowledge_first_seed",
-  "purpose": "Make the current SQL/JPA knowledge layer inspectable and wire covered generation paths to local facts before asking an LLM/provider.",
+  "coverage_level": "schema_detail_seed",
+  "purpose": "Make the current SQL/JPA knowledge layer inspectable, expose normalized schema-detail metadata for supported proof paths, and wire covered generation paths to local facts before asking an LLM/provider.",
   "summary": {
     "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
     "structured_rule_files": [
@@ -15,6 +15,7 @@
     "agent_reference_files": ["skills/coquery-cli/references/db-knowledge.md"],
     "deterministic_commands": [
       "python3 main.py --command db_knowledge --dialect sqlite --topic schema",
+      "python3 main.py --command schema_detail --db example.db --table users --format json",
       "python3 main.py --command db_knowledge --dialect postgresql --topic pagination",
       "python3 main.py --command db_knowledge --dialect mysql --topic constraints",
       "python3 main.py --command db_knowledge --dialect jpql --topic joins",
@@ -40,6 +41,12 @@
       "coverage": "implemented",
       "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
       "notes": "Provides table/source introspection templates or JPA source-command guidance."
+    },
+    {
+      "topic": "schema_detail",
+      "coverage": "implemented_seed",
+      "dialects": ["sqlite", "postgresql", "mysql", "jpql"],
+      "notes": "Exposes normalized columns, primary keys, foreign keys, indexes, constraints, and SQLite create SQL for verified SQLite plus mocked and smoke-testable PostgreSQL paths; MySQL and JPQL remain guidance only."
     },
     {
       "topic": "pagination",
@@ -94,25 +101,25 @@
     "sqlite": {
       "coquery_status": "working",
       "runtime_status": "verified_baseline",
-      "structured_topics": ["statements", "schema", "pagination", "parameters", "types", "operators", "joins", "constraints", "upsert", "safety"],
+      "structured_topics": ["statements", "schema", "schema_detail", "pagination", "parameters", "types", "operators", "joins", "constraints", "upsert", "safety"],
       "source_files": ["knowledge/dialects/sqlite.json"]
     },
     "postgresql": {
       "coquery_status": "experimental_narrow",
-      "runtime_status": "schema_query_insert_update_delete_smoke",
-      "structured_topics": ["statements", "schema", "pagination", "parameters", "types", "operators", "joins", "constraints", "upsert", "safety"],
+      "runtime_status": "schema_schema_detail_query_insert_update_delete_smoke",
+      "structured_topics": ["statements", "schema", "schema_detail", "pagination", "parameters", "types", "operators", "joins", "constraints", "upsert", "safety"],
       "source_files": ["knowledge/dialects/postgresql.json"]
     },
     "mysql": {
       "coquery_status": "stub",
       "runtime_status": "not_implemented",
-      "structured_topics": ["statements", "schema", "pagination", "parameters", "types", "operators", "joins", "constraints", "upsert", "safety"],
+      "structured_topics": ["statements", "schema", "schema_detail", "pagination", "parameters", "types", "operators", "joins", "constraints", "upsert", "safety"],
       "source_files": ["knowledge/dialects/mysql.json"]
     },
     "jpql": {
       "coquery_status": "source_introspection_only",
       "runtime_status": "jpa_schema_only",
-      "structured_topics": ["statements", "schema", "pagination", "parameters", "types", "operators", "joins", "constraints", "upsert", "safety"],
+      "structured_topics": ["statements", "schema", "schema_detail", "pagination", "parameters", "types", "operators", "joins", "constraints", "upsert", "safety"],
       "source_files": ["knowledge/dialects/jpql.json"]
     }
   },
@@ -122,6 +129,7 @@
       "which common statements are reads or writes",
       "which CoQuery write commands require --write",
       "basic schema introspection templates by supported/planned dialect",
+      "normalized schema-detail metadata for SQLite and the PostgreSQL proof path",
       "basic pagination templates by dialect",
       "basic parameter placeholder conventions",
       "common scalar type mappings",
@@ -150,20 +158,25 @@
         "test_generate_uses_local_knowledge_context",
         "test_write_uses_local_knowledge_context"
       ]
+    },
+    {
+      "name": "schema_detail_knowledge",
+      "status": "implemented_seed",
+      "description": "CoQuery can expose normalized column, primary-key, foreign-key, index, constraint, and SQLite create-SQL metadata through schema_detail, with local DB knowledge topics documenting the path.",
+      "verification": [
+        "test_schema_detail_sqlite_users",
+        "test_schema_detail_sqlite_fk_index_fixture",
+        "test_schema_detail_postgresql_success_path",
+        "test_db_knowledge_schema_detail_topic"
+      ]
     }
   ],
   "remaining_gaps": [
     {
       "id": "generation_depth",
       "severity": "high",
-      "description": "Local knowledge is consulted before covered generation paths, but generated SQL templates are still basic and not schema-detail aware.",
-      "next_step": "Use the knowledge context to select dialect-specific templates and validate identifiers against richer schema details."
-    },
-    {
-      "id": "schema_detail",
-      "severity": "medium",
-      "description": "Schema knowledge has table/source templates but no normalized cross-backend column, index, foreign-key, and constraint model.",
-      "next_step": "Add a schema-detail command and fixtures for SQLite plus PostgreSQL."
+      "description": "Local knowledge is consulted before covered generation paths, and schema-detail metadata can be queried, but generated SQL templates do not yet validate identifiers against schema_detail output.",
+      "next_step": "Use schema_detail output to select dialect-specific templates and validate table/column identifiers before returning generated SQL."
     },
     {
       "id": "function_matrix",
@@ -191,9 +204,9 @@
     }
   ],
   "next_gate": {
-    "name": "schema_detail_knowledge",
-    "pass_condition": "CoQuery can expose normalized column, index, foreign-key, and constraint metadata for SQLite plus one non-SQLite proof path.",
-    "verification": "Add schema-detail fixtures and tests that consume the local knowledge context during generation."
+    "name": "schema_detail_aware_generation",
+    "pass_condition": "CoQuery generation and natural-language drafting can consume schema_detail metadata to validate identifiers and shape safe SELECT templates.",
+    "verification": "Add tests showing generated SQL uses schema_detail output for table and column validation without provider calls on covered simple requests."
   },
   "official_sources": [
     {
