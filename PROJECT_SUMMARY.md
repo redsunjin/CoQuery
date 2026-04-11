@@ -9,13 +9,13 @@
 
 ```text
 Verified on 2026-04-11
-- 72 executable baseline tests pass
+- 73 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
 - explicit write contract is enforced
 - shared DB URI contract is implemented
 - PostgreSQL schema, schema_detail, query, insert, update, and delete smoke have succeeded
-- PostgreSQL direct `generate join_inner` smoke has succeeded against a real schema-detail path
+- PostgreSQL direct `generate join_inner` and `generate join_left` smoke have succeeded against real schema-detail paths
 - schema-detail knowledge command is verified for SQLite and the PostgreSQL proof path
 - schema-detail-aware identifier validation is verified for generate and simple natural paths
 - schema-detail-aware direct join generation is verified for built-in join skills
@@ -87,7 +87,7 @@ Current executable baseline:
 python3 sql_cli/tests/test_core.py
 ```
 
-This passes 72 baseline tests covering:
+This passes 73 baseline tests covering:
 
 - SQL generation
 - SQL validation
@@ -111,7 +111,7 @@ This passes 72 baseline tests covering:
 ## Current Limits
 
 - SQLite is the only broadly verified backend
-- PostgreSQL is experimental for the narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` paths plus one direct `generate join_inner` smoke slice
+- PostgreSQL is experimental for the narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` paths plus direct `generate join_inner` / `generate join_left` smoke slices
 - MySQL is still a stub, not a working backend
 - no transaction or dry-run layer exists yet
 - natural-language behavior is lightweight by default; provider-backed quality and backend parity are not broadly proven
@@ -203,4 +203,4 @@ Current runner improvement:
 ---
 
 Last Updated: 2026-04-11
-Status: SQLite-first baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` proof plus direct schema-detail join inference
+Status: SQLite-first baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof plus direct schema-detail join inference

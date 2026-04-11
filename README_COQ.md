@@ -5,7 +5,7 @@ Date: 2026-04-11
 ## Result
 
 ```text
-72/72 executable baseline tests pass
+73/73 executable baseline tests pass
 SQLite-first CLI verified
 Explicit write contract verified
 Shared DB URI contract verified
@@ -50,7 +50,7 @@ Scope decision:
 | DB URI contract | Working baseline | `--db-uri` is available and validated |
 | Phase 5 verification matrix | Working baseline | backend promotion is now proof-gated |
 | PostgreSQL schema smoke | Working baseline | local proof recorded on 2026-04-05 |
-| PostgreSQL direct join generation smoke | Working baseline | local proof recorded on 2026-04-11 for the direct `generate join_inner` slice |
+| PostgreSQL direct join generation smoke | Working baseline | local proof recorded on 2026-04-11 for direct `generate join_inner` and `generate join_left` slices |
 | PostgreSQL query smoke | Working baseline | local proof recorded on 2026-04-05 |
 | PostgreSQL insert smoke | Working baseline | local proof recorded on 2026-04-05 |
 | PostgreSQL update smoke | Working baseline | local proof recorded on 2026-04-07 |
@@ -85,7 +85,7 @@ bash scripts/run_postgresql_local_smoke.sh
 - `schema_detail` provides normalized schema metadata for agent-side DB knowledge use
 - `generate` and simple `natural` requests can reject unknown tables before returning local SQL
 - `generate` can auto-build direct join `ON` clauses from schema detail when both tables are inspectable
-- the local PostgreSQL smoke runner now proves the direct `generate join_inner` slice against a real PostgreSQL schema
+- the local PostgreSQL smoke runner now proves direct `generate join_inner` and `generate join_left` slices against a real PostgreSQL schema
 - explicit join `ON` clauses are still allowed, but qualified table/column references are validated against schema detail when available
 - `natural` defaults to simple fixed SQL patterns
 - `natural --provider-name ...` skips provider calls for simple covered requests and can route complex requests through a registered provider
@@ -95,6 +95,6 @@ bash scripts/run_postgresql_local_smoke.sh
 
 Version: v0.7.0
 Last Updated: 2026-04-11
-Status: Baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` proof, local DB knowledge-first planning, schema-detail-aware identifier validation, and direct schema-detail join inference
+Status: Baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof, local DB knowledge-first planning, schema-detail-aware identifier validation, and direct schema-detail join inference
 Reference: `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 Smoke Result: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`

@@ -18,6 +18,7 @@ python3 skills/coquery-cli/scripts/coquery_agent.py run --command schema --db ex
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command schema_detail --db example.db --table users
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command query --db example.db --sql "SELECT * FROM users"
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command generate --db /tmp/join-test.db --skill join_inner --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}'
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command generate --db /tmp/join-test.db --skill join_left --params '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}'
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command jpa_schema --jpa-project /path/to/java-project
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --dialect sqlite --topic schema
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --topic coverage
@@ -28,7 +29,7 @@ If the skill has been installed outside the repository, pass `--repo /path/to/Co
 ## Operating Rules
 
 - Treat SQLite as the working backend.
-- Treat PostgreSQL as experimental and limited to the documented `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` smoke paths plus the direct `generate join_inner` smoke slice.
+- Treat PostgreSQL as experimental and limited to the documented `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` smoke paths plus direct `generate join_inner` / `generate join_left` smoke slices.
 - Treat MySQL as a stub unless the repository status documents have been updated with a real verification slice.
 - Treat JPA as ORM/model source introspection unless a Java runtime proof exists.
 - Use explicit SQL plus `--write` for `insert`, `update`, and `delete`.
@@ -72,6 +73,7 @@ Inspect normalized schema detail:
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command schema_detail --db example.db --table users
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}'
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command generate --db /tmp/join-test.db --skill join_inner --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}'
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command generate --db /tmp/join-test.db --skill join_left --params '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}'
 ```
 
 Inspect JPA entity source:

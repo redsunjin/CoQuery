@@ -961,6 +961,17 @@ tmpdir.cleanup()
 print("69. test_generate_auto_join_reverse_direction ✓")
 
 tmpdir, db_path = make_join_db()
+left_join_generated = generate_handler(
+    str(db_path),
+    "join_left",
+    params={"table1": "orgs", "table2": "members", "cols": ["orgs.name", "members.email"]},
+)
+assert left_join_generated["ok"] is True
+assert left_join_generated["sql"] == "SELECT ORGS.NAME, MEMBERS.EMAIL FROM ORGS LEFT JOIN MEMBERS ON MEMBERS.ORG_ID = ORGS.ID"
+tmpdir.cleanup()
+print("70. test_generate_auto_left_join_from_schema_detail ✓")
+
+tmpdir, db_path = make_join_db()
 no_join_generated = generate_handler(
     str(db_path),
     "join_inner",
@@ -970,7 +981,7 @@ assert no_join_generated["ok"] is False
 assert no_join_generated["error"]["code"] == "schema_validation_failed"
 assert no_join_generated["schema_validation"]["errors"][0]["code"] == "no_join_path"
 tmpdir.cleanup()
-print("70. test_generate_rejects_missing_join_path ✓")
+print("71. test_generate_rejects_missing_join_path ✓")
 
 with TemporaryDirectory() as tmpdir:
     db_path = Path(tmpdir) / "ambiguous-join.db"
@@ -997,7 +1008,7 @@ with TemporaryDirectory() as tmpdir:
 assert ambiguous_join_generated["ok"] is False
 assert ambiguous_join_generated["error"]["code"] == "schema_validation_failed"
 assert ambiguous_join_generated["schema_validation"]["errors"][0]["code"] == "ambiguous_join_path"
-print("71. test_generate_rejects_ambiguous_join_path ✓")
+print("72. test_generate_rejects_ambiguous_join_path ✓")
 
 tmpdir, db_path = make_join_db()
 invalid_manual_join_generated = generate_handler(
@@ -1013,7 +1024,7 @@ assert invalid_manual_join_generated["ok"] is False
 assert invalid_manual_join_generated["error"]["code"] == "schema_validation_failed"
 assert invalid_manual_join_generated["schema_validation"]["errors"][0]["code"] == "unknown_column"
 tmpdir.cleanup()
-print("72. test_generate_validates_manual_join_columns ✓")
+print("73. test_generate_validates_manual_join_columns ✓")
 
 print("")
-print("=== ALL 72 TESTS PASS ✅ ===")
+print("=== ALL 73 TESTS PASS ✅ ===")

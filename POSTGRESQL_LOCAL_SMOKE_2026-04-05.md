@@ -6,7 +6,7 @@ Workspace: `/Users/Agent/ps-workspace/CoQuery`
 
 ## Purpose
 
-Record one repeatable local PostgreSQL smoke path that proves CoQuery can run `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` against a real non-SQLite backend, plus one direct schema-detail join-generation slice.
+Record one repeatable local PostgreSQL smoke path that proves CoQuery can run `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` against a real non-SQLite backend, plus direct schema-detail `join_inner` and `join_left` generation slices.
 
 This is a narrow probe environment, not the default baseline runtime.
 
@@ -37,7 +37,7 @@ This script:
 - starts PostgreSQL on a non-default port
 - seeds `users`, `orgs`, and `members` probe tables
 - runs CoQuery `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete`
-- runs `generate join_inner` against real PostgreSQL schema detail and executes the generated join SQL
+- runs `generate join_inner` and `generate join_left` against real PostgreSQL schema detail and executes the generated join SQL
 - stops the cluster when finished
 
 ## Observed commands and results
@@ -138,6 +138,50 @@ Generated SQL verification query output:
 }
 ```
 
+### Direct left-join-generation proof
+
+```bash
+/Users/Agent/ps-workspace/CoQuery/.tmp/pg-venv/bin/python main.py \
+  --command generate \
+  --db-uri "postgresql://localhost/coquery_probe?host=/Users/Agent/ps-workspace/CoQuery/.tmp/pg-socket&port=49251" \
+  --skill join_left \
+  --params '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}' \
+  --format json
+```
+
+Observed output:
+
+```json
+{
+  "ok": true,
+  "command": "generate",
+  "sql": "SELECT ORGS.NAME, MEMBERS.EMAIL FROM ORGS LEFT JOIN MEMBERS ON MEMBERS.ORG_ID = ORGS.ID",
+  "schema_validation": {
+    "status": "validated",
+    "backend": "postgresql"
+  },
+  "error": null
+}
+```
+
+Generated SQL verification query output:
+
+```json
+{
+  "ok": true,
+  "command": "query",
+  "data": {
+    "rows": [
+      [
+        "join_probe_org",
+        "join_probe_member@example.com"
+      ]
+    ]
+  },
+  "error": null
+}
+```
+
 ### Insert proof
 
 ```bash
@@ -228,7 +272,7 @@ What is proven:
 - `insert` works against a real PostgreSQL database with the baseline write contract
 - `update` works against a real PostgreSQL database with the baseline write contract
 - `delete` works against a real PostgreSQL database with the baseline write contract
-- direct `generate join_inner` inference works against real PostgreSQL schema detail when exactly one direct foreign-key path exists
+- direct `generate join_inner` and `generate join_left` inference work against real PostgreSQL schema detail when exactly one direct foreign-key path exists
 
 What is not proven yet:
 
@@ -243,6 +287,6 @@ What is not proven yet:
 This supports:
 
 - PostgreSQL status: `experimental`
-- proven scope: `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, and one direct `generate join_inner` slice
+- proven scope: `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, and direct `generate join_inner` / `generate join_left` slices
 
 This does not justify claiming broad multi-DB completion.

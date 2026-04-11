@@ -138,6 +138,22 @@ def command_verify(args: argparse.Namespace) -> int:
                 ],
                 "schema_detail_join_generate",
             ),
+            coquery_command(
+                repo,
+                [
+                    "--command",
+                    "generate",
+                    "--db",
+                    str(join_db),
+                    "--skill",
+                    "join_left",
+                    "--params",
+                    '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}',
+                    "--format",
+                    "json",
+                ],
+                "schema_detail_left_join_generate",
+            ),
             run_process(repo, [sys.executable, "sql_cli/tests/test_core.py"], "baseline_tests"),
         ]
 
@@ -187,6 +203,22 @@ def command_demo(args: argparse.Namespace) -> int:
                     "json",
                 ],
                 "generate_join",
+            ),
+            coquery_command(
+                repo,
+                [
+                    "--command",
+                    "generate",
+                    "--db",
+                    str(join_db),
+                    "--skill",
+                    "join_left",
+                    "--params",
+                    '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}',
+                    "--format",
+                    "json",
+                ],
+                "generate_left_join",
             ),
             coquery_command(repo, ["--command", "natural", "--db", str(demo_db), "--sql", "show users", "--format", "json"], "natural"),
             coquery_command(

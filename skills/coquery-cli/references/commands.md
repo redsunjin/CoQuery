@@ -9,6 +9,7 @@ python3 main.py --command query --db example.db --sql "SELECT * FROM users" --fo
 python3 main.py --command generate --db example.db --skill select_simple --format json
 python3 main.py --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}' --format json
 python3 main.py --command generate --db /tmp/join-test.db --skill join_inner --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}' --format json
+python3 main.py --command generate --db /tmp/join-test.db --skill join_left --params '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}' --format json
 python3 main.py --command natural --db example.db --sql "show users" --format json
 python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
 python3 main.py --command db_knowledge --dialect sqlite --topic schema
@@ -36,6 +37,8 @@ Direct join generation example:
 ```bash
 python3 main.py --command generate --db /tmp/join-test.db --skill join_inner \
   --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}' --format json
+python3 main.py --command generate --db /tmp/join-test.db --skill join_left \
+  --params '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}' --format json
 ```
 
 This generates a direct `ON` clause from `schema_detail` foreign-key metadata when the two tables have exactly one direct join path. Missing or ambiguous join paths fail closed.

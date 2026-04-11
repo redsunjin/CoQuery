@@ -243,3 +243,23 @@ echo "== PostgreSQL direct join verification query =="
   --db-uri "${DB_URI}" \
   --sql "${JOIN_SQL}" \
   --format json
+
+echo ""
+echo "== PostgreSQL direct left join generation smoke =="
+JOIN_LEFT_GENERATE_OUTPUT="$("${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command generate \
+  --db-uri "${DB_URI}" \
+  --skill join_left \
+  --params '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}' \
+  --format json)"
+printf '%s\n' "${JOIN_LEFT_GENERATE_OUTPUT}"
+
+JOIN_LEFT_SQL="$(printf '%s\n' "${JOIN_LEFT_GENERATE_OUTPUT}" | "${VENV_DIR}/bin/python" -c 'import json, sys; payload = json.load(sys.stdin); assert payload.get("ok"), payload; print(payload["sql"])')"
+
+echo ""
+echo "== PostgreSQL direct left join verification query =="
+"${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command query \
+  --db-uri "${DB_URI}" \
+  --sql "${JOIN_LEFT_SQL}" \
+  --format json
