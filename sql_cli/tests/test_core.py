@@ -54,6 +54,25 @@ def seed_user(db_path: Path, name: str = "seed_user", age: int = 30) -> int:
     return row_id
 
 
+def make_join_db() -> tuple[TemporaryDirectory[str], Path]:
+    tmpdir = TemporaryDirectory()
+    db_path = Path(tmpdir.name) / "join-test.db"
+    db = CoQueryDB(str(db_path))
+    db.execute("PRAGMA foreign_keys = ON")
+    db.execute("CREATE TABLE orgs (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE)")
+    db.execute(
+        "CREATE TABLE members ("
+        "id INTEGER PRIMARY KEY, "
+        "org_id INTEGER NOT NULL, "
+        "email TEXT NOT NULL, "
+        "FOREIGN KEY (org_id) REFERENCES orgs(id) ON DELETE CASCADE"
+        ")"
+    )
+    db.execute("CREATE TABLE audits (id INTEGER PRIMARY KEY, event_name TEXT NOT NULL)")
+    db.close()
+    return tmpdir, db_path
+
+
 def run_cli(args: list[str]) -> tuple[int, dict[str, object]]:
     result = subprocess.run(
         ["python3", "main.py", *args],
@@ -303,8 +322,16 @@ class _FakePsycopgConnection:
     def execute(self, query: str, params: object | None = None) -> _FakeCursor:
         self.last_query = query
         if "information_schema.tables" in query:
-            return _FakeCursor([("users",)])
+            return _FakeCursor([("orgs",), ("users",)])
         if "information_schema.columns" in query:
+            table_name = (params or ["users"])[0]
+            if table_name == "orgs":
+                return _FakeCursor(
+                    [
+                        ("id", "integer", "NO", "nextval('orgs_id_seq'::regclass)", 1),
+                        ("name", "text", "NO", None, 2),
+                    ]
+                )
             return _FakeCursor(
                 [
                     ("id", "integer", "NO", "nextval('users_id_seq'::regclass)", 1),
@@ -313,6 +340,9 @@ class _FakePsycopgConnection:
                 ]
             )
         if "information_schema.table_constraints" in query:
+            table_name = (params or ["users"])[0]
+            if table_name == "orgs":
+                return _FakeCursor([("orgs_pkey", "PRIMARY KEY", "id", None, None)])
             return _FakeCursor(
                 [
                     ("users_pkey", "PRIMARY KEY", "id", None, None),
@@ -320,6 +350,14 @@ class _FakePsycopgConnection:
                 ]
             )
         if "JOIN pg_index" in query:
+            table_name = (params or ["users"])[0]
+            if table_name == "orgs":
+                return _FakeCursor(
+                    [
+                        ("orgs_name_key", True, False, ["name"]),
+                        ("orgs_pkey", True, True, ["id"]),
+                    ]
+                )
             return _FakeCursor(
                 [
                     ("users_name_idx", False, False, ["name"]),
@@ -349,7 +387,7 @@ class _FakePsycopgSuccessModule:
 with patch("sql_cli.db_new.importlib.import_module", return_value=_FakePsycopgSuccessModule()):
     postgres_schema = schema_handler("postgresql://user:pass@localhost:5432/dbname")
 assert postgres_schema["ok"] is True
-assert postgres_schema["data"]["tables"] == ["users"]
+assert postgres_schema["data"]["tables"] == ["orgs", "users"]
 assert _FakePsycopgSuccessModule.last_connection is not None
 assert "information_schema.tables" in _FakePsycopgSuccessModule.last_connection.last_query
 print("26. test_postgresql_schema_success_path ✓")
@@ -765,12 +803,19 @@ assert complex_natural["provider_name"] == "local_ollama"
 assert "joins" in complex_natural["knowledge_context"]["topic_names"]
 print("55. test_natural_provider_fallback_for_complex_request ✓")
 
-generated_with_context = generate_handler("postgresql://user:pass@localhost:5432/dbname", "join_inner")
+with patch("sql_cli.db_new.importlib.import_module", return_value=_FakePsycopgSuccessModule()):
+    generated_with_context = generate_handler(
+        "postgresql://user:pass@localhost:5432/dbname",
+        "join_inner",
+        params={"table1": "users", "table2": "orgs", "cols": ["users.name", "orgs.name"]},
+    )
 assert generated_with_context["ok"] is True
 assert generated_with_context["knowledge_context"]["knowledge_first"] is True
 assert generated_with_context["knowledge_context"]["dialect"] == "postgresql"
 assert "statements" in generated_with_context["knowledge_context"]["topic_names"]
 assert "joins" in generated_with_context["knowledge_context"]["topic_names"]
+assert generated_with_context["sql"] == "SELECT USERS.NAME, ORGS.NAME FROM USERS JOIN ORGS ON USERS.ORG_ID = ORGS.ID"
+assert generated_with_context["schema_validation"]["validated_joins"][0]["condition"] == "users.org_id = orgs.id"
 print("56. test_generate_uses_local_knowledge_context ✓")
 
 tmpdir, db_path = make_temp_db()
@@ -892,5 +937,83 @@ assert natural_missing_table["error"]["code"] == "schema_validation_failed"
 assert natural_missing_table["schema_validation"]["errors"][0]["code"] == "unknown_table"
 print("67. test_natural_rejects_unknown_schema_table ✓")
 
+tmpdir, db_path = make_join_db()
+auto_join_generated = generate_handler(
+    str(db_path),
+    "join_inner",
+    params={"table1": "members", "table2": "orgs", "cols": ["members.email", "orgs.name"]},
+)
+assert auto_join_generated["ok"] is True
+assert auto_join_generated["sql"] == "SELECT MEMBERS.EMAIL, ORGS.NAME FROM MEMBERS JOIN ORGS ON MEMBERS.ORG_ID = ORGS.ID"
+assert auto_join_generated["schema_validation"]["validated_joins"][0]["condition"] == "members.org_id = orgs.id"
+tmpdir.cleanup()
+print("68. test_generate_auto_join_from_sqlite_schema_detail ✓")
+
+tmpdir, db_path = make_join_db()
+reverse_auto_join_generated = generate_handler(
+    str(db_path),
+    "join_inner",
+    params={"table1": "orgs", "table2": "members", "cols": ["orgs.name", "members.email"]},
+)
+assert reverse_auto_join_generated["ok"] is True
+assert reverse_auto_join_generated["sql"] == "SELECT ORGS.NAME, MEMBERS.EMAIL FROM ORGS JOIN MEMBERS ON MEMBERS.ORG_ID = ORGS.ID"
+tmpdir.cleanup()
+print("69. test_generate_auto_join_reverse_direction ✓")
+
+tmpdir, db_path = make_join_db()
+no_join_generated = generate_handler(
+    str(db_path),
+    "join_inner",
+    params={"table1": "members", "table2": "audits"},
+)
+assert no_join_generated["ok"] is False
+assert no_join_generated["error"]["code"] == "schema_validation_failed"
+assert no_join_generated["schema_validation"]["errors"][0]["code"] == "no_join_path"
+tmpdir.cleanup()
+print("70. test_generate_rejects_missing_join_path ✓")
+
+with TemporaryDirectory() as tmpdir:
+    db_path = Path(tmpdir) / "ambiguous-join.db"
+    db = CoQueryDB(str(db_path))
+    db.execute("PRAGMA foreign_keys = ON")
+    db.execute("CREATE TABLE orgs (id INTEGER PRIMARY KEY, name TEXT NOT NULL)")
+    db.execute(
+        "CREATE TABLE org_links ("
+        "id INTEGER PRIMARY KEY, "
+        "primary_org_id INTEGER NOT NULL, "
+        "secondary_org_id INTEGER NOT NULL, "
+        "FOREIGN KEY (primary_org_id) REFERENCES orgs(id), "
+        "FOREIGN KEY (secondary_org_id) REFERENCES orgs(id)"
+        ")"
+    )
+    db.close()
+
+    ambiguous_join_generated = generate_handler(
+        str(db_path),
+        "join_inner",
+        params={"table1": "org_links", "table2": "orgs"},
+    )
+
+assert ambiguous_join_generated["ok"] is False
+assert ambiguous_join_generated["error"]["code"] == "schema_validation_failed"
+assert ambiguous_join_generated["schema_validation"]["errors"][0]["code"] == "ambiguous_join_path"
+print("71. test_generate_rejects_ambiguous_join_path ✓")
+
+tmpdir, db_path = make_join_db()
+invalid_manual_join_generated = generate_handler(
+    str(db_path),
+    "join_inner",
+    params={
+        "table1": "members",
+        "table2": "orgs",
+        "on": "members.missing_org_id = orgs.id",
+    },
+)
+assert invalid_manual_join_generated["ok"] is False
+assert invalid_manual_join_generated["error"]["code"] == "schema_validation_failed"
+assert invalid_manual_join_generated["schema_validation"]["errors"][0]["code"] == "unknown_column"
+tmpdir.cleanup()
+print("72. test_generate_validates_manual_join_columns ✓")
+
 print("")
-print("=== ALL 67 TESTS PASS ✅ ===")
+print("=== ALL 72 TESTS PASS ✅ ===")

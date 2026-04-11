@@ -79,6 +79,18 @@ fi
   -h "${SOCKET_DIR}" \
   -p "${PORT}" \
   -d "${DB_NAME}" \
+  -c "CREATE TABLE IF NOT EXISTS orgs (id SERIAL PRIMARY KEY, name TEXT NOT NULL UNIQUE);" >/dev/null
+
+"${POSTGRES_BIN_DIR}/psql" \
+  -h "${SOCKET_DIR}" \
+  -p "${PORT}" \
+  -d "${DB_NAME}" \
+  -c "CREATE TABLE IF NOT EXISTS members (id SERIAL PRIMARY KEY, org_id INTEGER NOT NULL REFERENCES orgs(id) ON DELETE CASCADE, email TEXT NOT NULL UNIQUE);" >/dev/null
+
+"${POSTGRES_BIN_DIR}/psql" \
+  -h "${SOCKET_DIR}" \
+  -p "${PORT}" \
+  -d "${DB_NAME}" \
   -c "INSERT INTO users (name, age) SELECT 'probe_user', 34 WHERE NOT EXISTS (SELECT 1 FROM users WHERE name = 'probe_user');" >/dev/null
 
 "${POSTGRES_BIN_DIR}/psql" \
@@ -98,6 +110,30 @@ fi
   -p "${PORT}" \
   -d "${DB_NAME}" \
   -c "DELETE FROM users WHERE name = 'delete_probe_user';" >/dev/null
+
+"${POSTGRES_BIN_DIR}/psql" \
+  -h "${SOCKET_DIR}" \
+  -p "${PORT}" \
+  -d "${DB_NAME}" \
+  -c "DELETE FROM members WHERE email = 'join_probe_member@example.com';" >/dev/null
+
+"${POSTGRES_BIN_DIR}/psql" \
+  -h "${SOCKET_DIR}" \
+  -p "${PORT}" \
+  -d "${DB_NAME}" \
+  -c "DELETE FROM orgs WHERE name = 'join_probe_org';" >/dev/null
+
+"${POSTGRES_BIN_DIR}/psql" \
+  -h "${SOCKET_DIR}" \
+  -p "${PORT}" \
+  -d "${DB_NAME}" \
+  -c "INSERT INTO orgs (name) SELECT 'join_probe_org' WHERE NOT EXISTS (SELECT 1 FROM orgs WHERE name = 'join_probe_org');" >/dev/null
+
+"${POSTGRES_BIN_DIR}/psql" \
+  -h "${SOCKET_DIR}" \
+  -p "${PORT}" \
+  -d "${DB_NAME}" \
+  -c "INSERT INTO members (org_id, email) SELECT id, 'join_probe_member@example.com' FROM orgs WHERE name = 'join_probe_org' AND NOT EXISTS (SELECT 1 FROM members WHERE email = 'join_probe_member@example.com');" >/dev/null
 
 DB_URI="postgresql://localhost/${DB_NAME}?host=${SOCKET_DIR}&port=${PORT}"
 
@@ -186,4 +222,24 @@ echo "== PostgreSQL delete verification query =="
   --command query \
   --db-uri "${DB_URI}" \
   --sql "SELECT COUNT(*) FROM users WHERE name = 'delete_probe_user'" \
+  --format json
+
+echo ""
+echo "== PostgreSQL direct join generation smoke =="
+JOIN_GENERATE_OUTPUT="$("${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command generate \
+  --db-uri "${DB_URI}" \
+  --skill join_inner \
+  --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}' \
+  --format json)"
+printf '%s\n' "${JOIN_GENERATE_OUTPUT}"
+
+JOIN_SQL="$(printf '%s\n' "${JOIN_GENERATE_OUTPUT}" | "${VENV_DIR}/bin/python" -c 'import json, sys; payload = json.load(sys.stdin); assert payload.get("ok"), payload; print(payload["sql"])')"
+
+echo ""
+echo "== PostgreSQL direct join verification query =="
+"${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command query \
+  --db-uri "${DB_URI}" \
+  --sql "${JOIN_SQL}" \
   --format json

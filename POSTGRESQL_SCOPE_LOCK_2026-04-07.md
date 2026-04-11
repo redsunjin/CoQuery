@@ -1,6 +1,6 @@
 # CoQuery PostgreSQL Scope Lock
 
-Date: 2026-04-07
+Date: 2026-04-11
 
 Workspace: `/Users/Agent/ps-workspace/CoQuery`
 
@@ -16,10 +16,11 @@ This document exists so the project does not drift from:
 
 ## 2. Current PostgreSQL scope
 
-As of 2026-04-07, the PostgreSQL slice is:
+As of 2026-04-11, the PostgreSQL slice is:
 
 - status: `experimental`
-- proven commands: `schema`, `query`, `insert`, `update`, `delete`
+- proven commands: `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`
+- proven generation slice: direct `generate join_inner` inference when exactly one direct foreign-key path exists
 - proof path: `bash scripts/run_postgresql_local_smoke.sh`
 - proof note: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
 
@@ -34,6 +35,8 @@ What this means:
 Do not treat these as current PostgreSQL support:
 
 - natural-language PostgreSQL execution
+- broad PostgreSQL `generate` parity
+- multi-hop or alias-aware join generation
 - transaction handling
 - parity with the SQLite baseline
 - broad multi-DB completion claims
@@ -43,15 +46,17 @@ Do not treat these as current PostgreSQL support:
 Until a new verification slice is opened, keep PostgreSQL language limited to:
 
 - `experimental`
-- `schema`, `query`, `insert`, `update`, and `delete` are proven
+- `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` are proven
+- one direct `generate join_inner` slice is proven through real schema-detail introspection
 - broader PostgreSQL support is not proven
 
 Do not:
 
 - call PostgreSQL `working`
 - imply full write parity
+- imply full PostgreSQL generation parity
 - imply multi-DB completion
-- widen docs from `schema/query/insert/update/delete` to generic PostgreSQL support
+- widen docs from the proven slice to generic PostgreSQL support
 
 ## 5. Unlock condition for the next PostgreSQL slice
 

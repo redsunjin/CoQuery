@@ -8,6 +8,7 @@ python3 main.py --command schema_detail --db example.db --table users --format j
 python3 main.py --command query --db example.db --sql "SELECT * FROM users" --format json
 python3 main.py --command generate --db example.db --skill select_simple --format json
 python3 main.py --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}' --format json
+python3 main.py --command generate --db /tmp/join-test.db --skill join_inner --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}' --format json
 python3 main.py --command natural --db example.db --sql "show users" --format json
 python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
 python3 main.py --command db_knowledge --dialect sqlite --topic schema
@@ -29,6 +30,15 @@ python3 main.py --command insert --db /tmp/demo.db --write --sql "INSERT INTO us
 python3 main.py --command update --db /tmp/demo.db --write --sql "UPDATE users SET age = 21 WHERE name = 'a'"
 python3 main.py --command delete --db /tmp/demo.db --write --sql "DELETE FROM users WHERE name = 'a'"
 ```
+
+Direct join generation example:
+
+```bash
+python3 main.py --command generate --db /tmp/join-test.db --skill join_inner \
+  --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}' --format json
+```
+
+This generates a direct `ON` clause from `schema_detail` foreign-key metadata when the two tables have exactly one direct join path. Missing or ambiguous join paths fail closed.
 
 Provider registry examples:
 

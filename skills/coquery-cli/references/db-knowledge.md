@@ -6,7 +6,7 @@ This is a compact offline reference for CoQuery agents. Use it before asking an 
 
 Current level: `schema_detail_aware_generation_seed`
 
-This file is enough for basic routing, safety decisions, deterministic lookup, normalized schema-detail lookup, simple identifier validation, and simple local-first planning. It is not enough for full SQL dialect generation, query optimization, or JPQL runtime execution.
+This file is enough for basic routing, safety decisions, deterministic lookup, normalized schema-detail lookup, simple identifier validation, direct foreign-key join inference, and simple local-first planning. It is not enough for full SQL dialect generation, query optimization, or JPQL runtime execution.
 
 For a machine-readable status, run:
 
@@ -105,7 +105,7 @@ python3 main.py --command db_knowledge --topic coverage
 
 ## Missing Knowledge Still Needed
 
-- relationship-aware and join-aware generation from schema_detail foreign keys and constraints
+- multi-hop relationship-aware and alias-aware generation from schema_detail foreign keys and constraints
 - deeper dialect-specific generation templates
 - per-dialect syntax snippets for common commands
 - per-dialect placeholder conventions by Python driver

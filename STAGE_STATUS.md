@@ -1,7 +1,7 @@
 # CoQuery Stage Status Report
 
 Version: v0.7.0
-Last Update: 2026-04-10
+Last Update: 2026-04-11
 
 ## Current Status
 
@@ -9,9 +9,11 @@ Last Update: 2026-04-10
 SQLite-first baseline verified
 Explicit write contract frozen
 Shared DB URI contract implemented
-PostgreSQL schema, query, insert, update, and delete smoke proved
+PostgreSQL schema, schema_detail, query, insert, update, and delete smoke proved
+PostgreSQL direct join generation smoke proved for the `generate join_inner` slice
 Codex skill package added for agent-side reuse
 JPA entity source introspection added as an ORM/model track
+Schema-detail direct join generation proved for built-in join skills
 Phase 5 remains narrow and experimental
 ```
 
@@ -24,11 +26,12 @@ Phase 5 remains narrow and experimental
 | Phase 2 | Complete enough | structured SQL generation works for built-in skills |
 | Phase 3 | Baseline stabilized | explicit `--write` plus explicit SQL is enforced |
 | Phase 4 | In stabilization | natural-language path is heuristic by default and can optionally use a registered provider |
-| Phase 5 | Early experimental | PostgreSQL `schema`, `query`, `insert`, `update`, and `delete` smoke succeeded; broader backend support is not proven |
+| Phase 5 | Early experimental | PostgreSQL `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, and one direct `generate join_inner` smoke slice succeeded; broader backend support is not proven |
 
 ## Verified Commands
 
 - `schema`
+- `schema_detail`
 - `query`
 - `generate`
 - `insert`
@@ -51,7 +54,7 @@ Write-command baseline:
 | Backend | Status | Notes |
 |---------|--------|-------|
 | SQLite | Working | current verified runtime path |
-| PostgreSQL | Experimental (narrow read + write) | local smoke proof succeeded for `schema`, `query`, `insert`, `update`, and `delete`; broader backend support is still not proven |
+| PostgreSQL | Experimental (narrow read + write) | local smoke proof succeeded for `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete`, plus one direct `generate join_inner` slice; broader backend support is still not proven |
 | MySQL | Stub | URI contract exists; runtime returns structured placeholder error |
 
 ORM/model support:
@@ -81,7 +84,7 @@ bash scripts/run_postgresql_local_smoke.sh
 2. keep the PostgreSQL smoke runner repeatable and repo-managed
 3. keep `skills/coquery-cli` aligned with runnable CLI behavior
 4. keep JPA labelled as ORM/model support until JPQL runtime proof exists
-5. use the verification matrix before changing any broader multi-DB status claim
+5. do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
 
-Last Updated: 2026-04-10
-Phase Status: SQLite-first baseline verified with PostgreSQL schema, query, insert, update, and delete smoke proof plus agent skill packaging and JPA source introspection
+Last Updated: 2026-04-11
+Phase Status: SQLite-first baseline verified with PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` smoke proof plus agent skill packaging, JPA source introspection, and direct schema-detail join inference

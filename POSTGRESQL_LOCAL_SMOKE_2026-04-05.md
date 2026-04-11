@@ -1,12 +1,12 @@
 # CoQuery PostgreSQL Local Smoke
 
-Date: 2026-04-05
+Date: 2026-04-11
 
 Workspace: `/Users/Agent/ps-workspace/CoQuery`
 
 ## Purpose
 
-Record one repeatable local PostgreSQL smoke path that proves CoQuery can run `schema`, `query`, `insert`, `update`, and `delete` against a real non-SQLite backend.
+Record one repeatable local PostgreSQL smoke path that proves CoQuery can run `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` against a real non-SQLite backend, plus one direct schema-detail join-generation slice.
 
 This is a narrow probe environment, not the default baseline runtime.
 
@@ -35,8 +35,9 @@ This script:
 - installs `psycopg[binary]`
 - initializes a temporary local PostgreSQL cluster
 - starts PostgreSQL on a non-default port
-- seeds a `users` table
-- runs CoQuery `schema`, `query`, `insert`, `update`, and `delete`
+- seeds `users`, `orgs`, and `members` probe tables
+- runs CoQuery `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete`
+- runs `generate join_inner` against real PostgreSQL schema detail and executes the generated join SQL
 - stops the cluster when finished
 
 ## Observed commands and results
@@ -86,6 +87,50 @@ Observed output:
       [
         "probe_user",
         34
+      ]
+    ]
+  },
+  "error": null
+}
+```
+
+### Direct join-generation proof
+
+```bash
+/Users/Agent/ps-workspace/CoQuery/.tmp/pg-venv/bin/python main.py \
+  --command generate \
+  --db-uri "postgresql://localhost/coquery_probe?host=/Users/Agent/ps-workspace/CoQuery/.tmp/pg-socket&port=49251" \
+  --skill join_inner \
+  --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}' \
+  --format json
+```
+
+Observed output:
+
+```json
+{
+  "ok": true,
+  "command": "generate",
+  "sql": "SELECT MEMBERS.EMAIL, ORGS.NAME FROM MEMBERS JOIN ORGS ON MEMBERS.ORG_ID = ORGS.ID",
+  "schema_validation": {
+    "status": "validated",
+    "backend": "postgresql"
+  },
+  "error": null
+}
+```
+
+Generated SQL verification query output:
+
+```json
+{
+  "ok": true,
+  "command": "query",
+  "data": {
+    "rows": [
+      [
+        "join_probe_member@example.com",
+        "join_probe_org"
       ]
     ]
   },
@@ -178,14 +223,18 @@ What is proven:
 - PostgreSQL URI handling works with a real target
 - PostgreSQL connection succeeds when `psycopg[binary]` is available
 - `schema` works against a real PostgreSQL database
+- `schema_detail` works against a real PostgreSQL database
 - `query` works against a real PostgreSQL database
 - `insert` works against a real PostgreSQL database with the baseline write contract
 - `update` works against a real PostgreSQL database with the baseline write contract
 - `delete` works against a real PostgreSQL database with the baseline write contract
+- direct `generate join_inner` inference works against real PostgreSQL schema detail when exactly one direct foreign-key path exists
 
 What is not proven yet:
 
 - PostgreSQL natural-language flows
+- broad PostgreSQL generation parity
+- multi-hop or alias-aware join generation
 - CI-backed PostgreSQL automation
 - stable one-command bootstrap inside the default developer baseline
 
@@ -194,6 +243,6 @@ What is not proven yet:
 This supports:
 
 - PostgreSQL status: `experimental`
-- proven scope: `schema`, `query`, `insert`, `update`, and `delete`
+- proven scope: `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, and one direct `generate join_inner` slice
 
 This does not justify claiming broad multi-DB completion.

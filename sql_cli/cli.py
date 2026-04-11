@@ -205,9 +205,66 @@ def generate_handler(
     try:
         from sql_cli.core import SQLGenerator
 
+        requirements = generation_schema_requirements(skill or "select_simple", params)
+        schema_validation = validate_schema_identifiers(
+            db,
+            requirements["tables"],
+            requirements["columns_by_table"],
+            requirements.get("join_pairs"),
+        )
+        validation_warnings = [
+            f"schema_validation_unavailable:{warning['code']}"
+            for warning in schema_validation.get("warnings", [])
+        ]
+        if schema_validation_failed(schema_validation):
+            return {
+                "ok": False,
+                "command": "generate",
+                "sql": "",
+                "warnings": validation_warnings,
+                "knowledge_context": knowledge_context,
+                "schema_validation": schema_validation,
+                "error": {
+                    "code": "schema_validation_failed",
+                    "message": schema_validation_message(schema_validation),
+                },
+            }
+
+        prepared_params = dict(params or {})
+        if requirements.get("auto_join_requested"):
+            if schema_validation.get("status") == "unavailable":
+                return {
+                    "ok": False,
+                    "command": "generate",
+                    "sql": "",
+                    "warnings": validation_warnings,
+                    "knowledge_context": knowledge_context,
+                    "schema_validation": schema_validation,
+                    "error": {
+                        "code": "schema_detail_unavailable_for_join",
+                        "message": "Automatic join generation requires schema_detail access for both tables.",
+                    },
+                }
+
+            validated_joins = schema_validation.get("validated_joins", [])
+            if not validated_joins:
+                return {
+                    "ok": False,
+                    "command": "generate",
+                    "sql": "",
+                    "warnings": validation_warnings,
+                    "knowledge_context": knowledge_context,
+                    "schema_validation": schema_validation,
+                    "error": {
+                        "code": "schema_validation_failed",
+                        "message": "Automatic join generation requires a validated direct join path.",
+                    },
+                }
+            prepared_params["on"] = validated_joins[0]["condition"]
+
         gen = SQLGenerator()
-        result = gen.generate(skill or "select_simple", params or {})
-        warnings = result.get("warnings", [])
+        result = gen.generate(skill or "select_simple", prepared_params)
+        warnings = validation_warnings + result.get("warnings", [])
         if "error" in result:
             return {
                 "ok": False,
@@ -225,29 +282,6 @@ def generate_handler(
                 "error": result.get("error"),
             }
 
-        requirements = generation_schema_requirements(skill or "select_simple", params)
-        schema_validation = validate_schema_identifiers(
-            db,
-            requirements["tables"],
-            requirements["columns_by_table"],
-        )
-        warnings.extend(
-            f"schema_validation_unavailable:{warning['code']}"
-            for warning in schema_validation.get("warnings", [])
-        )
-        if schema_validation_failed(schema_validation):
-            return {
-                "ok": False,
-                "command": "generate",
-                "sql": "",
-                "warnings": warnings,
-                "knowledge_context": knowledge_context,
-                "schema_validation": schema_validation,
-                "error": {
-                    "code": "schema_validation_failed",
-                    "message": schema_validation_message(schema_validation),
-                },
-            }
         return {
             "ok": "error" not in result,
             "command": "generate",
