@@ -1,7 +1,7 @@
 # CoQuery Todo List
 
 Version: v0.7.x stabilization
-Last Updated: 2026-04-10
+Last Updated: 2026-04-12
 
 ## Official Next Tasks
 
@@ -78,10 +78,13 @@ Open tasks:
 - [x] pick PostgreSQL as the first probe
 - [x] add one documented local smoke path
 - [x] prove PostgreSQL `schema`
+- [x] prove PostgreSQL `schema_detail`
 - [x] prove PostgreSQL `query`
 - [x] prove PostgreSQL `insert`
 - [x] prove PostgreSQL `update`
 - [x] prove PostgreSQL `delete`
+- [x] prove PostgreSQL direct `generate join_inner`
+- [x] prove PostgreSQL direct `generate join_left`
 
 Current output:
 
@@ -90,7 +93,7 @@ Current output:
 
 Current next step:
 
-- keep the PostgreSQL smoke runner easy to rerun from a normal shell environment
+- observe the first GitHub Actions PostgreSQL smoke runs and keep the runner portable before broadening any PostgreSQL claim
 
 ### 5. Verification-gated backend promotion
 
@@ -213,6 +216,7 @@ Current output:
 - `python3 main.py --command schema_detail --db example.db --table users --format json`
 - `python3 main.py --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}' --format json`
 - `python3 main.py --command generate --db /tmp/join-test.db --skill join_inner --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}' --format json`
+- `python3 main.py --command generate --db /tmp/join-test.db --skill join_left --params '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}' --format json`
 - `python3 main.py --command db_knowledge --topic coverage`
 
 ## Recently Closed Stabilization Slices
@@ -224,7 +228,7 @@ Current output:
 - [x] define verification matrix and backend status policy
 - [x] add docs-example smoke coverage to the baseline test file
 - [x] add persona review checkpoint
-- [x] add first real PostgreSQL `schema`, `query`, `insert`, `update`, and `delete` smoke
+- [x] add first real PostgreSQL `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` smoke
 - [x] package CoQuery as an agent-usable Codex skill
 - [x] add first JPA entity source introspection slice
 - [x] add first DB knowledge audit and reference seed
@@ -233,6 +237,9 @@ Current output:
 - [x] add local-knowledge-first planning for generation, natural, and write flows
 - [x] add normalized schema-detail knowledge for columns, indexes, foreign keys, and constraints
 - [x] add schema-detail-backed identifier validation for generation and simple natural-language flows
+- [x] add schema-detail-backed direct join inference for built-in join skills
+- [x] prove direct PostgreSQL `generate join_inner` and `generate join_left` smoke against a real schema
+- [x] add GitHub Actions workflows for baseline verification and PostgreSQL smoke automation
 
 ## Reference Documents
 
@@ -259,11 +266,15 @@ python3 main.py --help
 python3 main.py --command schema --db example.db --format json
 python3 main.py --command schema_detail --db example.db --table users --format json
 python3 main.py --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}' --format json
+python3 main.py --command generate --db /tmp/join-test.db --skill join_inner --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}' --format json
+python3 main.py --command generate --db /tmp/join-test.db --skill join_left --params '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}' --format json
 python3 sql_cli/tests/test_core.py
 python3 -c "import sql_cli.cli, sql_cli.core, sql_cli.db_new"
 python3 skills/coquery-cli/scripts/coquery_agent.py verify
+python3 skills/coquery-cli/scripts/coquery_agent.py demo
 python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
 python3 main.py --command db_knowledge --dialect sqlite --topic schema
+bash scripts/run_postgresql_local_smoke.sh
 ```
 
 ## Current Direction

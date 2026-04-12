@@ -1,6 +1,6 @@
 # CoQuery Handoff v0.7.0
 
-Date: 2026-04-11
+Date: 2026-04-12
 
 ## Current Handoff State
 
@@ -41,6 +41,7 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 - schema-detail-backed direct join inference for `join_inner` and `join_left`
 - schema-detail-backed validation of qualified columns in explicit join `ON` clauses
 - real PostgreSQL smoke proof for direct `generate join_inner` and `generate join_left` slices
+- repo-local GitHub Actions workflows for baseline and PostgreSQL smoke automation
 - structured write results with `affected_rows`, `warnings`, and `safety_level`
 
 ## What Is Not Complete
@@ -63,11 +64,12 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 - PostgreSQL is proven only for narrow `schema`, `schema_detail`, `query`, `insert`, and `update`, and `delete` paths plus direct `generate join_inner` / `generate join_left` slices through local smoke runs
 - MySQL URIs return a structured `unsupported_backend` placeholder error
 - JPA support is source introspection only and does not execute JPQL
+- the new GitHub Actions workflow files exist, but this session did not observe a live GitHub runner result
 
 ## Official Next Work
 
-1. Keep top-level docs aligned with the verified baseline
-2. Keep the PostgreSQL smoke runner repeatable and repo-managed
+1. Observe the first GitHub Actions baseline and PostgreSQL smoke runs and fix any runner drift
+2. Keep top-level docs aligned with the verified baseline
 3. Use the verification matrix and scope lock to gate any broader Phase 5 claim changes
 4. Do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
 
@@ -92,6 +94,8 @@ Current runner note:
 - `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
 - `POSTGRESQL_SCOPE_LOCK_2026-04-07.md`
 - `SCOPE_DECISION_2026-04-10.md`
+- `.github/workflows/baseline.yml`
+- `.github/workflows/postgresql-smoke.yml`
 
 ## Recommended Verification
 
@@ -107,6 +111,6 @@ python3 main.py --command db_knowledge --topic coverage
 bash scripts/run_postgresql_local_smoke.sh
 ```
 
-Last Updated: 2026-04-11
-Status: SQLite-first baseline verified with PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` smoke proof, local DB knowledge-first planning, schema-detail-aware identifier validation, and direct schema-detail join inference
-Next: keep docs aligned and avoid broadening join-generation claims beyond direct schema-detail foreign-key inference
+Last Updated: 2026-04-12
+Status: SQLite-first baseline verified with PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` smoke proof, local DB knowledge-first planning, schema-detail-aware identifier validation, direct schema-detail join inference, and added GitHub Actions baseline / PostgreSQL smoke workflows
+Next: observe first workflow runs, keep docs aligned, and avoid broadening join-generation claims beyond direct schema-detail foreign-key inference
