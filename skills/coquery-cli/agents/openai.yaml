@@ -1,4 +1,4 @@
 interface:
   display_name: "CoQuery CLI"
   short_description: "Run CoQuery SQL and JPA schema workflows"
-  default_prompt: "Use $coquery-cli to inspect a database or JPA entity schema, run a safe query, or verify CoQuery readiness."
+  default_prompt: "Use $coquery-cli to inspect database or JPA entity schema, run a safe query, generate direct schema-detail joins, or verify CoQuery readiness."

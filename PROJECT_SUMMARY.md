@@ -8,15 +8,17 @@
 ## Current Status
 
 ```text
-Verified on 2026-04-10
-- 67 executable baseline tests pass
+Verified on 2026-04-11
+- 73 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
 - explicit write contract is enforced
 - shared DB URI contract is implemented
 - PostgreSQL schema, schema_detail, query, insert, update, and delete smoke have succeeded
+- PostgreSQL direct `generate join_inner` and `generate join_left` smoke have succeeded against real schema-detail paths
 - schema-detail knowledge command is verified for SQLite and the PostgreSQL proof path
 - schema-detail-aware identifier validation is verified for generate and simple natural paths
+- schema-detail-aware direct join generation is verified for built-in join skills
 ```
 
 Scope decision:
@@ -85,7 +87,7 @@ Current executable baseline:
 python3 sql_cli/tests/test_core.py
 ```
 
-This passes 67 baseline tests covering:
+This passes 73 baseline tests covering:
 
 - SQL generation
 - SQL validation
@@ -102,18 +104,19 @@ This passes 67 baseline tests covering:
 - local DB/JPA knowledge context for generation, natural, and write planning
 - normalized schema-detail metadata for SQLite and mocked PostgreSQL paths
 - schema-detail-backed table and simple column validation for generate and natural
+- schema-detail-backed direct join inference, no-path rejection, ambiguous-path rejection, and explicit join-column validation
 
 ---
 
 ## Current Limits
 
 - SQLite is the only broadly verified backend
-- PostgreSQL is experimental for the narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` paths
+- PostgreSQL is experimental for the narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` paths plus direct `generate join_inner` / `generate join_left` smoke slices
 - MySQL is still a stub, not a working backend
 - no transaction or dry-run layer exists yet
 - natural-language behavior is lightweight by default; provider-backed quality and backend parity are not broadly proven
 - provider-backed natural is currently a secondary experimental track
-- generated SQL templates validate basic identifiers, but are not yet relationship-aware, join-aware, or expression-aware
+- generated SQL templates validate basic identifiers and direct foreign-key joins, but are not yet multi-hop relationship-aware, alias-aware, or expression-aware
 - JPA support is source introspection only; JPQL runtime execution is not implemented
 - older docs before the 2026-04-04 repair may overstate completion
 
@@ -171,10 +174,10 @@ python3 sql_cli/tests/test_core.py
 
 ## Next Steps
 
-1. use schema_detail relationships and constraints for safer join generation
-2. keep status docs aligned with observed behavior
-3. keep the PostgreSQL probe runner repeatable and less ad hoc
-4. use the verification matrix before changing any broader multi-DB status claim
+1. keep status docs aligned with observed behavior
+2. keep the PostgreSQL probe runner repeatable and less ad hoc
+3. use the verification matrix before changing any broader multi-DB status claim
+4. do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
 
 Current runner improvement:
 
@@ -199,5 +202,5 @@ Current runner improvement:
 
 ---
 
-Last Updated: 2026-04-10
-Status: SQLite-first baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, and delete proof
+Last Updated: 2026-04-11
+Status: SQLite-first baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof plus direct schema-detail join inference

@@ -61,6 +61,27 @@ def _tail(text: str, max_chars: int = 4000) -> str:
     return text[-max_chars:]
 
 
+def create_join_demo_db(db_path: Path) -> Path:
+    import sqlite3
+
+    conn = sqlite3.connect(db_path)
+    try:
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("CREATE TABLE orgs (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE)")
+        conn.execute(
+            "CREATE TABLE members ("
+            "id INTEGER PRIMARY KEY, "
+            "org_id INTEGER NOT NULL, "
+            "email TEXT NOT NULL, "
+            "FOREIGN KEY (org_id) REFERENCES orgs(id) ON DELETE CASCADE"
+            ")"
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    return db_path
+
+
 def run_process(repo: Path, args: list[str], name: str) -> dict[str, Any]:
     result = subprocess.run(
         args,
@@ -91,19 +112,53 @@ def coquery_command(repo: Path, cli_args: list[str], name: str) -> dict[str, Any
 
 def command_verify(args: argparse.Namespace) -> int:
     repo = find_repo(args.repo)
-    checks = [
-        coquery_command(repo, ["--help"], "help"),
-        coquery_command(repo, ["--command", "schema", "--db", "example.db", "--format", "json"], "sqlite_schema"),
-        coquery_command(
-            repo,
-            ["--command", "schema_detail", "--db", "example.db", "--table", "users", "--format", "json"],
-            "sqlite_schema_detail",
-        ),
-        run_process(repo, [sys.executable, "sql_cli/tests/test_core.py"], "baseline_tests"),
-    ]
+    with tempfile.TemporaryDirectory(prefix="coquery-agent-verify-") as tmpdir:
+        join_db = create_join_demo_db(Path(tmpdir) / "join-verify.db")
+        checks = [
+            coquery_command(repo, ["--help"], "help"),
+            coquery_command(repo, ["--command", "schema", "--db", "example.db", "--format", "json"], "sqlite_schema"),
+            coquery_command(
+                repo,
+                ["--command", "schema_detail", "--db", "example.db", "--table", "users", "--format", "json"],
+                "sqlite_schema_detail",
+            ),
+            coquery_command(
+                repo,
+                [
+                    "--command",
+                    "generate",
+                    "--db",
+                    str(join_db),
+                    "--skill",
+                    "join_inner",
+                    "--params",
+                    '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}',
+                    "--format",
+                    "json",
+                ],
+                "schema_detail_join_generate",
+            ),
+            coquery_command(
+                repo,
+                [
+                    "--command",
+                    "generate",
+                    "--db",
+                    str(join_db),
+                    "--skill",
+                    "join_left",
+                    "--params",
+                    '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}',
+                    "--format",
+                    "json",
+                ],
+                "schema_detail_left_join_generate",
+            ),
+            run_process(repo, [sys.executable, "sql_cli/tests/test_core.py"], "baseline_tests"),
+        ]
 
-    if args.postgres:
-        checks.append(run_process(repo, ["bash", "scripts/run_postgresql_local_smoke.sh"], "postgres_smoke"))
+        if args.postgres:
+            checks.append(run_process(repo, ["bash", "scripts/run_postgresql_local_smoke.sh"], "postgres_smoke"))
 
     payload = {
         "ok": all(check["ok"] for check in checks),
@@ -122,6 +177,7 @@ def command_demo(args: argparse.Namespace) -> int:
 
     with tempfile.TemporaryDirectory(prefix="coquery-agent-demo-") as tmpdir:
         demo_db = Path(tmpdir) / "demo.db"
+        join_db = create_join_demo_db(Path(tmpdir) / "join-demo.db")
         shutil.copy2(fixture, demo_db)
 
         checks = [
@@ -132,6 +188,38 @@ def command_demo(args: argparse.Namespace) -> int:
                 "schema_detail",
             ),
             coquery_command(repo, ["--command", "generate", "--db", str(demo_db), "--skill", "select_simple", "--format", "json"], "generate"),
+            coquery_command(
+                repo,
+                [
+                    "--command",
+                    "generate",
+                    "--db",
+                    str(join_db),
+                    "--skill",
+                    "join_inner",
+                    "--params",
+                    '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}',
+                    "--format",
+                    "json",
+                ],
+                "generate_join",
+            ),
+            coquery_command(
+                repo,
+                [
+                    "--command",
+                    "generate",
+                    "--db",
+                    str(join_db),
+                    "--skill",
+                    "join_left",
+                    "--params",
+                    '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}',
+                    "--format",
+                    "json",
+                ],
+                "generate_left_join",
+            ),
             coquery_command(repo, ["--command", "natural", "--db", str(demo_db), "--sql", "show users", "--format", "json"], "natural"),
             coquery_command(
                 repo,

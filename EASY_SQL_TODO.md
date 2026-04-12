@@ -197,7 +197,7 @@ Open tasks:
 - [x] wire local knowledge lookup into generation before provider calls
 - [x] add schema-detail knowledge for columns, indexes, foreign keys, and constraints
 - [x] wire schema-detail output into generation and natural-language identifier validation
-- [ ] use schema-detail relationships and constraints for safer join generation
+- [x] use schema-detail relationships and constraints for safer join generation
 
 Current output:
 
@@ -212,6 +212,7 @@ Current output:
 - `sql_cli/knowledge_planner.py`
 - `python3 main.py --command schema_detail --db example.db --table users --format json`
 - `python3 main.py --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}' --format json`
+- `python3 main.py --command generate --db /tmp/join-test.db --skill join_inner --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}' --format json`
 - `python3 main.py --command db_knowledge --topic coverage`
 
 ## Recently Closed Stabilization Slices

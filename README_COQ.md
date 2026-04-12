@@ -1,18 +1,20 @@
 # CoQuery Baseline Verification
 
-Date: 2026-04-10
+Date: 2026-04-11
 
 ## Result
 
 ```text
-67/67 executable baseline tests pass
+73/73 executable baseline tests pass
 SQLite-first CLI verified
 Explicit write contract verified
 Shared DB URI contract verified
 PostgreSQL schema, schema_detail, query, insert, update, and delete smoke verified
+PostgreSQL direct join-generation smoke verified
 Local DB/JPA knowledge-first generation planning verified
 Schema-detail knowledge command verified
 Schema-detail-aware generation and natural identifier validation verified
+Schema-detail-aware direct join generation verified
 ```
 
 Scope decision:
@@ -48,6 +50,7 @@ Scope decision:
 | DB URI contract | Working baseline | `--db-uri` is available and validated |
 | Phase 5 verification matrix | Working baseline | backend promotion is now proof-gated |
 | PostgreSQL schema smoke | Working baseline | local proof recorded on 2026-04-05 |
+| PostgreSQL direct join generation smoke | Working baseline | local proof recorded on 2026-04-11 for direct `generate join_inner` and `generate join_left` slices |
 | PostgreSQL query smoke | Working baseline | local proof recorded on 2026-04-05 |
 | PostgreSQL insert smoke | Working baseline | local proof recorded on 2026-04-05 |
 | PostgreSQL update smoke | Working baseline | local proof recorded on 2026-04-07 |
@@ -58,6 +61,7 @@ Scope decision:
 | DB knowledge planner | Seed | generation, natural, and write planning attach local dialect/safety context |
 | Schema detail knowledge | Seed | `schema_detail` exposes normalized columns, keys, indexes, constraints, and SQLite create SQL for verified paths |
 | Schema validation | Seed | `generate` and simple `natural` requests validate table and simple column identifiers against `schema_detail` |
+| Direct join generation | Working baseline | `generate` can infer one-step join `ON` clauses from schema-detail foreign keys; no-path and ambiguous joins fail closed |
 
 ## Verification Commands
 
@@ -66,6 +70,7 @@ python3 main.py --help
 python3 main.py --command schema --db example.db --format json
 python3 main.py --command schema_detail --db example.db --table users --format json
 python3 main.py --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}' --format json
+python3 main.py --command generate --db /tmp/join-test.db --skill join_inner --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}' --format json
 python3 main.py --command schema --db-uri sqlite:///Users/Agent/ps-workspace/CoQuery/example.db --format json
 python3 sql_cli/tests/test_core.py
 bash scripts/run_postgresql_local_smoke.sh
@@ -79,6 +84,9 @@ bash scripts/run_postgresql_local_smoke.sh
 - `--db-uri` is preferred for future multi-backend commands
 - `schema_detail` provides normalized schema metadata for agent-side DB knowledge use
 - `generate` and simple `natural` requests can reject unknown tables before returning local SQL
+- `generate` can auto-build direct join `ON` clauses from schema detail when both tables are inspectable
+- the local PostgreSQL smoke runner now proves direct `generate join_inner` and `generate join_left` slices against a real PostgreSQL schema
+- explicit join `ON` clauses are still allowed, but qualified table/column references are validated against schema detail when available
 - `natural` defaults to simple fixed SQL patterns
 - `natural --provider-name ...` skips provider calls for simple covered requests and can route complex requests through a registered provider
 - provider-backed natural is experimental and secondary to the PostgreSQL proof track
@@ -86,7 +94,7 @@ bash scripts/run_postgresql_local_smoke.sh
 - the PostgreSQL smoke runner checks `PATH` for PostgreSQL binaries before falling back to known Homebrew paths
 
 Version: v0.7.0
-Last Updated: 2026-04-10
-Status: Baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete proof, local DB knowledge-first planning, and schema-detail-aware identifier validation
+Last Updated: 2026-04-11
+Status: Baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof, local DB knowledge-first planning, schema-detail-aware identifier validation, and direct schema-detail join inference
 Reference: `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 Smoke Result: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`

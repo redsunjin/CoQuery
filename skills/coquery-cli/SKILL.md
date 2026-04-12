@@ -17,6 +17,8 @@ python3 skills/coquery-cli/scripts/coquery_agent.py demo
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command schema --db example.db
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command schema_detail --db example.db --table users
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command query --db example.db --sql "SELECT * FROM users"
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command generate --db /tmp/join-test.db --skill join_inner --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}'
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command generate --db /tmp/join-test.db --skill join_left --params '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}'
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command jpa_schema --jpa-project /path/to/java-project
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --dialect sqlite --topic schema
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --topic coverage
@@ -27,12 +29,14 @@ If the skill has been installed outside the repository, pass `--repo /path/to/Co
 ## Operating Rules
 
 - Treat SQLite as the working backend.
-- Treat PostgreSQL as experimental and limited to the documented `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` smoke paths.
+- Treat PostgreSQL as experimental and limited to the documented `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` smoke paths plus direct `generate join_inner` / `generate join_left` smoke slices.
 - Treat MySQL as a stub unless the repository status documents have been updated with a real verification slice.
 - Treat JPA as ORM/model source introspection unless a Java runtime proof exists.
 - Use explicit SQL plus `--write` for `insert`, `update`, and `delete`.
 - Use `natural` as an assistive drafting path; simple covered requests use local knowledge first, and provider-backed natural is a fallback for more complex requests.
-- Expect `generate` and simple `natural` requests to validate basic identifiers against `schema_detail`; do not claim relationship-aware join generation yet.
+- Expect `generate` and simple `natural` requests to validate identifiers against `schema_detail`.
+- Expect `join_inner` and `join_left` to auto-build direct join conditions from inspectable schema-detail foreign keys when no explicit `on` is supplied.
+- Do not claim multi-hop, alias-aware, or expression-aware join generation yet.
 - Prefer JSON output for agent consumption.
 
 ## Common Tasks
@@ -68,6 +72,8 @@ Inspect normalized schema detail:
 ```bash
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command schema_detail --db example.db --table users
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}'
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command generate --db /tmp/join-test.db --skill join_inner --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}'
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command generate --db /tmp/join-test.db --skill join_left --params '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}'
 ```
 
 Inspect JPA entity source:
