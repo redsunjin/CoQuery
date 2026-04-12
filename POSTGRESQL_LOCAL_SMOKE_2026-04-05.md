@@ -279,8 +279,13 @@ What is not proven yet:
 - PostgreSQL natural-language flows
 - broad PostgreSQL generation parity
 - multi-hop or alias-aware join generation
-- CI-backed PostgreSQL automation
+- observed GitHub Actions PostgreSQL smoke success
 - stable one-command bootstrap inside the default developer baseline
+
+Automation note:
+
+- `.github/workflows/postgresql-smoke.yml` now exists and runs this smoke path against an external PostgreSQL service URI
+- this document still records the local smoke proof; a live GitHub Actions result was not observed in this session
 
 ## Current status effect
 

@@ -8,7 +8,7 @@
 ## Current Status
 
 ```text
-Verified on 2026-04-11
+Verified on 2026-04-12
 - 73 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
@@ -19,6 +19,7 @@ Verified on 2026-04-11
 - schema-detail knowledge command is verified for SQLite and the PostgreSQL proof path
 - schema-detail-aware identifier validation is verified for generate and simple natural paths
 - schema-detail-aware direct join generation is verified for built-in join skills
+- GitHub Actions workflow files are added for baseline and PostgreSQL smoke automation
 ```
 
 Scope decision:
@@ -33,7 +34,7 @@ Scope decision:
 
 - Delivery harness: `Plan -> Review -> Execute -> Verify` in `STABILIZATION_PLAN_2026-04-04.md`
 - Runtime harness: `main.py` routes one command into `sql_cli/cli.py`, which fans into `sql_cli/db_new.py`, `sql_cli/core.py`, or `sql_cli/nl_core.py`
-- Verification harness: baseline CLI checks, `python3 sql_cli/tests/test_core.py`, and `bash scripts/run_postgresql_local_smoke.sh`
+- Verification harness: baseline CLI checks, `python3 sql_cli/tests/test_core.py`, `bash scripts/run_postgresql_local_smoke.sh`, and GitHub Actions workflows under `.github/workflows/`
 
 ---
 
@@ -118,6 +119,7 @@ This passes 73 baseline tests covering:
 - provider-backed natural is currently a secondary experimental track
 - generated SQL templates validate basic identifiers and direct foreign-key joins, but are not yet multi-hop relationship-aware, alias-aware, or expression-aware
 - JPA support is source introspection only; JPQL runtime execution is not implemented
+- the first live GitHub Actions results for the new workflow files have not been observed in this session
 - older docs before the 2026-04-04 repair may overstate completion
 
 ---
@@ -174,8 +176,8 @@ python3 sql_cli/tests/test_core.py
 
 ## Next Steps
 
-1. keep status docs aligned with observed behavior
-2. keep the PostgreSQL probe runner repeatable and less ad hoc
+1. observe the first GitHub Actions baseline and PostgreSQL smoke runs and fix any runner-specific drift
+2. keep status docs aligned with observed behavior
 3. use the verification matrix before changing any broader multi-DB status claim
 4. do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
 
@@ -202,5 +204,5 @@ Current runner improvement:
 
 ---
 
-Last Updated: 2026-04-11
-Status: SQLite-first baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof plus direct schema-detail join inference
+Last Updated: 2026-04-12
+Status: SQLite-first baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof plus direct schema-detail join inference and added GitHub Actions baseline / PostgreSQL smoke workflows
