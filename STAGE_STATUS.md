@@ -48,6 +48,8 @@ Phase 5 remains narrow and experimental
 Write-command baseline:
 
 - `insert`, `update`, and `delete` require `--write` and explicit SQL
+- `insert`, `update`, `delete`, and write-mode `query` support `--dry-run` preview with rollback
+- `insert`, `update`, `delete`, and write-mode `query` support `--max-affected-rows` rollback guards
 - full-table `update` and `delete` return a high-risk warning
 
 ## Backend Support

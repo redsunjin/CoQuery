@@ -5,7 +5,8 @@ from __future__ import annotations
 
 import importlib
 import sqlite3
-from urllib.parse import urlparse
+from pathlib import Path
+from urllib.parse import urlparse, urlunparse
 from typing import Any, Optional
 
 
@@ -21,20 +22,22 @@ BACKEND_LABELS = {
 class CoQueryDBError(Exception):
     """Structured DB/runtime error used by CLI handlers."""
 
-    def __init__(self, code: str, message: str):
+    def __init__(self, code: str, message: str, data: Optional[dict[str, Any]] = None):
         super().__init__(message)
         self.code = code
         self.message = message
+        self.data = data or {}
 
 
 class CoQueryDB:
     """SQLite-first DB wrapper with simple URI detection."""
 
-    def __init__(self, db_uri: str, db_type: Optional[str] = None):
+    def __init__(self, db_uri: str, db_type: Optional[str] = None, connect_now: bool = True):
         self.uri = self._normalize_db_uri(db_uri)
         self.type = self._detect_type(self.uri, db_type)
         self.conn: Optional[Any] = None
-        self.connect()
+        if connect_now:
+            self.connect()
 
     def _normalize_db_uri(self, db_uri: str) -> str:
         if db_uri is None:
@@ -99,6 +102,131 @@ class CoQueryDB:
             return self.uri.replace("sqlite://", "", 1)
         return self.uri
 
+    def _display_uri(self) -> str:
+        if self.type == "sqlite":
+            return self.uri
+
+        parsed = urlparse(self.uri)
+        auth = ""
+        if parsed.username:
+            auth = parsed.username
+            if parsed.password is not None:
+                auth += ":***"
+            auth += "@"
+
+        host = parsed.hostname or ""
+        port = f":{parsed.port}" if parsed.port else ""
+        netloc = f"{auth}{host}{port}"
+        return urlunparse((parsed.scheme, netloc, parsed.path, parsed.params, parsed.query, parsed.fragment))
+
+    def _driver_details(self) -> dict[str, Any]:
+        if self.type == "sqlite":
+            return {
+                "module": "sqlite3",
+                "available": True,
+                "install_hint": None,
+            }
+
+        if self.type == "postgresql":
+            try:
+                importlib.import_module("psycopg")
+                return {
+                    "module": "psycopg",
+                    "available": True,
+                    "install_hint": "Install psycopg[binary] for postgresql:// URIs.",
+                }
+            except ModuleNotFoundError:
+                return {
+                    "module": "psycopg",
+                    "available": False,
+                    "install_hint": "Install psycopg[binary] for postgresql:// URIs.",
+                }
+
+        return {
+            "module": None,
+            "available": False,
+            "install_hint": "MySQL is still a stub in the current baseline.",
+        }
+
+    def describe_target(self) -> dict[str, Any]:
+        details: dict[str, Any] = {
+            "backend": self.type,
+            "target_kind": "db_uri" if "://" in self.uri else "legacy_path",
+            "normalized_target": self._display_uri(),
+            "driver": self._driver_details(),
+        }
+
+        if self.type == "sqlite":
+            db_path = Path(self._sqlite_path()).expanduser()
+            details["path"] = {
+                "value": self._sqlite_path(),
+                "absolute": str(db_path.resolve()),
+                "exists": db_path.exists(),
+            }
+            return details
+
+        parsed = urlparse(self.uri)
+        details["connection_target"] = {
+            "host": parsed.hostname,
+            "port": parsed.port,
+            "database": parsed.path.lstrip("/"),
+            "username": parsed.username,
+            "has_password": parsed.password is not None,
+        }
+        return details
+
+    def doctor(self) -> dict[str, Any]:
+        report = self.describe_target()
+        report["ready"] = False
+
+        if self.type == "sqlite" and not report["path"]["exists"]:
+            report["connection"] = {
+                "ok": False,
+                "code": "database_not_found",
+                "message": "SQLite database file does not exist.",
+            }
+            return report
+
+        if self.type == "postgresql" and not report["driver"]["available"]:
+            report["connection"] = {
+                "ok": False,
+                "code": "driver_not_installed",
+                "message": "PostgreSQL support requires psycopg[binary]. Install it before using postgresql:// URIs.",
+            }
+            return report
+
+        if self.type == "mysql":
+            report["connection"] = {
+                "ok": False,
+                "code": "unsupported_backend",
+                "message": "MySQL support is not implemented yet.",
+            }
+            return report
+
+        try:
+            self.connect()
+            tables = self.get_schemas()
+            report["schemas"] = {
+                "table_count": len(tables),
+                "tables_preview": tables[:10],
+            }
+            report["connection"] = {
+                "ok": True,
+                "code": None,
+                "message": "Connection successful.",
+            }
+            report["ready"] = True
+            return report
+        except CoQueryDBError as exc:
+            report["connection"] = {
+                "ok": False,
+                "code": exc.code,
+                "message": exc.message,
+            }
+            return report
+        finally:
+            self.close()
+
     def connect_sqlite(self) -> bool:
         try:
             self.conn = sqlite3.connect(self._sqlite_path())
@@ -149,16 +277,45 @@ class CoQueryDB:
             f"Unsupported database backend: {self.type}.",
         )
 
-    def execute(self, sql: str, params: Optional[list[Any]] = None) -> Any:
+    def execute(
+        self,
+        sql: str,
+        params: Optional[list[Any]] = None,
+        dry_run: bool = False,
+        max_affected_rows: Optional[int] = None,
+    ) -> Any:
         if not self.connect():
             raise CoQueryDBError("connection_failed", "Database connection failed")
 
-        cursor = self.conn.execute(sql, params or [])
-        if sql.strip().upper().startswith("SELECT"):
-            return cursor.fetchall()
+        is_select = sql.strip().upper().startswith("SELECT")
+        try:
+            cursor = self.conn.execute(sql, params or [])
+            if is_select:
+                return cursor.fetchall()
 
-        self.conn.commit()
-        return cursor.rowcount
+            rowcount = cursor.rowcount
+            if max_affected_rows is not None and rowcount > max_affected_rows:
+                self.conn.rollback()
+                raise CoQueryDBError(
+                    "affected_rows_exceeded",
+                    f"Write affected {rowcount} rows, which exceeds the allowed limit of {max_affected_rows}.",
+                    {
+                        "affected_rows": rowcount,
+                        "max_affected_rows": max_affected_rows,
+                    },
+                )
+            if dry_run:
+                self.conn.rollback()
+            else:
+                self.conn.commit()
+            return rowcount
+        except Exception:
+            if not is_select and self.conn is not None:
+                try:
+                    self.conn.rollback()
+                except Exception:
+                    pass
+            raise
 
     def _quote_sqlite_identifier(self, identifier: str) -> str:
         return '"' + identifier.replace('"', '""') + '"'

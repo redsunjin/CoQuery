@@ -30,6 +30,8 @@ Write examples:
 python3 main.py --command insert --db /tmp/demo.db --write --sql "INSERT INTO users (name, age) VALUES ('a', 20)"
 python3 main.py --command update --db /tmp/demo.db --write --sql "UPDATE users SET age = 21 WHERE name = 'a'"
 python3 main.py --command delete --db /tmp/demo.db --write --sql "DELETE FROM users WHERE name = 'a'"
+python3 main.py --command insert --db /tmp/demo.db --write --dry-run --sql "INSERT INTO users (name, age) VALUES ('preview', 20)"
+python3 main.py --command delete --db /tmp/demo.db --write --max-affected-rows 1 --sql "DELETE FROM users WHERE name = 'a'"
 ```
 
 Direct join generation example:

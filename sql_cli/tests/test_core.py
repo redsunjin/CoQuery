@@ -18,6 +18,7 @@ if __package__ in (None, ""):
 from sql_cli.cli import (
     db_knowledge_handler,
     delete_handler,
+    doctor_handler,
     generate_handler,
     insert_handler,
     jpa_schema_handler,
@@ -318,6 +319,7 @@ class _FakePsycopgConnection:
     def __init__(self):
         self.last_query = ""
         self.committed = False
+        self.rolled_back = False
 
     def execute(self, query: str, params: object | None = None) -> _FakeCursor:
         self.last_query = query
@@ -371,6 +373,9 @@ class _FakePsycopgConnection:
     def commit(self) -> None:
         self.committed = True
 
+    def rollback(self) -> None:
+        self.rolled_back = True
+
     def close(self) -> None:
         return None
 
@@ -382,6 +387,23 @@ class _FakePsycopgSuccessModule:
     def connect(uri: str) -> _FakePsycopgConnection:
         _FakePsycopgSuccessModule.last_connection = _FakePsycopgConnection()
         return _FakePsycopgSuccessModule.last_connection
+
+
+class _FakePsycopgHighRowcountConnection(_FakePsycopgConnection):
+    def execute(self, query: str, params: object | None = None) -> _FakeCursor:
+        self.last_query = query
+        if query.strip().upper().startswith("SELECT"):
+            return _FakeCursor([("probe_user", 34)])
+        return _FakeCursor(rowcount=3)
+
+
+class _FakePsycopgHighRowcountModule:
+    last_connection: _FakePsycopgHighRowcountConnection | None = None
+
+    @staticmethod
+    def connect(uri: str) -> _FakePsycopgHighRowcountConnection:
+        _FakePsycopgHighRowcountModule.last_connection = _FakePsycopgHighRowcountConnection()
+        return _FakePsycopgHighRowcountModule.last_connection
 
 
 with patch("sql_cli.db_new.importlib.import_module", return_value=_FakePsycopgSuccessModule()):
@@ -1026,5 +1048,209 @@ assert invalid_manual_join_generated["schema_validation"]["errors"][0]["code"] =
 tmpdir.cleanup()
 print("73. test_generate_validates_manual_join_columns ✓")
 
+doctor_sqlite = doctor_handler("example.db")
+assert doctor_sqlite["ok"] is True
+assert doctor_sqlite["data"]["backend"] == "sqlite"
+assert doctor_sqlite["data"]["path"]["exists"] is True
+assert doctor_sqlite["data"]["schemas"]["table_count"] >= 1
+print("74. test_doctor_sqlite_ready ✓")
+
+missing_sqlite_path = ROOT_DIR / ".tmp" / "missing-doctor.db"
+if missing_sqlite_path.exists():
+    missing_sqlite_path.unlink()
+missing_sqlite = doctor_handler(str(missing_sqlite_path))
+assert missing_sqlite["ok"] is False
+assert missing_sqlite["error"]["code"] == "database_not_found"
+assert missing_sqlite["data"]["path"]["exists"] is False
+assert missing_sqlite_path.exists() is False
+print("75. test_doctor_sqlite_missing_file ✓")
+
+with patch("sql_cli.db_new.importlib.import_module", side_effect=ModuleNotFoundError("psycopg")):
+    doctor_missing_driver = doctor_handler("postgresql://doctor:secret@localhost:5432/dbname")
+assert doctor_missing_driver["ok"] is False
+assert doctor_missing_driver["error"]["code"] == "driver_not_installed"
+assert doctor_missing_driver["data"]["normalized_target"] == "postgresql://doctor:***@localhost:5432/dbname"
+print("76. test_doctor_postgresql_driver_not_installed ✓")
+
+with patch("sql_cli.db_new.importlib.import_module", return_value=_FakePsycopgSuccessModule()):
+    doctor_postgres = doctor_handler("postgresql://doctor:secret@localhost:5432/dbname")
+assert doctor_postgres["ok"] is True
+assert doctor_postgres["data"]["backend"] == "postgresql"
+assert doctor_postgres["data"]["connection_target"]["database"] == "dbname"
+assert doctor_postgres["data"]["schemas"]["table_count"] == 2
+print("77. test_doctor_postgresql_success_path ✓")
+
+rc, payload = run_cli(["--command", "doctor", "--db", "example.db", "--format", "json"])
+assert rc == 0
+assert payload["ok"] is True
+assert payload["command"] == "doctor"
+assert payload["data"]["backend"] == "sqlite"
+print("78. test_cli_doctor_example_db ✓")
+
+tmpdir, db_path = make_temp_db()
+insert_dry_run = insert_handler(
+    str(db_path),
+    "INSERT INTO users (name, age) VALUES (?, ?)",
+    ["dry_run_user", 44],
+    write=True,
+    dry_run=True,
+)
+assert insert_dry_run["ok"] is True
+assert insert_dry_run["data"]["affected_rows"] == 1
+assert insert_dry_run["data"]["dry_run"] is True
+assert insert_dry_run["data"]["committed"] is False
+assert "Dry-run mode enabled" in insert_dry_run["data"]["warnings"][0]
+db = CoQueryDB(str(db_path))
+rows = db.execute("SELECT COUNT(*) FROM users WHERE name = ?", ["dry_run_user"])
+assert rows == [(0,)]
+db.close()
+tmpdir.cleanup()
+print("79. test_insert_dry_run_rolls_back ✓")
+
+tmpdir, db_path = make_temp_db()
+seed_user(db_path, name="dry_delete_user", age=26)
+delete_dry_run = delete_handler(
+    str(db_path),
+    "DELETE FROM users WHERE name = 'dry_delete_user'",
+    write=True,
+    dry_run=True,
+)
+assert delete_dry_run["ok"] is True
+assert delete_dry_run["data"]["affected_rows"] == 1
+assert delete_dry_run["data"]["dry_run"] is True
+assert delete_dry_run["data"]["committed"] is False
+db = CoQueryDB(str(db_path))
+rows = db.execute("SELECT COUNT(*) FROM users WHERE name = 'dry_delete_user'")
+assert rows == [(1,)]
+db.close()
+tmpdir.cleanup()
+print("80. test_delete_dry_run_rolls_back ✓")
+
+with patch("sql_cli.db_new.importlib.import_module", return_value=_FakePsycopgSuccessModule()):
+    postgres_insert_dry_run = insert_handler(
+        "postgresql://user:pass@localhost:5432/dbname",
+        "INSERT INTO users (name, age) VALUES ('pg_dry_run_user', 37)",
+        write=True,
+        dry_run=True,
+    )
+assert postgres_insert_dry_run["ok"] is True
+assert postgres_insert_dry_run["data"]["dry_run"] is True
+assert postgres_insert_dry_run["data"]["committed"] is False
+assert _FakePsycopgSuccessModule.last_connection is not None
+assert _FakePsycopgSuccessModule.last_connection.committed is False
+assert _FakePsycopgSuccessModule.last_connection.rolled_back is True
+print("81. test_postgresql_insert_dry_run_rolls_back ✓")
+
+tmpdir, db_path = make_temp_db()
+rc, payload = run_cli(
+    [
+        "--command",
+        "insert",
+        "--db",
+        str(db_path),
+        "--write",
+        "--dry-run",
+        "--sql",
+        "INSERT INTO users (name, age) VALUES ('cli_dry_run_user', 23)",
+    ]
+)
+assert rc == 0
+assert payload["ok"] is True
+assert payload["data"]["dry_run"] is True
+db = CoQueryDB(str(db_path))
+rows = db.execute("SELECT COUNT(*) FROM users WHERE name = 'cli_dry_run_user'")
+assert rows == [(0,)]
+db.close()
+tmpdir.cleanup()
+print("82. test_cli_insert_dry_run ✓")
+
+tmpdir, db_path = make_temp_db()
+seed_user(db_path, name="query_dry_run_user", age=29)
+query_delete_dry_run = query_handler(
+    str(db_path),
+    "DELETE FROM users WHERE name = 'query_dry_run_user'",
+    write=True,
+    dry_run=True,
+)
+assert query_delete_dry_run["ok"] is True
+assert query_delete_dry_run["data"]["dry_run"] is True
+db = CoQueryDB(str(db_path))
+rows = db.execute("SELECT COUNT(*) FROM users WHERE name = 'query_dry_run_user'")
+assert rows == [(1,)]
+db.close()
+tmpdir.cleanup()
+print("83. test_query_write_dry_run ✓")
+
+tmpdir, db_path = make_temp_db()
+seed_user(db_path, name="limit_guard_user", age=22)
+seed_user(db_path, name="limit_guard_user_2", age=23)
+guarded_delete = delete_handler(
+    str(db_path),
+    "DELETE FROM users",
+    write=True,
+    max_affected_rows=1,
+)
+assert guarded_delete["ok"] is False
+assert guarded_delete["error"]["code"] == "affected_rows_exceeded"
+assert guarded_delete["data"]["affected_rows"] == 2
+assert guarded_delete["data"]["max_affected_rows"] == 1
+assert guarded_delete["data"]["committed"] is False
+db = CoQueryDB(str(db_path))
+rows = db.execute("SELECT COUNT(*) FROM users")
+assert rows == [(2,)]
+db.close()
+tmpdir.cleanup()
+print("84. test_delete_max_affected_rows_rolls_back ✓")
+
+with patch("sql_cli.db_new.importlib.import_module", return_value=_FakePsycopgHighRowcountModule()):
+    postgres_limit_guard = update_handler(
+        "postgresql://user:pass@localhost:5432/dbname",
+        "UPDATE users SET age = 99 WHERE age > 0",
+        write=True,
+        max_affected_rows=1,
+    )
+assert postgres_limit_guard["ok"] is False
+assert postgres_limit_guard["error"]["code"] == "affected_rows_exceeded"
+assert postgres_limit_guard["data"]["affected_rows"] == 3
+assert _FakePsycopgHighRowcountModule.last_connection is not None
+assert _FakePsycopgHighRowcountModule.last_connection.committed is False
+assert _FakePsycopgHighRowcountModule.last_connection.rolled_back is True
+print("85. test_postgresql_max_affected_rows_rolls_back ✓")
+
+tmpdir, db_path = make_temp_db()
+seed_user(db_path, name="cli_limit_user", age=24)
+rc, payload = run_cli(
+    [
+        "--command",
+        "delete",
+        "--db",
+        str(db_path),
+        "--write",
+        "--max-affected-rows",
+        "0",
+        "--sql",
+        "DELETE FROM users WHERE name = 'cli_limit_user'",
+    ]
+)
+assert rc == 1
+assert payload["ok"] is False
+assert payload["error"]["code"] == "affected_rows_exceeded"
+db = CoQueryDB(str(db_path))
+rows = db.execute("SELECT COUNT(*) FROM users WHERE name = 'cli_limit_user'")
+assert rows == [(1,)]
+db.close()
+tmpdir.cleanup()
+print("86. test_cli_max_affected_rows_guard ✓")
+
+invalid_max_rows = insert_handler(
+    "example.db",
+    "INSERT INTO users (name, age) VALUES ('bad_limit_user', 10)",
+    write=True,
+    max_affected_rows=-1,
+)
+assert invalid_max_rows["ok"] is False
+assert invalid_max_rows["error"]["code"] == "invalid_max_affected_rows"
+print("87. test_invalid_max_affected_rows ✓")
+
 print("")
-print("=== ALL 73 TESTS PASS ✅ ===")
+print("=== ALL 87 TESTS PASS ✅ ===")

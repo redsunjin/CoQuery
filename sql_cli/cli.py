@@ -54,9 +54,12 @@ def _normalize_write_params(params: Optional[Any]) -> Optional[list[Any]]:
     raise TypeError("Write params must be a JSON array")
 
 
-def _write_metadata(operation: str, sql: str) -> tuple[list[str], str]:
+def _write_metadata(operation: str, sql: str, dry_run: bool = False) -> tuple[list[str], str]:
     sql_upper = sql.strip().upper()
     warnings: list[str] = []
+
+    if dry_run:
+        warnings.append("Dry-run mode enabled; changes were rolled back.")
 
     if operation == "INSERT":
         return warnings, "low"
@@ -92,6 +95,8 @@ def _run_write_command(
     sql: Optional[str],
     params: Optional[Any],
     write: bool,
+    dry_run: bool = False,
+    max_affected_rows: Optional[int] = None,
     expected_operation: Optional[str] = None,
 ) -> dict[str, Any]:
     operation = _sql_operation(sql) or expected_operation or command.upper()
@@ -129,21 +134,53 @@ def _run_write_command(
             {"knowledge_context": knowledge_context},
         )
 
+    if max_affected_rows is not None and max_affected_rows < 0:
+        return _error(
+            command,
+            "invalid_max_affected_rows",
+            "max_affected_rows must be zero or greater.",
+            {"knowledge_context": knowledge_context},
+        )
+
     try:
         normalized_params = _normalize_write_params(params)
-        warnings, safety_level = _write_metadata(_sql_operation(sql), sql)
+        warnings, safety_level = _write_metadata(_sql_operation(sql), sql, dry_run=dry_run)
         with CoQueryDB(db) as conn:
-            affected_rows = conn.execute(sql, normalized_params)
+            affected_rows = conn.execute(
+                sql,
+                normalized_params,
+                dry_run=dry_run,
+                max_affected_rows=max_affected_rows,
+            )
         return _success(
             command,
             {
                 "affected_rows": affected_rows,
+                "max_affected_rows": max_affected_rows,
+                "dry_run": dry_run,
+                "committed": not dry_run,
                 "warnings": warnings,
                 "safety_level": safety_level,
                 "knowledge_context": knowledge_context,
             },
         )
     except CoQueryDBError as e:
+        if e.code == "affected_rows_exceeded":
+            limit_warnings = warnings + ["Affected-row limit exceeded; changes were rolled back."]
+            return _error(
+                command,
+                e.code,
+                e.message,
+                {
+                    "affected_rows": e.data.get("affected_rows"),
+                    "max_affected_rows": e.data.get("max_affected_rows"),
+                    "dry_run": dry_run,
+                    "committed": False,
+                    "warnings": limit_warnings,
+                    "safety_level": safety_level,
+                    "knowledge_context": knowledge_context,
+                },
+            )
         return _db_error(command, e)
     except NotImplementedError as e:
         return _error(command, "unsupported_write_mode", str(e))
@@ -177,11 +214,46 @@ def schema_detail_handler(db: str, table: Optional[str] = None, format: str = "j
         return _error("schema_detail", "execution_error", str(e))
 
 
-def query_handler(db: str, sql: str, format: str = "json", write: bool = False) -> dict[str, Any]:
+def doctor_handler(db: str, format: str = "json") -> dict[str, Any]:
+    try:
+        conn = CoQueryDB(db, connect_now=False)
+        report = conn.doctor()
+        if report.get("ready"):
+            return _success("doctor", report)
+
+        connection = report.get("connection", {})
+        return _error(
+            "doctor",
+            connection.get("code", "database_not_ready"),
+            connection.get("message", "Database target is not ready."),
+            report,
+        )
+    except CoQueryDBError as e:
+        return _error("doctor", e.code, e.message, {"requested_target": db})
+    except Exception as e:
+        return _error("doctor", "execution_error", str(e), {"requested_target": db})
+
+
+def query_handler(
+    db: str,
+    sql: str,
+    format: str = "json",
+    write: bool = False,
+    dry_run: bool = False,
+    max_affected_rows: Optional[int] = None,
+) -> dict[str, Any]:
     operation = _sql_operation(sql)
 
     if operation != "SELECT":
-        return _run_write_command("query", db, sql, None, write)
+        return _run_write_command(
+            "query",
+            db,
+            sql,
+            None,
+            write,
+            dry_run=dry_run,
+            max_affected_rows=max_affected_rows,
+        )
 
     try:
         with CoQueryDB(db) as conn:
@@ -393,8 +465,19 @@ def insert_handler(
     sql: Optional[str] = None,
     params: Optional[list[Any]] = None,
     write: bool = False,
+    dry_run: bool = False,
+    max_affected_rows: Optional[int] = None,
 ) -> dict[str, Any]:
-    return _run_write_command("insert", db, sql, params, write, expected_operation="INSERT")
+    return _run_write_command(
+        "insert",
+        db,
+        sql,
+        params,
+        write,
+        dry_run=dry_run,
+        max_affected_rows=max_affected_rows,
+        expected_operation="INSERT",
+    )
 
 
 def update_handler(
@@ -402,8 +485,19 @@ def update_handler(
     sql: Optional[str] = None,
     params: Optional[list[Any]] = None,
     write: bool = False,
+    dry_run: bool = False,
+    max_affected_rows: Optional[int] = None,
 ) -> dict[str, Any]:
-    return _run_write_command("update", db, sql, params, write, expected_operation="UPDATE")
+    return _run_write_command(
+        "update",
+        db,
+        sql,
+        params,
+        write,
+        dry_run=dry_run,
+        max_affected_rows=max_affected_rows,
+        expected_operation="UPDATE",
+    )
 
 
 def delete_handler(
@@ -411,8 +505,19 @@ def delete_handler(
     sql: Optional[str] = None,
     params: Optional[list[Any]] = None,
     write: bool = False,
+    dry_run: bool = False,
+    max_affected_rows: Optional[int] = None,
 ) -> dict[str, Any]:
-    return _run_write_command("delete", db, sql, params, write, expected_operation="DELETE")
+    return _run_write_command(
+        "delete",
+        db,
+        sql,
+        params,
+        write,
+        dry_run=dry_run,
+        max_affected_rows=max_affected_rows,
+        expected_operation="DELETE",
+    )
 
 
 def natural_handler(

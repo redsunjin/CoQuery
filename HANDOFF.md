@@ -30,7 +30,7 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 - SQLite query execution
 - shared DB URI parsing with structured backend errors
 - SQL generation from the built-in skill set
-- explicit write handlers for `insert`, `update`, and `delete`
+- explicit write handlers for `insert`, `update`, and `delete`, with optional `--dry-run` preview and `--max-affected-rows` guard
 - repo-local LLM provider registration and connectivity checks
 - lightweight natural-language intent-to-SQL conversion with local knowledge first and optional registered provider fallback
 - JPA annotation-based entity source introspection through `jpa_schema`
@@ -59,6 +59,8 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 
 - `query` blocks non-`SELECT` SQL unless `--write` is provided
 - `insert`, `update`, and `delete` require both `--write` and explicit SQL
+- `insert`, `update`, and `delete` can run with `--dry-run` to preview affected rows without committing changes
+- `insert`, `update`, `delete`, and write-mode `query` can fail closed with `--max-affected-rows`
 - `update` and `delete` surface a high-risk warning when no `WHERE` clause exists
 - `natural` is heuristic by default, skips provider calls for simple covered requests, and can optionally route complex requests through a registered provider
 - provider-backed natural is currently a secondary experimental track, not the primary loop

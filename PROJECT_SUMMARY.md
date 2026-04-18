@@ -67,9 +67,9 @@ Scope decision:
 - `schema_detail`: expose normalized columns, primary keys, foreign keys, indexes, constraints, and SQLite create SQL
 - `query`: execute `SELECT` statements by default; non-`SELECT` requires `--write`
 - `generate`: build SQL from built-in skill IDs
-- `insert`: requires explicit `INSERT` SQL and `--write`
-- `update`: requires explicit `UPDATE` SQL and `--write`
-- `delete`: requires explicit `DELETE` SQL and `--write`
+- `insert`: requires explicit `INSERT` SQL and `--write`; supports `--dry-run` and `--max-affected-rows`
+- `update`: requires explicit `UPDATE` SQL and `--write`; supports `--dry-run` and `--max-affected-rows`
+- `delete`: requires explicit `DELETE` SQL and `--write`; supports `--dry-run` and `--max-affected-rows`
 - `natural`: uses heuristic intent mapping with local knowledge first and can optionally fall back to a registered provider
 - `provider_add`: add or update one repo-local LLM provider profile
 - `provider_list`: list registered provider profiles
@@ -114,7 +114,7 @@ This passes 73 baseline tests covering:
 - SQLite is the only broadly verified backend
 - PostgreSQL is experimental for the narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` paths plus direct `generate join_inner` / `generate join_left` smoke slices
 - MySQL is still a stub, not a working backend
-- no transaction or dry-run layer exists yet
+- no transaction layer exists yet; baseline write commands now support `--dry-run` and `--max-affected-rows`
 - natural-language behavior is lightweight by default; provider-backed quality and backend parity are not broadly proven
 - provider-backed natural is currently a secondary experimental track
 - generated SQL templates validate basic identifiers and direct foreign-key joins, but are not yet multi-hop relationship-aware, alias-aware, or expression-aware

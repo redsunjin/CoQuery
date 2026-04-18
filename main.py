@@ -9,6 +9,7 @@ import sys
 from typing import Any
 
 from sql_cli.cli import (
+    doctor_handler,
     db_knowledge_handler,
     delete_handler,
     generate_handler,
@@ -44,7 +45,7 @@ def main() -> int:
         "--command",
         type=str,
         default=None,
-        help="schema, schema_detail, query, generate, insert, update, delete, natural, jpa_schema, db_knowledge, provider_add, provider_list, provider_remove, provider_test",
+        help="schema, schema_detail, doctor, query, generate, insert, update, delete, natural, jpa_schema, db_knowledge, provider_add, provider_list, provider_remove, provider_test",
     )
     parser.add_argument("--db", type=str, default="example.db", help="Legacy SQLite path or DB URI")
     parser.add_argument("--db-uri", type=str, default=None, help="Preferred multi-backend database URI")
@@ -67,12 +68,25 @@ def main() -> int:
         default=False,
         help="Required for state-changing SQL in query/insert/update/delete",
     )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        default=False,
+        help="Execute state-changing SQL inside a rollback-only preview",
+    )
+    parser.add_argument(
+        "--max-affected-rows",
+        type=int,
+        default=None,
+        help="Abort and roll back if a write affects more than this many rows",
+    )
     args = parser.parse_args()
 
     if not args.command:
         print("CoQuery v0.7.0")
-        print("commands: schema, schema_detail, query, generate, insert, update, delete, natural, jpa_schema, db_knowledge, provider_add, provider_list, provider_remove, provider_test")
+        print("commands: schema, schema_detail, doctor, query, generate, insert, update, delete, natural, jpa_schema, db_knowledge, provider_add, provider_list, provider_remove, provider_test")
         print("write commands require explicit --write and --sql")
+        print("state-changing commands support optional --dry-run preview and --max-affected-rows guard")
         print("prefer --db-uri for multi-backend contracts; --db remains SQLite-first compatibility")
         return 0
 
@@ -83,16 +97,25 @@ def main() -> int:
         result = schema_handler(db_target, args.format)
     elif args.command == "schema_detail":
         result = schema_detail_handler(db_target, args.table, args.format)
+    elif args.command == "doctor":
+        result = doctor_handler(db_target, args.format)
     elif args.command == "query":
-        result = query_handler(db_target, args.sql or "SELECT * FROM users", args.format, args.write)
+        result = query_handler(
+            db_target,
+            args.sql or "SELECT * FROM users",
+            args.format,
+            args.write,
+            args.dry_run,
+            args.max_affected_rows,
+        )
     elif args.command == "generate":
         result = generate_handler(db_target, args.skill or "select_simple", args.format, parsed_params)
     elif args.command == "insert":
-        result = insert_handler(db_target, args.sql, parsed_params, args.write)
+        result = insert_handler(db_target, args.sql, parsed_params, args.write, args.dry_run, args.max_affected_rows)
     elif args.command == "update":
-        result = update_handler(db_target, args.sql, parsed_params, args.write)
+        result = update_handler(db_target, args.sql, parsed_params, args.write, args.dry_run, args.max_affected_rows)
     elif args.command == "delete":
-        result = delete_handler(db_target, args.sql, parsed_params, args.write)
+        result = delete_handler(db_target, args.sql, parsed_params, args.write, args.dry_run, args.max_affected_rows)
     elif args.command == "natural":
         result = natural_handler(db_target, args.sql, args.format, args.provider_name)
     elif args.command == "jpa_schema":

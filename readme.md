@@ -14,6 +14,8 @@ python3 main.py --command generate --db example.db --skill select_simple
 python3 main.py --command insert --db example.db --write --sql "INSERT INTO users (name, age) VALUES ('a', 20)"
 python3 main.py --command update --db example.db --write --sql "UPDATE users SET age = 21 WHERE id = 1"
 python3 main.py --command delete --db example.db --write --sql "DELETE FROM users WHERE id = 1"
+python3 main.py --command insert --db example.db --write --dry-run --sql "INSERT INTO users (name, age) VALUES ('preview', 20)"
+python3 main.py --command delete --db example.db --write --max-affected-rows 1 --sql "DELETE FROM users WHERE id = 1"
 python3 main.py --command natural --db example.db --sql "show users"
 python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
 python3 main.py --command db_knowledge --dialect sqlite --topic schema
@@ -60,7 +62,7 @@ This is enough for basic SQL/JPA boundary decisions, deterministic lookup, norma
 
 - PostgreSQL is experimental for the documented `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` probe paths only
 - MySQL is a stub with a structured placeholder error
-- write commands do not yet have dry-run or transaction support
+- write commands support `--dry-run` and `--max-affected-rows`, but a broader transaction control layer does not exist yet
 - natural-language support is lightweight by default; provider-backed quality is not broadly proven
 - provider-backed natural is currently a secondary experimental track
 - generated SQL templates validate basic identifiers, but are not yet relationship-aware, join-aware, or expression-aware

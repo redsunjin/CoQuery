@@ -48,6 +48,8 @@ Scope decision:
 | PostgreSQL | Experimental (narrow read + write) | local smoke proof succeeded for `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` |
 | MySQL | Stub | returns structured placeholder error |
 | Write contract | Working baseline | `--write` plus explicit SQL is enforced |
+| Dry-run preview | Working baseline | `insert`, `update`, `delete`, and write-mode `query` can return affected rows without committing changes |
+| Affected-row guard | Working baseline | `--max-affected-rows` rolls back writes that touch more rows than expected |
 | DB URI contract | Working baseline | `--db-uri` is available and validated |
 | Phase 5 verification matrix | Working baseline | backend promotion is now proof-gated |
 | PostgreSQL schema smoke | Working baseline | local proof recorded on 2026-04-05 |
@@ -82,6 +84,8 @@ bash scripts/run_postgresql_local_smoke.sh
 
 - `query` is read-only unless `--write` is set
 - dedicated `insert`, `update`, and `delete` handlers require `--write` and explicit SQL
+- `insert`, `update`, `delete`, and write-mode `query` accept `--dry-run` to roll back after execution
+- `insert`, `update`, `delete`, and write-mode `query` accept `--max-affected-rows` to fail closed on unexpected row counts
 - full-table `update` and `delete` return a high-risk warning
 - `--db-uri` is preferred for future multi-backend commands
 - `schema_detail` provides normalized schema metadata for agent-side DB knowledge use
