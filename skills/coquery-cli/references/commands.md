@@ -58,4 +58,8 @@ PostgreSQL smoke:
 
 ```bash
 bash scripts/run_postgresql_local_smoke.sh
+COQUERY_PG_RESET=1 bash scripts/run_postgresql_local_smoke.sh
+COQUERY_PG_DB_URI=postgresql://user:pass@host:5432/dbname bash scripts/run_postgresql_local_smoke.sh
 ```
+
+The runner prefers PostgreSQL binaries from `PATH`, falls back to known Homebrew paths, creates a per-run socket directory, and auto-selects a free port when the preferred smoke port is already in use.

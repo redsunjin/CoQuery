@@ -1,7 +1,7 @@
 # CoQuery Stage Status Report
 
 Version: v0.7.0
-Last Update: 2026-04-12
+Last Update: 2026-04-13
 
 ## Current Status
 
@@ -14,7 +14,7 @@ PostgreSQL direct join generation smoke proved for `generate join_inner` and `ge
 Codex skill package added for agent-side reuse
 JPA entity source introspection added as an ORM/model track
 Schema-detail direct join generation proved for built-in join skills
-GitHub Actions workflow files added for baseline and PostgreSQL smoke automation
+GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-12
 Phase 5 remains narrow and experimental
 ```
 
@@ -61,7 +61,7 @@ Write-command baseline:
 CI note:
 
 - GitHub Actions workflow files now exist for baseline and PostgreSQL smoke automation
-- this session did not observe a live GitHub runner result yet
+- the first observed runs for `baseline` and `postgresql-smoke` both succeeded on 2026-04-12
 
 ORM/model support:
 
@@ -86,12 +86,12 @@ bash scripts/run_postgresql_local_smoke.sh
 
 ## Active Loop
 
-1. observe the first GitHub Actions baseline and PostgreSQL smoke runs and fix runner drift if needed
+1. keep the GitHub Actions `baseline` and `postgresql-smoke` workflows green
 2. align docs to executable behavior
 3. keep the PostgreSQL smoke runner repeatable and repo-managed
 4. keep `skills/coquery-cli` aligned with runnable CLI behavior
 5. keep JPA labelled as ORM/model support until JPQL runtime proof exists
 6. do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
 
-Last Updated: 2026-04-12
-Phase Status: SQLite-first baseline verified with PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` smoke proof plus agent skill packaging, JPA source introspection, direct schema-detail join inference, and added GitHub Actions baseline / PostgreSQL smoke workflows
+Last Updated: 2026-04-13
+Phase Status: SQLite-first baseline verified with PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` smoke proof plus agent skill packaging, JPA source introspection, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows

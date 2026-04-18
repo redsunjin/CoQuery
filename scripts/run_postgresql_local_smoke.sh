@@ -6,14 +6,20 @@ TMP_DIR="${ROOT_DIR}/.tmp"
 VENV_DIR="${TMP_DIR}/pg-venv"
 DATA_DIR="${TMP_DIR}/pg-smoke"
 LOG_FILE="${TMP_DIR}/pg-smoke.log"
-SOCKET_DIR="${TMP_DIR}/pg-socket"
-PORT="${COQUERY_PG_PORT:-49251}"
+SOCKET_ROOT="${COQUERY_PG_SOCKET_ROOT:-${TMP_DIR}}"
+PORT="${COQUERY_PG_PORT:-}"
+DEFAULT_PORT="${COQUERY_PG_DEFAULT_PORT:-49251}"
 DB_NAME="${COQUERY_PG_DB:-coquery_probe}"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 POSTGRES_BIN_DIR="${POSTGRES_BIN_DIR:-}"
 EXTERNAL_DB_URI="${COQUERY_PG_DB_URI:-}"
 PSQL_URI="${COQUERY_PSQL_URI:-${EXTERNAL_DB_URI}}"
 INITDB_LOCALE="${COQUERY_PG_INITDB_LOCALE:-}"
+START_TIMEOUT="${COQUERY_PG_START_TIMEOUT:-30}"
+RESET_CLUSTER="${COQUERY_PG_RESET:-0}"
+KEEP_SOCKET_DIR="${COQUERY_PG_KEEP_SOCKET_DIR:-0}"
+SOCKET_DIR=""
+LOCAL_CLUSTER_STARTED=0
 
 detect_initdb_locale() {
   if [[ -n "${INITDB_LOCALE}" ]]; then
@@ -28,6 +34,80 @@ detect_initdb_locale() {
     printf '%s\n' "C.UTF-8"
     return
   fi
+}
+
+detect_port() {
+  if [[ -n "${PORT}" ]]; then
+    printf '%s\n' "${PORT}"
+    return
+  fi
+
+  "${PYTHON_BIN}" - "${DEFAULT_PORT}" <<'PY'
+import socket
+import sys
+
+preferred = int(sys.argv[1])
+
+
+def is_free(port: int) -> bool:
+    sock = socket.socket()
+    try:
+        sock.bind(("127.0.0.1", port))
+    except OSError:
+        return False
+    finally:
+        sock.close()
+    return True
+
+
+if is_free(preferred):
+    print(preferred)
+else:
+    sock = socket.socket()
+    sock.bind(("127.0.0.1", 0))
+    print(sock.getsockname()[1])
+    sock.close()
+PY
+}
+
+make_socket_dir() {
+  mkdir -p "${SOCKET_ROOT}"
+  mktemp -d "${SOCKET_ROOT}/pg-socket.XXXXXX"
+}
+
+require_binary() {
+  local binary_path="$1"
+  local description="$2"
+
+  if [[ ! -x "${binary_path}" ]]; then
+    echo "${description} not found at '${binary_path}'." >&2
+    echo "Add PostgreSQL binaries to PATH or set POSTGRES_BIN_DIR." >&2
+    exit 1
+  fi
+}
+
+show_failure_context() {
+  local exit_code=$?
+
+  echo "" >&2
+  echo "PostgreSQL smoke failed with exit code ${exit_code}." >&2
+  if [[ -n "${EXTERNAL_DB_URI}" ]]; then
+    echo "Mode: external DB URI" >&2
+    echo "PSQL_URI: ${PSQL_URI}" >&2
+  else
+    echo "Mode: local cluster" >&2
+    echo "Data dir: ${DATA_DIR}" >&2
+    echo "Socket dir: ${SOCKET_DIR}" >&2
+    echo "Port: ${PORT}" >&2
+  fi
+  echo "Log file: ${LOG_FILE}" >&2
+  if [[ -f "${LOG_FILE}" ]]; then
+    echo "--- PostgreSQL log tail ---" >&2
+    tail -n 40 "${LOG_FILE}" >&2 || true
+    echo "--- End log tail ---" >&2
+  fi
+
+  return "${exit_code}"
 }
 
 if [[ -n "${EXTERNAL_DB_URI}" ]]; then
@@ -46,20 +126,15 @@ else
   fi
 fi
 
-mkdir -p "${TMP_DIR}" "${SOCKET_DIR}"
+mkdir -p "${TMP_DIR}"
 
 if [[ -n "${EXTERNAL_DB_URI}" ]]; then
-  if [[ ! -x "${POSTGRES_BIN_DIR}/psql" ]]; then
-    echo "PostgreSQL client binary not found. Add psql to PATH or set POSTGRES_BIN_DIR." >&2
-    echo "Current PATH lookup failed; tried POSTGRES_BIN_DIR='${POSTGRES_BIN_DIR}'." >&2
-    exit 1
-  fi
+  require_binary "${POSTGRES_BIN_DIR}/psql" "PostgreSQL client binary"
 else
-  if [[ ! -x "${POSTGRES_BIN_DIR}/pg_ctl" || ! -x "${POSTGRES_BIN_DIR}/psql" || ! -x "${POSTGRES_BIN_DIR}/initdb" ]]; then
-    echo "PostgreSQL binaries not found. Add them to PATH or set POSTGRES_BIN_DIR." >&2
-    echo "Current PATH lookup failed; tried POSTGRES_BIN_DIR='${POSTGRES_BIN_DIR}'." >&2
-    exit 1
-  fi
+  require_binary "${POSTGRES_BIN_DIR}/pg_ctl" "pg_ctl"
+  require_binary "${POSTGRES_BIN_DIR}/psql" "psql"
+  require_binary "${POSTGRES_BIN_DIR}/initdb" "initdb"
+  require_binary "${POSTGRES_BIN_DIR}/createdb" "createdb"
 fi
 
 if [[ ! -d "${VENV_DIR}" ]]; then
@@ -85,13 +160,24 @@ psql_exec() {
 }
 
 cleanup() {
-  if [[ -z "${EXTERNAL_DB_URI}" && -f "${DATA_DIR}/postmaster.pid" ]]; then
+  if [[ "${LOCAL_CLUSTER_STARTED}" == "1" && -f "${DATA_DIR}/postmaster.pid" ]]; then
     "${POSTGRES_BIN_DIR}/pg_ctl" -D "${DATA_DIR}" stop -m fast >/dev/null || true
   fi
+  if [[ -n "${SOCKET_DIR}" && "${KEEP_SOCKET_DIR}" != "1" ]]; then
+    rm -rf "${SOCKET_DIR}" || true
+  fi
 }
+trap show_failure_context ERR
 trap cleanup EXIT
 
 if [[ -z "${EXTERNAL_DB_URI}" ]]; then
+  PORT="$(detect_port)"
+  SOCKET_DIR="$(make_socket_dir)"
+
+  if [[ "${RESET_CLUSTER}" == "1" ]]; then
+    rm -rf "${DATA_DIR}"
+  fi
+
   if [[ ! -f "${DATA_DIR}/PG_VERSION" ]]; then
     INITDB_LOCALE="$(detect_initdb_locale)"
     rm -rf "${DATA_DIR}"
@@ -107,7 +193,10 @@ if [[ -z "${EXTERNAL_DB_URI}" ]]; then
     -D "${DATA_DIR}" \
     -l "${LOG_FILE}" \
     -o "-k ${SOCKET_DIR} -p ${PORT}" \
+    -w \
+    -t "${START_TIMEOUT}" \
     start >/dev/null
+  LOCAL_CLUSTER_STARTED=1
 
   DB_EXISTS="$(
     "${POSTGRES_BIN_DIR}/psql" \
@@ -126,6 +215,7 @@ else
   DB_URI="${EXTERNAL_DB_URI}"
 fi
 
+psql_exec "SELECT current_database();"
 psql_exec "CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, name TEXT, age INTEGER);"
 psql_exec "CREATE TABLE IF NOT EXISTS orgs (id SERIAL PRIMARY KEY, name TEXT NOT NULL UNIQUE);"
 psql_exec "CREATE TABLE IF NOT EXISTS members (id SERIAL PRIMARY KEY, org_id INTEGER NOT NULL REFERENCES orgs(id) ON DELETE CASCADE, email TEXT NOT NULL UNIQUE);"

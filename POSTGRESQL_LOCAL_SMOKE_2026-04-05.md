@@ -1,6 +1,6 @@
 # CoQuery PostgreSQL Local Smoke
 
-Date: 2026-04-11
+Date: 2026-04-18
 
 Workspace: `/Users/Agent/ps-workspace/CoQuery`
 
@@ -15,8 +15,8 @@ This is a narrow probe environment, not the default baseline runtime.
 - PostgreSQL binaries: `/Users/Agent/homebrew/opt/postgresql@18/bin`
 - temporary Python venv: `/Users/Agent/ps-workspace/CoQuery/.tmp/pg-venv`
 - temporary cluster dir: `/Users/Agent/ps-workspace/CoQuery/.tmp/pg-smoke`
-- temporary socket dir: `/Users/Agent/ps-workspace/CoQuery/.tmp/pg-socket`
-- port: `49251`
+- temporary socket dir: per-run directory under `/Users/Agent/ps-workspace/CoQuery/.tmp/pg-socket.*`
+- port: prefers `49251`, but auto-selects a free port when needed unless `COQUERY_PG_PORT` is set
 - database: `coquery_probe`
 
 ## Recommended runner
@@ -29,15 +29,18 @@ bash scripts/run_postgresql_local_smoke.sh
 
 This script:
 
-- checks `PATH` for PostgreSQL binaries first
+- prefers PostgreSQL binaries from `PATH` first
 - falls back to known Homebrew paths when needed
 - creates the probe virtualenv if needed
 - installs `psycopg[binary]`
 - initializes a temporary local PostgreSQL cluster
-- starts PostgreSQL on a non-default port
+- creates a per-run socket directory to avoid stale-socket collisions
+- starts PostgreSQL on a non-default port and auto-picks a free port when the preferred one is busy
 - seeds `users`, `orgs`, and `members` probe tables
 - runs CoQuery `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete`
 - runs `generate join_inner` and `generate join_left` against real PostgreSQL schema detail and executes the generated join SQL
+- supports `COQUERY_PG_DB_URI` for an external PostgreSQL target and `COQUERY_PG_RESET=1` to reinitialize the local probe cluster
+- prints PostgreSQL log-tail diagnostics when startup or smoke execution fails
 - stops the cluster when finished
 
 ## Observed commands and results
@@ -279,13 +282,13 @@ What is not proven yet:
 - PostgreSQL natural-language flows
 - broad PostgreSQL generation parity
 - multi-hop or alias-aware join generation
-- observed GitHub Actions PostgreSQL smoke success
 - stable one-command bootstrap inside the default developer baseline
 
 Automation note:
 
 - `.github/workflows/postgresql-smoke.yml` now exists and runs this smoke path against an external PostgreSQL service URI
-- this document still records the local smoke proof; a live GitHub Actions result was not observed in this session
+- GitHub Actions `postgresql-smoke` succeeded on 2026-04-12 through PR `#3`
+- this document still records the local smoke proof plus the first observed CI-backed run of the same smoke path
 
 ## Current status effect
 

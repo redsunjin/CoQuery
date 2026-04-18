@@ -1,6 +1,6 @@
 # CoQuery Baseline Verification
 
-Date: 2026-04-12
+Date: 2026-04-13
 
 ## Result
 
@@ -15,7 +15,7 @@ Local DB/JPA knowledge-first generation planning verified
 Schema-detail knowledge command verified
 Schema-detail-aware generation and natural identifier validation verified
 Schema-detail-aware direct join generation verified
-GitHub Actions baseline and PostgreSQL smoke workflows added
+GitHub Actions baseline and PostgreSQL smoke workflows verified on 2026-04-12
 ```
 
 Scope decision:
@@ -63,7 +63,7 @@ Scope decision:
 | Schema detail knowledge | Seed | `schema_detail` exposes normalized columns, keys, indexes, constraints, and SQLite create SQL for verified paths |
 | Schema validation | Seed | `generate` and simple `natural` requests validate table and simple column identifiers against `schema_detail` |
 | Direct join generation | Working baseline | `generate` can infer one-step join `ON` clauses from schema-detail foreign keys; no-path and ambiguous joins fail closed |
-| CI automation | Added | GitHub Actions workflow files are committed for baseline and PostgreSQL smoke; this session did not observe a live runner result |
+| CI automation | Working baseline | GitHub Actions `baseline` and `postgresql-smoke` completed successfully on 2026-04-12 via PR `#3` |
 
 ## Verification Commands
 
@@ -94,12 +94,12 @@ bash scripts/run_postgresql_local_smoke.sh
 - provider-backed natural is experimental and secondary to the PostgreSQL proof track
 - `jpa_schema --jpa-project ...` can provide entity model context for Java/JPA projects
 - the PostgreSQL smoke runner checks `PATH` for PostgreSQL binaries before falling back to known Homebrew paths
-- GitHub Actions workflow files now exist at `.github/workflows/baseline.yml` and `.github/workflows/postgresql-smoke.yml`
+- GitHub Actions workflow files exist at `.github/workflows/baseline.yml` and `.github/workflows/postgresql-smoke.yml`
 - the PostgreSQL smoke workflow uses an external PostgreSQL service URI, while the local smoke runner still supports managed local startup
-- this session added CI automation files but did not observe a live GitHub Actions runner result
+- GitHub Actions `baseline` and `postgresql-smoke` both succeeded on 2026-04-12 in PR `#3`
 
 Version: v0.7.0
-Last Updated: 2026-04-12
-Status: Baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof, local DB knowledge-first planning, schema-detail-aware identifier validation, direct schema-detail join inference, and added GitHub Actions baseline / PostgreSQL smoke workflows
+Last Updated: 2026-04-13
+Status: Baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof, local DB knowledge-first planning, schema-detail-aware identifier validation, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
 Reference: `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 Smoke Result: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`

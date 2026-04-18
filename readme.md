@@ -83,7 +83,7 @@ bash scripts/run_postgresql_local_smoke.sh
 
 Runner note:
 
-- `scripts/run_postgresql_local_smoke.sh` checks `PATH` for PostgreSQL binaries before falling back to known Homebrew paths
+- `scripts/run_postgresql_local_smoke.sh` prefers PostgreSQL binaries from `PATH`, uses a per-run socket directory, and auto-selects a free port when the preferred smoke port is unavailable
 
 Version: v0.7.0
 Last Updated: 2026-04-10

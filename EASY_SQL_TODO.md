@@ -1,7 +1,7 @@
 # CoQuery Todo List
 
 Version: v0.7.x stabilization
-Last Updated: 2026-04-12
+Last Updated: 2026-04-13
 
 ## Official Next Tasks
 
@@ -93,7 +93,7 @@ Current output:
 
 Current next step:
 
-- observe the first GitHub Actions PostgreSQL smoke runs and keep the runner portable before broadening any PostgreSQL claim
+- keep GitHub Actions PostgreSQL smoke green and keep the runner portable before broadening any PostgreSQL claim
 
 ### 5. Verification-gated backend promotion
 
@@ -240,6 +240,7 @@ Current output:
 - [x] add schema-detail-backed direct join inference for built-in join skills
 - [x] prove direct PostgreSQL `generate join_inner` and `generate join_left` smoke against a real schema
 - [x] add GitHub Actions workflows for baseline verification and PostgreSQL smoke automation
+- [x] observe first GitHub Actions `baseline` and `postgresql-smoke` success on 2026-04-12
 
 ## Reference Documents
 

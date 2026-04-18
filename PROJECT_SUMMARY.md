@@ -19,7 +19,7 @@ Verified on 2026-04-12
 - schema-detail knowledge command is verified for SQLite and the PostgreSQL proof path
 - schema-detail-aware identifier validation is verified for generate and simple natural paths
 - schema-detail-aware direct join generation is verified for built-in join skills
-- GitHub Actions workflow files are added for baseline and PostgreSQL smoke automation
+- GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-12
 ```
 
 Scope decision:
@@ -119,7 +119,7 @@ This passes 73 baseline tests covering:
 - provider-backed natural is currently a secondary experimental track
 - generated SQL templates validate basic identifiers and direct foreign-key joins, but are not yet multi-hop relationship-aware, alias-aware, or expression-aware
 - JPA support is source introspection only; JPQL runtime execution is not implemented
-- the first live GitHub Actions results for the new workflow files have not been observed in this session
+- GitHub Actions proof currently covers the committed `baseline` and `postgresql-smoke` workflows, not every future runner or environment change
 - older docs before the 2026-04-04 repair may overstate completion
 
 ---
@@ -176,7 +176,7 @@ python3 sql_cli/tests/test_core.py
 
 ## Next Steps
 
-1. observe the first GitHub Actions baseline and PostgreSQL smoke runs and fix any runner-specific drift
+1. keep the GitHub Actions `baseline` and `postgresql-smoke` workflows green as the repo-managed proof path
 2. keep status docs aligned with observed behavior
 3. use the verification matrix before changing any broader multi-DB status claim
 4. do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
@@ -204,5 +204,5 @@ Current runner improvement:
 
 ---
 
-Last Updated: 2026-04-12
-Status: SQLite-first baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof plus direct schema-detail join inference and added GitHub Actions baseline / PostgreSQL smoke workflows
+Last Updated: 2026-04-13
+Status: SQLite-first baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof plus direct schema-detail join inference and verified GitHub Actions baseline / PostgreSQL smoke workflows
