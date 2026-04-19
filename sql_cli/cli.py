@@ -79,7 +79,7 @@ def _is_full_table_write(operation: str, sql: str) -> bool:
 
 
 def _db_error(command: str, exc: CoQueryDBError) -> dict[str, Any]:
-    return _error(command, exc.code, exc.message)
+    return _error(command, exc.code, exc.message, exc.data)
 
 
 def _llm_error(command: str, exc: CoQueryLLMError) -> dict[str, Any]:

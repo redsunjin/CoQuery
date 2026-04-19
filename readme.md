@@ -8,6 +8,8 @@ Phase 5 multi-DB support is now early experimental and is not complete.
 ```bash
 python3 main.py --command schema --db example.db
 python3 main.py --command schema_detail --db example.db --table users --format json
+python3 main.py --command doctor --db example.db --format json
+python3 main.py --command doctor --db-uri postgresql://doctor:secret@localhost:5432/appdb --format json
 python3 main.py --command schema --db-uri sqlite:///Users/Agent/ps-workspace/CoQuery/example.db
 python3 main.py --command query --db example.db --sql "SELECT * FROM users"
 python3 main.py --command generate --db example.db --skill select_simple
@@ -29,9 +31,10 @@ python3 main.py --command provider_test --provider-name local_ollama
 ## Verified Baseline
 
 - `main.py` routes to the package handlers in `sql_cli/cli.py`
-- `python3 sql_cli/tests/test_core.py` passes with 90 tests
+- `python3 sql_cli/tests/test_core.py` passes with 96 tests
 - SQLite is the working backend
 - `--db-uri` is the preferred multi-backend connection contract
+- `doctor` reports masked targets, readiness checks, and classified PostgreSQL connection failures
 - `query` is read-only unless `--write` is provided
 - `insert`, `update`, and `delete` require both `--write` and explicit SQL
 - `update` and `delete` without `WHERE` require `--allow-full-table-write`
@@ -63,6 +66,7 @@ This is enough for basic SQL/JPA boundary decisions, deterministic lookup, norma
 ## Current Limits
 
 - PostgreSQL is experimental for the documented `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` probe paths only
+- `doctor` can classify common PostgreSQL connection failures such as `auth_failed`, `database_not_found`, `host_unreachable`, `connection_refused`, `timeout`, and `ssl_error`
 - MySQL is a stub with a structured placeholder error
 - write commands support `--dry-run` and `--max-affected-rows`, but a broader transaction control layer does not exist yet
 - natural-language support is lightweight by default; provider-backed quality is not broadly proven
@@ -90,5 +94,5 @@ Runner note:
 - `scripts/run_postgresql_local_smoke.sh` prefers PostgreSQL binaries from `PATH`, uses a per-run socket directory, and auto-selects a free port when the preferred smoke port is unavailable
 
 Version: v0.7.0
-Last Updated: 2026-04-10
+Last Updated: 2026-04-19
 Status: SQLite-first baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete proof, and schema-detail-aware identifier validation

@@ -6,7 +6,7 @@ from __future__ import annotations
 import importlib
 import sqlite3
 from pathlib import Path
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import parse_qs, urlparse, urlunparse
 from typing import Any, Optional
 
 
@@ -119,6 +119,117 @@ class CoQueryDB:
         netloc = f"{auth}{host}{port}"
         return urlunparse((parsed.scheme, netloc, parsed.path, parsed.params, parsed.query, parsed.fragment))
 
+    def _postgresql_target_details(self) -> dict[str, Any]:
+        parsed = urlparse(self.uri)
+        query = parse_qs(parsed.query)
+        explicit_port = parsed.port
+        return {
+            "host": parsed.hostname,
+            "port": explicit_port,
+            "resolved_port": explicit_port or 5432,
+            "port_source": "explicit" if explicit_port else "default",
+            "database": parsed.path.lstrip("/"),
+            "username": parsed.username,
+            "has_password": parsed.password is not None,
+            "sslmode": query.get("sslmode", [None])[-1],
+            "connect_timeout": query.get("connect_timeout", [None])[-1],
+        }
+
+    def _doctor_readiness(self, driver_available: bool) -> dict[str, bool]:
+        return {
+            "target_parsed": True,
+            "driver_available": driver_available,
+            "connection_ok": False,
+            "schema_probe_ok": False,
+        }
+
+    def _classify_postgresql_connect_error(self, exc: Exception) -> tuple[str, str, Optional[str]]:
+        raw_error = str(exc).strip()
+        normalized = raw_error.lower()
+
+        if isinstance(exc, TimeoutError) or any(
+            marker in normalized
+            for marker in ("timeout expired", "timed out", "operation timed out")
+        ):
+            return (
+                "timeout",
+                "PostgreSQL connection attempt timed out.",
+                "Check host, port, firewall rules, and any connect_timeout setting.",
+            )
+
+        if any(
+            marker in normalized
+            for marker in (
+                "could not translate host name",
+                "name or service not known",
+                "temporary failure in name resolution",
+                "nodename nor servname provided",
+                "failed to resolve host",
+                "no route to host",
+                "network is unreachable",
+            )
+        ):
+            return (
+                "host_unreachable",
+                "PostgreSQL host could not be reached.",
+                "Check the hostname, DNS resolution, and network path to the server.",
+            )
+
+        if "connection refused" in normalized:
+            return (
+                "connection_refused",
+                "PostgreSQL server refused the connection.",
+                "Check whether PostgreSQL is running and listening on the requested host and port.",
+            )
+
+        if any(
+            marker in normalized
+            for marker in (
+                "password authentication failed",
+                "authentication failed",
+                "no password supplied",
+                "pg_hba.conf",
+            )
+        ) or ("role " in normalized and " does not exist" in normalized):
+            return (
+                "auth_failed",
+                "PostgreSQL authentication failed.",
+                "Check the username, password, and pg_hba.conf access rules.",
+            )
+
+        if "database " in normalized and " does not exist" in normalized:
+            return (
+                "database_not_found",
+                "PostgreSQL database does not exist.",
+                "Check the database name in the connection URI.",
+            )
+
+        if "ssl" in normalized or "certificate verify failed" in normalized:
+            return (
+                "ssl_error",
+                "PostgreSQL SSL negotiation failed.",
+                "Check sslmode and the server/client certificate configuration.",
+            )
+
+        return (
+            "connection_failed",
+            "Failed to connect to the PostgreSQL database.",
+            "Inspect the underlying driver error for more detail.",
+        )
+
+    def _postgresql_connect_error_data(self, exc: Exception, hint: Optional[str]) -> dict[str, Any]:
+        data = {
+            "backend": "postgresql",
+            "normalized_target": self._display_uri(),
+            "connection_target": self._postgresql_target_details(),
+            "driver": self._driver_details(),
+            "raw_error": str(exc),
+            "raw_error_type": type(exc).__name__,
+        }
+        if hint:
+            data["hint"] = hint
+        return data
+
     def _driver_details(self) -> dict[str, Any]:
         if self.type == "sqlite":
             return {
@@ -166,18 +277,13 @@ class CoQueryDB:
             return details
 
         parsed = urlparse(self.uri)
-        details["connection_target"] = {
-            "host": parsed.hostname,
-            "port": parsed.port,
-            "database": parsed.path.lstrip("/"),
-            "username": parsed.username,
-            "has_password": parsed.password is not None,
-        }
+        details["connection_target"] = self._postgresql_target_details()
         return details
 
     def doctor(self) -> dict[str, Any]:
         report = self.describe_target()
         report["ready"] = False
+        report["readiness"] = self._doctor_readiness(report["driver"]["available"])
 
         if self.type == "sqlite" and not report["path"]["exists"]:
             report["connection"] = {
@@ -215,6 +321,8 @@ class CoQueryDB:
                 "code": None,
                 "message": "Connection successful.",
             }
+            report["readiness"]["connection_ok"] = True
+            report["readiness"]["schema_probe_ok"] = True
             report["ready"] = True
             return report
         except CoQueryDBError as exc:
@@ -223,6 +331,16 @@ class CoQueryDB:
                 "code": exc.code,
                 "message": exc.message,
             }
+            if exc.data.get("raw_error"):
+                report["connection"]["raw_error"] = exc.data["raw_error"]
+            if exc.data.get("raw_error_type"):
+                report["connection"]["raw_error_type"] = exc.data["raw_error_type"]
+            if exc.data.get("hint"):
+                report["connection"]["hint"] = exc.data["hint"]
+            if exc.data.get("connection_target"):
+                report["connection_target"] = exc.data["connection_target"]
+            if exc.data.get("driver"):
+                report["driver"] = exc.data["driver"]
             return report
         finally:
             self.close()
@@ -252,9 +370,11 @@ class CoQueryDB:
             return True
         except Exception as exc:
             self.conn = None
+            code, message, hint = self._classify_postgresql_connect_error(exc)
             raise CoQueryDBError(
-                "connection_failed",
-                "Failed to connect to the PostgreSQL database.",
+                code,
+                message,
+                self._postgresql_connect_error_data(exc, hint),
             ) from exc
 
     def connect_mysql(self) -> bool:

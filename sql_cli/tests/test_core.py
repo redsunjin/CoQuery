@@ -293,13 +293,18 @@ assert missing_driver["error"]["code"] == "driver_not_installed"
 print("23. test_postgresql_driver_not_installed_error ✓")
 
 
-class _FakePsycopgModule:
-    @staticmethod
-    def connect(uri: str) -> None:
-        raise RuntimeError(f"cannot connect to {uri}")
+class _FakePsycopgErrorModule:
+    def __init__(self, error: Exception):
+        self.error = error
+
+    def connect(self, uri: str) -> None:
+        raise self.error
 
 
-with patch("sql_cli.db_new.importlib.import_module", return_value=_FakePsycopgModule()):
+with patch(
+    "sql_cli.db_new.importlib.import_module",
+    return_value=_FakePsycopgErrorModule(RuntimeError("cannot connect to requested PostgreSQL target")),
+):
     connection_failed = schema_handler("postgresql://user:pass@localhost:5432/dbname")
 assert connection_failed["ok"] is False
 assert connection_failed["error"]["code"] == "connection_failed"
@@ -1314,5 +1319,89 @@ db.close()
 tmpdir.cleanup()
 print("90. test_cli_allow_full_table_write ✓")
 
+with patch(
+    "sql_cli.db_new.importlib.import_module",
+    return_value=_FakePsycopgErrorModule(
+        RuntimeError('FATAL: password authentication failed for user "doctor"')
+    ),
+):
+    postgres_auth_failed = doctor_handler("postgresql://doctor:secret@db.example.com/appdb?sslmode=require")
+assert postgres_auth_failed["ok"] is False
+assert postgres_auth_failed["error"]["code"] == "auth_failed"
+assert postgres_auth_failed["data"]["connection"]["raw_error_type"] == "RuntimeError"
+assert postgres_auth_failed["data"]["connection"]["hint"] == "Check the username, password, and pg_hba.conf access rules."
+assert postgres_auth_failed["data"]["connection_target"]["host"] == "db.example.com"
+assert postgres_auth_failed["data"]["connection_target"]["resolved_port"] == 5432
+assert postgres_auth_failed["data"]["connection_target"]["port_source"] == "default"
+assert postgres_auth_failed["data"]["connection_target"]["sslmode"] == "require"
+print("91. test_doctor_postgresql_auth_failed_classification ✓")
+
+with patch(
+    "sql_cli.db_new.importlib.import_module",
+    return_value=_FakePsycopgErrorModule(RuntimeError('FATAL: database "missingdb" does not exist')),
+):
+    postgres_database_missing = doctor_handler("postgresql://doctor:secret@localhost:5432/missingdb")
+assert postgres_database_missing["ok"] is False
+assert postgres_database_missing["error"]["code"] == "database_not_found"
+assert postgres_database_missing["data"]["connection_target"]["database"] == "missingdb"
+assert postgres_database_missing["data"]["connection"]["hint"] == "Check the database name in the connection URI."
+print("92. test_doctor_postgresql_database_not_found_classification ✓")
+
+with patch(
+    "sql_cli.db_new.importlib.import_module",
+    return_value=_FakePsycopgErrorModule(
+        RuntimeError('could not translate host name "db.internal" to address: nodename nor servname provided, or not known')
+    ),
+):
+    postgres_host_unreachable = schema_handler("postgresql://doctor:secret@db.internal:5432/appdb")
+assert postgres_host_unreachable["ok"] is False
+assert postgres_host_unreachable["error"]["code"] == "host_unreachable"
+assert postgres_host_unreachable["data"]["connection_target"]["host"] == "db.internal"
+assert postgres_host_unreachable["data"]["normalized_target"] == "postgresql://doctor:***@db.internal:5432/appdb"
+assert postgres_host_unreachable["data"]["hint"] == "Check the hostname, DNS resolution, and network path to the server."
+print("93. test_postgresql_host_unreachable_classification ✓")
+
+with patch(
+    "sql_cli.db_new.importlib.import_module",
+    return_value=_FakePsycopgErrorModule(
+        RuntimeError('connection to server at "127.0.0.1", port 5432 failed: Connection refused')
+    ),
+):
+    postgres_connection_refused = doctor_handler("postgresql://doctor:secret@127.0.0.1:5432/appdb")
+assert postgres_connection_refused["ok"] is False
+assert postgres_connection_refused["error"]["code"] == "connection_refused"
+assert postgres_connection_refused["data"]["connection"]["hint"] == (
+    "Check whether PostgreSQL is running and listening on the requested host and port."
+)
+print("94. test_doctor_postgresql_connection_refused_classification ✓")
+
+with patch(
+    "sql_cli.db_new.importlib.import_module",
+    return_value=_FakePsycopgErrorModule(TimeoutError("connection timed out")),
+):
+    postgres_timeout = doctor_handler("postgresql://doctor:secret@10.0.0.5:5432/appdb?connect_timeout=3")
+assert postgres_timeout["ok"] is False
+assert postgres_timeout["error"]["code"] == "timeout"
+assert postgres_timeout["data"]["connection_target"]["connect_timeout"] == "3"
+assert postgres_timeout["data"]["connection"]["hint"] == (
+    "Check host, port, firewall rules, and any connect_timeout setting."
+)
+print("95. test_doctor_postgresql_timeout_classification ✓")
+
+with patch(
+    "sql_cli.db_new.importlib.import_module",
+    return_value=_FakePsycopgErrorModule(
+        RuntimeError("SSL error: certificate verify failed")
+    ),
+):
+    postgres_ssl_error = doctor_handler("postgresql://doctor:secret@secure-db.example.com/appdb?sslmode=verify-full")
+assert postgres_ssl_error["ok"] is False
+assert postgres_ssl_error["error"]["code"] == "ssl_error"
+assert postgres_ssl_error["data"]["connection_target"]["sslmode"] == "verify-full"
+assert postgres_ssl_error["data"]["connection"]["hint"] == (
+    "Check sslmode and the server/client certificate configuration."
+)
+print("96. test_doctor_postgresql_ssl_error_classification ✓")
+
 print("")
-print("=== ALL 90 TESTS PASS ✅ ===")
+print("=== ALL 96 TESTS PASS ✅ ===")

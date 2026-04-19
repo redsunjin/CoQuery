@@ -5,6 +5,8 @@ Baseline commands:
 ```bash
 python3 main.py --command schema --db example.db --format json
 python3 main.py --command schema_detail --db example.db --table users --format json
+python3 main.py --command doctor --db example.db --format json
+python3 main.py --command doctor --db-uri postgresql://doctor:secret@localhost:5432/appdb --format json
 python3 main.py --command query --db example.db --sql "SELECT * FROM users" --format json
 python3 main.py --command generate --db example.db --skill select_simple --format json
 python3 main.py --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}' --format json
@@ -23,6 +25,8 @@ SQLite URI example:
 python3 main.py --command schema --db-uri sqlite:///absolute/path/to/example.db --format json
 python3 main.py --command schema_detail --db-uri sqlite:///absolute/path/to/example.db --table users --format json
 ```
+
+Doctor output now includes readiness checks plus classified PostgreSQL connection failures such as `auth_failed`, `database_not_found`, `host_unreachable`, `connection_refused`, `timeout`, and `ssl_error`.
 
 Write examples:
 
