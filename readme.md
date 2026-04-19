@@ -16,6 +16,7 @@ python3 main.py --command update --db example.db --write --sql "UPDATE users SET
 python3 main.py --command delete --db example.db --write --sql "DELETE FROM users WHERE id = 1"
 python3 main.py --command insert --db example.db --write --dry-run --sql "INSERT INTO users (name, age) VALUES ('preview', 20)"
 python3 main.py --command delete --db example.db --write --max-affected-rows 1 --sql "DELETE FROM users WHERE id = 1"
+python3 main.py --command update --db example.db --write --allow-full-table-write --dry-run --sql "UPDATE users SET age = age + 1"
 python3 main.py --command natural --db example.db --sql "show users"
 python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
 python3 main.py --command db_knowledge --dialect sqlite --topic schema
@@ -28,11 +29,12 @@ python3 main.py --command provider_test --provider-name local_ollama
 ## Verified Baseline
 
 - `main.py` routes to the package handlers in `sql_cli/cli.py`
-- `python3 sql_cli/tests/test_core.py` passes with 67 tests
+- `python3 sql_cli/tests/test_core.py` passes with 90 tests
 - SQLite is the working backend
 - `--db-uri` is the preferred multi-backend connection contract
 - `query` is read-only unless `--write` is provided
 - `insert`, `update`, and `delete` require both `--write` and explicit SQL
+- `update` and `delete` without `WHERE` require `--allow-full-table-write`
 - provider registry commands are available for optional `natural` fallback routing
 - `jpa_schema` can inspect annotation-based JPA entity source as an ORM/model context
 - `db_knowledge` can retrieve local SQL/JPA dialect and write-safety rules before using an LLM/provider

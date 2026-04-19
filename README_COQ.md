@@ -86,7 +86,7 @@ bash scripts/run_postgresql_local_smoke.sh
 - dedicated `insert`, `update`, and `delete` handlers require `--write` and explicit SQL
 - `insert`, `update`, `delete`, and write-mode `query` accept `--dry-run` to roll back after execution
 - `insert`, `update`, `delete`, and write-mode `query` accept `--max-affected-rows` to fail closed on unexpected row counts
-- full-table `update` and `delete` return a high-risk warning
+- full-table `update` and `delete` fail closed unless `--allow-full-table-write` is provided
 - `--db-uri` is preferred for future multi-backend commands
 - `schema_detail` provides normalized schema metadata for agent-side DB knowledge use
 - `generate` and simple `natural` requests can reject unknown tables before returning local SQL

@@ -80,6 +80,12 @@ def main() -> int:
         default=None,
         help="Abort and roll back if a write affects more than this many rows",
     )
+    parser.add_argument(
+        "--allow-full-table-write",
+        action="store_true",
+        default=False,
+        help="Allow UPDATE/DELETE statements without WHERE",
+    )
     args = parser.parse_args()
 
     if not args.command:
@@ -87,6 +93,7 @@ def main() -> int:
         print("commands: schema, schema_detail, doctor, query, generate, insert, update, delete, natural, jpa_schema, db_knowledge, provider_add, provider_list, provider_remove, provider_test")
         print("write commands require explicit --write and --sql")
         print("state-changing commands support optional --dry-run preview and --max-affected-rows guard")
+        print("full-table UPDATE/DELETE requires explicit --allow-full-table-write")
         print("prefer --db-uri for multi-backend contracts; --db remains SQLite-first compatibility")
         return 0
 
@@ -107,15 +114,40 @@ def main() -> int:
             args.write,
             args.dry_run,
             args.max_affected_rows,
+            args.allow_full_table_write,
         )
     elif args.command == "generate":
         result = generate_handler(db_target, args.skill or "select_simple", args.format, parsed_params)
     elif args.command == "insert":
-        result = insert_handler(db_target, args.sql, parsed_params, args.write, args.dry_run, args.max_affected_rows)
+        result = insert_handler(
+            db_target,
+            args.sql,
+            parsed_params,
+            args.write,
+            args.dry_run,
+            args.max_affected_rows,
+            args.allow_full_table_write,
+        )
     elif args.command == "update":
-        result = update_handler(db_target, args.sql, parsed_params, args.write, args.dry_run, args.max_affected_rows)
+        result = update_handler(
+            db_target,
+            args.sql,
+            parsed_params,
+            args.write,
+            args.dry_run,
+            args.max_affected_rows,
+            args.allow_full_table_write,
+        )
     elif args.command == "delete":
-        result = delete_handler(db_target, args.sql, parsed_params, args.write, args.dry_run, args.max_affected_rows)
+        result = delete_handler(
+            db_target,
+            args.sql,
+            parsed_params,
+            args.write,
+            args.dry_run,
+            args.max_affected_rows,
+            args.allow_full_table_write,
+        )
     elif args.command == "natural":
         result = natural_handler(db_target, args.sql, args.format, args.provider_name)
     elif args.command == "jpa_schema":

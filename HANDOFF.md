@@ -61,7 +61,7 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 - `insert`, `update`, and `delete` require both `--write` and explicit SQL
 - `insert`, `update`, and `delete` can run with `--dry-run` to preview affected rows without committing changes
 - `insert`, `update`, `delete`, and write-mode `query` can fail closed with `--max-affected-rows`
-- `update` and `delete` surface a high-risk warning when no `WHERE` clause exists
+- `update` and `delete` without `WHERE` fail closed unless `--allow-full-table-write` is provided
 - `natural` is heuristic by default, skips provider calls for simple covered requests, and can optionally route complex requests through a registered provider
 - provider-backed natural is currently a secondary experimental track, not the primary loop
 - PostgreSQL is proven only for narrow `schema`, `schema_detail`, `query`, `insert`, and `update`, and `delete` paths plus direct `generate join_inner` / `generate join_left` slices through local smoke runs

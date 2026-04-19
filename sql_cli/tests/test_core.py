@@ -214,12 +214,17 @@ full_table_update = update_handler(
     "UPDATE users SET age = age + 1",
     write=True,
 )
-assert full_table_update["ok"] is True
-assert full_table_update["data"]["affected_rows"] == 1
+assert full_table_update["ok"] is False
+assert full_table_update["error"]["code"] == "full_table_write_requires_flag"
+assert full_table_update["data"]["committed"] is False
 assert full_table_update["data"]["safety_level"] == "high"
 assert "WHERE" in full_table_update["data"]["warnings"][0]
+db = CoQueryDB(str(db_path))
+rows = db.execute("SELECT age FROM users WHERE name = 'bulk_target'")
+assert rows == [(33,)]
+db.close()
 tmpdir.cleanup()
-print("16. test_full_table_warning ✓")
+print("16. test_full_table_write_requires_flag ✓")
 
 tmpdir, db_path = make_temp_db()
 query_write_without_flag = query_handler(
@@ -1186,7 +1191,7 @@ seed_user(db_path, name="limit_guard_user", age=22)
 seed_user(db_path, name="limit_guard_user_2", age=23)
 guarded_delete = delete_handler(
     str(db_path),
-    "DELETE FROM users",
+    "DELETE FROM users WHERE age >= 22",
     write=True,
     max_affected_rows=1,
 )
@@ -1252,5 +1257,62 @@ assert invalid_max_rows["ok"] is False
 assert invalid_max_rows["error"]["code"] == "invalid_max_affected_rows"
 print("87. test_invalid_max_affected_rows ✓")
 
+tmpdir, db_path = make_temp_db()
+seed_user(db_path, name="full_table_allow_user", age=28)
+allowed_full_table_update = update_handler(
+    str(db_path),
+    "UPDATE users SET age = age + 1",
+    write=True,
+    allow_full_table_write=True,
+)
+assert allowed_full_table_update["ok"] is True
+assert allowed_full_table_update["data"]["safety_level"] == "high"
+db = CoQueryDB(str(db_path))
+rows = db.execute("SELECT age FROM users WHERE name = 'full_table_allow_user'")
+assert rows == [(29,)]
+db.close()
+tmpdir.cleanup()
+print("88. test_allow_full_table_update_flag ✓")
+
+tmpdir, db_path = make_temp_db()
+seed_user(db_path, name="query_full_table_user", age=25)
+query_full_table_delete = query_handler(
+    str(db_path),
+    "DELETE FROM users",
+    write=True,
+)
+assert query_full_table_delete["ok"] is False
+assert query_full_table_delete["error"]["code"] == "full_table_write_requires_flag"
+db = CoQueryDB(str(db_path))
+rows = db.execute("SELECT COUNT(*) FROM users WHERE name = 'query_full_table_user'")
+assert rows == [(1,)]
+db.close()
+tmpdir.cleanup()
+print("89. test_query_full_table_write_requires_flag ✓")
+
+tmpdir, db_path = make_temp_db()
+seed_user(db_path, name="cli_full_table_user", age=31)
+rc, payload = run_cli(
+    [
+        "--command",
+        "delete",
+        "--db",
+        str(db_path),
+        "--write",
+        "--allow-full-table-write",
+        "--sql",
+        "DELETE FROM users",
+    ]
+)
+assert rc == 0
+assert payload["ok"] is True
+assert payload["data"]["safety_level"] == "high"
+db = CoQueryDB(str(db_path))
+rows = db.execute("SELECT COUNT(*) FROM users WHERE name = 'cli_full_table_user'")
+assert rows == [(0,)]
+db.close()
+tmpdir.cleanup()
+print("90. test_cli_allow_full_table_write ✓")
+
 print("")
-print("=== ALL 87 TESTS PASS ✅ ===")
+print("=== ALL 90 TESTS PASS ✅ ===")

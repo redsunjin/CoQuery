@@ -73,6 +73,11 @@ def _write_metadata(operation: str, sql: str, dry_run: bool = False) -> tuple[li
     return warnings, "medium"
 
 
+def _is_full_table_write(operation: str, sql: str) -> bool:
+    sql_upper = sql.strip().upper()
+    return operation in {"UPDATE", "DELETE"} and "WHERE" not in sql_upper
+
+
 def _db_error(command: str, exc: CoQueryDBError) -> dict[str, Any]:
     return _error(command, exc.code, exc.message)
 
@@ -97,6 +102,7 @@ def _run_write_command(
     write: bool,
     dry_run: bool = False,
     max_affected_rows: Optional[int] = None,
+    allow_full_table_write: bool = False,
     expected_operation: Optional[str] = None,
 ) -> dict[str, Any]:
     operation = _sql_operation(sql) or expected_operation or command.upper()
@@ -142,9 +148,27 @@ def _run_write_command(
             {"knowledge_context": knowledge_context},
         )
 
+    warnings, safety_level = _write_metadata(_sql_operation(sql), sql, dry_run=dry_run)
+
+    if _is_full_table_write(_sql_operation(sql), sql) and not allow_full_table_write:
+        full_table_warnings = warnings + [
+            "Use --allow-full-table-write to run this statement intentionally.",
+        ]
+        return _error(
+            command,
+            "full_table_write_requires_flag",
+            f"{_sql_operation(sql)} without WHERE requires --allow-full-table-write.",
+            {
+                "dry_run": dry_run,
+                "committed": False,
+                "warnings": full_table_warnings,
+                "safety_level": safety_level,
+                "knowledge_context": knowledge_context,
+            },
+        )
+
     try:
         normalized_params = _normalize_write_params(params)
-        warnings, safety_level = _write_metadata(_sql_operation(sql), sql, dry_run=dry_run)
         with CoQueryDB(db) as conn:
             affected_rows = conn.execute(
                 sql,
@@ -241,6 +265,7 @@ def query_handler(
     write: bool = False,
     dry_run: bool = False,
     max_affected_rows: Optional[int] = None,
+    allow_full_table_write: bool = False,
 ) -> dict[str, Any]:
     operation = _sql_operation(sql)
 
@@ -253,6 +278,7 @@ def query_handler(
             write,
             dry_run=dry_run,
             max_affected_rows=max_affected_rows,
+            allow_full_table_write=allow_full_table_write,
         )
 
     try:
@@ -467,6 +493,7 @@ def insert_handler(
     write: bool = False,
     dry_run: bool = False,
     max_affected_rows: Optional[int] = None,
+    allow_full_table_write: bool = False,
 ) -> dict[str, Any]:
     return _run_write_command(
         "insert",
@@ -476,6 +503,7 @@ def insert_handler(
         write,
         dry_run=dry_run,
         max_affected_rows=max_affected_rows,
+        allow_full_table_write=allow_full_table_write,
         expected_operation="INSERT",
     )
 
@@ -487,6 +515,7 @@ def update_handler(
     write: bool = False,
     dry_run: bool = False,
     max_affected_rows: Optional[int] = None,
+    allow_full_table_write: bool = False,
 ) -> dict[str, Any]:
     return _run_write_command(
         "update",
@@ -496,6 +525,7 @@ def update_handler(
         write,
         dry_run=dry_run,
         max_affected_rows=max_affected_rows,
+        allow_full_table_write=allow_full_table_write,
         expected_operation="UPDATE",
     )
 
@@ -507,6 +537,7 @@ def delete_handler(
     write: bool = False,
     dry_run: bool = False,
     max_affected_rows: Optional[int] = None,
+    allow_full_table_write: bool = False,
 ) -> dict[str, Any]:
     return _run_write_command(
         "delete",
@@ -516,6 +547,7 @@ def delete_handler(
         write,
         dry_run=dry_run,
         max_affected_rows=max_affected_rows,
+        allow_full_table_write=allow_full_table_write,
         expected_operation="DELETE",
     )
 
