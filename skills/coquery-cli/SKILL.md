@@ -12,6 +12,7 @@ Use this skill to operate CoQuery as an agent-side SQL helper without re-discove
 Prefer the bundled wrapper for repeatable agent use:
 
 ```bash
+python3 skills/coquery-cli/scripts/coquery_agent.py describe
 python3 skills/coquery-cli/scripts/coquery_agent.py verify
 python3 skills/coquery-cli/scripts/coquery_agent.py demo
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command schema --db example.db
@@ -25,6 +26,7 @@ python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge -
 ```
 
 If the skill has been installed outside the repository, pass `--repo /path/to/CoQuery` or set `COQUERY_REPO=/path/to/CoQuery`.
+To copy the skill package into another Codex skills directory, use `install-skill`.
 
 ## Operating Rules
 
@@ -44,6 +46,7 @@ If the skill has been installed outside the repository, pass `--repo /path/to/Co
 Check readiness:
 
 ```bash
+python3 skills/coquery-cli/scripts/coquery_agent.py describe
 python3 skills/coquery-cli/scripts/coquery_agent.py verify
 ```
 
@@ -99,11 +102,27 @@ python3 skills/coquery-cli/scripts/coquery_agent.py run \
   --db /tmp/demo.db \
   --write \
   --sql "INSERT INTO users (name, age) VALUES ('agent_user', 30)"
+
+python3 skills/coquery-cli/scripts/coquery_agent.py run \
+  --command update \
+  --db /tmp/demo.db \
+  --write \
+  --dry-run \
+  --allow-full-table-write \
+  --sql "UPDATE users SET age = age + 1"
+```
+
+Install the skill package for reuse in another Codex session:
+
+```bash
+python3 skills/coquery-cli/scripts/coquery_agent.py install-skill
+python3 skills/coquery-cli/scripts/coquery_agent.py install-skill --target-root /tmp/codex-skills
 ```
 
 ## References
 
 - Read `references/status.md` for the current truthful capability boundaries.
 - Read `references/commands.md` for command examples and demo flow.
+- Read `references/capabilities.json` for machine-readable capability metadata and install guidance.
 - Read `references/db-knowledge.md` before asking an LLM for common SQL, dialect, or JPA rules.
 - Use `knowledge/dialects/*.json` and `knowledge/safety/write_rules.json` through `db_knowledge` for deterministic lookup.

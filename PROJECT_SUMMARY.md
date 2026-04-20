@@ -8,12 +8,14 @@
 ## Current Status
 
 ```text
-Verified on 2026-04-12
-- 73 executable baseline tests pass
+Verified on 2026-04-20
+- 96 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
 - explicit write contract is enforced
 - shared DB URI contract is implemented
+- doctor diagnostics are implemented and verified
+- dry-run preview, max-affected-row rollback guards, and full-table write rejection are verified
 - PostgreSQL schema, schema_detail, query, insert, update, and delete smoke have succeeded
 - PostgreSQL direct `generate join_inner` and `generate join_left` smoke have succeeded against real schema-detail paths
 - schema-detail knowledge command is verified for SQLite and the PostgreSQL proof path
@@ -65,12 +67,14 @@ Scope decision:
 
 - `schema`: list SQLite tables
 - `schema_detail`: expose normalized columns, primary keys, foreign keys, indexes, constraints, and SQLite create SQL
+- `doctor`: probe readiness and classify common PostgreSQL connection failures without exposing raw secrets
 - `query`: execute `SELECT` statements by default; non-`SELECT` requires `--write`
 - `generate`: build SQL from built-in skill IDs
 - `insert`: requires explicit `INSERT` SQL and `--write`; supports `--dry-run` and `--max-affected-rows`
 - `update`: requires explicit `UPDATE` SQL and `--write`; supports `--dry-run` and `--max-affected-rows`
 - `delete`: requires explicit `DELETE` SQL and `--write`; supports `--dry-run` and `--max-affected-rows`
 - `natural`: uses heuristic intent mapping with local knowledge first and can optionally fall back to a registered provider
+- `db_knowledge`: inspect local DB/JPA rules, safety guidance, schema detail, and coverage metadata
 - `provider_add`: add or update one repo-local LLM provider profile
 - `provider_list`: list registered provider profiles
 - `provider_remove`: remove one provider profile
@@ -88,7 +92,7 @@ Current executable baseline:
 python3 sql_cli/tests/test_core.py
 ```
 
-This passes 73 baseline tests covering:
+This passes 96 baseline tests covering:
 
 - SQL generation
 - SQL validation
@@ -106,6 +110,8 @@ This passes 73 baseline tests covering:
 - normalized schema-detail metadata for SQLite and mocked PostgreSQL paths
 - schema-detail-backed table and simple column validation for generate and natural
 - schema-detail-backed direct join inference, no-path rejection, ambiguous-path rejection, and explicit join-column validation
+- doctor readiness checks and PostgreSQL failure classification
+- dry-run write previews, affected-row rollback guards, and full-table write protection
 
 ---
 
@@ -115,6 +121,7 @@ This passes 73 baseline tests covering:
 - PostgreSQL is experimental for the narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` paths plus direct `generate join_inner` / `generate join_left` smoke slices
 - MySQL is still a stub, not a working backend
 - no transaction layer exists yet; baseline write commands now support `--dry-run` and `--max-affected-rows`
+- `doctor` classifies common PostgreSQL failures, but it is still a diagnostic aid rather than proof of complete backend support
 - natural-language behavior is lightweight by default; provider-backed quality and backend parity are not broadly proven
 - provider-backed natural is currently a secondary experimental track
 - generated SQL templates validate basic identifiers and direct foreign-key joins, but are not yet multi-hop relationship-aware, alias-aware, or expression-aware
@@ -149,6 +156,9 @@ python3 main.py --command schema --db example.db --format json
 # inspect normalized schema detail
 python3 main.py --command schema_detail --db example.db --table users --format json
 
+# run readiness diagnostics
+python3 main.py --command doctor --db example.db --format json
+
 # generate with schema-detail validation
 python3 main.py --command generate --db example.db --skill select_simple \
   --params '{"table":"users","cols":["id","name"]}' --format json
@@ -167,6 +177,10 @@ python3 main.py --command generate --db example.db \
 # run an explicit write
 python3 main.py --command insert --db example.db --write \
   --sql "INSERT INTO users (name, age) VALUES ('alice', 30)"
+
+# preview a write without committing
+python3 main.py --command insert --db example.db --write --dry-run \
+  --sql "INSERT INTO users (name, age) VALUES ('preview', 20)"
 
 # run the baseline tests
 python3 sql_cli/tests/test_core.py
@@ -204,5 +218,5 @@ Current runner improvement:
 
 ---
 
-Last Updated: 2026-04-13
-Status: SQLite-first baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof plus direct schema-detail join inference and verified GitHub Actions baseline / PostgreSQL smoke workflows
+Last Updated: 2026-04-20
+Status: SQLite-first baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof plus direct schema-detail join inference and verified GitHub Actions baseline / PostgreSQL smoke workflows

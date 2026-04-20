@@ -1,0 +1,126 @@
+{
+  "skill": {
+    "name": "coquery-cli",
+    "display_name": "CoQuery CLI",
+    "purpose": "Run CoQuery SQL, schema detail, write safety, and JPA schema workflows from agent sessions."
+  },
+  "wrapper_commands": [
+    {
+      "name": "describe",
+      "summary": "Emit machine-readable skill metadata, capability boundaries, and install guidance.",
+      "requires_repo": false
+    },
+    {
+      "name": "verify",
+      "summary": "Run repeatable readiness checks against a CoQuery repository.",
+      "requires_repo": true
+    },
+    {
+      "name": "demo",
+      "summary": "Run a safe SQLite demo on a temporary database copy.",
+      "requires_repo": true
+    },
+    {
+      "name": "run",
+      "summary": "Run one CoQuery CLI command with agent-oriented JSON output.",
+      "requires_repo": true
+    },
+    {
+      "name": "install-skill",
+      "summary": "Copy this skill package into a Codex skills directory for reuse in other sessions.",
+      "requires_repo": false
+    }
+  ],
+  "run_passthrough_flags": [
+    "--db",
+    "--db-uri",
+    "--sql",
+    "--table",
+    "--skill",
+    "--params",
+    "--provider-name",
+    "--provider-kind",
+    "--model-name",
+    "--base-url",
+    "--api-key-env",
+    "--jpa-project",
+    "--dialect",
+    "--topic",
+    "--format",
+    "--write",
+    "--dry-run",
+    "--max-affected-rows",
+    "--allow-full-table-write"
+  ],
+  "coquery_commands": [
+    "schema",
+    "schema_detail",
+    "doctor",
+    "query",
+    "generate",
+    "insert",
+    "update",
+    "delete",
+    "natural",
+    "jpa_schema",
+    "db_knowledge",
+    "provider_add",
+    "provider_list",
+    "provider_remove",
+    "provider_test"
+  ],
+  "backend_support": {
+    "sqlite": {
+      "status": "working",
+      "notes": [
+        "Primary verified runtime path."
+      ]
+    },
+    "postgresql": {
+      "status": "experimental_narrow",
+      "notes": [
+        "Smoke-proven for schema, schema_detail, query, insert, update, delete, and direct join generation.",
+        "Requires psycopg[binary] in the active Python environment for direct runtime use."
+      ]
+    },
+    "mysql": {
+      "status": "stub",
+      "notes": [
+        "URI parsing exists but runtime remains a structured placeholder."
+      ]
+    },
+    "oracle": {
+      "status": "not_supported",
+      "notes": [
+        "Not in the current project scope."
+      ]
+    },
+    "jpa": {
+      "status": "source_introspection_only",
+      "notes": [
+        "Entity source scanning is supported through jpa_schema.",
+        "JPQL runtime execution is not implemented."
+      ]
+    }
+  },
+  "driver_requirements": {
+    "sqlite": "Uses Python sqlite3 from the active interpreter.",
+    "postgresql": "Requires psycopg[binary] in the active interpreter, or use scripts/run_postgresql_local_smoke.sh which bootstraps .tmp/pg-venv.",
+    "mysql": "No working runtime driver path is exposed yet.",
+    "oracle": "No runtime path is implemented."
+  },
+  "references": {
+    "skill_markdown": "SKILL.md",
+    "status": "references/status.md",
+    "commands": "references/commands.md",
+    "db_knowledge": "references/db-knowledge.md",
+    "openai_agent": "agents/openai.yaml",
+    "wrapper_script": "scripts/coquery_agent.py"
+  },
+  "consumption_notes": [
+    "Use JSON output when another agent needs machine-readable results.",
+    "Pass --repo or set COQUERY_REPO when the skill package is installed outside the repository.",
+    "Prefer verify, demo, or run over directly re-discovering CLI behavior.",
+    "Do not claim Oracle support in the current project scope."
+  ]
+}

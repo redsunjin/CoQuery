@@ -1,7 +1,7 @@
 # CoQuery Stage Status Report
 
 Version: v0.7.0
-Last Update: 2026-04-13
+Last Update: 2026-04-20
 
 ## Current Status
 
@@ -9,6 +9,7 @@ Last Update: 2026-04-13
 SQLite-first baseline verified
 Explicit write contract frozen
 Shared DB URI contract implemented
+Doctor diagnostics implemented and verified
 PostgreSQL schema, schema_detail, query, insert, update, and delete smoke proved
 PostgreSQL direct join generation smoke proved for `generate join_inner` and `generate join_left` slices
 Codex skill package added for agent-side reuse
@@ -33,6 +34,7 @@ Phase 5 remains narrow and experimental
 
 - `schema`
 - `schema_detail`
+- `doctor`
 - `query`
 - `generate`
 - `insert`
@@ -40,6 +42,7 @@ Phase 5 remains narrow and experimental
 - `delete`
 - `natural`
 - `jpa_schema`
+- `db_knowledge`
 - `provider_add`
 - `provider_list`
 - `provider_remove`
@@ -50,7 +53,7 @@ Write-command baseline:
 - `insert`, `update`, and `delete` require `--write` and explicit SQL
 - `insert`, `update`, `delete`, and write-mode `query` support `--dry-run` preview with rollback
 - `insert`, `update`, `delete`, and write-mode `query` support `--max-affected-rows` rollback guards
-- full-table `update` and `delete` fail closed unless `--allow-full-table-write` is provided
+- full-table `update`, `delete`, and write-mode `query` statements fail closed unless `--allow-full-table-write` is provided
 
 ## Backend Support
 
@@ -76,11 +79,17 @@ Natural-language note:
 - heuristic by default
 - registered-provider routing exists as a secondary experimental track
 
+Doctor note:
+
+- readiness checks include parsed target, driver availability, connection probe, and schema probe where applicable
+- PostgreSQL diagnostics classify common failure modes such as `auth_failed`, `database_not_found`, `host_unreachable`, `connection_refused`, `timeout`, and `ssl_error`
+
 ## Verification Commands
 
 ```bash
 python3 main.py --help
 python3 main.py --command schema --db example.db --format json
+python3 main.py --command doctor --db example.db --format json
 python3 sql_cli/tests/test_core.py
 python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
 bash scripts/run_postgresql_local_smoke.sh
@@ -95,5 +104,5 @@ bash scripts/run_postgresql_local_smoke.sh
 5. keep JPA labelled as ORM/model support until JPQL runtime proof exists
 6. do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
 
-Last Updated: 2026-04-13
-Phase Status: SQLite-first baseline verified with PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` smoke proof plus agent skill packaging, JPA source introspection, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
+Last Updated: 2026-04-20
+Phase Status: SQLite-first baseline verified with `doctor`, PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` smoke proof plus agent skill packaging, JPA source introspection, explicit write safety guards, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows

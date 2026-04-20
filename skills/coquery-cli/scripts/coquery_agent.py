@@ -14,6 +14,19 @@ from pathlib import Path
 from typing import Any
 
 
+def skill_dir() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
+def default_install_root() -> Path:
+    return Path.home() / ".codex" / "skills"
+
+
+def load_capabilities_manifest() -> dict[str, Any]:
+    manifest_path = skill_dir() / "references" / "capabilities.json"
+    return json.loads(manifest_path.read_text(encoding="utf-8"))
+
+
 def _is_repo(path: Path) -> bool:
     return (path / "main.py").is_file() and (path / "sql_cli").is_dir()
 
@@ -53,6 +66,13 @@ def find_repo(explicit_repo: str | None = None) -> Path:
             return resolved
 
     raise SystemExit("Could not find CoQuery repo. Pass --repo or set COQUERY_REPO.")
+
+
+def maybe_find_repo(explicit_repo: str | None = None) -> Path | None:
+    try:
+        return find_repo(explicit_repo)
+    except SystemExit:
+        return None
 
 
 def _tail(text: str, max_chars: int = 4000) -> str:
@@ -108,6 +128,43 @@ def run_process(repo: Path, args: list[str], name: str) -> dict[str, Any]:
 
 def coquery_command(repo: Path, cli_args: list[str], name: str) -> dict[str, Any]:
     return run_process(repo, [sys.executable, "main.py", *cli_args], name)
+
+
+def command_describe(args: argparse.Namespace) -> int:
+    manifest = load_capabilities_manifest()
+    repo = maybe_find_repo(args.repo)
+    package_dir = skill_dir()
+    refs = {
+        name: {
+            "relative_path": relative_path,
+            "absolute_path": str((package_dir / relative_path).resolve()),
+        }
+        for name, relative_path in manifest["references"].items()
+    }
+
+    payload = {
+        "ok": True,
+        "skill": {
+            **manifest["skill"],
+            "source_dir": str(package_dir),
+            "default_install_root": str(default_install_root()),
+            "default_install_dir": str(default_install_root() / manifest["skill"]["name"]),
+        },
+        "repo": {
+            "detected": repo is not None,
+            "path": str(repo) if repo is not None else None,
+            "env_var": "COQUERY_REPO",
+        },
+        "wrapper_commands": manifest["wrapper_commands"],
+        "run_passthrough_flags": manifest["run_passthrough_flags"],
+        "coquery_commands": manifest["coquery_commands"],
+        "backend_support": manifest["backend_support"],
+        "driver_requirements": manifest["driver_requirements"],
+        "references": refs,
+        "consumption_notes": manifest["consumption_notes"],
+    }
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+    return 0
 
 
 def command_verify(args: argparse.Namespace) -> int:
@@ -167,6 +224,36 @@ def command_verify(args: argparse.Namespace) -> int:
     }
     print(json.dumps(payload, indent=2, ensure_ascii=False))
     return 0 if payload["ok"] else 1
+
+
+def command_install_skill(args: argparse.Namespace) -> int:
+    manifest = load_capabilities_manifest()
+    package_dir = skill_dir()
+    repo = maybe_find_repo(args.repo)
+    skill_name = args.skill_name or manifest["skill"]["name"]
+    target_root = Path(args.target_root).expanduser().resolve() if args.target_root else default_install_root().resolve()
+    target_dir = target_root / skill_name
+
+    target_root.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(package_dir, target_dir, dirs_exist_ok=True)
+
+    payload = {
+        "ok": True,
+        "skill_name": skill_name,
+        "source_dir": str(package_dir),
+        "target_root": str(target_root),
+        "target_dir": str(target_dir),
+        "repo_detected": repo is not None,
+        "repo_path": str(repo) if repo is not None else None,
+        "repo_hint_env_var": "COQUERY_REPO",
+        "repo_hint_value": str(repo) if repo is not None else None,
+        "next_steps": [
+            f"Use {target_dir / 'scripts' / 'coquery_agent.py'} describe --repo /path/to/CoQuery",
+            f"Use {target_dir / 'scripts' / 'coquery_agent.py'} verify --repo /path/to/CoQuery",
+        ],
+    }
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+    return 0
 
 
 def command_demo(args: argparse.Namespace) -> int:
@@ -339,6 +426,12 @@ def command_run(args: argparse.Namespace) -> int:
         cli_args.extend(["--topic", args.topic])
     if args.write:
         cli_args.append("--write")
+    if args.dry_run:
+        cli_args.append("--dry-run")
+    if args.max_affected_rows is not None:
+        cli_args.extend(["--max-affected-rows", str(args.max_affected_rows)])
+    if args.allow_full_table_write:
+        cli_args.append("--allow-full-table-write")
 
     result = coquery_command(repo, cli_args, args.command)
     if result["payload"] is not None:
@@ -351,6 +444,10 @@ def command_run(args: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Agent wrapper for CoQuery CLI")
     subparsers = parser.add_subparsers(dest="subcommand", required=True)
+
+    describe = subparsers.add_parser("describe", help="Emit machine-readable capability metadata")
+    describe.add_argument("--repo", default=None, help="Optional path to the CoQuery repository")
+    describe.set_defaults(func=command_describe)
 
     verify = subparsers.add_parser("verify", help="Run readiness checks")
     verify.add_argument("--repo", default=None, help="Path to the CoQuery repository")
@@ -380,7 +477,20 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--topic", default=None, help="Knowledge topic")
     run.add_argument("--format", default="json", help="Output format")
     run.add_argument("--write", action="store_true", help="Confirm state-changing SQL")
+    run.add_argument("--dry-run", action="store_true", help="Run state-changing SQL in rollback-only preview mode")
+    run.add_argument("--max-affected-rows", type=int, default=None, help="Abort and roll back if a write affects too many rows")
+    run.add_argument(
+        "--allow-full-table-write",
+        action="store_true",
+        help="Allow UPDATE/DELETE or write-mode query statements without WHERE",
+    )
     run.set_defaults(func=command_run)
+
+    install = subparsers.add_parser("install-skill", help="Copy this skill package into a Codex skills directory")
+    install.add_argument("--repo", default=None, help="Optional path to the CoQuery repository for repo hints")
+    install.add_argument("--target-root", default=None, help="Destination skills root directory")
+    install.add_argument("--skill-name", default=None, help="Installed skill directory name")
+    install.set_defaults(func=command_install_skill)
 
     return parser
 

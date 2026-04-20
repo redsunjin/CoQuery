@@ -3,9 +3,13 @@
 Baseline commands:
 
 ```bash
+python3 skills/coquery-cli/scripts/coquery_agent.py describe
+python3 skills/coquery-cli/scripts/coquery_agent.py install-skill
+python3 skills/coquery-cli/scripts/coquery_agent.py install-skill --target-root /tmp/codex-skills
 python3 main.py --command schema --db example.db --format json
 python3 main.py --command schema_detail --db example.db --table users --format json
 python3 main.py --command doctor --db example.db --format json
+# requires psycopg[binary] in the active Python environment
 python3 main.py --command doctor --db-uri postgresql://doctor:secret@localhost:5432/appdb --format json
 python3 main.py --command query --db example.db --sql "SELECT * FROM users" --format json
 python3 main.py --command generate --db example.db --skill select_simple --format json
@@ -27,6 +31,13 @@ python3 main.py --command schema_detail --db-uri sqlite:///absolute/path/to/exam
 ```
 
 Doctor output now includes readiness checks plus classified PostgreSQL connection failures such as `auth_failed`, `database_not_found`, `host_unreachable`, `connection_refused`, `timeout`, and `ssl_error`.
+If `psycopg[binary]` is not installed in the active Python environment, PostgreSQL doctor calls fail closed with `driver_not_installed`.
+
+Agent package notes:
+
+- `describe` prints machine-readable capability metadata and install guidance.
+- `install-skill` copies the current skill package into another Codex skills directory.
+- installed skill copies should use `--repo /path/to/CoQuery` or `COQUERY_REPO=/path/to/CoQuery` when the repository lives elsewhere.
 
 Write examples:
 
@@ -37,6 +48,9 @@ python3 main.py --command delete --db /tmp/demo.db --write --sql "DELETE FROM us
 python3 main.py --command insert --db /tmp/demo.db --write --dry-run --sql "INSERT INTO users (name, age) VALUES ('preview', 20)"
 python3 main.py --command delete --db /tmp/demo.db --write --max-affected-rows 1 --sql "DELETE FROM users WHERE name = 'a'"
 python3 main.py --command update --db /tmp/demo.db --write --allow-full-table-write --dry-run --sql "UPDATE users SET age = age + 1"
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command insert --db /tmp/demo.db --write --dry-run --sql "INSERT INTO users (name, age) VALUES ('preview', 20)"
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command delete --db /tmp/demo.db --write --max-affected-rows 1 --sql "DELETE FROM users WHERE name = 'a'"
+python3 skills/coquery-cli/scripts/coquery_agent.py run --command update --db /tmp/demo.db --write --allow-full-table-write --dry-run --sql "UPDATE users SET age = age + 1"
 ```
 
 Direct join generation example:
@@ -70,3 +84,4 @@ COQUERY_PG_DB_URI=postgresql://user:pass@host:5432/dbname bash scripts/run_postg
 ```
 
 The runner prefers PostgreSQL binaries from `PATH`, falls back to known Homebrew paths, creates a per-run socket directory, and auto-selects a free port when the preferred smoke port is already in use.
+It also bootstraps `.tmp/pg-venv` and installs `psycopg[binary]` there when needed.

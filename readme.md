@@ -9,6 +9,7 @@ Phase 5 multi-DB support is now early experimental and is not complete.
 python3 main.py --command schema --db example.db
 python3 main.py --command schema_detail --db example.db --table users --format json
 python3 main.py --command doctor --db example.db --format json
+# requires psycopg[binary] in the Python environment running main.py
 python3 main.py --command doctor --db-uri postgresql://doctor:secret@localhost:5432/appdb --format json
 python3 main.py --command schema --db-uri sqlite:///Users/Agent/ps-workspace/CoQuery/example.db
 python3 main.py --command query --db example.db --sql "SELECT * FROM users"
@@ -35,6 +36,7 @@ python3 main.py --command provider_test --provider-name local_ollama
 - SQLite is the working backend
 - `--db-uri` is the preferred multi-backend connection contract
 - `doctor` reports masked targets, readiness checks, and classified PostgreSQL connection failures
+- direct PostgreSQL `doctor` or runtime use requires `psycopg[binary]` in the active Python environment
 - `query` is read-only unless `--write` is provided
 - `insert`, `update`, and `delete` require both `--write` and explicit SQL
 - `update` and `delete` without `WHERE` require `--allow-full-table-write`
@@ -50,23 +52,31 @@ python3 main.py --command provider_test --provider-name local_ollama
 CoQuery can now be used as a Codex skill through `skills/coquery-cli`.
 
 ```bash
+bash scripts/install_coquery_skill.sh
+python3 skills/coquery-cli/scripts/coquery_agent.py describe
 python3 skills/coquery-cli/scripts/coquery_agent.py verify
 python3 skills/coquery-cli/scripts/coquery_agent.py demo
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command schema --db example.db
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command schema_detail --db example.db --table users
 python3 skills/coquery-cli/scripts/coquery_agent.py run --command db_knowledge --dialect jpql --topic parameters
+python3 skills/coquery-cli/scripts/coquery_agent.py install-skill
 ```
 
 The skill is also installable under `~/.codex/skills/coquery-cli` for `$coquery-cli` discovery in future Codex sessions.
+`describe` emits machine-readable capability metadata, and `install-skill` copies the skill package into another Codex skills directory.
+`scripts/install_coquery_skill.sh` is the shortest shell-first install path.
 
 The skill includes a compact DB knowledge seed at `skills/coquery-cli/references/db-knowledge.md`.
 Structured machine-readable rules and coverage metadata now live under `knowledge/`.
+Machine-readable agent capability metadata now also lives at `skills/coquery-cli/references/capabilities.json`.
+Practical install/call guidance now lives in `AGENT_INTEGRATION.md`.
 This is enough for basic SQL/JPA boundary decisions, deterministic lookup, normalized schema-detail lookup, simple identifier validation, and simple local-first planning, but not a complete offline SQL dialect knowledge base.
 
 ## Current Limits
 
 - PostgreSQL is experimental for the documented `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` probe paths only
 - `doctor` can classify common PostgreSQL connection failures such as `auth_failed`, `database_not_found`, `host_unreachable`, `connection_refused`, `timeout`, and `ssl_error`
+- if `psycopg[binary]` is not installed, PostgreSQL `doctor` and PostgreSQL runtime commands fail with `driver_not_installed`
 - MySQL is a stub with a structured placeholder error
 - write commands support `--dry-run` and `--max-affected-rows`, but a broader transaction control layer does not exist yet
 - natural-language support is lightweight by default; provider-backed quality is not broadly proven
@@ -92,7 +102,8 @@ bash scripts/run_postgresql_local_smoke.sh
 Runner note:
 
 - `scripts/run_postgresql_local_smoke.sh` prefers PostgreSQL binaries from `PATH`, uses a per-run socket directory, and auto-selects a free port when the preferred smoke port is unavailable
+- the smoke runner bootstraps `.tmp/pg-venv` and installs `psycopg[binary]` there if needed, so it remains the repeatable PostgreSQL proof path even when the default `python3` environment lacks the driver
 
 Version: v0.7.0
-Last Updated: 2026-04-19
-Status: SQLite-first baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete proof, and schema-detail-aware identifier validation
+Last Updated: 2026-04-20
+Status: SQLite-first baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete proof, schema-detail-aware identifier validation, and environment-aware PostgreSQL doctor guidance

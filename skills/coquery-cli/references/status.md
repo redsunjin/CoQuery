@@ -4,8 +4,10 @@ Current truthful product state:
 
 - Version line: v0.7.x stabilization.
 - SQLite-first CLI baseline is verified.
-- Baseline tests pass with 73 executable tests.
+- Baseline tests pass with 96 executable tests.
 - Explicit write contract is frozen: `insert`, `update`, and `delete` require `--write` and explicit SQL.
+- `doctor` reports masked targets, readiness checks, and classified PostgreSQL connection failures.
+- `--dry-run`, `--max-affected-rows`, and `--allow-full-table-write` are part of the verified write-safety surface.
 - `--db-uri` is the preferred multi-backend connection contract.
 - PostgreSQL is experimental for a narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` smoke slice plus direct `generate join_inner` / `generate join_left` proof.
 - MySQL is a stub with a structured placeholder error.
@@ -16,6 +18,7 @@ Current truthful product state:
 - Structured DB/JPA rules exist under `knowledge/` and are queryable through `db_knowledge`.
 - DB knowledge coverage and gaps are queryable through `db_knowledge --topic coverage`.
 - Normalized schema detail is queryable through `schema_detail`.
+- The skill package exposes machine-readable metadata through `references/capabilities.json` and `coquery_agent.py describe`.
 - Generate and simple natural-language paths validate basic identifiers against `schema_detail`.
 - Built-in join generation can infer one-step join conditions from `schema_detail` foreign keys and constraints when exactly one direct path exists.
 - Generation, natural-language, and write-planning paths attach local DB/JPA knowledge context before provider use.
@@ -36,6 +39,7 @@ Recommended readiness checks:
 python3 main.py --help
 python3 main.py --command schema --db example.db --format json
 python3 main.py --command schema_detail --db example.db --table users --format json
+python3 main.py --command doctor --db example.db --format json
 python3 main.py --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}' --format json
 python3 main.py --command generate --db /tmp/join-test.db --skill join_inner --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}' --format json
 python3 main.py --command generate --db /tmp/join-test.db --skill join_left --params '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}' --format json

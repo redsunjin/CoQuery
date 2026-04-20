@@ -1,20 +1,24 @@
 # CoQuery Baseline Verification
 
-Date: 2026-04-13
+Date: 2026-04-20
 
 ## Result
 
 ```text
-73/73 executable baseline tests pass
+96/96 executable baseline tests pass
 SQLite-first CLI verified
 Explicit write contract verified
 Shared DB URI contract verified
+Doctor command verified
 PostgreSQL schema, schema_detail, query, insert, update, and delete smoke verified
 PostgreSQL direct join-generation smoke verified
 Local DB/JPA knowledge-first generation planning verified
 Schema-detail knowledge command verified
 Schema-detail-aware generation and natural identifier validation verified
 Schema-detail-aware direct join generation verified
+Dry-run preview and max-affected-row rollback guards verified
+Full-table write guard verified
+PostgreSQL doctor classification verified for common connection failures
 GitHub Actions baseline and PostgreSQL smoke workflows verified on 2026-04-12
 ```
 
@@ -28,6 +32,7 @@ Scope decision:
 
 - `schema`
 - `schema_detail`
+- `doctor`
 - `query`
 - `generate`
 - `insert`
@@ -35,6 +40,7 @@ Scope decision:
 - `delete`
 - `natural`
 - `jpa_schema`
+- `db_knowledge`
 - `provider_add`
 - `provider_list`
 - `provider_remove`
@@ -50,7 +56,9 @@ Scope decision:
 | Write contract | Working baseline | `--write` plus explicit SQL is enforced |
 | Dry-run preview | Working baseline | `insert`, `update`, `delete`, and write-mode `query` can return affected rows without committing changes |
 | Affected-row guard | Working baseline | `--max-affected-rows` rolls back writes that touch more rows than expected |
+| Full-table write guard | Working baseline | `update`, `delete`, and write-mode `query` without `WHERE` fail closed unless `--allow-full-table-write` is provided |
 | DB URI contract | Working baseline | `--db-uri` is available and validated |
+| Doctor diagnostics | Working baseline | `doctor` reports readiness plus classified PostgreSQL connection failures |
 | Phase 5 verification matrix | Working baseline | backend promotion is now proof-gated |
 | PostgreSQL schema smoke | Working baseline | local proof recorded on 2026-04-05 |
 | PostgreSQL direct join generation smoke | Working baseline | local proof recorded on 2026-04-11 for direct `generate join_inner` and `generate join_left` slices |
@@ -73,6 +81,7 @@ Scope decision:
 python3 main.py --help
 python3 main.py --command schema --db example.db --format json
 python3 main.py --command schema_detail --db example.db --table users --format json
+python3 main.py --command doctor --db example.db --format json
 python3 main.py --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}' --format json
 python3 main.py --command generate --db /tmp/join-test.db --skill join_inner --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}' --format json
 python3 main.py --command schema --db-uri sqlite:///Users/Agent/ps-workspace/CoQuery/example.db --format json
@@ -86,8 +95,9 @@ bash scripts/run_postgresql_local_smoke.sh
 - dedicated `insert`, `update`, and `delete` handlers require `--write` and explicit SQL
 - `insert`, `update`, `delete`, and write-mode `query` accept `--dry-run` to roll back after execution
 - `insert`, `update`, `delete`, and write-mode `query` accept `--max-affected-rows` to fail closed on unexpected row counts
-- full-table `update` and `delete` fail closed unless `--allow-full-table-write` is provided
+- full-table `update`, `delete`, and write-mode `query` statements fail closed unless `--allow-full-table-write` is provided
 - `--db-uri` is preferred for future multi-backend commands
+- `doctor` exposes masked targets, readiness checks, and structured connection failure codes
 - `schema_detail` provides normalized schema metadata for agent-side DB knowledge use
 - `generate` and simple `natural` requests can reject unknown tables before returning local SQL
 - `generate` can auto-build direct join `ON` clauses from schema detail when both tables are inspectable
@@ -98,12 +108,13 @@ bash scripts/run_postgresql_local_smoke.sh
 - provider-backed natural is experimental and secondary to the PostgreSQL proof track
 - `jpa_schema --jpa-project ...` can provide entity model context for Java/JPA projects
 - the PostgreSQL smoke runner checks `PATH` for PostgreSQL binaries before falling back to known Homebrew paths
+- `doctor` can classify common PostgreSQL connection failures such as `auth_failed`, `database_not_found`, `host_unreachable`, `connection_refused`, `timeout`, and `ssl_error`
 - GitHub Actions workflow files exist at `.github/workflows/baseline.yml` and `.github/workflows/postgresql-smoke.yml`
 - the PostgreSQL smoke workflow uses an external PostgreSQL service URI, while the local smoke runner still supports managed local startup
 - GitHub Actions `baseline` and `postgresql-smoke` both succeeded on 2026-04-12 in PR `#3`
 
 Version: v0.7.0
-Last Updated: 2026-04-13
-Status: Baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof, local DB knowledge-first planning, schema-detail-aware identifier validation, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
+Last Updated: 2026-04-20
+Status: Baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof, local DB knowledge-first planning, schema-detail-aware identifier validation, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
 Reference: `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 Smoke Result: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
