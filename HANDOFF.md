@@ -1,6 +1,6 @@
 # CoQuery Handoff v0.7.0
 
-Date: 2026-04-20
+Date: 2026-04-21
 
 ## Current Handoff State
 
@@ -20,6 +20,7 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 - write commands require explicit `--write` confirmation and explicit SQL
 - PostgreSQL `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` have verified local smoke results
 - PostgreSQL direct `generate join_inner` and `generate join_left` inference have verified local smoke results against real schema detail
+- Latest local PostgreSQL smoke re-run succeeded on 2026-04-21
 - `schema_detail` exposes normalized columns, keys, indexes, constraints, and SQLite create SQL
 - `generate` and simple `natural` requests validate basic identifiers against `schema_detail`
 - `generate` can infer one-step join conditions from `schema_detail` foreign keys and constraints when both tables are inspectable
@@ -45,7 +46,7 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 - schema-detail-backed validation of qualified columns in explicit join `ON` clauses
 - real PostgreSQL smoke proof for direct `generate join_inner` and `generate join_left` slices
 - repo-local GitHub Actions workflows for baseline and PostgreSQL smoke automation
-- GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-12 through PR `#3`
+- GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-20 UTC for `main` commit `e9c98be`
 - structured write results with `affected_rows`, `warnings`, and `safety_level`
 
 ## What Is Not Complete
@@ -119,6 +120,6 @@ python3 main.py --command db_knowledge --topic coverage
 bash scripts/run_postgresql_local_smoke.sh
 ```
 
-Last Updated: 2026-04-20
+Last Updated: 2026-04-21
 Status: SQLite-first baseline verified with `doctor`, PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` smoke proof, local DB knowledge-first planning, schema-detail-aware identifier validation, explicit write safety guards, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
 Next: keep workflows green, keep docs aligned, and avoid broadening join-generation claims beyond direct schema-detail foreign-key inference

@@ -8,7 +8,7 @@
 ## Current Status
 
 ```text
-Verified on 2026-04-20
+Verified on 2026-04-21
 - 96 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
@@ -18,10 +18,11 @@ Verified on 2026-04-20
 - dry-run preview, max-affected-row rollback guards, and full-table write rejection are verified
 - PostgreSQL schema, schema_detail, query, insert, update, and delete smoke have succeeded
 - PostgreSQL direct `generate join_inner` and `generate join_left` smoke have succeeded against real schema-detail paths
+- local PostgreSQL smoke runner succeeded on 2026-04-21
 - schema-detail knowledge command is verified for SQLite and the PostgreSQL proof path
 - schema-detail-aware identifier validation is verified for generate and simple natural paths
 - schema-detail-aware direct join generation is verified for built-in join skills
-- GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-12
+- GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-20 UTC for `main` commit `e9c98be`
 ```
 
 Scope decision:
@@ -218,5 +219,5 @@ Current runner improvement:
 
 ---
 
-Last Updated: 2026-04-20
+Last Updated: 2026-04-21
 Status: SQLite-first baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof plus direct schema-detail join inference and verified GitHub Actions baseline / PostgreSQL smoke workflows

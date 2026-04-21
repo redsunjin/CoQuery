@@ -1,7 +1,7 @@
 # CoQuery Todo List
 
 Version: v0.7.x stabilization
-Last Updated: 2026-04-20
+Last Updated: 2026-04-21
 
 ## Official Next Tasks
 
@@ -95,6 +95,8 @@ Current next step:
 
 - keep GitHub Actions PostgreSQL smoke green and keep the runner portable before broadening any PostgreSQL claim
 - keep docs explicit about PostgreSQL driver requirements in the active Python environment
+- latest local PostgreSQL smoke re-run succeeded on 2026-04-21
+- latest observed `main` runs for `baseline` and `postgresql-smoke` succeeded on 2026-04-20 UTC for commit `e9c98be`
 
 ### 5. Verification-gated backend promotion
 
@@ -240,8 +242,10 @@ Current output:
 - [x] add schema-detail-backed identifier validation for generation and simple natural-language flows
 - [x] add schema-detail-backed direct join inference for built-in join skills
 - [x] prove direct PostgreSQL `generate join_inner` and `generate join_left` smoke against a real schema
+- [x] re-run local PostgreSQL smoke on 2026-04-21
 - [x] add GitHub Actions workflows for baseline verification and PostgreSQL smoke automation
 - [x] observe first GitHub Actions `baseline` and `postgresql-smoke` success on 2026-04-12
+- [x] observe latest GitHub Actions `baseline` and `postgresql-smoke` success on 2026-04-20 UTC for `main` commit `e9c98be`
 - [x] add `doctor` command with masked target reporting and readiness checks
 - [x] add write safety guards for `--dry-run`, `--max-affected-rows`, and `--allow-full-table-write`
 - [x] add PostgreSQL doctor failure classification for common connection errors

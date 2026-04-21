@@ -1,6 +1,6 @@
 # CoQuery PostgreSQL Local Smoke
 
-Date: 2026-04-18
+Date: 2026-04-21
 
 Workspace: `/Users/Agent/ps-workspace/CoQuery`
 
@@ -287,8 +287,10 @@ What is not proven yet:
 Automation note:
 
 - `.github/workflows/postgresql-smoke.yml` now exists and runs this smoke path against an external PostgreSQL service URI
-- GitHub Actions `postgresql-smoke` succeeded on 2026-04-12 through PR `#3`
-- this document still records the local smoke proof plus the first observed CI-backed run of the same smoke path
+- Local `bash scripts/run_postgresql_local_smoke.sh` re-run succeeded on 2026-04-21
+- GitHub Actions `postgresql-smoke` first succeeded on 2026-04-12 through PR `#3`
+- GitHub Actions `postgresql-smoke` also succeeded on 2026-04-20 UTC for `main` commit `e9c98be`
+- this document still records the local smoke proof plus observed CI-backed runs of the same smoke path
 
 ## Current status effect
 
