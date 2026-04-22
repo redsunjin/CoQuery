@@ -9,7 +9,7 @@ Current truthful product state:
 - `doctor` reports masked targets, readiness checks, and classified PostgreSQL connection failures.
 - `--dry-run`, `--max-affected-rows`, and `--allow-full-table-write` are part of the verified write-safety surface.
 - `--db-uri` is the preferred multi-backend connection contract.
-- PostgreSQL is experimental for a narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` smoke slice plus direct `generate join_inner` / `generate join_left` proof.
+- PostgreSQL is experimental for a narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` smoke slice plus `generate select_simple`, `generate count_simple`, and direct `generate join_inner` / `generate join_left` proof.
 - MySQL is a stub with a structured placeholder error.
 - Natural-language mode is heuristic by default.
 - Provider-backed natural routing exists, but remains secondary and experimental.

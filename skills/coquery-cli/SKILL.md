@@ -31,7 +31,7 @@ To copy the skill package into another Codex skills directory, use `install-skil
 ## Operating Rules
 
 - Treat SQLite as the working backend.
-- Treat PostgreSQL as experimental and limited to the documented `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` smoke paths plus direct `generate join_inner` / `generate join_left` smoke slices.
+- Treat PostgreSQL as experimental and limited to the documented `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` smoke paths plus `generate select_simple`, `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke slices.
 - Treat MySQL as a stub unless the repository status documents have been updated with a real verification slice.
 - Treat JPA as ORM/model source introspection unless a Java runtime proof exists.
 - Use explicit SQL plus `--write` for `insert`, `update`, and `delete`.

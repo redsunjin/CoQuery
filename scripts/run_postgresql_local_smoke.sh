@@ -251,6 +251,50 @@ echo "== PostgreSQL query smoke =="
   --format json
 
 echo ""
+echo "== PostgreSQL select_simple generation smoke =="
+SELECT_GENERATE_OUTPUT="$("${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command generate \
+  --db-uri "${DB_URI}" \
+  --skill select_simple \
+  --params '{"table":"users","cols":["id","name"]}' \
+  --format json)"
+printf '%s\n' "${SELECT_GENERATE_OUTPUT}"
+
+SELECT_SQL="$(printf '%s\n' "${SELECT_GENERATE_OUTPUT}" | "${VENV_DIR}/bin/python" -c 'import json, sys; payload = json.load(sys.stdin); assert payload.get("ok"), payload; assert payload.get("schema_validation", {}).get("status") == "validated", payload; print(payload["sql"])')"
+
+echo ""
+echo "== PostgreSQL select_simple generated query smoke =="
+SELECT_VERIFY_OUTPUT="$("${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command query \
+  --db-uri "${DB_URI}" \
+  --sql "${SELECT_SQL}" \
+  --format json)"
+printf '%s\n' "${SELECT_VERIFY_OUTPUT}"
+printf '%s\n' "${SELECT_VERIFY_OUTPUT}" | "${VENV_DIR}/bin/python" -c 'import json, sys; payload = json.load(sys.stdin); assert payload.get("ok"), payload; rows = payload.get("data", {}).get("rows", []); assert rows, payload; assert len(rows[0]) == 2, payload'
+
+echo ""
+echo "== PostgreSQL count_simple generation smoke =="
+COUNT_GENERATE_OUTPUT="$("${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command generate \
+  --db-uri "${DB_URI}" \
+  --skill count_simple \
+  --params '{"table":"users"}' \
+  --format json)"
+printf '%s\n' "${COUNT_GENERATE_OUTPUT}"
+
+COUNT_SQL="$(printf '%s\n' "${COUNT_GENERATE_OUTPUT}" | "${VENV_DIR}/bin/python" -c 'import json, sys; payload = json.load(sys.stdin); assert payload.get("ok"), payload; assert payload.get("schema_validation", {}).get("status") == "validated", payload; print(payload["sql"])')"
+
+echo ""
+echo "== PostgreSQL count_simple generated query smoke =="
+COUNT_VERIFY_OUTPUT="$("${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command query \
+  --db-uri "${DB_URI}" \
+  --sql "${COUNT_SQL}" \
+  --format json)"
+printf '%s\n' "${COUNT_VERIFY_OUTPUT}"
+printf '%s\n' "${COUNT_VERIFY_OUTPUT}" | "${VENV_DIR}/bin/python" -c 'import json, sys; payload = json.load(sys.stdin); assert payload.get("ok"), payload; rows = payload.get("data", {}).get("rows", []); assert rows and rows[0][0] >= 1, payload'
+
+echo ""
 echo "== PostgreSQL insert smoke =="
 "${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
   --command insert \

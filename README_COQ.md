@@ -1,6 +1,6 @@
 # CoQuery Baseline Verification
 
-Date: 2026-04-21
+Date: 2026-04-22
 
 ## Result
 
@@ -11,8 +11,9 @@ Explicit write contract verified
 Shared DB URI contract verified
 Doctor command verified
 PostgreSQL schema, schema_detail, query, insert, update, and delete smoke verified
+PostgreSQL select/count generation smoke verified
 PostgreSQL direct join-generation smoke verified
-Local PostgreSQL smoke runner re-verified on 2026-04-21
+Local PostgreSQL smoke runner re-verified on 2026-04-22
 Local DB/JPA knowledge-first generation planning verified
 Schema-detail knowledge command verified
 Schema-detail-aware generation and natural identifier validation verified
@@ -52,7 +53,7 @@ Scope decision:
 | Area | Status | Notes |
 |------|--------|-------|
 | SQLite CLI path | Working | current verified runtime |
-| PostgreSQL | Experimental (narrow read + write) | local smoke proof succeeded for `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, and direct join generation; latest local runner pass on 2026-04-21 |
+| PostgreSQL | Experimental (narrow read + write + limited generate) | local smoke proof succeeded for `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct join generation; latest local runner pass on 2026-04-22 |
 | MySQL | Stub | returns structured placeholder error |
 | Write contract | Working baseline | `--write` plus explicit SQL is enforced |
 | Dry-run preview | Working baseline | `insert`, `update`, `delete`, and write-mode `query` can return affected rows without committing changes |
@@ -61,12 +62,13 @@ Scope decision:
 | DB URI contract | Working baseline | `--db-uri` is available and validated |
 | Doctor diagnostics | Working baseline | `doctor` reports readiness plus classified PostgreSQL connection failures |
 | Phase 5 verification matrix | Working baseline | backend promotion is now proof-gated |
-| PostgreSQL schema smoke | Working baseline | initial local proof recorded on 2026-04-05; latest runner pass on 2026-04-21 |
-| PostgreSQL direct join generation smoke | Working baseline | initial local proof recorded on 2026-04-11 for direct `generate join_inner` and `generate join_left` slices; latest runner pass on 2026-04-21 |
-| PostgreSQL query smoke | Working baseline | initial local proof recorded on 2026-04-05; latest runner pass on 2026-04-21 |
-| PostgreSQL insert smoke | Working baseline | initial local proof recorded on 2026-04-05; latest runner pass on 2026-04-21 |
-| PostgreSQL update smoke | Working baseline | initial local proof recorded on 2026-04-07; latest runner pass on 2026-04-21 |
-| PostgreSQL delete smoke | Working baseline | initial local proof recorded on 2026-04-08; latest runner pass on 2026-04-21 |
+| PostgreSQL schema smoke | Working baseline | initial local proof recorded on 2026-04-05; latest runner pass on 2026-04-22 |
+| PostgreSQL select/count generation smoke | Working baseline | local proof recorded on 2026-04-22 for schema-detail-validated `generate select_simple` and `generate count_simple` plus generated SQL execution |
+| PostgreSQL direct join generation smoke | Working baseline | initial local proof recorded on 2026-04-11 for direct `generate join_inner` and `generate join_left` slices; latest runner pass on 2026-04-22 |
+| PostgreSQL query smoke | Working baseline | initial local proof recorded on 2026-04-05; latest runner pass on 2026-04-22 |
+| PostgreSQL insert smoke | Working baseline | initial local proof recorded on 2026-04-05; latest runner pass on 2026-04-22 |
+| PostgreSQL update smoke | Working baseline | initial local proof recorded on 2026-04-07; latest runner pass on 2026-04-22 |
+| PostgreSQL delete smoke | Working baseline | initial local proof recorded on 2026-04-08; latest runner pass on 2026-04-22 |
 | Docs example smoke | Working baseline | key documented CLI examples are exercised in tests |
 | Natural language | Baseline only | simple covered requests use local knowledge first; optional provider path remains fallback |
 | JPA | Source introspection only | `jpa_schema` scans annotation-based entity source; JPQL runtime execution is not implemented |
@@ -101,9 +103,10 @@ bash scripts/run_postgresql_local_smoke.sh
 - `doctor` exposes masked targets, readiness checks, and structured connection failure codes
 - `schema_detail` provides normalized schema metadata for agent-side DB knowledge use
 - `generate` and simple `natural` requests can reject unknown tables before returning local SQL
+- the local PostgreSQL smoke runner now proves schema-detail-validated `generate select_simple` and `generate count_simple`, then executes the generated SQL
 - `generate` can auto-build direct join `ON` clauses from schema detail when both tables are inspectable
 - the local PostgreSQL smoke runner now proves direct `generate join_inner` and `generate join_left` slices against a real PostgreSQL schema
-- the local PostgreSQL smoke runner was re-run successfully on 2026-04-21
+- the local PostgreSQL smoke runner was re-run successfully on 2026-04-22
 - explicit join `ON` clauses are still allowed, but qualified table/column references are validated against schema detail when available
 - `natural` defaults to simple fixed SQL patterns
 - `natural --provider-name ...` skips provider calls for simple covered requests and can route complex requests through a registered provider
@@ -117,7 +120,7 @@ bash scripts/run_postgresql_local_smoke.sh
 - GitHub Actions `baseline` and `postgresql-smoke` both succeeded on 2026-04-20 UTC for `main` commit `e9c98be`
 
 Version: v0.7.0
-Last Updated: 2026-04-21
-Status: Baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof, local DB knowledge-first planning, schema-detail-aware identifier validation, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
+Last Updated: 2026-04-22
+Status: Baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` proof, local DB knowledge-first planning, schema-detail-aware identifier validation, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
 Reference: `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 Smoke Result: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`

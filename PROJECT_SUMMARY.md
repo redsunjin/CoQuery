@@ -8,7 +8,7 @@
 ## Current Status
 
 ```text
-Verified on 2026-04-21
+Verified on 2026-04-22
 - 96 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
@@ -17,8 +17,9 @@ Verified on 2026-04-21
 - doctor diagnostics are implemented and verified
 - dry-run preview, max-affected-row rollback guards, and full-table write rejection are verified
 - PostgreSQL schema, schema_detail, query, insert, update, and delete smoke have succeeded
+- PostgreSQL `generate select_simple` and `generate count_simple` smoke have succeeded with generated SQL execution
 - PostgreSQL direct `generate join_inner` and `generate join_left` smoke have succeeded against real schema-detail paths
-- local PostgreSQL smoke runner succeeded on 2026-04-21
+- local PostgreSQL smoke runner succeeded on 2026-04-22
 - schema-detail knowledge command is verified for SQLite and the PostgreSQL proof path
 - schema-detail-aware identifier validation is verified for generate and simple natural paths
 - schema-detail-aware direct join generation is verified for built-in join skills
@@ -119,7 +120,7 @@ This passes 96 baseline tests covering:
 ## Current Limits
 
 - SQLite is the only broadly verified backend
-- PostgreSQL is experimental for the narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` paths plus direct `generate join_inner` / `generate join_left` smoke slices
+- PostgreSQL is experimental for the narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` paths plus `generate select_simple`, `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke slices
 - MySQL is still a stub, not a working backend
 - no transaction layer exists yet; baseline write commands now support `--dry-run` and `--max-affected-rows`
 - `doctor` classifies common PostgreSQL failures, but it is still a diagnostic aid rather than proof of complete backend support
@@ -219,5 +220,5 @@ Current runner improvement:
 
 ---
 
-Last Updated: 2026-04-21
-Status: SQLite-first baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, and direct `generate join_inner` / `generate join_left` proof plus direct schema-detail join inference and verified GitHub Actions baseline / PostgreSQL smoke workflows
+Last Updated: 2026-04-22
+Status: SQLite-first baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` proof plus direct schema-detail join inference and verified GitHub Actions baseline / PostgreSQL smoke workflows

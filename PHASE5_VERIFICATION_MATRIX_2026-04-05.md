@@ -1,6 +1,6 @@
 # CoQuery Phase 5 Verification Matrix
 
-Date: 2026-04-05
+Date: 2026-04-22
 
 Workspace: `/Users/Agent/ps-workspace/CoQuery`
 
@@ -31,10 +31,14 @@ Use these meanings consistently:
 | PostgreSQL | missing driver error | yes | yes | stub | returns `driver_not_installed` when `psycopg` is unavailable |
 | PostgreSQL | connection failure error | yes | yes | stub | returns `connection_failed` on connect failure |
 | PostgreSQL | `schema` against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
+| PostgreSQL | `schema_detail` against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
 | PostgreSQL | `query` against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
 | PostgreSQL | `insert` against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
 | PostgreSQL | `update` against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
 | PostgreSQL | `delete` against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
+| PostgreSQL | `generate select_simple` against real DB schema detail | yes | yes | experimental | generated SQL is executed in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
+| PostgreSQL | `generate count_simple` against real DB schema detail | yes | yes | experimental | generated SQL is executed in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
+| PostgreSQL | direct `generate join_inner` / `generate join_left` against real DB schema detail | yes | yes | experimental | generated SQL is executed in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
 | MySQL | URI detection | yes | yes | stub | `mysql://` scheme is recognized and validated |
 | MySQL | runtime execution | no | yes | stub | returns structured `unsupported_backend` placeholder |
 
@@ -43,7 +47,7 @@ Use these meanings consistently:
 What this matrix means today:
 
 - SQLite is the only backend with broad proof across multiple command types
-- PostgreSQL is `experimental` for the narrow `schema`, `query`, `insert`, `update`, and `delete` paths
+- PostgreSQL is `experimental` for the narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` paths plus `generate select_simple`, `generate count_simple`, and direct join generation slices
 - MySQL is still a placeholder backend and should not be described as supported
 - broader PostgreSQL support is still unproven beyond the documented smoke
 
@@ -85,10 +89,13 @@ bash scripts/run_postgresql_local_smoke.sh
 This runner proves:
 
 - `schema`
+- `schema_detail`
 - `query`
 - `insert`
 - `update`
 - `delete`
+- schema-detail-validated `generate select_simple` and `generate count_simple`, with generated SQL execution
+- direct `generate join_inner` and `generate join_left`, with generated SQL execution
 
 against a real local PostgreSQL target.
 
@@ -107,7 +114,7 @@ The first real PostgreSQL smoke result is recorded in:
 Current limits:
 
 - the proof still uses a dedicated local probe environment
-- only one write family is proven
+- only selected generation slices are proven
 - the probe still depends on local PostgreSQL binaries outside the repo
 
 ## 9. Persona checkpoint

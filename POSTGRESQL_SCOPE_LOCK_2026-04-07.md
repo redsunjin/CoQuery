@@ -1,6 +1,6 @@
 # CoQuery PostgreSQL Scope Lock
 
-Date: 2026-04-11
+Date: 2026-04-22
 
 Workspace: `/Users/Agent/ps-workspace/CoQuery`
 
@@ -16,11 +16,11 @@ This document exists so the project does not drift from:
 
 ## 2. Current PostgreSQL scope
 
-As of 2026-04-11, the PostgreSQL slice is:
+As of 2026-04-22, the PostgreSQL slice is:
 
 - status: `experimental`
 - proven commands: `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`
-- proven generation slices: direct `generate join_inner` and `generate join_left` inference when exactly one direct foreign-key path exists
+- proven generation slices: schema-detail-validated `generate select_simple` and `generate count_simple`, plus direct `generate join_inner` and `generate join_left` inference when exactly one direct foreign-key path exists
 - proof path: `bash scripts/run_postgresql_local_smoke.sh`
 - proof note: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
 
@@ -35,7 +35,7 @@ What this means:
 Do not treat these as current PostgreSQL support:
 
 - natural-language PostgreSQL execution
-- broad PostgreSQL `generate` parity
+- broad PostgreSQL `generate` parity beyond the proven `select_simple`, `count_simple`, `join_inner`, and `join_left` slices
 - multi-hop or alias-aware join generation
 - transaction handling
 - parity with the SQLite baseline
@@ -47,6 +47,7 @@ Until a new verification slice is opened, keep PostgreSQL language limited to:
 
 - `experimental`
 - `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` are proven
+- `generate select_simple` and `generate count_simple` are proven through real schema-detail validation and generated SQL execution
 - direct `generate join_inner` and `generate join_left` slices are proven through real schema-detail introspection
 - broader PostgreSQL support is not proven
 

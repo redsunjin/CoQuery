@@ -1,7 +1,7 @@
 # CoQuery Todo List
 
 Version: v0.7.x stabilization
-Last Updated: 2026-04-21
+Last Updated: 2026-04-22
 
 ## Official Next Tasks
 
@@ -83,6 +83,8 @@ Open tasks:
 - [x] prove PostgreSQL `insert`
 - [x] prove PostgreSQL `update`
 - [x] prove PostgreSQL `delete`
+- [x] prove PostgreSQL schema-detail-validated `generate select_simple`
+- [x] prove PostgreSQL schema-detail-validated `generate count_simple`
 - [x] prove PostgreSQL direct `generate join_inner`
 - [x] prove PostgreSQL direct `generate join_left`
 
@@ -95,7 +97,7 @@ Current next step:
 
 - keep GitHub Actions PostgreSQL smoke green and keep the runner portable before broadening any PostgreSQL claim
 - keep docs explicit about PostgreSQL driver requirements in the active Python environment
-- latest local PostgreSQL smoke re-run succeeded on 2026-04-21
+- latest local PostgreSQL smoke re-run succeeded on 2026-04-22
 - latest observed `main` runs for `baseline` and `postgresql-smoke` succeeded on 2026-04-20 UTC for commit `e9c98be`
 
 ### 5. Verification-gated backend promotion
@@ -241,8 +243,9 @@ Current output:
 - [x] add normalized schema-detail knowledge for columns, indexes, foreign keys, and constraints
 - [x] add schema-detail-backed identifier validation for generation and simple natural-language flows
 - [x] add schema-detail-backed direct join inference for built-in join skills
+- [x] prove PostgreSQL `generate select_simple` and `generate count_simple` smoke with generated SQL execution
 - [x] prove direct PostgreSQL `generate join_inner` and `generate join_left` smoke against a real schema
-- [x] re-run local PostgreSQL smoke on 2026-04-21
+- [x] re-run local PostgreSQL smoke on 2026-04-22
 - [x] add GitHub Actions workflows for baseline verification and PostgreSQL smoke automation
 - [x] observe first GitHub Actions `baseline` and `postgresql-smoke` success on 2026-04-12
 - [x] observe latest GitHub Actions `baseline` and `postgresql-smoke` success on 2026-04-20 UTC for `main` commit `e9c98be`

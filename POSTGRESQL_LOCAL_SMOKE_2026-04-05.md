@@ -1,12 +1,12 @@
 # CoQuery PostgreSQL Local Smoke
 
-Date: 2026-04-21
+Date: 2026-04-22
 
 Workspace: `/Users/Agent/ps-workspace/CoQuery`
 
 ## Purpose
 
-Record one repeatable local PostgreSQL smoke path that proves CoQuery can run `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` against a real non-SQLite backend, plus direct schema-detail `join_inner` and `join_left` generation slices.
+Record one repeatable local PostgreSQL smoke path that proves CoQuery can run `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` against a real non-SQLite backend, plus schema-detail-validated `select_simple`, `count_simple`, `join_inner`, and `join_left` generation slices with generated SQL execution.
 
 This is a narrow probe environment, not the default baseline runtime.
 
@@ -38,6 +38,7 @@ This script:
 - starts PostgreSQL on a non-default port and auto-picks a free port when the preferred one is busy
 - seeds `users`, `orgs`, and `members` probe tables
 - runs CoQuery `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete`
+- runs `generate select_simple` and `generate count_simple` against real PostgreSQL schema detail and executes the generated SQL
 - runs `generate join_inner` and `generate join_left` against real PostgreSQL schema detail and executes the generated join SQL
 - supports `COQUERY_PG_DB_URI` for an external PostgreSQL target and `COQUERY_PG_RESET=1` to reinitialize the local probe cluster
 - prints PostgreSQL log-tail diagnostics when startup or smoke execution fails
@@ -96,6 +97,34 @@ Observed output:
   "error": null
 }
 ```
+
+### Basic generation proof
+
+```bash
+/Users/Agent/ps-workspace/CoQuery/.tmp/pg-venv/bin/python main.py \
+  --command generate \
+  --db-uri "postgresql://localhost/coquery_probe?host=/Users/Agent/ps-workspace/CoQuery/.tmp/pg-socket&port=49251" \
+  --skill select_simple \
+  --params '{"table":"users","cols":["id","name"]}' \
+  --format json
+```
+
+Observed output:
+
+```json
+{
+  "ok": true,
+  "command": "generate",
+  "sql": "SELECT ID, NAME FROM USERS",
+  "schema_validation": {
+    "status": "validated",
+    "backend": "postgresql"
+  },
+  "error": null
+}
+```
+
+The runner executes the generated `select_simple` SQL and also verifies `generate count_simple` with generated SQL execution.
 
 ### Direct join-generation proof
 
@@ -272,6 +301,8 @@ What is proven:
 - `schema` works against a real PostgreSQL database
 - `schema_detail` works against a real PostgreSQL database
 - `query` works against a real PostgreSQL database
+- schema-detail-validated `generate select_simple` works against real PostgreSQL schema detail and the generated SQL executes
+- schema-detail-validated `generate count_simple` works against real PostgreSQL schema detail and the generated SQL executes
 - `insert` works against a real PostgreSQL database with the baseline write contract
 - `update` works against a real PostgreSQL database with the baseline write contract
 - `delete` works against a real PostgreSQL database with the baseline write contract
@@ -280,14 +311,14 @@ What is proven:
 What is not proven yet:
 
 - PostgreSQL natural-language flows
-- broad PostgreSQL generation parity
+- broad PostgreSQL generation parity beyond the proven `select_simple`, `count_simple`, `join_inner`, and `join_left` slices
 - multi-hop or alias-aware join generation
 - stable one-command bootstrap inside the default developer baseline
 
 Automation note:
 
 - `.github/workflows/postgresql-smoke.yml` now exists and runs this smoke path against an external PostgreSQL service URI
-- Local `bash scripts/run_postgresql_local_smoke.sh` re-run succeeded on 2026-04-21
+- Local `bash scripts/run_postgresql_local_smoke.sh` re-run succeeded on 2026-04-22
 - GitHub Actions `postgresql-smoke` first succeeded on 2026-04-12 through PR `#3`
 - GitHub Actions `postgresql-smoke` also succeeded on 2026-04-20 UTC for `main` commit `e9c98be`
 - this document still records the local smoke proof plus observed CI-backed runs of the same smoke path
@@ -297,6 +328,6 @@ Automation note:
 This supports:
 
 - PostgreSQL status: `experimental`
-- proven scope: `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, and direct `generate join_inner` / `generate join_left` slices
+- proven scope: `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` slices
 
 This does not justify claiming broad multi-DB completion.
