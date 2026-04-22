@@ -6,7 +6,7 @@ Workspace: `/Users/Agent/ps-workspace/CoQuery`
 
 ## Purpose
 
-Record one repeatable local PostgreSQL smoke path that proves CoQuery can run `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` against a real non-SQLite backend, plus schema-detail-validated `select_simple`, `count_simple`, `join_inner`, and `join_left` generation slices with generated SQL execution.
+Record one repeatable local PostgreSQL smoke path that proves CoQuery can run `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` against a real non-SQLite backend, plus write-safety guard slices and schema-detail-validated `select_simple`, `count_simple`, `join_inner`, and `join_left` generation slices with generated SQL execution.
 
 This is a narrow probe environment, not the default baseline runtime.
 
@@ -38,6 +38,7 @@ This script:
 - starts PostgreSQL on a non-default port and auto-picks a free port when the preferred one is busy
 - seeds `users`, `orgs`, and `members` probe tables
 - runs CoQuery `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete`
+- verifies `--dry-run`, `--max-affected-rows`, and full-table write rejection against PostgreSQL
 - runs `generate select_simple` and `generate count_simple` against real PostgreSQL schema detail and executes the generated SQL
 - runs `generate join_inner` and `generate join_left` against real PostgreSQL schema detail and executes the generated join SQL
 - supports `COQUERY_PG_DB_URI` for an external PostgreSQL target and `COQUERY_PG_RESET=1` to reinitialize the local probe cluster
@@ -292,6 +293,58 @@ Observed output:
 }
 ```
 
+### Write-safety proof
+
+The runner verifies the PostgreSQL write-safety contract with three bounded probes:
+
+- `insert --write --dry-run` returns `ok: true`, `dry_run: true`, and `committed: false`; a follow-up count confirms the row was rolled back.
+- `delete --write --max-affected-rows 1` against two matching rows fails with `affected_rows_exceeded`, returns `committed: false`, and leaves both rows present for cleanup.
+- `delete --write --sql "DELETE FROM users"` fails with `full_table_write_requires_flag`, returns `committed: false`, and leaves the guard row present for cleanup.
+
+Observed dry-run excerpt:
+
+```json
+{
+  "ok": true,
+  "data": {
+    "affected_rows": 1,
+    "dry_run": true,
+    "committed": false
+  }
+}
+```
+
+Observed max-affected excerpt:
+
+```json
+{
+  "ok": false,
+  "data": {
+    "affected_rows": 2,
+    "max_affected_rows": 1,
+    "committed": false
+  },
+  "error": {
+    "code": "affected_rows_exceeded"
+  }
+}
+```
+
+Observed full-table guard excerpt:
+
+```json
+{
+  "ok": false,
+  "data": {
+    "committed": false,
+    "safety_level": "high"
+  },
+  "error": {
+    "code": "full_table_write_requires_flag"
+  }
+}
+```
+
 ## Interpretation
 
 What is proven:
@@ -306,6 +359,9 @@ What is proven:
 - `insert` works against a real PostgreSQL database with the baseline write contract
 - `update` works against a real PostgreSQL database with the baseline write contract
 - `delete` works against a real PostgreSQL database with the baseline write contract
+- `--dry-run` rolls back a PostgreSQL write after reporting affected rows
+- `--max-affected-rows` rejects and rolls back an over-limit PostgreSQL write
+- full-table PostgreSQL writes are rejected unless `--allow-full-table-write` is provided
 - direct `generate join_inner` and `generate join_left` inference work against real PostgreSQL schema detail when exactly one direct foreign-key path exists
 
 What is not proven yet:
@@ -328,6 +384,6 @@ Automation note:
 This supports:
 
 - PostgreSQL status: `experimental`
-- proven scope: `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` slices
+- proven scope: `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, write-safety guard slices, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` slices
 
 This does not justify claiming broad multi-DB completion.

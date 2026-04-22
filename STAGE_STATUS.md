@@ -13,6 +13,7 @@ Doctor diagnostics implemented and verified
 PostgreSQL schema, schema_detail, query, insert, update, and delete smoke proved
 PostgreSQL schema-detail-validated `generate select_simple` and `generate count_simple` smoke proved
 PostgreSQL direct join generation smoke proved for `generate join_inner` and `generate join_left` slices
+PostgreSQL write-safety guard smoke proved for dry-run rollback, max-affected rollback, and full-table rejection
 Local PostgreSQL smoke re-run succeeded on 2026-04-22
 Codex skill package added for agent-side reuse
 JPA entity source introspection added as an ORM/model track
@@ -30,7 +31,7 @@ Phase 5 remains narrow and experimental
 | Phase 2 | Complete enough | structured SQL generation works for built-in skills |
 | Phase 3 | Baseline stabilized | explicit `--write` plus explicit SQL is enforced |
 | Phase 4 | In stabilization | natural-language path is heuristic by default and can optionally use a registered provider |
-| Phase 5 | Early experimental | PostgreSQL `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, `generate select_simple`, `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke slices succeeded; broader backend support is not proven |
+| Phase 5 | Early experimental | PostgreSQL `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, write-safety guard, `generate select_simple`, `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke slices succeeded; broader backend support is not proven |
 
 ## Verified Commands
 
@@ -62,7 +63,7 @@ Write-command baseline:
 | Backend | Status | Notes |
 |---------|--------|-------|
 | SQLite | Working | current verified runtime path |
-| PostgreSQL | Experimental (narrow read + write + limited generate) | local smoke proof succeeded for `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, `generate select_simple`, `generate count_simple`, plus direct `generate join_inner` / `generate join_left` slices; broader backend support is still not proven |
+| PostgreSQL | Experimental (narrow read + write + limited generate) | local smoke proof succeeded for `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, write-safety guards, `generate select_simple`, `generate count_simple`, plus direct `generate join_inner` / `generate join_left` slices; broader backend support is still not proven |
 | MySQL | Stub | URI contract exists; runtime returns structured placeholder error |
 
 CI note:
@@ -109,4 +110,4 @@ bash scripts/run_postgresql_local_smoke.sh
 6. do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
 
 Last Updated: 2026-04-22
-Phase Status: SQLite-first baseline verified with `doctor`, PostgreSQL schema, schema_detail, query, insert, update, delete, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke proof plus agent skill packaging, JPA source introspection, explicit write safety guards, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
+Phase Status: SQLite-first baseline verified with `doctor`, PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke proof plus agent skill packaging, JPA source introspection, explicit write safety guards, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows

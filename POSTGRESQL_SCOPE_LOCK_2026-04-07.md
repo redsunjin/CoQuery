@@ -20,6 +20,7 @@ As of 2026-04-22, the PostgreSQL slice is:
 
 - status: `experimental`
 - proven commands: `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`
+- proven write-safety guard slices: `--dry-run` rollback, `--max-affected-rows` rollback, and full-table write rejection
 - proven generation slices: schema-detail-validated `generate select_simple` and `generate count_simple`, plus direct `generate join_inner` and `generate join_left` inference when exactly one direct foreign-key path exists
 - proof path: `bash scripts/run_postgresql_local_smoke.sh`
 - proof note: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
@@ -47,6 +48,7 @@ Until a new verification slice is opened, keep PostgreSQL language limited to:
 
 - `experimental`
 - `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` are proven
+- PostgreSQL write-safety guard slices are proven for `--dry-run`, `--max-affected-rows`, and full-table write rejection
 - `generate select_simple` and `generate count_simple` are proven through real schema-detail validation and generated SQL execution
 - direct `generate join_inner` and `generate join_left` slices are proven through real schema-detail introspection
 - broader PostgreSQL support is not proven

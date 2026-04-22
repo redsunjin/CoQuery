@@ -21,6 +21,7 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 - PostgreSQL `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` have verified local smoke results
 - PostgreSQL `generate select_simple` and `generate count_simple` have verified local smoke results with generated SQL execution
 - PostgreSQL direct `generate join_inner` and `generate join_left` inference have verified local smoke results with generated SQL execution
+- PostgreSQL write-safety smoke verifies `--dry-run`, `--max-affected-rows`, and full-table write rejection against a real target
 - Latest local PostgreSQL smoke re-run succeeded on 2026-04-22
 - `schema_detail` exposes normalized columns, keys, indexes, constraints, and SQLite create SQL
 - `generate` and simple `natural` requests validate basic identifiers against `schema_detail`
@@ -47,6 +48,7 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 - schema-detail-backed validation of qualified columns in explicit join `ON` clauses
 - real PostgreSQL smoke proof for schema-detail-validated `generate select_simple` and `generate count_simple` slices
 - real PostgreSQL smoke proof for direct `generate join_inner` and `generate join_left` slices
+- real PostgreSQL smoke proof for write-safety rollback and guard paths
 - repo-local GitHub Actions workflows for baseline and PostgreSQL smoke automation
 - GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-20 UTC for `main` commit `e9c98be`
 - structured write results with `affected_rows`, `warnings`, and `safety_level`
@@ -70,7 +72,7 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 - `update`, `delete`, and write-mode `query` statements without `WHERE` fail closed unless `--allow-full-table-write` is provided
 - `natural` is heuristic by default, skips provider calls for simple covered requests, and can optionally route complex requests through a registered provider
 - provider-backed natural is currently a secondary experimental track, not the primary loop
-- PostgreSQL is proven only for narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` paths plus `generate select_simple`, `generate count_simple`, and direct `generate join_inner` / `generate join_left` slices through local smoke runs
+- PostgreSQL is proven only for narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` paths, write-safety guard slices, `generate select_simple`, `generate count_simple`, and direct `generate join_inner` / `generate join_left` slices through local smoke runs
 - `doctor` classifies common PostgreSQL failures such as `auth_failed`, `database_not_found`, `host_unreachable`, `connection_refused`, `timeout`, and `ssl_error`
 - MySQL URIs return a structured `unsupported_backend` placeholder error
 - JPA support is source introspection only and does not execute JPQL
@@ -123,5 +125,5 @@ bash scripts/run_postgresql_local_smoke.sh
 ```
 
 Last Updated: 2026-04-22
-Status: SQLite-first baseline verified with `doctor`, PostgreSQL schema, schema_detail, query, insert, update, delete, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke proof, local DB knowledge-first planning, schema-detail-aware identifier validation, explicit write safety guards, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
+Status: SQLite-first baseline verified with `doctor`, PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke proof, local DB knowledge-first planning, schema-detail-aware identifier validation, explicit write safety guards, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
 Next: keep workflows green, keep docs aligned, and avoid broadening join-generation claims beyond direct schema-detail foreign-key inference

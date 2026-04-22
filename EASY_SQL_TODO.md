@@ -87,6 +87,9 @@ Open tasks:
 - [x] prove PostgreSQL schema-detail-validated `generate count_simple`
 - [x] prove PostgreSQL direct `generate join_inner`
 - [x] prove PostgreSQL direct `generate join_left`
+- [x] prove PostgreSQL `--dry-run` write rollback
+- [x] prove PostgreSQL `--max-affected-rows` rollback guard
+- [x] prove PostgreSQL full-table write rejection
 
 Current output:
 
@@ -246,6 +249,7 @@ Current output:
 - [x] prove PostgreSQL `generate select_simple` and `generate count_simple` smoke with generated SQL execution
 - [x] prove direct PostgreSQL `generate join_inner` and `generate join_left` smoke against a real schema
 - [x] re-run local PostgreSQL smoke on 2026-04-22
+- [x] prove PostgreSQL write-safety guard smoke for dry-run rollback, max-affected rollback, and full-table rejection
 - [x] add GitHub Actions workflows for baseline verification and PostgreSQL smoke automation
 - [x] observe first GitHub Actions `baseline` and `postgresql-smoke` success on 2026-04-12
 - [x] observe latest GitHub Actions `baseline` and `postgresql-smoke` success on 2026-04-20 UTC for `main` commit `e9c98be`

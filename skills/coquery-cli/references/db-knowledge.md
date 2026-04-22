@@ -49,7 +49,7 @@ PostgreSQL:
 - Driver path: `psycopg`.
 - Current schema query uses `information_schema.tables` for `public` base tables.
 - Current schema-detail query path uses `information_schema` plus `pg_catalog` metadata.
-- Current proven commands and slices: `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left`.
+- Current proven commands and slices: `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, write-safety guards (`--dry-run`, `--max-affected-rows`, full-table rejection), schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left`.
 - Do not claim broad PostgreSQL support beyond the smoke-proven commands and generation slices.
 
 MySQL:

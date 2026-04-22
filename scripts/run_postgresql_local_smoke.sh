@@ -223,6 +223,9 @@ psql_exec "INSERT INTO users (name, age) SELECT 'probe_user', 34 WHERE NOT EXIST
 psql_exec "DELETE FROM users WHERE name = 'insert_probe_user';"
 psql_exec "DELETE FROM users WHERE name = 'update_probe_user';"
 psql_exec "DELETE FROM users WHERE name = 'delete_probe_user';"
+psql_exec "DELETE FROM users WHERE name = 'dry_run_probe_user';"
+psql_exec "DELETE FROM users WHERE name IN ('max_guard_probe_user_1', 'max_guard_probe_user_2');"
+psql_exec "DELETE FROM users WHERE name = 'full_table_guard_user';"
 psql_exec "DELETE FROM members WHERE email = 'join_probe_member@example.com';"
 psql_exec "DELETE FROM orgs WHERE name = 'join_probe_org';"
 psql_exec "INSERT INTO orgs (name) SELECT 'join_probe_org' WHERE NOT EXISTS (SELECT 1 FROM orgs WHERE name = 'join_probe_org');"
@@ -312,6 +315,28 @@ echo "== PostgreSQL insert verification query =="
   --format json
 
 echo ""
+echo "== PostgreSQL insert dry-run rollback smoke =="
+INSERT_DRY_RUN_OUTPUT="$("${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command insert \
+  --db-uri "${DB_URI}" \
+  --write \
+  --dry-run \
+  --sql "INSERT INTO users (name, age) VALUES ('dry_run_probe_user', 48)" \
+  --format json)"
+printf '%s\n' "${INSERT_DRY_RUN_OUTPUT}"
+printf '%s\n' "${INSERT_DRY_RUN_OUTPUT}" | "${VENV_DIR}/bin/python" -c 'import json, sys; payload = json.load(sys.stdin); assert payload.get("ok"), payload; data = payload.get("data", {}); assert data.get("dry_run") is True, payload; assert data.get("committed") is False, payload'
+
+echo ""
+echo "== PostgreSQL insert dry-run verification query =="
+INSERT_DRY_RUN_VERIFY_OUTPUT="$("${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command query \
+  --db-uri "${DB_URI}" \
+  --sql "SELECT COUNT(*) FROM users WHERE name = 'dry_run_probe_user'" \
+  --format json)"
+printf '%s\n' "${INSERT_DRY_RUN_VERIFY_OUTPUT}"
+printf '%s\n' "${INSERT_DRY_RUN_VERIFY_OUTPUT}" | "${VENV_DIR}/bin/python" -c 'import json, sys; payload = json.load(sys.stdin); assert payload.get("ok"), payload; assert payload.get("data", {}).get("rows") == [[0]], payload'
+
+echo ""
 echo "== PostgreSQL update smoke =="
 "${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
   --command insert \
@@ -358,6 +383,80 @@ echo "== PostgreSQL delete verification query =="
   --db-uri "${DB_URI}" \
   --sql "SELECT COUNT(*) FROM users WHERE name = 'delete_probe_user'" \
   --format json
+
+echo ""
+echo "== PostgreSQL max affected rows guard smoke =="
+"${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command insert \
+  --db-uri "${DB_URI}" \
+  --write \
+  --sql "INSERT INTO users (name, age) VALUES ('max_guard_probe_user_1', 31)" \
+  --format json >/dev/null
+
+"${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command insert \
+  --db-uri "${DB_URI}" \
+  --write \
+  --sql "INSERT INTO users (name, age) VALUES ('max_guard_probe_user_2', 32)" \
+  --format json >/dev/null
+
+if MAX_GUARD_OUTPUT="$("${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command delete \
+  --db-uri "${DB_URI}" \
+  --write \
+  --max-affected-rows 1 \
+  --sql "DELETE FROM users WHERE name IN ('max_guard_probe_user_1', 'max_guard_probe_user_2')" \
+  --format json)"; then
+  echo "Expected max affected rows guard to fail." >&2
+  printf '%s\n' "${MAX_GUARD_OUTPUT}" >&2
+  exit 1
+fi
+printf '%s\n' "${MAX_GUARD_OUTPUT}"
+printf '%s\n' "${MAX_GUARD_OUTPUT}" | "${VENV_DIR}/bin/python" -c 'import json, sys; payload = json.load(sys.stdin); assert payload.get("ok") is False, payload; assert payload.get("error", {}).get("code") == "affected_rows_exceeded", payload; data = payload.get("data", {}); assert data.get("affected_rows") == 2, payload; assert data.get("max_affected_rows") == 1, payload; assert data.get("committed") is False, payload'
+
+echo ""
+echo "== PostgreSQL max affected rows verification query =="
+MAX_GUARD_VERIFY_OUTPUT="$("${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command query \
+  --db-uri "${DB_URI}" \
+  --sql "SELECT COUNT(*) FROM users WHERE name IN ('max_guard_probe_user_1', 'max_guard_probe_user_2')" \
+  --format json)"
+printf '%s\n' "${MAX_GUARD_VERIFY_OUTPUT}"
+printf '%s\n' "${MAX_GUARD_VERIFY_OUTPUT}" | "${VENV_DIR}/bin/python" -c 'import json, sys; payload = json.load(sys.stdin); assert payload.get("ok"), payload; assert payload.get("data", {}).get("rows") == [[2]], payload'
+psql_exec "DELETE FROM users WHERE name IN ('max_guard_probe_user_1', 'max_guard_probe_user_2');"
+
+echo ""
+echo "== PostgreSQL full-table write guard smoke =="
+"${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command insert \
+  --db-uri "${DB_URI}" \
+  --write \
+  --sql "INSERT INTO users (name, age) VALUES ('full_table_guard_user', 33)" \
+  --format json >/dev/null
+
+if FULL_TABLE_GUARD_OUTPUT="$("${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command delete \
+  --db-uri "${DB_URI}" \
+  --write \
+  --sql "DELETE FROM users" \
+  --format json)"; then
+  echo "Expected full-table write guard to fail." >&2
+  printf '%s\n' "${FULL_TABLE_GUARD_OUTPUT}" >&2
+  exit 1
+fi
+printf '%s\n' "${FULL_TABLE_GUARD_OUTPUT}"
+printf '%s\n' "${FULL_TABLE_GUARD_OUTPUT}" | "${VENV_DIR}/bin/python" -c 'import json, sys; payload = json.load(sys.stdin); assert payload.get("ok") is False, payload; assert payload.get("error", {}).get("code") == "full_table_write_requires_flag", payload; data = payload.get("data", {}); assert data.get("committed") is False, payload; assert data.get("safety_level") == "high", payload'
+
+echo ""
+echo "== PostgreSQL full-table write guard verification query =="
+FULL_TABLE_GUARD_VERIFY_OUTPUT="$("${VENV_DIR}/bin/python" "${ROOT_DIR}/main.py" \
+  --command query \
+  --db-uri "${DB_URI}" \
+  --sql "SELECT COUNT(*) FROM users WHERE name = 'full_table_guard_user'" \
+  --format json)"
+printf '%s\n' "${FULL_TABLE_GUARD_VERIFY_OUTPUT}"
+printf '%s\n' "${FULL_TABLE_GUARD_VERIFY_OUTPUT}" | "${VENV_DIR}/bin/python" -c 'import json, sys; payload = json.load(sys.stdin); assert payload.get("ok"), payload; assert payload.get("data", {}).get("rows") == [[1]], payload'
+psql_exec "DELETE FROM users WHERE name = 'full_table_guard_user';"
 
 echo ""
 echo "== PostgreSQL direct join generation smoke =="

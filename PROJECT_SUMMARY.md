@@ -17,6 +17,7 @@ Verified on 2026-04-22
 - doctor diagnostics are implemented and verified
 - dry-run preview, max-affected-row rollback guards, and full-table write rejection are verified
 - PostgreSQL schema, schema_detail, query, insert, update, and delete smoke have succeeded
+- PostgreSQL write-safety smoke has succeeded for dry-run rollback, max-affected rollback, and full-table rejection
 - PostgreSQL `generate select_simple` and `generate count_simple` smoke have succeeded with generated SQL execution
 - PostgreSQL direct `generate join_inner` and `generate join_left` smoke have succeeded against real schema-detail paths
 - local PostgreSQL smoke runner succeeded on 2026-04-22
@@ -120,7 +121,7 @@ This passes 96 baseline tests covering:
 ## Current Limits
 
 - SQLite is the only broadly verified backend
-- PostgreSQL is experimental for the narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` paths plus `generate select_simple`, `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke slices
+- PostgreSQL is experimental for the narrow `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, write-safety guard paths, `generate select_simple`, `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke slices
 - MySQL is still a stub, not a working backend
 - no transaction layer exists yet; baseline write commands now support `--dry-run` and `--max-affected-rows`
 - `doctor` classifies common PostgreSQL failures, but it is still a diagnostic aid rather than proof of complete backend support
@@ -142,7 +143,7 @@ This passes 96 baseline tests covering:
 | Phase 2 | Complete enough | structured generation works |
 | Phase 3 | Complete enough | write contract is explicit, but still baseline-only |
 | Phase 4 | Partial | NL path is intentionally lightweight, uses local knowledge first for covered simple requests, and can optionally use a registered provider as fallback |
-| Phase 5 | Early experimental | first PostgreSQL `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` proofs exist, but broader support is not implemented |
+| Phase 5 | Early experimental | first PostgreSQL `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, and write-safety guard proofs exist, but broader support is not implemented |
 
 ---
 
@@ -221,4 +222,4 @@ Current runner improvement:
 ---
 
 Last Updated: 2026-04-22
-Status: SQLite-first baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` proof plus direct schema-detail join inference and verified GitHub Actions baseline / PostgreSQL smoke workflows
+Status: SQLite-first baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` proof plus direct schema-detail join inference and verified GitHub Actions baseline / PostgreSQL smoke workflows

@@ -36,6 +36,9 @@ Use these meanings consistently:
 | PostgreSQL | `insert` against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
 | PostgreSQL | `update` against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
 | PostgreSQL | `delete` against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
+| PostgreSQL | `--dry-run` write rollback against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
+| PostgreSQL | `--max-affected-rows` rollback guard against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
+| PostgreSQL | full-table write rejection against real DB | yes | yes | experimental | verified in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
 | PostgreSQL | `generate select_simple` against real DB schema detail | yes | yes | experimental | generated SQL is executed in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
 | PostgreSQL | `generate count_simple` against real DB schema detail | yes | yes | experimental | generated SQL is executed in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
 | PostgreSQL | direct `generate join_inner` / `generate join_left` against real DB schema detail | yes | yes | experimental | generated SQL is executed in `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md` |
@@ -47,7 +50,7 @@ Use these meanings consistently:
 What this matrix means today:
 
 - SQLite is the only backend with broad proof across multiple command types
-- PostgreSQL is `experimental` for the narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` paths plus `generate select_simple`, `generate count_simple`, and direct join generation slices
+- PostgreSQL is `experimental` for the narrow `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, write-safety guard paths, `generate select_simple`, `generate count_simple`, and direct join generation slices
 - MySQL is still a placeholder backend and should not be described as supported
 - broader PostgreSQL support is still unproven beyond the documented smoke
 
@@ -94,6 +97,7 @@ This runner proves:
 - `insert`
 - `update`
 - `delete`
+- write-safety guard paths for `--dry-run`, `--max-affected-rows`, and full-table write rejection
 - schema-detail-validated `generate select_simple` and `generate count_simple`, with generated SQL execution
 - direct `generate join_inner` and `generate join_left`, with generated SQL execution
 
@@ -115,6 +119,7 @@ Current limits:
 
 - the proof still uses a dedicated local probe environment
 - only selected generation slices are proven
+- only selected write-safety guard paths are proven
 - the probe still depends on local PostgreSQL binaries outside the repo
 
 ## 9. Persona checkpoint

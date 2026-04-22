@@ -79,7 +79,7 @@
     "postgresql": {
       "status": "experimental_narrow",
       "notes": [
-        "Smoke-proven for schema, schema_detail, query, insert, update, delete, select/count generation, and direct join generation.",
+        "Smoke-proven for schema, schema_detail, query, insert, update, delete, write-safety guards, select/count generation, and direct join generation.",
         "Requires psycopg[binary] in the active Python environment for direct runtime use."
       ]
     },
