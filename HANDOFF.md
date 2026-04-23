@@ -1,12 +1,14 @@
 # CoQuery Handoff v0.7.0
 
-Date: 2026-04-22
+Date: 2026-04-23
 
 ## Current Handoff State
 
 CoQuery is no longer in emergency repair.
 The verified state is now a working SQLite-first CLI baseline.
 The reduced cleanup PR was closed unmerged; current `main` remains the active line with DB/JPA knowledge retained.
+The current saved result is commit `4be8a3d` on `origin/main`.
+The GitHub repository `redsunjin/CoQuery` is public as verified on 2026-04-23.
 
 ## Verified Baseline
 
@@ -50,8 +52,9 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 - real PostgreSQL smoke proof for direct `generate join_inner` and `generate join_left` slices
 - real PostgreSQL smoke proof for write-safety rollback and guard paths
 - repo-local GitHub Actions workflows for baseline and PostgreSQL smoke automation
-- GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-20 UTC for `main` commit `e9c98be`
+- GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-22 UTC for `main` commit `4be8a3d`
 - structured write results with `affected_rows`, `warnings`, and `safety_level`
+- GitHub Actions can be used as a log-based demo through manual `workflow_dispatch` runs of `baseline` and `postgresql-smoke`
 
 ## What Is Not Complete
 
@@ -77,6 +80,7 @@ The reduced cleanup PR was closed unmerged; current `main` remains the active li
 - MySQL URIs return a structured `unsupported_backend` placeholder error
 - JPA support is source introspection only and does not execute JPQL
 - GitHub Actions proof has only been observed for the committed `baseline` and `postgresql-smoke` workflows so far
+- no GitHub Pages or hosted browser demo exists yet
 
 ## Official Next Work
 
@@ -105,6 +109,7 @@ Current runner note:
 - `PROVIDER_TRACK_DECISION_2026-04-09.md`
 - `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
 - `POSTGRESQL_SCOPE_LOCK_2026-04-07.md`
+- `USAGE_AND_DEMO.md`
 - `SCOPE_DECISION_2026-04-10.md`
 - `.github/workflows/baseline.yml`
 - `.github/workflows/postgresql-smoke.yml`
@@ -124,6 +129,6 @@ python3 main.py --command db_knowledge --topic coverage
 bash scripts/run_postgresql_local_smoke.sh
 ```
 
-Last Updated: 2026-04-22
+Last Updated: 2026-04-23
 Status: SQLite-first baseline verified with `doctor`, PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke proof, local DB knowledge-first planning, schema-detail-aware identifier validation, explicit write safety guards, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
-Next: keep workflows green, keep docs aligned, and avoid broadening join-generation claims beyond direct schema-detail foreign-key inference
+Next: keep workflows green, keep docs aligned, use `USAGE_AND_DEMO.md` for public usage/demo guidance, and avoid broadening join-generation claims beyond direct schema-detail foreign-key inference

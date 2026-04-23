@@ -8,7 +8,7 @@
 ## Current Status
 
 ```text
-Verified on 2026-04-22
+Verified on 2026-04-23
 - 96 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
@@ -24,7 +24,8 @@ Verified on 2026-04-22
 - schema-detail knowledge command is verified for SQLite and the PostgreSQL proof path
 - schema-detail-aware identifier validation is verified for generate and simple natural paths
 - schema-detail-aware direct join generation is verified for built-in join skills
-- GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-20 UTC for `main` commit `e9c98be`
+- GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-22 UTC for `main` commit `4be8a3d`
+- GitHub repository `redsunjin/CoQuery` is public and can run Actions-based log demos
 ```
 
 Scope decision:
@@ -40,6 +41,7 @@ Scope decision:
 - Delivery harness: `Plan -> Review -> Execute -> Verify` in `STABILIZATION_PLAN_2026-04-04.md`
 - Runtime harness: `main.py` routes one command into `sql_cli/cli.py`, which fans into `sql_cli/db_new.py`, `sql_cli/core.py`, or `sql_cli/nl_core.py`
 - Verification harness: baseline CLI checks, `python3 sql_cli/tests/test_core.py`, `bash scripts/run_postgresql_local_smoke.sh`, and GitHub Actions workflows under `.github/workflows/`
+- Usage/demo guide: `USAGE_AND_DEMO.md`
 
 ---
 
@@ -130,6 +132,7 @@ This passes 96 baseline tests covering:
 - generated SQL templates validate basic identifiers and direct foreign-key joins, but are not yet multi-hop relationship-aware, alias-aware, or expression-aware
 - JPA support is source introspection only; JPQL runtime execution is not implemented
 - GitHub Actions proof currently covers the committed `baseline` and `postgresql-smoke` workflows, not every future runner or environment change
+- GitHub demo support is currently Actions-log based, not a hosted browser UI
 - older docs before the 2026-04-04 repair may overstate completion
 
 ---
@@ -221,5 +224,5 @@ Current runner improvement:
 
 ---
 
-Last Updated: 2026-04-22
+Last Updated: 2026-04-23
 Status: SQLite-first baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` proof plus direct schema-detail join inference and verified GitHub Actions baseline / PostgreSQL smoke workflows

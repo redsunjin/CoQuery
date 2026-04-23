@@ -1,7 +1,7 @@
 # CoQuery Stage Status Report
 
 Version: v0.7.0
-Last Update: 2026-04-22
+Last Update: 2026-04-23
 
 ## Current Status
 
@@ -18,7 +18,8 @@ Local PostgreSQL smoke re-run succeeded on 2026-04-22
 Codex skill package added for agent-side reuse
 JPA entity source introspection added as an ORM/model track
 Schema-detail direct join generation proved for built-in join skills
-GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-20 UTC for `main` commit `e9c98be`
+GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-22 UTC for `main` commit `4be8a3d`
+GitHub repository `redsunjin/CoQuery` is public
 Phase 5 remains narrow and experimental
 ```
 
@@ -71,7 +72,8 @@ CI note:
 - GitHub Actions workflow files now exist for baseline and PostgreSQL smoke automation
 - the latest local PostgreSQL smoke re-run succeeded on 2026-04-22
 - the first observed runs for `baseline` and `postgresql-smoke` both succeeded on 2026-04-12
-- the latest observed `main` runs for `baseline` and `postgresql-smoke` both succeeded on 2026-04-20 UTC for commit `e9c98be`
+- the latest observed `main` runs for `baseline` and `postgresql-smoke` both succeeded on 2026-04-22 UTC for commit `4be8a3d`
+- the public GitHub repository can run a log-based demo through manual `workflow_dispatch`
 
 ORM/model support:
 
@@ -109,5 +111,5 @@ bash scripts/run_postgresql_local_smoke.sh
 5. keep JPA labelled as ORM/model support until JPQL runtime proof exists
 6. do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
 
-Last Updated: 2026-04-22
+Last Updated: 2026-04-23
 Phase Status: SQLite-first baseline verified with `doctor`, PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke proof plus agent skill packaging, JPA source introspection, explicit write safety guards, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows

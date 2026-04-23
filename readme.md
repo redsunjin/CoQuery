@@ -3,6 +3,10 @@
 CoQuery currently provides a verified SQLite-first CLI baseline.
 Phase 5 multi-DB support is now early experimental and is not complete.
 
+Repository: `https://github.com/redsunjin/CoQuery`
+Visibility: `PUBLIC` as verified on 2026-04-23.
+Current saved commit: `4be8a3d Add PostgreSQL write safety smoke proof`.
+
 ## Available Commands
 
 ```bash
@@ -46,6 +50,19 @@ python3 main.py --command provider_test --provider-name local_ollama
 - `schema_detail` exposes normalized columns, keys, indexes, constraints, and SQLite create SQL for agent-side knowledge use
 - `generate` and simple `natural` requests validate table and simple column identifiers against `schema_detail`
 - generation, natural-language, and write-planning paths attach local DB/JPA knowledge context first
+- PostgreSQL `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, write-safety guards, select/count generation, and direct join generation are smoke-proven on the documented experimental path
+- GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-22 UTC for commit `4be8a3d`
+
+## GitHub Demo
+
+CoQuery is currently a CLI project, not a hosted browser app. The public GitHub repository can still run a log-based demo:
+
+1. open `https://github.com/redsunjin/CoQuery`
+2. go to `Actions`
+3. run the `baseline` workflow manually to execute `verify` and `demo`
+4. run the `postgresql-smoke` workflow manually to execute the PostgreSQL proof
+
+Detailed usage and demo steps live in `USAGE_AND_DEMO.md`.
 
 ## Agent Skill
 
@@ -74,14 +91,14 @@ This is enough for basic SQL/JPA boundary decisions, deterministic lookup, norma
 
 ## Current Limits
 
-- PostgreSQL is experimental for the documented `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` probe paths only
+- PostgreSQL is experimental for the documented `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, write-safety guard, select/count generation, and direct join generation smoke paths only
 - `doctor` can classify common PostgreSQL connection failures such as `auth_failed`, `database_not_found`, `host_unreachable`, `connection_refused`, `timeout`, and `ssl_error`
 - if `psycopg[binary]` is not installed, PostgreSQL `doctor` and PostgreSQL runtime commands fail with `driver_not_installed`
 - MySQL is a stub with a structured placeholder error
 - write commands support `--dry-run` and `--max-affected-rows`, but a broader transaction control layer does not exist yet
 - natural-language support is lightweight by default; provider-backed quality is not broadly proven
 - provider-backed natural is currently a secondary experimental track
-- generated SQL templates validate basic identifiers, but are not yet relationship-aware, join-aware, or expression-aware
+- generated SQL templates validate basic identifiers and direct joins, but are not yet multi-hop relationship-aware, alias-aware, or expression-aware
 - JPA support is source introspection only; it does not execute JPQL or run a Java persistence unit
 - DB reference knowledge is currently a seed pack, not a complete local replacement for SQL/JPA documentation
 
@@ -105,5 +122,5 @@ Runner note:
 - the smoke runner bootstraps `.tmp/pg-venv` and installs `psycopg[binary]` there if needed, so it remains the repeatable PostgreSQL proof path even when the default `python3` environment lacks the driver
 
 Version: v0.7.0
-Last Updated: 2026-04-20
-Status: SQLite-first baseline verified with experimental PostgreSQL schema, schema_detail, query, insert, update, delete proof, schema-detail-aware identifier validation, and environment-aware PostgreSQL doctor guidance
+Last Updated: 2026-04-23
+Status: SQLite-first baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated select/count generation, direct join generation proof, public GitHub repository, and verified GitHub Actions baseline / PostgreSQL smoke workflows

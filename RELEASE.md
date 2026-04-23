@@ -1,36 +1,52 @@
-# CoQuery v0.7.0 Release
+# CoQuery v0.7.0 Stabilization Snapshot
 
 ## Release Information
 
 **Version**: v0.7.0  
-**Date**: 2026-04-01  
-**Status**: Ready for Release
+**Date**: 2026-04-23
+**Status**: Stabilized CLI baseline
 
 ## Features
 
-### CLI Commands (7/7 Working)
-```
-✅ schema - List database tables
-✅ query - Execute read-only queries
-✅ generate - Generate SQL from skills
-✅ insert - Insert new rows
-✅ update - Update existing rows
-✅ delete - Delete rows  
-✅ natural - Natural language processing
+### Verified CLI Commands
+
+```text
+schema
+schema_detail
+doctor
+query
+generate
+insert
+update
+delete
+natural
+jpa_schema
+db_knowledge
+provider_add
+provider_list
+provider_remove
+provider_test
 ```
 
 ### New in v0.7.0
 
-**CoQueryDB Integration:**
-- Unified database interface
-- Pure Python implementation
-- No external dependencies
-- SQLite support
+**SQLite-first CLI baseline:**
+- `main.py` routes through `sql_cli/cli.py`
+- SQLite schema, query, generation, natural-language, and explicit write paths are verified
+- `schema_detail` exposes normalized schema metadata
+- write commands require `--write` and explicit SQL
+- `--dry-run`, `--max-affected-rows`, and full-table write rejection are verified
 
-**Test Suite:**
-- 8 tests
-- 7 passed (87.5%)
-- Core functionality verified
+**Experimental PostgreSQL proof:**
+- `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` smoke paths are verified
+- schema-detail-validated `generate select_simple` and `generate count_simple` are verified with generated SQL execution
+- direct `generate join_inner` and `generate join_left` are verified
+- write-safety guards are verified against a real PostgreSQL target
+
+**Agent and automation support:**
+- Codex skill package lives under `skills/coquery-cli`
+- `coquery_agent.py` supports `describe`, `verify`, `demo`, `run`, and `install-skill`
+- GitHub Actions `baseline` and `postgresql-smoke` are verified
 
 ## Installation
 
@@ -69,34 +85,31 @@ python3 main.py --command natural --sql "count users"
 
 | Test Suite | Status |
 |------------|--------|
-| CLI Tests | ✅ 7/7 |
-| Core Tests | ✅ 8/8 |
-| Integration | ✅ Working |
+| Baseline tests | 96/96 passing |
+| Agent wrapper verify | passing |
+| Local PostgreSQL smoke | passing |
+| GitHub Actions baseline | success on 2026-04-22 UTC for `4be8a3d` |
+| GitHub Actions postgresql-smoke | success on 2026-04-22 UTC for `4be8a3d` |
 
 ## Release Notes
 
-### v0.7.0 (2026-04-01)
-- Initial Release
-- CoQueryDB unified interface
-- 7 CLI commands working
-- Base test suite
-- Multi-database support (SQLite)
+### v0.7.0 stabilization snapshot (2026-04-23)
+- SQLite-first CLI baseline is verified
+- PostgreSQL remains experimental and smoke-proven only for documented slices
+- MySQL remains a stub
+- JPA support is source introspection only
+- Public repository usage and GitHub Actions log demo path are documented in `USAGE_AND_DEMO.md`
 
 ## Next Release
 
 **v0.8.0 Planned**:
-- Add PostgreSQL support
-- Add MySQL support
-- Improve test coverage to 100%
-- Add more CLI commands
-- Documentation polish
+- decide the next PostgreSQL verification slice before widening claims
+- keep GitHub Actions `baseline` and `postgresql-smoke` green
+- consider a hosted or browser-facing demo only after CLI proof remains stable
+- keep docs aligned with observed proof
 
 ## Credits
 
 **Repository**: [redsunjin/CoQuery](https://github.com/redsunjin/CoQuery)  
 **License**: MIT  
-**Status**: v0.7.0 Ready
-
----
-
-Ready for Release! 🚀
+**Status**: v0.7.0 stabilized CLI baseline
