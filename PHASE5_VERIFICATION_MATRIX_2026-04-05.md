@@ -121,7 +121,7 @@ Current limits:
 - only selected generation slices are proven
 - only selected write-safety guard paths are proven
 - the probe still depends on local PostgreSQL binaries outside the repo
-- last recorded GitHub Actions proof is commit `022d89f` on 2026-04-23 UTC
+- last recorded GitHub Actions proof is commit `7e677fe` on 2026-04-27 UTC
 
 ## 9. Persona checkpoint
 

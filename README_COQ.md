@@ -1,6 +1,6 @@
 # CoQuery Baseline Verification
 
-Date: 2026-04-23
+Date: 2026-04-28
 
 ## Result
 
@@ -22,7 +22,7 @@ Schema-detail-aware direct join generation verified
 Dry-run preview and max-affected-row rollback guards verified
 Full-table write guard verified
 PostgreSQL doctor classification verified for common connection failures
-GitHub Actions baseline and PostgreSQL smoke workflows last recorded as verified on 2026-04-23 UTC for `main` commit `022d89f`
+GitHub Actions baseline and PostgreSQL smoke workflows last recorded as verified on 2026-04-27 UTC for `main` commit `7e677fe`
 Public GitHub repository verified
 ```
 
@@ -79,7 +79,7 @@ Scope decision:
 | Schema detail knowledge | Seed | `schema_detail` exposes normalized columns, keys, indexes, constraints, and SQLite create SQL for verified paths |
 | Schema validation | Seed | `generate` and simple `natural` requests validate table and simple column identifiers against `schema_detail` |
 | Direct join generation | Working baseline | `generate` can infer one-step join `ON` clauses from schema-detail foreign keys; no-path and ambiguous joins fail closed |
-| CI automation | Working baseline | GitHub Actions `baseline` and `postgresql-smoke` last recorded successfully on 2026-04-23 UTC for `main` commit `022d89f` |
+| CI automation | Working baseline | GitHub Actions `baseline` and `postgresql-smoke` last recorded successfully on 2026-04-27 UTC for `main` commit `7e677fe` |
 | GitHub log demo | Available | public repository can run `baseline` and `postgresql-smoke` manually from GitHub Actions |
 
 ## Verification Commands
@@ -122,11 +122,11 @@ bash scripts/run_postgresql_local_smoke.sh
 - GitHub Actions workflow files exist at `.github/workflows/baseline.yml` and `.github/workflows/postgresql-smoke.yml`
 - the PostgreSQL smoke workflow uses an external PostgreSQL service URI, while the local smoke runner still supports managed local startup
 - GitHub Actions `baseline` and `postgresql-smoke` first succeeded on 2026-04-12 in PR `#3`
-- GitHub Actions `baseline` and `postgresql-smoke` were last recorded successful on 2026-04-23 UTC for `main` commit `022d89f`
+- GitHub Actions `baseline` and `postgresql-smoke` were last recorded successful on 2026-04-27 UTC for `main` commit `7e677fe`
 - use `USAGE_AND_DEMO.md` for local CLI usage and GitHub Actions demo steps
 
-Version: v0.7.0
-Last Updated: 2026-04-23
+Version: v0.7.1
+Last Updated: 2026-04-28
 Status: Baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` proof, local DB knowledge-first planning, schema-detail-aware identifier validation, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
 Reference: `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 Smoke Result: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`

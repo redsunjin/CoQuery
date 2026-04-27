@@ -89,7 +89,7 @@ def main() -> int:
     args = parser.parse_args()
 
     if not args.command:
-        print("CoQuery v0.7.0")
+        print("CoQuery v0.7.1")
         print("commands: schema, schema_detail, doctor, query, generate, insert, update, delete, natural, jpa_schema, db_knowledge, provider_add, provider_list, provider_remove, provider_test")
         print("write commands require explicit --write and --sql")
         print("state-changing commands support optional --dry-run preview and --max-affected-rows guard")

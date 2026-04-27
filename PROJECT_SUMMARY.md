@@ -1,4 +1,4 @@
-# CoQuery - Project Summary v0.7.0
+# CoQuery - Project Summary v0.7.1
 
 **AI-assisted SQL CLI baseline**
 **Current focus: stabilization after CLI repair**
@@ -8,7 +8,7 @@
 ## Current Status
 
 ```text
-Verified on 2026-04-23
+Verified on 2026-04-28
 - 96 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
@@ -24,7 +24,7 @@ Verified on 2026-04-23
 - schema-detail knowledge command is verified for SQLite and the PostgreSQL proof path
 - schema-detail-aware identifier validation is verified for generate and simple natural paths
 - schema-detail-aware direct join generation is verified for built-in join skills
-- Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-04-23 UTC for `main` commit `022d89f`
+- Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-04-27 UTC for `main` commit `7e677fe`
 - GitHub repository `redsunjin/CoQuery` is public and can run Actions-based log demos
 ```
 
@@ -224,5 +224,5 @@ Current runner improvement:
 
 ---
 
-Last Updated: 2026-04-23
+Last Updated: 2026-04-28
 Status: SQLite-first baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` proof plus direct schema-detail join inference and verified GitHub Actions baseline / PostgreSQL smoke workflows

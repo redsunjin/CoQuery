@@ -1,9 +1,9 @@
-# CoQuery v0.7.0 Stabilization Snapshot
+# CoQuery v0.7.1 Stabilization Snapshot
 
 ## Release Information
 
-**Version**: v0.7.0  
-**Date**: 2026-04-23
+**Version**: v0.7.1
+**Date**: 2026-04-28
 **Status**: Stabilized CLI baseline
 
 ## Features
@@ -28,7 +28,7 @@ provider_remove
 provider_test
 ```
 
-### New in v0.7.0
+### Stabilized in v0.7.1
 
 **SQLite-first CLI baseline:**
 - `main.py` routes through `sql_cli/cli.py`
@@ -88,12 +88,12 @@ python3 main.py --command natural --sql "count users"
 | Baseline tests | 96/96 passing |
 | Agent wrapper verify | passing |
 | Local PostgreSQL smoke | passing |
-| GitHub Actions baseline | success on 2026-04-23 UTC for `022d89f` |
-| GitHub Actions postgresql-smoke | success on 2026-04-23 UTC for `022d89f` |
+| GitHub Actions baseline | success on 2026-04-27 UTC for `7e677fe` |
+| GitHub Actions postgresql-smoke | success on 2026-04-27 UTC for `7e677fe` |
 
 ## Release Notes
 
-### v0.7.0 stabilization snapshot (2026-04-23)
+### v0.7.1 stabilization snapshot (2026-04-28)
 - SQLite-first CLI baseline is verified
 - PostgreSQL remains experimental and smoke-proven only for documented slices
 - MySQL remains a stub
@@ -112,4 +112,4 @@ python3 main.py --command natural --sql "count users"
 
 **Repository**: [redsunjin/CoQuery](https://github.com/redsunjin/CoQuery)  
 **License**: MIT  
-**Status**: v0.7.0 stabilized CLI baseline
+**Status**: v0.7.1 stabilized CLI baseline

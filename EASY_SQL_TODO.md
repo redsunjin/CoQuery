@@ -1,7 +1,7 @@
 # CoQuery Todo List
 
 Version: v0.7.x stabilization
-Last Updated: 2026-04-23
+Last Updated: 2026-04-28
 
 ## Official Next Tasks
 
@@ -101,7 +101,7 @@ Current next step:
 - keep GitHub Actions PostgreSQL smoke green and keep the runner portable before broadening any PostgreSQL claim
 - keep docs explicit about PostgreSQL driver requirements in the active Python environment
 - latest local PostgreSQL smoke re-run succeeded on 2026-04-22
-- last recorded `main` runs for `baseline` and `postgresql-smoke` succeeded on 2026-04-23 UTC for commit `022d89f`
+- last recorded `main` runs for `baseline` and `postgresql-smoke` succeeded on 2026-04-27 UTC for commit `7e677fe`
 
 ### 5. Verification-gated backend promotion
 
@@ -252,7 +252,7 @@ Current output:
 - [x] prove PostgreSQL write-safety guard smoke for dry-run rollback, max-affected rollback, and full-table rejection
 - [x] add GitHub Actions workflows for baseline verification and PostgreSQL smoke automation
 - [x] observe first GitHub Actions `baseline` and `postgresql-smoke` success on 2026-04-12
-- [x] record GitHub Actions `baseline` and `postgresql-smoke` success on 2026-04-23 UTC for `main` commit `022d89f`
+- [x] record GitHub Actions `baseline` and `postgresql-smoke` success on 2026-04-27 UTC for `main` commit `7e677fe`
 - [x] document public repository usage and GitHub Actions log demo path
 - [x] add `doctor` command with masked target reporting and readiness checks
 - [x] add write safety guards for `--dry-run`, `--max-affected-rows`, and `--allow-full-table-write`

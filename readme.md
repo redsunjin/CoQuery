@@ -5,7 +5,7 @@ Phase 5 multi-DB support is now early experimental and is not complete.
 
 Repository: `https://github.com/redsunjin/CoQuery`
 Visibility: `PUBLIC` as verified on 2026-04-23.
-Recorded proof commit: `022d89f Refresh current usage and demo docs`.
+Recorded proof commit: `7e677fe Clarify recorded CI proof status`.
 
 ## Available Commands
 
@@ -51,7 +51,7 @@ python3 main.py --command provider_test --provider-name local_ollama
 - `generate` and simple `natural` requests validate table and simple column identifiers against `schema_detail`
 - generation, natural-language, and write-planning paths attach local DB/JPA knowledge context first
 - PostgreSQL `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, write-safety guards, select/count generation, and direct join generation are smoke-proven on the documented experimental path
-- GitHub Actions `baseline` and `postgresql-smoke` were last recorded successful on 2026-04-23 UTC for commit `022d89f`
+- GitHub Actions `baseline` and `postgresql-smoke` were last recorded successful on 2026-04-27 UTC for commit `7e677fe`
 
 ## GitHub Demo
 
@@ -121,6 +121,6 @@ Runner note:
 - `scripts/run_postgresql_local_smoke.sh` prefers PostgreSQL binaries from `PATH`, uses a per-run socket directory, and auto-selects a free port when the preferred smoke port is unavailable
 - the smoke runner bootstraps `.tmp/pg-venv` and installs `psycopg[binary]` there if needed, so it remains the repeatable PostgreSQL proof path even when the default `python3` environment lacks the driver
 
-Version: v0.7.0
-Last Updated: 2026-04-23
+Version: v0.7.1
+Last Updated: 2026-04-28
 Status: SQLite-first baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated select/count generation, direct join generation proof, public GitHub repository, and verified GitHub Actions baseline / PostgreSQL smoke workflows

@@ -1,13 +1,13 @@
-# CoQuery Handoff v0.7.0
+# CoQuery Handoff v0.7.1
 
-Date: 2026-04-23
+Date: 2026-04-28
 
 ## Current Handoff State
 
 CoQuery is no longer in emergency repair.
 The verified state is now a working SQLite-first CLI baseline.
 The reduced cleanup PR was closed unmerged; current `main` remains the active line with DB/JPA knowledge retained.
-The last recorded GitHub Actions proof is commit `022d89f` on `origin/main`.
+The last recorded GitHub Actions proof is commit `7e677fe` on `origin/main`.
 The GitHub repository `redsunjin/CoQuery` is public as verified on 2026-04-23.
 
 ## Verified Baseline
@@ -52,7 +52,7 @@ The GitHub repository `redsunjin/CoQuery` is public as verified on 2026-04-23.
 - real PostgreSQL smoke proof for direct `generate join_inner` and `generate join_left` slices
 - real PostgreSQL smoke proof for write-safety rollback and guard paths
 - repo-local GitHub Actions workflows for baseline and PostgreSQL smoke automation
-- Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-04-23 UTC for `main` commit `022d89f`
+- Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-04-27 UTC for `main` commit `7e677fe`
 - structured write results with `affected_rows`, `warnings`, and `safety_level`
 - GitHub Actions can be used as a log-based demo through manual `workflow_dispatch` runs of `baseline` and `postgresql-smoke`
 
@@ -129,6 +129,6 @@ python3 main.py --command db_knowledge --topic coverage
 bash scripts/run_postgresql_local_smoke.sh
 ```
 
-Last Updated: 2026-04-23
+Last Updated: 2026-04-28
 Status: SQLite-first baseline verified with `doctor`, PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke proof, local DB knowledge-first planning, schema-detail-aware identifier validation, explicit write safety guards, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
 Next: keep workflows green, keep docs aligned, use `USAGE_AND_DEMO.md` for public usage/demo guidance, and avoid broadening join-generation claims beyond direct schema-detail foreign-key inference

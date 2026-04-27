@@ -1,15 +1,15 @@
 # CoQuery Usage and Demo
 
-Date: 2026-04-23
+Date: 2026-04-28
 
 ## Current Saved Result
 
 - Repository: `redsunjin/CoQuery`
 - Repository URL: `https://github.com/redsunjin/CoQuery`
 - Visibility: `PUBLIC` as verified through GitHub on 2026-04-23
-- Recorded proof commit: `022d89f Refresh current usage and demo docs`
+- Recorded proof commit: `7e677fe Clarify recorded CI proof status`
 - Current branch: `main`
-- Recorded GitHub Actions result: `baseline` and `postgresql-smoke` succeeded on 2026-04-23 UTC for commit `022d89f4972e7184c1e5445cd501e8d18aee5737`
+- Recorded GitHub Actions result: `baseline` and `postgresql-smoke` succeeded on 2026-04-27 UTC for commit `7e677feb8a608b416a8a41c9da3fe2a0dbf00dc7`
 
 The project state is stored in the repository, not only in chat context. The main context and result files are:
 
