@@ -18,7 +18,7 @@ Local PostgreSQL smoke re-run succeeded on 2026-04-22
 Codex skill package added for agent-side reuse
 JPA entity source introspection added as an ORM/model track
 Schema-detail direct join generation proved for built-in join skills
-GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-22 UTC for `main` commit `4be8a3d`
+Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-04-23 UTC for `main` commit `022d89f`
 GitHub repository `redsunjin/CoQuery` is public
 Phase 5 remains narrow and experimental
 ```
@@ -72,7 +72,7 @@ CI note:
 - GitHub Actions workflow files now exist for baseline and PostgreSQL smoke automation
 - the latest local PostgreSQL smoke re-run succeeded on 2026-04-22
 - the first observed runs for `baseline` and `postgresql-smoke` both succeeded on 2026-04-12
-- the latest observed `main` runs for `baseline` and `postgresql-smoke` both succeeded on 2026-04-22 UTC for commit `4be8a3d`
+- the last recorded `main` runs for `baseline` and `postgresql-smoke` both succeeded on 2026-04-23 UTC for commit `022d89f`
 - the public GitHub repository can run a log-based demo through manual `workflow_dispatch`
 
 ORM/model support:

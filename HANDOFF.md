@@ -7,7 +7,7 @@ Date: 2026-04-23
 CoQuery is no longer in emergency repair.
 The verified state is now a working SQLite-first CLI baseline.
 The reduced cleanup PR was closed unmerged; current `main` remains the active line with DB/JPA knowledge retained.
-The current saved result is commit `4be8a3d` on `origin/main`.
+The last recorded GitHub Actions proof is commit `022d89f` on `origin/main`.
 The GitHub repository `redsunjin/CoQuery` is public as verified on 2026-04-23.
 
 ## Verified Baseline
@@ -52,7 +52,7 @@ The GitHub repository `redsunjin/CoQuery` is public as verified on 2026-04-23.
 - real PostgreSQL smoke proof for direct `generate join_inner` and `generate join_left` slices
 - real PostgreSQL smoke proof for write-safety rollback and guard paths
 - repo-local GitHub Actions workflows for baseline and PostgreSQL smoke automation
-- GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-22 UTC for `main` commit `4be8a3d`
+- Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-04-23 UTC for `main` commit `022d89f`
 - structured write results with `affected_rows`, `warnings`, and `safety_level`
 - GitHub Actions can be used as a log-based demo through manual `workflow_dispatch` runs of `baseline` and `postgresql-smoke`
 

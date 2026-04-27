@@ -24,7 +24,7 @@ Verified on 2026-04-23
 - schema-detail knowledge command is verified for SQLite and the PostgreSQL proof path
 - schema-detail-aware identifier validation is verified for generate and simple natural paths
 - schema-detail-aware direct join generation is verified for built-in join skills
-- GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-22 UTC for `main` commit `4be8a3d`
+- Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-04-23 UTC for `main` commit `022d89f`
 - GitHub repository `redsunjin/CoQuery` is public and can run Actions-based log demos
 ```
 

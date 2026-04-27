@@ -376,7 +376,7 @@ Automation note:
 - `.github/workflows/postgresql-smoke.yml` now exists and runs this smoke path against an external PostgreSQL service URI
 - Local `bash scripts/run_postgresql_local_smoke.sh` re-run succeeded on 2026-04-22
 - GitHub Actions `postgresql-smoke` first succeeded on 2026-04-12 through PR `#3`
-- GitHub Actions `postgresql-smoke` also succeeded on 2026-04-22 UTC for `main` commit `4be8a3d`
+- Last recorded GitHub Actions `postgresql-smoke` proof succeeded on 2026-04-23 UTC for `main` commit `022d89f`
 - this document still records the local smoke proof plus observed CI-backed runs of the same smoke path
 
 ## Current status effect

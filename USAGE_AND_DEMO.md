@@ -7,9 +7,9 @@ Date: 2026-04-23
 - Repository: `redsunjin/CoQuery`
 - Repository URL: `https://github.com/redsunjin/CoQuery`
 - Visibility: `PUBLIC` as verified through GitHub on 2026-04-23
-- Current saved commit: `4be8a3d Add PostgreSQL write safety smoke proof`
+- Recorded proof commit: `022d89f Refresh current usage and demo docs`
 - Current branch: `main`
-- Latest observed GitHub Actions result: `baseline` and `postgresql-smoke` succeeded on 2026-04-22 UTC for commit `4be8a3d36f9c30f922f2ce30d21e4056cdd7bb57`
+- Recorded GitHub Actions result: `baseline` and `postgresql-smoke` succeeded on 2026-04-23 UTC for commit `022d89f4972e7184c1e5445cd501e8d18aee5737`
 
 The project state is stored in the repository, not only in chat context. The main context and result files are:
 

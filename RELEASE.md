@@ -88,8 +88,8 @@ python3 main.py --command natural --sql "count users"
 | Baseline tests | 96/96 passing |
 | Agent wrapper verify | passing |
 | Local PostgreSQL smoke | passing |
-| GitHub Actions baseline | success on 2026-04-22 UTC for `4be8a3d` |
-| GitHub Actions postgresql-smoke | success on 2026-04-22 UTC for `4be8a3d` |
+| GitHub Actions baseline | success on 2026-04-23 UTC for `022d89f` |
+| GitHub Actions postgresql-smoke | success on 2026-04-23 UTC for `022d89f` |
 
 ## Release Notes
 

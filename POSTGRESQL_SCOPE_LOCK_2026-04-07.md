@@ -24,7 +24,7 @@ As of 2026-04-23, the PostgreSQL slice is:
 - proven generation slices: schema-detail-validated `generate select_simple` and `generate count_simple`, plus direct `generate join_inner` and `generate join_left` inference when exactly one direct foreign-key path exists
 - proof path: `bash scripts/run_postgresql_local_smoke.sh`
 - proof note: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
-- latest saved proof commit: `4be8a3d`
+- last recorded proof commit: `022d89f`
 
 What this means:
 

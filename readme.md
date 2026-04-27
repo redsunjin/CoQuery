@@ -5,7 +5,7 @@ Phase 5 multi-DB support is now early experimental and is not complete.
 
 Repository: `https://github.com/redsunjin/CoQuery`
 Visibility: `PUBLIC` as verified on 2026-04-23.
-Current saved commit: `4be8a3d Add PostgreSQL write safety smoke proof`.
+Recorded proof commit: `022d89f Refresh current usage and demo docs`.
 
 ## Available Commands
 
@@ -51,7 +51,7 @@ python3 main.py --command provider_test --provider-name local_ollama
 - `generate` and simple `natural` requests validate table and simple column identifiers against `schema_detail`
 - generation, natural-language, and write-planning paths attach local DB/JPA knowledge context first
 - PostgreSQL `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, write-safety guards, select/count generation, and direct join generation are smoke-proven on the documented experimental path
-- GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-04-22 UTC for commit `4be8a3d`
+- GitHub Actions `baseline` and `postgresql-smoke` were last recorded successful on 2026-04-23 UTC for commit `022d89f`
 
 ## GitHub Demo
 
