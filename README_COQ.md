@@ -28,6 +28,7 @@ Responsive Terminal Shell Prototype verified as a local Command API app shell
 Provider Preset Mobile Flow verified in the dark-mode terminal shell prototype
 Practice Dataset Sandbox verified for DB-free sample schema, query, grading, attempts, CLI, and Command API paths
 Query Practice Flow UI verified for problem start, schema view, SQL submit, grading, and local attempt review
+iOS Launch Feasibility And Packaging Decision documented for a TestFlight-first Training App path
 Bilingual beginner help verified for Korean/English command and SQL term guidance
 GitHub Actions baseline and PostgreSQL smoke workflows last recorded as verified on 2026-04-27 UTC for `main` commit `7e677fe`
 Public GitHub repository verified
@@ -36,7 +37,8 @@ Public GitHub repository verified
 Service launch plan:
 
 - `SERVICE_LAUNCH_PLAN_2026-07-07.md`
-- Next recommended `/goal`: `Launch Goal 2: Wrong Note And Feedback`
+- iOS decision: `IOS_LAUNCH_FEASIBILITY_2026-07-07.md`
+- Next recommended `/goal`: `Launch Goal 3: iOS Training Runtime Contract`
 
 Scope decision:
 
@@ -99,6 +101,7 @@ Scope decision:
 | Provider presets | Experimental secondary track | presets exist for OpenAI, Groq, OpenRouter, Gemini, and DeepSeek-style APIs; run `provider_test` to verify selected model availability |
 | Command API Adapter | Working baseline | `sql_cli.command_api.run_command` reuses existing handlers and adds `cli_equivalent`, `block_type`, and `actions` for mobile/web shells |
 | Responsive terminal shell | Local prototype | `app_shell/terminal_shell_prototype` serves a dark-mode mobile/tablet/desktop terminal UI over the Command API; not a packaged mobile app |
+| iOS launch path | Decision documented | TestFlight-first Training App, Capacitor iOS shell selected, Python local server rejected for iOS runtime |
 | Provider Preset Mobile Flow | Local prototype | setup form can choose preset, edit provider/model/env, preview CLI, and save through `provider_add_preset` |
 | Practice Dataset Sandbox | Working baseline | built-in `sql_basics` pack runs in-memory SQLite for DB-free SQL learning, query checks, grading, and attempts |
 | Bilingual beginner help | Working baseline | `help_catalog`, `command_explain`, and `term_explain` expose Korean/English command and SQL term explanations through CLI, Command API, and terminal shell |

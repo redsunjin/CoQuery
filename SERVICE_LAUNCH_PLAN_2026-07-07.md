@@ -37,6 +37,7 @@ Current product boundary:
 - CoQuery is not yet a packaged mobile app.
 - CoQuery is not yet a production DB agent.
 - CoQuery is currently a verified CLI core plus local responsive terminal shell prototype.
+- CoQuery's iOS path is now selected as a TestFlight-first Training App, but no iOS project exists yet.
 
 ## Launch Tracks
 
@@ -120,7 +121,53 @@ Done when:
 - Mobile layout has no horizontal scroll.
 - Smoke test covers the practice submit flow.
 
-### Launch Goal 2: Wrong Note And Feedback
+### Launch Goal 2: iOS Launch Feasibility And Packaging Decision
+
+Decide whether and how CoQuery should proceed as an iOS app.
+
+Done when:
+
+- iOS release feasibility is documented.
+- Packaging approach is selected.
+- TestFlight vs public App Store target is clarified.
+- Python local server dependency is accepted, rejected, or replaced for iOS.
+- First iOS app scope and exclusions are documented.
+- Next implementation `/goal` is identified.
+
+Implemented as `IOS_LAUNCH_FEASIBILITY_2026-07-07.md`.
+
+Current decision:
+
+- Proceed with a TestFlight-first iOS Training App.
+- Use a Capacitor iOS shell as the first packaging path.
+- Do not embed the current Python local server in the iOS app.
+- Keep production DB assistance out of the first iOS release.
+
+### Launch Goal 3: iOS Training Runtime Contract
+
+Extract the current training command behavior into a portable contract for iOS.
+
+Done when:
+
+- Portable command contracts are documented for `practice_list`, `practice_schema`, `practice_query`, `practice_grade`, `practice_attempts`, `help_catalog`, `command_explain`, and `term_explain`.
+- Local storage contracts are defined for practice packs and attempt logs.
+- iOS-safe query execution strategy is selected.
+- The app shell knows which commands can run without the Python server.
+- The next `/goal` can scaffold the Capacitor iOS shell without re-deciding architecture.
+
+### Launch Goal 4: iOS TestFlight Shell Skeleton
+
+Create the first iOS package path.
+
+Done when:
+
+- Capacitor project files exist.
+- `ios/` project exists.
+- The app can load the terminal shell on iPhone and iPad simulator.
+- The shell can run at least one local Training Runtime command without the Python server.
+- TestFlight metadata checklist exists.
+
+### Launch Goal 5: Wrong Note And Feedback
 
 Turn attempt records into a usable learning loop.
 
@@ -132,7 +179,7 @@ Done when:
 - Optional provider feedback can be requested only in Training Mode.
 - Feedback is labeled as AI-generated when provider-backed.
 
-### Launch Goal 3: Provider Test And Model Readiness UI
+### Launch Goal 6: Provider Test And Model Readiness UI
 
 Make provider setup launch-ready.
 
@@ -143,7 +190,7 @@ Done when:
 - Provider status is visible near the command input.
 - CLI equivalent is shown for each provider action.
 
-### Launch Goal 4: Mode Separation
+### Launch Goal 7: Mode Separation
 
 Separate Training Mode from Production Assist Mode.
 
@@ -155,15 +202,15 @@ Done when:
 - Production Assist Mode blocks external provider use unless explicitly overridden by policy.
 - Docs explain the security boundary.
 
-### Launch Goal 5: Local Packaging Decision
+### Launch Goal 8: Desktop/Local Packaging Decision
 
-Decide how the app is shipped.
+Decide how the non-iOS local app is shipped.
 
 Recommended launch path:
 
 1. Local web app first: Python local server + browser.
 2. Desktop wrapper second: Tauri or Electron only after the web shell stabilizes.
-3. Mobile wrapper later: package only after offline/local network behavior is proven.
+3. Mobile wrapper follows the iOS decision in `IOS_LAUNCH_FEASIBILITY_2026-07-07.md`.
 
 Done when:
 
@@ -172,7 +219,7 @@ Done when:
 - Runtime storage paths are documented.
 - Update and rollback path is documented.
 
-### Launch Goal 6: Production Assist Safety Gate
+### Launch Goal 9: Production Assist Safety Gate
 
 Prepare production DB support without overclaiming.
 
@@ -184,7 +231,7 @@ Done when:
 - `SELECT`-only guard is enforced for production assist.
 - Audit log is written.
 
-### Launch Goal 7: Release Candidate Hardening
+### Launch Goal 10: Release Candidate Hardening
 
 Make the service release candidate testable.
 
@@ -221,21 +268,24 @@ Completed:
 - Provider Preset Mobile Flow.
 - Practice Dataset Sandbox backend and CLI.
 - Query Practice Flow UI.
+- iOS Launch Feasibility And Packaging Decision.
 - Bilingual beginner help.
 - Korean font/readability improvement.
 
 Still required for service launch:
 
+- iOS Training Runtime Contract.
+- iOS TestFlight Shell Skeleton.
 - Wrong-note UI.
 - Provider test/remove/select UI.
 - Training/Production Assist mode separation.
-- Packaging decision.
+- Desktop/local packaging decision.
 - Release candidate hardening.
 
 ## Immediate Next Action
 
-After completing Launch Goal 1, the next implementation `/goal` should be:
+After completing Launch Goal 2, the next implementation `/goal` should be:
 
 ```text
-Launch Goal 2: Wrong Note And Feedback
+Launch Goal 3: iOS Training Runtime Contract
 ```

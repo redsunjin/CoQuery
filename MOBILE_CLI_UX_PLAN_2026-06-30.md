@@ -384,6 +384,27 @@ Done when:
 
 Implemented through `sql_cli.help_catalog`, `sql_cli.command_api.run_command`, and `app_shell/terminal_shell_prototype`.
 
+### Goal F: iOS Launch Feasibility And Packaging Decision - Done
+
+Decide how the mobile shell should become an iOS app.
+
+Done when:
+
+- iOS feasibility is documented
+- packaging approach is selected
+- first iOS app scope is separated from production DB support
+- the current Python local server dependency is addressed
+- the next `/goal` is clear
+
+Implemented as `IOS_LAUNCH_FEASIBILITY_2026-07-07.md`.
+
+Current decision:
+
+- first iOS target is a TestFlight-first Training App
+- Capacitor iOS shell is the selected packaging path
+- the iOS app must run Training Mode without starting the Python local server
+- production DB assistance remains deferred to a controlled Production Assist track
+
 ## Boundary
 
 This plan does not change CoQuery into a BI dashboard.
