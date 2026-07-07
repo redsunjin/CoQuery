@@ -146,13 +146,15 @@ The iOS launch track is not ready until all gates below are true:
 Recommended next implementation unit:
 
 ```text
-Launch Goal 3: iOS Training Runtime Contract
+Launch Goal 4: iOS TestFlight Shell Skeleton
 ```
 
 Done when:
 
-- The current Python Command API training commands are documented as a portable contract.
-- The contract covers `practice_list`, `practice_schema`, `practice_query`, `practice_grade`, `practice_attempts`, `help_catalog`, `command_explain`, and `term_explain`.
-- Required local storage paths and data shapes are documented.
-- The iOS implementation strategy is selected for query execution and attempt storage.
-- A follow-up `/goal` can scaffold the Capacitor iOS shell without re-deciding architecture.
+- Capacitor project files exist.
+- `ios/` project exists.
+- The shell can load the current terminal UI.
+- `postCommand` can call a local Training Runtime adapter for at least `practice_list`.
+- iPhone and iPad simulator verification instructions are documented for Mac.
+
+Training Runtime Contract is now documented in `IOS_TRAINING_RUNTIME_CONTRACT_2026-07-08.md`.

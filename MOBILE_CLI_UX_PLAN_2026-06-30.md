@@ -405,6 +405,29 @@ Current decision:
 - the iOS app must run Training Mode without starting the Python local server
 - production DB assistance remains deferred to a controlled Production Assist track
 
+### Goal G: iOS Training Runtime Contract - Done
+
+Define the Training Mode runtime that can run inside the iOS app.
+
+Done when:
+
+- portable command contracts are documented
+- practice pack storage is documented
+- local attempt storage is documented
+- SQL query execution strategy is selected
+- app shell adapter boundary is documented
+- the next `/goal` can create an iOS shell without re-deciding runtime architecture
+
+Implemented as `IOS_TRAINING_RUNTIME_CONTRACT_2026-07-08.md`.
+
+Current decision:
+
+- keep the Python Command API as the reference oracle
+- implement the iOS Training Runtime as a TypeScript adapter
+- bundle `practice_packs/sql_basics.json`
+- use a SQLite-compatible JS/WASM executor first
+- avoid starting the Python local server from the iOS app
+
 ## Boundary
 
 This plan does not change CoQuery into a BI dashboard.

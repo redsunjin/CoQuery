@@ -155,6 +155,16 @@ Done when:
 - The app shell knows which commands can run without the Python server.
 - The next `/goal` can scaffold the Capacitor iOS shell without re-deciding architecture.
 
+Implemented as `IOS_TRAINING_RUNTIME_CONTRACT_2026-07-08.md`.
+
+Current decision:
+
+- Use the current Python handlers as the reference behavior.
+- Implement the first iOS runtime as a TypeScript Training Runtime adapter.
+- Bundle `practice_packs/sql_basics.json`.
+- Prefer a SQLite-compatible JS/WASM executor first; fall back to native SQLite only if needed.
+- Keep attempts local and expose `local://coquery/practice_attempts` as the logical path.
+
 ### Launch Goal 4: iOS TestFlight Shell Skeleton
 
 Create the first iOS package path.
@@ -269,12 +279,12 @@ Completed:
 - Practice Dataset Sandbox backend and CLI.
 - Query Practice Flow UI.
 - iOS Launch Feasibility And Packaging Decision.
+- iOS Training Runtime Contract.
 - Bilingual beginner help.
 - Korean font/readability improvement.
 
 Still required for service launch:
 
-- iOS Training Runtime Contract.
 - iOS TestFlight Shell Skeleton.
 - Wrong-note UI.
 - Provider test/remove/select UI.
@@ -284,8 +294,8 @@ Still required for service launch:
 
 ## Immediate Next Action
 
-After completing Launch Goal 2, the next implementation `/goal` should be:
+After completing Launch Goal 3, the next implementation `/goal` should be:
 
 ```text
-Launch Goal 3: iOS Training Runtime Contract
+Launch Goal 4: iOS TestFlight Shell Skeleton
 ```

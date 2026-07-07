@@ -29,6 +29,7 @@ Provider Preset Mobile Flow verified in the dark-mode terminal shell prototype
 Practice Dataset Sandbox verified for DB-free sample schema, query, grading, attempts, CLI, and Command API paths
 Query Practice Flow UI verified for problem start, schema view, SQL submit, grading, and local attempt review
 iOS Launch Feasibility And Packaging Decision documented for a TestFlight-first Training App path
+iOS Training Runtime Contract documented for Python-server-free Training Mode on iOS
 Bilingual beginner help verified for Korean/English command and SQL term guidance
 GitHub Actions baseline and PostgreSQL smoke workflows last recorded as verified on 2026-04-27 UTC for `main` commit `7e677fe`
 Public GitHub repository verified
@@ -38,7 +39,9 @@ Service launch plan:
 
 - `SERVICE_LAUNCH_PLAN_2026-07-07.md`
 - iOS decision: `IOS_LAUNCH_FEASIBILITY_2026-07-07.md`
-- Next recommended `/goal`: `Launch Goal 3: iOS Training Runtime Contract`
+- iOS runtime contract: `IOS_TRAINING_RUNTIME_CONTRACT_2026-07-08.md`
+- Mac handoff: `IOS_MAC_HANDOFF_2026-07-08.md`
+- Next recommended `/goal`: `Launch Goal 4: iOS TestFlight Shell Skeleton`
 
 Scope decision:
 
@@ -102,6 +105,7 @@ Scope decision:
 | Command API Adapter | Working baseline | `sql_cli.command_api.run_command` reuses existing handlers and adds `cli_equivalent`, `block_type`, and `actions` for mobile/web shells |
 | Responsive terminal shell | Local prototype | `app_shell/terminal_shell_prototype` serves a dark-mode mobile/tablet/desktop terminal UI over the Command API; not a packaged mobile app |
 | iOS launch path | Decision documented | TestFlight-first Training App, Capacitor iOS shell selected, Python local server rejected for iOS runtime |
+| iOS Training Runtime Contract | Decision documented | portable Training Mode command envelope, practice/help command shapes, local storage, and Python-server-free adapter boundary are defined |
 | Provider Preset Mobile Flow | Local prototype | setup form can choose preset, edit provider/model/env, preview CLI, and save through `provider_add_preset` |
 | Practice Dataset Sandbox | Working baseline | built-in `sql_basics` pack runs in-memory SQLite for DB-free SQL learning, query checks, grading, and attempts |
 | Bilingual beginner help | Working baseline | `help_catalog`, `command_explain`, and `term_explain` expose Korean/English command and SQL term explanations through CLI, Command API, and terminal shell |

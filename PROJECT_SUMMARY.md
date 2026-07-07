@@ -31,6 +31,7 @@ Verified on 2026-04-28
 - Practice Dataset Sandbox is verified for built-in sample schema, read-only query, grading, attempt logging, CLI, and Command API paths
 - Query Practice Flow UI is verified for problem start, schema view, SQL submit, grading, and local attempt review
 - iOS Launch Feasibility And Packaging Decision is documented for a TestFlight-first Training App path
+- iOS Training Runtime Contract is documented for Python-server-free Training Mode on iOS
 - Bilingual beginner help is verified for Korean/English command and SQL term guidance
 - Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-04-27 UTC for `main` commit `7e677fe`
 - GitHub repository `redsunjin/CoQuery` is public and can run Actions-based log demos
@@ -46,7 +47,9 @@ Service launch plan:
 
 - Launch roadmap: `SERVICE_LAUNCH_PLAN_2026-07-07.md`
 - iOS decision: `IOS_LAUNCH_FEASIBILITY_2026-07-07.md`
-- Next recommended `/goal`: `Launch Goal 3: iOS Training Runtime Contract`
+- iOS runtime contract: `IOS_TRAINING_RUNTIME_CONTRACT_2026-07-08.md`
+- Mac handoff: `IOS_MAC_HANDOFF_2026-07-08.md`
+- Next recommended `/goal`: `Launch Goal 4: iOS TestFlight Shell Skeleton`
 
 ---
 
@@ -174,6 +177,7 @@ This passes 119 baseline tests covering:
 - provider presets simplify API registration but do not guarantee current provider pricing, free-tier limits, or model availability
 - Command API Adapter is a Python handler adapter; the terminal shell prototype is a local proof slice, not a packaged mobile app or hosted production service
 - iOS packaging is selected as a TestFlight-first Capacitor Training App path, but the repo does not yet contain an `ios/` project or an iOS-safe Training Runtime implementation
+- iOS Training Runtime Contract defines the portable command envelope and data shapes, but no Capacitor or Xcode project has been generated yet
 - Practice Dataset Sandbox uses a small built-in sample pack and in-memory SQLite; it is not connected to production data and is not yet a full curriculum engine
 - Bilingual beginner help is a curated local guide, not a complete SQL education product or adaptive tutor yet
 - generated SQL templates validate basic identifiers and direct foreign-key joins, but are not yet multi-hop relationship-aware, alias-aware, or expression-aware
