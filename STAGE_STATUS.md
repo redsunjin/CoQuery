@@ -1,7 +1,7 @@
 # CoQuery Stage Status Report
 
 Version: v0.7.1
-Last Update: 2026-04-28
+Last Update: 2026-06-30
 
 ## Current Status
 
@@ -18,6 +18,12 @@ Local PostgreSQL smoke re-run succeeded on 2026-04-22
 Codex skill package added for agent-side reuse
 JPA entity source introspection added as an ORM/model track
 Schema-detail direct join generation proved for built-in join skills
+Provider presets added for OpenAI, Groq, OpenRouter, Gemini, and DeepSeek-style API registration
+Command API Adapter added for mobile/web shell reuse of existing handlers
+Responsive Terminal Shell Prototype added as a local mobile/tablet/desktop app shell over the Command API
+Provider Preset Mobile Flow added to the dark-mode terminal shell
+Practice Dataset Sandbox added for DB-free SQL learning over built-in sample data
+Bilingual beginner help added for Korean/English command and SQL term guidance
 Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-04-27 UTC for `main` commit `7e677fe`
 GitHub repository `redsunjin/CoQuery` is public
 Phase 5 remains narrow and experimental
@@ -47,10 +53,20 @@ Phase 5 remains narrow and experimental
 - `natural`
 - `jpa_schema`
 - `db_knowledge`
+- `help_catalog`
+- `command_explain`
+- `term_explain`
 - `provider_add`
+- `provider_list_presets`
+- `provider_add_preset`
 - `provider_list`
 - `provider_remove`
 - `provider_test`
+- `practice_list`
+- `practice_schema`
+- `practice_query`
+- `practice_grade`
+- `practice_attempts`
 
 Write-command baseline:
 
@@ -84,7 +100,16 @@ ORM/model support:
 Natural-language note:
 
 - heuristic by default
-- registered-provider routing exists as a secondary experimental track
+- registered-provider routing exists as a secondary experimental track, with provider presets for common OpenAI-compatible APIs
+- `sql_cli.command_api.run_command` exposes app-shell metadata around existing handlers without replacing the CLI
+- `app_shell/terminal_shell_prototype` is a dark-mode local responsive terminal prototype, not a packaged mobile app or production web service
+- `Setup AI` can save a provider profile through `provider_add_preset`
+
+Practice sandbox note:
+
+- `practice_packs/sql_basics.json` is the current built-in pack
+- `practice_query` and `practice_grade` run against in-memory SQLite, not production data
+- `practice_attempts` reads local attempt records for review and wrong-note flows
 
 Doctor note:
 
@@ -109,7 +134,11 @@ bash scripts/run_postgresql_local_smoke.sh
 3. keep the PostgreSQL smoke runner repeatable and repo-managed
 4. keep `skills/coquery-cli` aligned with runnable CLI behavior
 5. keep JPA labelled as ORM/model support until JPQL runtime proof exists
-6. do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
+6. keep the terminal shell prototype aligned with Command API behavior
+7. keep bilingual help guidance local and curated until an adaptive tutor/LLM feedback flow is explicitly implemented
+8. keep provider setup UI honest about model/API key env configuration before any provider call
+9. expand practice packs and feedback only after keeping the DB-free baseline green
+10. do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
 
-Last Updated: 2026-04-28
-Phase Status: SQLite-first baseline verified with `doctor`, PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke proof plus agent skill packaging, JPA source introspection, explicit write safety guards, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
+Last Updated: 2026-07-06
+Phase Status: SQLite-first baseline verified with `doctor`, PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke proof plus agent skill packaging, JPA source introspection, provider presets, Command API Adapter, dark-mode responsive terminal shell prototype, Provider Preset Mobile Flow, Practice Dataset Sandbox, bilingual beginner help, explicit write safety guards, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows

@@ -41,6 +41,7 @@ example.db
 test_fixtures/
 fixtures/*/
 pytest_cache/
+.playwright-mcp/
 .coverage
 htmlcov/
 .tox/

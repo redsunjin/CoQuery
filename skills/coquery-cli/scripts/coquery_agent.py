@@ -412,10 +412,16 @@ def command_run(args: argparse.Namespace) -> int:
         cli_args.extend(["--provider-name", args.provider_name])
     if args.provider_kind is not None:
         cli_args.extend(["--provider-kind", args.provider_kind])
+    if args.preset is not None:
+        cli_args.extend(["--preset", args.preset])
     if args.model_name is not None:
         cli_args.extend(["--model-name", args.model_name])
     if args.base_url is not None:
         cli_args.extend(["--base-url", args.base_url])
+    if args.chat_completions_url is not None:
+        cli_args.extend(["--chat-completions-url", args.chat_completions_url])
+    if args.models_url is not None:
+        cli_args.extend(["--models-url", args.models_url])
     if args.api_key_env is not None:
         cli_args.extend(["--api-key-env", args.api_key_env])
     if args.jpa_project is not None:
@@ -424,6 +430,14 @@ def command_run(args: argparse.Namespace) -> int:
         cli_args.extend(["--dialect", args.dialect])
     if args.topic is not None:
         cli_args.extend(["--topic", args.topic])
+    if args.lang is not None:
+        cli_args.extend(["--lang", args.lang])
+    if args.pack is not None:
+        cli_args.extend(["--pack", args.pack])
+    if args.problem_id is not None:
+        cli_args.extend(["--problem-id", args.problem_id])
+    if args.limit is not None:
+        cli_args.extend(["--limit", str(args.limit)])
     if args.write:
         cli_args.append("--write")
     if args.dry_run:
@@ -432,6 +446,8 @@ def command_run(args: argparse.Namespace) -> int:
         cli_args.extend(["--max-affected-rows", str(args.max_affected_rows)])
     if args.allow_full_table_write:
         cli_args.append("--allow-full-table-write")
+    if args.no_record:
+        cli_args.append("--no-record")
 
     result = coquery_command(repo, cli_args, args.command)
     if result["payload"] is not None:
@@ -469,12 +485,19 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--params", default=None, help="JSON parameters payload")
     run.add_argument("--provider-name", default=None, help="Registered provider name")
     run.add_argument("--provider-kind", default=None, help="Provider kind")
+    run.add_argument("--preset", default=None, help="Known provider preset name")
     run.add_argument("--model-name", default=None, help="Provider model name")
     run.add_argument("--base-url", default=None, help="Provider base URL")
+    run.add_argument("--chat-completions-url", default=None, help="Direct chat completions endpoint override")
+    run.add_argument("--models-url", default=None, help="Direct model listing endpoint override")
     run.add_argument("--api-key-env", default=None, help="Provider API key environment variable name")
     run.add_argument("--jpa-project", default=None, help="Path to a Java/JPA project or .java entity file")
     run.add_argument("--dialect", default=None, help="Knowledge dialect")
-    run.add_argument("--topic", default=None, help="Knowledge topic")
+    run.add_argument("--topic", default=None, help="Knowledge or help topic")
+    run.add_argument("--lang", default=None, help="Help language: ko or en")
+    run.add_argument("--pack", default=None, help="Practice pack id")
+    run.add_argument("--problem-id", default=None, help="Practice problem id")
+    run.add_argument("--limit", type=int, default=None, help="Practice query or attempts row limit")
     run.add_argument("--format", default="json", help="Output format")
     run.add_argument("--write", action="store_true", help="Confirm state-changing SQL")
     run.add_argument("--dry-run", action="store_true", help="Run state-changing SQL in rollback-only preview mode")
@@ -484,6 +507,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Allow UPDATE/DELETE or write-mode query statements without WHERE",
     )
+    run.add_argument("--no-record", action="store_true", help="Do not write a practice_grade attempt record")
     run.set_defaults(func=command_run)
 
     install = subparsers.add_parser("install-skill", help="Copy this skill package into a Codex skills directory")

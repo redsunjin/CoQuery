@@ -4,6 +4,7 @@
 # Core modules
 from sql_cli.core import SQLGenerator, SQLValidator
 from sql_cli.db_new import CoQueryDB
+from sql_cli.command_api import build_cli_equivalent, run_command
 from sql_cli.cli import (
     db_knowledge_handler,
     delete_handler,
@@ -11,8 +12,15 @@ from sql_cli.cli import (
     insert_handler,
     jpa_schema_handler,
     natural_handler,
+    practice_attempts_handler,
+    practice_grade_handler,
+    practice_list_handler,
+    practice_query_handler,
+    practice_schema_handler,
     provider_add_handler,
+    provider_add_preset_handler,
     provider_list_handler,
+    provider_list_presets_handler,
     provider_remove_handler,
     provider_test_handler,
     query_handler,
@@ -25,6 +33,8 @@ __all__ = [
     'SQLGenerator',
     'SQLValidator',
     'CoQueryDB',
+    'run_command',
+    'build_cli_equivalent',
     'db_knowledge_handler',
     'schema_handler',
     'schema_detail_handler',
@@ -35,7 +45,14 @@ __all__ = [
     'update_handler',
     'delete_handler',
     'natural_handler',
+    'practice_list_handler',
+    'practice_schema_handler',
+    'practice_query_handler',
+    'practice_grade_handler',
+    'practice_attempts_handler',
     'provider_add_handler',
+    'provider_list_presets_handler',
+    'provider_add_preset_handler',
     'provider_list_handler',
     'provider_remove_handler',
     'provider_test_handler',

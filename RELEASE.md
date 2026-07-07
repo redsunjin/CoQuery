@@ -22,10 +22,20 @@ delete
 natural
 jpa_schema
 db_knowledge
+help_catalog
+command_explain
+term_explain
 provider_add
+provider_list_presets
+provider_add_preset
 provider_list
 provider_remove
 provider_test
+practice_list
+practice_schema
+practice_query
+practice_grade
+practice_attempts
 ```
 
 ### Stabilized in v0.7.1
@@ -85,13 +95,46 @@ python3 main.py --command natural --sql "count users"
 
 | Test Suite | Status |
 |------------|--------|
-| Baseline tests | 96/96 passing |
+| Baseline tests | 119/119 passing |
+| Terminal shell prototype smoke | passing |
 | Agent wrapper verify | passing |
 | Local PostgreSQL smoke | passing |
 | GitHub Actions baseline | success on 2026-04-27 UTC for `7e677fe` |
 | GitHub Actions postgresql-smoke | success on 2026-04-27 UTC for `7e677fe` |
 
 ## Release Notes
+
+### Current provider preset update (2026-06-30)
+- Provider preset registration is available for OpenAI, Groq, OpenRouter, Gemini, and DeepSeek-style APIs
+- OpenAI-compatible providers can store direct chat-completions and models endpoint overrides
+- Provider preset and endpoint override behavior is covered by the executable baseline tests
+
+### Current command API update (2026-06-30)
+- `sql_cli.command_api.run_command` exposes existing CLI handlers to mobile/web app shells without shelling out
+- Command API responses include `cli_equivalent`, `block_type`, and `actions` metadata
+- Provider preset, provider list, schema detail, natural request, and unknown-command adapter paths are covered by executable tests
+
+### Current responsive terminal shell update (2026-06-30)
+- `app_shell/terminal_shell_prototype` provides a local mobile/tablet/desktop terminal UI over the Command API
+- The shell keeps command blocks, CLI equivalents, and structured detail output visible without replacing the CLI core
+- The prototype is covered by `app_shell/terminal_shell_prototype/smoke.py` and browser snapshots for desktop, tablet, and phone widths
+
+### Current provider preset mobile flow update (2026-07-01)
+- Terminal shell now defaults to dark mode
+- `Setup AI` opens a provider preset form for mobile/tablet/desktop use
+- Users can choose a preset, edit provider name/model/API key env, preview the CLI equivalent, and save through `provider_add_preset`
+- `app_shell/terminal_shell_prototype/smoke.py` verifies provider preset saving through the local Command API
+
+### Current practice dataset update (2026-07-01)
+- `practice_packs/sql_basics.json` adds a built-in sample dataset and five SQL practice problems
+- `practice_list`, `practice_schema`, `practice_query`, `practice_grade`, and `practice_attempts` work without connecting to a user DB
+- Practice execution uses in-memory SQLite, read-only query enforcement, result-set grading, and local attempt records
+- Practice commands are available through both the CLI and `sql_cli.command_api.run_command`
+
+### Current bilingual help update (2026-07-06)
+- `help_catalog`, `command_explain`, and `term_explain` add Korean/English beginner guidance for commands and SQL/DB terms
+- The responsive terminal shell includes a KR/EN toggle, help/terms chips, and a beginner guide panel
+- Help commands are available through both the CLI and `sql_cli.command_api.run_command`
 
 ### v0.7.1 stabilization snapshot (2026-04-28)
 - SQLite-first CLI baseline is verified

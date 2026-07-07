@@ -18,6 +18,64 @@ REGISTRY_ENV_VAR = "COQUERY_LLM_REGISTRY_PATH"
 SUPPORTED_PROVIDER_KINDS = {"ollama", "openai_compatible"}
 SUPPORTED_SQL_INTENTS = {"select", "count", "insert", "update", "delete"}
 
+PROVIDER_PRESETS: dict[str, dict[str, Any]] = {
+    "openai": {
+        "label": "OpenAI",
+        "kind": "openai_compatible",
+        "base_url": "https://api.openai.com",
+        "chat_completions_url": "https://api.openai.com/v1/chat/completions",
+        "models_url": "https://api.openai.com/v1/models",
+        "api_key_env": "OPENAI_API_KEY",
+        "default_model": None,
+        "cost_profile": "balanced",
+        "docs_url": "https://platform.openai.com/docs/api-reference/chat/create",
+    },
+    "groq": {
+        "label": "Groq",
+        "kind": "openai_compatible",
+        "base_url": "https://api.groq.com/openai/v1",
+        "chat_completions_url": "https://api.groq.com/openai/v1/chat/completions",
+        "models_url": "https://api.groq.com/openai/v1/models",
+        "api_key_env": "GROQ_API_KEY",
+        "default_model": None,
+        "cost_profile": "cheap_or_free",
+        "docs_url": "https://console.groq.com/docs/openai",
+    },
+    "openrouter": {
+        "label": "OpenRouter",
+        "kind": "openai_compatible",
+        "base_url": "https://openrouter.ai/api/v1",
+        "chat_completions_url": "https://openrouter.ai/api/v1/chat/completions",
+        "models_url": "https://openrouter.ai/api/v1/models",
+        "api_key_env": "OPENROUTER_API_KEY",
+        "default_model": None,
+        "cost_profile": "free_or_cheap_router",
+        "docs_url": "https://openrouter.ai/docs/quickstart",
+    },
+    "gemini": {
+        "label": "Gemini API",
+        "kind": "openai_compatible",
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
+        "chat_completions_url": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+        "models_url": "https://generativelanguage.googleapis.com/v1beta/openai/models",
+        "api_key_env": "GEMINI_API_KEY",
+        "default_model": "gemini-3.5-flash",
+        "cost_profile": "free_or_low_cost",
+        "docs_url": "https://ai.google.dev/gemini-api/docs/openai",
+    },
+    "deepseek": {
+        "label": "DeepSeek",
+        "kind": "openai_compatible",
+        "base_url": "https://api.deepseek.com",
+        "chat_completions_url": "https://api.deepseek.com/chat/completions",
+        "models_url": "https://api.deepseek.com/models",
+        "api_key_env": "DEEPSEEK_API_KEY",
+        "default_model": "deepseek-v4-flash",
+        "cost_profile": "low_cost",
+        "docs_url": "https://api-docs.deepseek.com/",
+    },
+}
+
 
 class CoQueryLLMError(Exception):
     """Structured LLM/runtime error used by CLI handlers."""
@@ -37,6 +95,10 @@ class LLMProviderProfile:
     model_name: str
     base_url: str
     api_key_env: Optional[str] = None
+    preset: Optional[str] = None
+    cost_profile: Optional[str] = None
+    chat_completions_url: Optional[str] = None
+    models_url: Optional[str] = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "LLMProviderProfile":
@@ -46,6 +108,12 @@ class LLMProviderProfile:
             model_name=str(data.get("model_name", "")).strip(),
             base_url=str(data.get("base_url", "")).strip(),
             api_key_env=(str(data["api_key_env"]).strip() if data.get("api_key_env") else None),
+            preset=(str(data["preset"]).strip() if data.get("preset") else None),
+            cost_profile=(str(data["cost_profile"]).strip() if data.get("cost_profile") else None),
+            chat_completions_url=(
+                str(data["chat_completions_url"]).strip() if data.get("chat_completions_url") else None
+            ),
+            models_url=(str(data["models_url"]).strip() if data.get("models_url") else None),
         )
 
     def normalized(self) -> "LLMProviderProfile":
@@ -64,7 +132,9 @@ class LLMProviderProfile:
         base_url = self.base_url.strip()
         if kind == "ollama" and not base_url:
             base_url = "http://127.0.0.1:11434"
-        if not base_url:
+        chat_completions_url = (self.chat_completions_url or "").strip().rstrip("/") or None
+        models_url = (self.models_url or "").strip().rstrip("/") or None
+        if not base_url and not chat_completions_url:
             raise CoQueryLLMError("missing_base_url", "Base URL is required.")
 
         return LLMProviderProfile(
@@ -73,6 +143,10 @@ class LLMProviderProfile:
             model_name=self.model_name.strip(),
             base_url=base_url.rstrip("/"),
             api_key_env=self.api_key_env,
+            preset=(self.preset.strip() if self.preset else None),
+            cost_profile=(self.cost_profile.strip() if self.cost_profile else None),
+            chat_completions_url=chat_completions_url,
+            models_url=models_url,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -119,6 +193,10 @@ class LLMProviderRegistry:
         model_name: str,
         base_url: str,
         api_key_env: str | None = None,
+        preset: str | None = None,
+        cost_profile: str | None = None,
+        chat_completions_url: str | None = None,
+        models_url: str | None = None,
     ) -> dict[str, Any]:
         profile = LLMProviderProfile(
             name=name,
@@ -126,6 +204,10 @@ class LLMProviderRegistry:
             model_name=model_name,
             base_url=base_url,
             api_key_env=api_key_env,
+            preset=preset,
+            cost_profile=cost_profile,
+            chat_completions_url=chat_completions_url,
+            models_url=models_url,
         ).normalized()
 
         payload = self._load()
@@ -155,6 +237,25 @@ class LLMProviderRegistry:
         ]
         self._save(payload)
         return profile.to_dict()
+
+
+def list_provider_presets() -> list[dict[str, Any]]:
+    """Return stable metadata for known provider presets."""
+
+    presets: list[dict[str, Any]] = []
+    for name, payload in PROVIDER_PRESETS.items():
+        item = {"name": name, **payload}
+        presets.append(item)
+    return sorted(presets, key=lambda item: item["name"])
+
+
+def get_provider_preset(name: str | None) -> dict[str, Any]:
+    preset_name = (name or "").strip().lower()
+    if not preset_name:
+        raise CoQueryLLMError("missing_provider_preset", "Provider preset is required.")
+    if preset_name not in PROVIDER_PRESETS:
+        raise CoQueryLLMError("provider_preset_not_found", f"Provider preset not found: {preset_name}.")
+    return {"name": preset_name, **PROVIDER_PRESETS[preset_name]}
 
 
 def _decode_json_response(response: Any) -> dict[str, Any]:
@@ -254,6 +355,16 @@ class LLMProviderClient:
     def __init__(self, profile: LLMProviderProfile):
         self.profile = profile.normalized()
 
+    def _chat_completions_url(self) -> str:
+        if self.profile.chat_completions_url:
+            return self.profile.chat_completions_url
+        return f"{self.profile.base_url}/v1/chat/completions"
+
+    def _models_url(self) -> str:
+        if self.profile.models_url:
+            return self.profile.models_url
+        return f"{self.profile.base_url}/v1/models"
+
     def list_remote_models(self) -> list[str]:
         if self.profile.kind == "ollama":
             payload = _http_json("GET", f"{self.profile.base_url}/api/tags")
@@ -261,7 +372,7 @@ class LLMProviderClient:
 
         payload = _http_json(
             "GET",
-            f"{self.profile.base_url}/v1/models",
+            self._models_url(),
             headers=_llm_headers(self.profile),
         )
         return [item.get("id") for item in payload.get("data", []) if item.get("id")]
@@ -282,7 +393,7 @@ class LLMProviderClient:
     def _openai_chat_completion(self, prompt: str) -> str:
         payload = _http_json(
             "POST",
-            f"{self.profile.base_url}/v1/chat/completions",
+            self._chat_completions_url(),
             payload={
                 "model": self.profile.model_name,
                 "temperature": 0,

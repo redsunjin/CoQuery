@@ -2,7 +2,7 @@
   "skill": {
     "name": "coquery-cli",
     "display_name": "CoQuery CLI",
-    "purpose": "Run CoQuery SQL, schema detail, write safety, and JPA schema workflows from agent sessions."
+    "purpose": "Run CoQuery SQL, schema detail, write safety, practice dataset, and JPA schema workflows from agent sessions."
   },
   "wrapper_commands": [
     {
@@ -40,12 +40,20 @@
     "--params",
     "--provider-name",
     "--provider-kind",
+    "--preset",
     "--model-name",
     "--base-url",
+    "--chat-completions-url",
+    "--models-url",
     "--api-key-env",
     "--jpa-project",
     "--dialect",
     "--topic",
+    "--lang",
+    "--pack",
+    "--problem-id",
+    "--limit",
+    "--no-record",
     "--format",
     "--write",
     "--dry-run",
@@ -64,11 +72,56 @@
     "natural",
     "jpa_schema",
     "db_knowledge",
+    "help_catalog",
+    "command_explain",
+    "term_explain",
+    "practice_list",
+    "practice_schema",
+    "practice_query",
+    "practice_grade",
+    "practice_attempts",
     "provider_add",
+    "provider_list_presets",
+    "provider_add_preset",
     "provider_list",
     "provider_remove",
     "provider_test"
   ],
+  "python_api": {
+    "adapter": "sql_cli.command_api.run_command",
+    "summary": "Reuse existing handlers from mobile/web app shells without shelling out.",
+    "metadata": [
+      "cli_equivalent",
+      "block_type",
+      "actions"
+    ]
+  },
+  "practice_support": {
+    "status": "working_baseline",
+    "default_pack": "sql_basics",
+    "pack_path": "practice_packs/sql_basics.json",
+    "notes": [
+      "Runs built-in sample data through in-memory SQLite.",
+      "practice_query and practice_grade accept read-only SELECT statements.",
+      "practice_grade can record local attempts for review and wrong-note flows."
+    ]
+  },
+  "help_support": {
+    "status": "working_baseline",
+    "languages": [
+      "ko",
+      "en"
+    ],
+    "commands": [
+      "help_catalog",
+      "command_explain",
+      "term_explain"
+    ],
+    "notes": [
+      "Provides beginner-friendly command and SQL term explanations.",
+      "Shared by the CLI, Command API, and responsive terminal shell."
+    ]
+  },
   "backend_support": {
     "sqlite": {
       "status": "working",
@@ -121,6 +174,7 @@
     "Use JSON output when another agent needs machine-readable results.",
     "Pass --repo or set COQUERY_REPO when the skill package is installed outside the repository.",
     "Prefer verify, demo, or run over directly re-discovering CLI behavior.",
+    "Use sql_cli.command_api.run_command when building an app shell around CoQuery.",
     "Do not claim Oracle support in the current project scope."
   ]
 }

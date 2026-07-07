@@ -16,22 +16,33 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from sql_cli.cli import (
+    command_explain_handler,
     db_knowledge_handler,
     delete_handler,
     doctor_handler,
     generate_handler,
+    help_catalog_handler,
     insert_handler,
     jpa_schema_handler,
     natural_handler,
+    practice_attempts_handler,
+    practice_grade_handler,
+    practice_list_handler,
+    practice_query_handler,
+    practice_schema_handler,
     provider_add_handler,
+    provider_add_preset_handler,
     provider_list_handler,
+    provider_list_presets_handler,
     provider_remove_handler,
     provider_test_handler,
     query_handler,
     schema_detail_handler,
     schema_handler,
+    term_explain_handler,
     update_handler,
 )
+from sql_cli.command_api import run_command
 from sql_cli.core import SQLGenerator, SQLValidator
 from sql_cli.db_new import CoQueryDB
 from sql_cli.nl_core import NaturalLanguageEngine
@@ -564,6 +575,36 @@ def _fake_llm_urlopen(request: object, timeout: int = 60) -> _FakeHTTPResponse:
     )
 
 
+def _fake_openai_compatible_urlopen(request: object, timeout: int = 60) -> _FakeHTTPResponse:
+    url = request.full_url  # type: ignore[attr-defined]
+    if not url.endswith("/chat/completions"):
+        return _FakeHTTPResponse({"data": [{"id": "test-model"}]})
+
+    payload = json.loads(request.data.decode("utf-8"))  # type: ignore[attr-defined]
+    messages = payload.get("messages", [])
+    prompt = messages[-1].get("content", "") if messages else ""
+    if "Return exactly the text OK." in prompt:
+        return _FakeHTTPResponse({"choices": [{"message": {"content": "OK"}}]})
+
+    return _FakeHTTPResponse(
+        {
+            "choices": [
+                {
+                    "message": {
+                        "content": json.dumps(
+                            {
+                                "intent": "select",
+                                "sql": "SELECT * FROM users",
+                                "confidence": 0.89,
+                            }
+                        )
+                    }
+                }
+            ]
+        }
+    )
+
+
 with TemporaryDirectory() as tmpdir:
     registry_path = Path(tmpdir) / "llm_registry.json"
     with patch.dict(os.environ, {"COQUERY_LLM_REGISTRY_PATH": str(registry_path)}):
@@ -586,6 +627,243 @@ assert openai_provider["ok"] is True
 assert listed["ok"] is True
 assert [provider["name"] for provider in listed["data"]["providers"]] == ["local_ollama", "remote_api"]
 print("36. test_provider_registry_add_and_list ✓")
+
+presets = provider_list_presets_handler()
+assert presets["ok"] is True
+preset_names = [preset["name"] for preset in presets["data"]["presets"]]
+assert preset_names == ["deepseek", "gemini", "groq", "openai", "openrouter"]
+assert presets["data"]["presets"][preset_names.index("gemini")]["chat_completions_url"].endswith(
+    "/openai/chat/completions"
+)
+print("36a. test_provider_list_presets ✓")
+
+with TemporaryDirectory() as tmpdir:
+    registry_path = Path(tmpdir) / "llm_registry.json"
+    with patch.dict(os.environ, {"COQUERY_LLM_REGISTRY_PATH": str(registry_path)}):
+        groq_provider = provider_add_preset_handler(
+            "groq",
+            "fast_groq",
+            "llama-3.1-8b-instant",
+            "GROQ_API_KEY",
+        )
+        listed = provider_list_handler()
+assert groq_provider["ok"] is True
+assert groq_provider["data"]["provider"]["preset"] == "groq"
+assert groq_provider["data"]["provider"]["cost_profile"] == "cheap_or_free"
+assert groq_provider["data"]["provider"]["chat_completions_url"] == "https://api.groq.com/openai/v1/chat/completions"
+assert listed["data"]["providers"][0]["name"] == "fast_groq"
+print("36b. test_provider_add_preset ✓")
+
+with TemporaryDirectory() as tmpdir:
+    registry_path = Path(tmpdir) / "llm_registry.json"
+    requested_urls: list[str] = []
+
+    def _capture_urlopen(request: object, timeout: int = 60) -> _FakeHTTPResponse:
+        requested_urls.append(request.full_url)  # type: ignore[attr-defined]
+        return _fake_openai_compatible_urlopen(request, timeout)
+
+    with patch.dict(
+        os.environ,
+        {
+            "COQUERY_LLM_REGISTRY_PATH": str(registry_path),
+            "TEST_COMPAT_API_KEY": "secret",
+        },
+    ):
+        provider_add_handler(
+            "compat_api",
+            "openai_compatible",
+            "test-model",
+            "https://provider.example",
+            "TEST_COMPAT_API_KEY",
+            "https://provider.example/custom/chat/completions",
+            "https://provider.example/custom/models",
+        )
+        with patch("sql_cli.llm_registry.urlopen", side_effect=_capture_urlopen):
+            provider_test = provider_test_handler("compat_api")
+assert provider_test["ok"] is True
+assert provider_test["data"]["response_preview"] == "OK"
+assert requested_urls == ["https://provider.example/custom/chat/completions"]
+print("36c. test_openai_compatible_endpoint_override ✓")
+
+command_api_presets = run_command("provider_list_presets")
+assert command_api_presets["ok"] is True
+assert command_api_presets["block_type"] == "provider_presets"
+assert command_api_presets["actions"] == ["copy", "add_provider"]
+assert command_api_presets["cli_equivalent"] == "python main.py --command provider_list_presets --format json"
+assert [preset["name"] for preset in command_api_presets["data"]["presets"]] == [
+    "deepseek",
+    "gemini",
+    "groq",
+    "openai",
+    "openrouter",
+]
+print("36d. test_command_api_provider_list_presets ✓")
+
+with TemporaryDirectory() as tmpdir:
+    registry_path = Path(tmpdir) / "llm_registry.json"
+    with patch.dict(os.environ, {"COQUERY_LLM_REGISTRY_PATH": str(registry_path)}):
+        command_api_add_preset = run_command(
+            "provider_add_preset",
+            args={"preset": "gemini", "provider_name": "gemini_flash"},
+        )
+        command_api_list = run_command("provider_list")
+assert command_api_add_preset["ok"] is True
+assert command_api_add_preset["block_type"] == "provider_config"
+assert command_api_add_preset["data"]["provider"]["model_name"] == "gemini-3.5-flash"
+assert "--preset gemini" in command_api_add_preset["cli_equivalent"]
+assert command_api_list["data"]["providers"][0]["name"] == "gemini_flash"
+print("36e. test_command_api_provider_add_preset_and_list ✓")
+
+command_api_schema_detail = run_command(
+    "schema_detail",
+    args={"table": "users"},
+    context={"db": "example.db"},
+)
+assert command_api_schema_detail["ok"] is True
+assert command_api_schema_detail["block_type"] == "schema_detail"
+assert "copy" in command_api_schema_detail["actions"]
+assert command_api_schema_detail["data"]["tables"][0]["name"] == "users"
+assert command_api_schema_detail["cli_equivalent"] == (
+    "python main.py --command schema_detail --db example.db --table users --format json"
+)
+print("36f. test_command_api_schema_detail ✓")
+
+command_api_natural = run_command(
+    "natural",
+    args={"sql": "show users"},
+    context={"db": "example.db", "provider_name": "local_ollama"},
+)
+assert command_api_natural["ok"] is True
+assert command_api_natural["block_type"] == "natural_sql"
+assert command_api_natural["mode"] == "local_knowledge"
+assert command_api_natural["provider_skipped"] is True
+assert command_api_natural["sql"] == "SELECT * FROM users"
+assert "--provider-name local_ollama" in command_api_natural["cli_equivalent"]
+print("36g. test_command_api_natural_context ✓")
+
+command_api_unknown = run_command("not_a_command")
+assert command_api_unknown["ok"] is False
+assert command_api_unknown["error"]["code"] == "unknown_command"
+assert command_api_unknown["block_type"] == "command_result"
+assert command_api_unknown["cli_equivalent"] == "python main.py --command not_a_command --format json"
+print("36h. test_command_api_unknown_command ✓")
+
+help_catalog = help_catalog_handler("ko")
+assert help_catalog["ok"] is True
+assert help_catalog["data"]["language"] == "ko"
+assert any(command["id"] == "practice_grade" for command in help_catalog["data"]["commands"])
+assert any(term["id"] == "join" for term in help_catalog["data"]["terms"])
+print("36h1. test_help_catalog_ko ✓")
+
+command_help = command_explain_handler("natural", "ko")
+assert command_help["ok"] is True
+assert command_help["data"]["command"]["id"] == "natural"
+assert "자연어" in command_help["data"]["command"]["label"]
+assert command_help["data"]["related_terms"]
+print("36h2. test_command_explain_ko ✓")
+
+term_help = term_explain_handler("join", "en")
+assert term_help["ok"] is True
+assert term_help["data"]["term"]["label"] == "JOIN"
+assert "combine" in term_help["data"]["term"]["plain"]
+print("36h3. test_term_explain_en ✓")
+
+command_api_help = run_command("help_catalog", context={"lang": "en"})
+assert command_api_help["ok"] is True
+assert command_api_help["block_type"] == "help_catalog"
+assert command_api_help["data"]["language"] == "en"
+assert "--lang en" in command_api_help["cli_equivalent"]
+print("36h4. test_command_api_help_catalog ✓")
+
+rc, payload = run_cli(["--command", "command_explain", "--topic", "practice_grade", "--lang", "ko"])
+assert rc == 0
+assert payload["ok"] is True
+assert payload["data"]["command"]["id"] == "practice_grade"
+assert "오답노트" in payload["data"]["command"]["beginner"]
+print("36h5. test_cli_command_explain_ko ✓")
+
+practice_list = practice_list_handler()
+assert practice_list["ok"] is True
+assert practice_list["data"]["selected_pack"] == "sql_basics"
+assert practice_list["data"]["packs"][0]["problem_count"] >= 5
+assert practice_list["data"]["problems"][0]["id"] == "basic_select_customers"
+print("36i. test_practice_list ✓")
+
+practice_schema = practice_schema_handler(table="orders")
+assert practice_schema["ok"] is True
+assert practice_schema["data"]["dataset_id"] == "commerce_support"
+assert practice_schema["data"]["tables"][0]["name"] == "orders"
+assert practice_schema["data"]["tables"][0]["row_count"] == 6
+assert practice_schema["data"]["tables"][0]["foreign_keys"][0]["references_table"] == "customers"
+print("36j. test_practice_schema ✓")
+
+practice_query = practice_query_handler(
+    "SELECT id, name FROM customers WHERE region = 'Seoul' ORDER BY id",
+    limit=10,
+)
+assert practice_query["ok"] is True
+assert practice_query["data"]["columns"] == ["id", "name"]
+assert practice_query["data"]["rows"] == [
+    {"id": 1, "name": "Aster Foods"},
+    {"id": 3, "name": "Core Manufacturing"},
+]
+print("36k. test_practice_query ✓")
+
+practice_write_attempt = practice_query_handler("DELETE FROM customers")
+assert practice_write_attempt["ok"] is False
+assert practice_write_attempt["error"]["code"] == "practice_sql_not_select"
+print("36l. test_practice_query_rejects_writes ✓")
+
+with TemporaryDirectory() as tmpdir:
+    attempt_log = Path(tmpdir) / "attempts.jsonl"
+    with patch.dict(os.environ, {"COQUERY_PRACTICE_ATTEMPT_LOG": str(attempt_log)}):
+        practice_grade_correct = practice_grade_handler(
+            "basic_select_customers",
+            "SELECT id, name, region FROM customers ORDER BY id",
+        )
+        practice_grade_wrong = practice_grade_handler(
+            "basic_select_customers",
+            "SELECT id, name FROM customers ORDER BY id",
+        )
+        practice_attempts = practice_attempts_handler(limit=5)
+assert practice_grade_correct["ok"] is True
+assert practice_grade_correct["data"]["correct"] is True
+assert practice_grade_correct["data"]["attempt_recorded"] is True
+assert practice_grade_wrong["ok"] is True
+assert practice_grade_wrong["data"]["correct"] is False
+assert practice_attempts["data"]["attempt_count"] == 2
+assert practice_attempts["data"]["attempts"][-1]["correct"] is False
+print("36m. test_practice_grade_and_attempts ✓")
+
+rc, payload = run_cli(["--command", "practice_schema", "--table", "customers"])
+assert rc == 0
+assert payload["ok"] is True
+assert payload["data"]["tables"][0]["name"] == "customers"
+print("36n. test_cli_practice_schema ✓")
+
+command_api_practice_grade = run_command(
+    "practice_grade",
+    args={
+        "problem_id": "basic_select_customers",
+        "sql": "SELECT id, name, region FROM customers ORDER BY id",
+        "no_record": True,
+    },
+)
+assert command_api_practice_grade["ok"] is True
+assert command_api_practice_grade["block_type"] == "practice_grade"
+assert command_api_practice_grade["data"]["correct"] is True
+assert command_api_practice_grade["data"]["attempt_recorded"] is False
+assert "--no-record" in command_api_practice_grade["cli_equivalent"]
+print("36o. test_command_api_practice_grade ✓")
+
+command_api_practice_query = run_command(
+    "practice_query",
+    args={"sql": "SELECT COUNT(*) AS order_count FROM orders"},
+)
+assert command_api_practice_query["ok"] is True
+assert command_api_practice_query["block_type"] == "practice_query_result"
+assert command_api_practice_query["data"]["rows"] == [{"order_count": 6}]
+print("36p. test_command_api_practice_query ✓")
 
 with TemporaryDirectory() as tmpdir:
     registry_path = Path(tmpdir) / "llm_registry.json"
@@ -1404,4 +1682,4 @@ assert postgres_ssl_error["data"]["connection"]["hint"] == (
 print("96. test_doctor_postgresql_ssl_error_classification ✓")
 
 print("")
-print("=== ALL 96 TESTS PASS ✅ ===")
+print("=== ALL 119 TESTS PASS ✅ ===")

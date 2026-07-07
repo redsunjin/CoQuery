@@ -9,20 +9,30 @@ import sys
 from typing import Any
 
 from sql_cli.cli import (
+    command_explain_handler,
     doctor_handler,
     db_knowledge_handler,
     delete_handler,
     generate_handler,
+    help_catalog_handler,
     insert_handler,
     jpa_schema_handler,
     natural_handler,
+    practice_attempts_handler,
+    practice_grade_handler,
+    practice_list_handler,
+    practice_query_handler,
+    practice_schema_handler,
     provider_add_handler,
+    provider_add_preset_handler,
     provider_list_handler,
+    provider_list_presets_handler,
     provider_remove_handler,
     provider_test_handler,
     query_handler,
     schema_detail_handler,
     schema_handler,
+    term_explain_handler,
     update_handler,
 )
 
@@ -45,7 +55,7 @@ def main() -> int:
         "--command",
         type=str,
         default=None,
-        help="schema, schema_detail, doctor, query, generate, insert, update, delete, natural, jpa_schema, db_knowledge, provider_add, provider_list, provider_remove, provider_test",
+        help="schema, schema_detail, doctor, query, generate, insert, update, delete, natural, jpa_schema, db_knowledge, help_catalog, command_explain, term_explain, practice_list, practice_schema, practice_query, practice_grade, practice_attempts, provider_add, provider_list_presets, provider_add_preset, provider_list, provider_remove, provider_test",
     )
     parser.add_argument("--db", type=str, default="example.db", help="Legacy SQLite path or DB URI")
     parser.add_argument("--db-uri", type=str, default=None, help="Preferred multi-backend database URI")
@@ -55,12 +65,25 @@ def main() -> int:
     parser.add_argument("--params", type=str, default=None, help="JSON parameters payload")
     parser.add_argument("--provider-name", type=str, default=None, help="Registered LLM provider name")
     parser.add_argument("--provider-kind", type=str, default=None, help="LLM provider kind: ollama, openai_compatible")
+    parser.add_argument("--preset", type=str, default=None, help="Known provider preset name for provider_add_preset")
     parser.add_argument("--model-name", type=str, default=None, help="LLM model name for provider registration")
     parser.add_argument("--base-url", type=str, default=None, help="Base URL for provider registration")
+    parser.add_argument("--chat-completions-url", type=str, default=None, help="Direct chat completions endpoint override")
+    parser.add_argument("--models-url", type=str, default=None, help="Direct model listing endpoint override")
     parser.add_argument("--api-key-env", type=str, default=None, help="Environment variable name for API key")
     parser.add_argument("--jpa-project", type=str, default=None, help="Path to a Java/JPA project or .java entity file")
     parser.add_argument("--dialect", type=str, default=None, help="Knowledge dialect: sqlite, postgresql, mysql, jpql")
-    parser.add_argument("--topic", type=str, default=None, help="Knowledge topic, such as overview, statements, schema, schema_detail, pagination, coverage, write_safety")
+    parser.add_argument("--topic", type=str, default=None, help="Knowledge/help topic, such as schema, coverage, natural, or join")
+    parser.add_argument("--lang", type=str, default="ko", help="Help language: ko or en")
+    parser.add_argument("--pack", type=str, default=None, help="Practice pack id")
+    parser.add_argument("--problem-id", type=str, default=None, help="Practice problem id")
+    parser.add_argument("--limit", type=int, default=None, help="Practice query or attempts row limit")
+    parser.add_argument(
+        "--no-record",
+        action="store_true",
+        default=False,
+        help="Do not write a practice_grade attempt record",
+    )
     parser.add_argument("--format", type=str, default="json", help="Output format")
     parser.add_argument(
         "--write",
@@ -90,7 +113,7 @@ def main() -> int:
 
     if not args.command:
         print("CoQuery v0.7.1")
-        print("commands: schema, schema_detail, doctor, query, generate, insert, update, delete, natural, jpa_schema, db_knowledge, provider_add, provider_list, provider_remove, provider_test")
+        print("commands: schema, schema_detail, doctor, query, generate, insert, update, delete, natural, jpa_schema, db_knowledge, help_catalog, command_explain, term_explain, practice_list, practice_schema, practice_query, practice_grade, practice_attempts, provider_add, provider_list_presets, provider_add_preset, provider_list, provider_remove, provider_test")
         print("write commands require explicit --write and --sql")
         print("state-changing commands support optional --dry-run preview and --max-affected-rows guard")
         print("full-table UPDATE/DELETE requires explicit --allow-full-table-write")
@@ -154,6 +177,22 @@ def main() -> int:
         result = jpa_schema_handler(args.jpa_project, args.format)
     elif args.command == "db_knowledge":
         result = db_knowledge_handler(args.dialect, args.topic)
+    elif args.command == "help_catalog":
+        result = help_catalog_handler(args.lang)
+    elif args.command == "command_explain":
+        result = command_explain_handler(args.topic, args.lang)
+    elif args.command == "term_explain":
+        result = term_explain_handler(args.topic, args.lang)
+    elif args.command == "practice_list":
+        result = practice_list_handler(args.pack)
+    elif args.command == "practice_schema":
+        result = practice_schema_handler(args.pack, args.table)
+    elif args.command == "practice_query":
+        result = practice_query_handler(args.sql, args.pack, args.limit)
+    elif args.command == "practice_grade":
+        result = practice_grade_handler(args.problem_id, args.sql, args.pack, record=not args.no_record)
+    elif args.command == "practice_attempts":
+        result = practice_attempts_handler(args.pack, args.problem_id, args.limit)
     elif args.command == "provider_add":
         result = provider_add_handler(
             args.provider_name,
@@ -161,6 +200,20 @@ def main() -> int:
             args.model_name,
             args.base_url,
             args.api_key_env,
+            args.chat_completions_url,
+            args.models_url,
+        )
+    elif args.command == "provider_list_presets":
+        result = provider_list_presets_handler()
+    elif args.command == "provider_add_preset":
+        result = provider_add_preset_handler(
+            args.preset,
+            args.provider_name,
+            args.model_name,
+            args.api_key_env,
+            args.base_url,
+            args.chat_completions_url,
+            args.models_url,
         )
     elif args.command == "provider_list":
         result = provider_list_handler()

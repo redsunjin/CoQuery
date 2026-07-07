@@ -1,0 +1,129 @@
+{
+  "id": "sql_basics",
+  "title": "SQL Basics Practice Pack",
+  "description": "Small built-in commerce and support dataset for practicing SELECT, WHERE, JOIN, GROUP BY, and review flows without connecting to a production database.",
+  "dataset": {
+    "id": "commerce_support",
+    "title": "Commerce Support Sample",
+    "tables": [
+      {
+        "name": "customers",
+        "description": "Customer accounts used for join and filtering practice.",
+        "columns": [
+          {"name": "id", "type": "INTEGER", "description": "Customer primary key"},
+          {"name": "name", "type": "TEXT", "description": "Customer display name"},
+          {"name": "region", "type": "TEXT", "description": "Operating region"},
+          {"name": "segment", "type": "TEXT", "description": "Business segment"}
+        ],
+        "primary_key": ["id"],
+        "rows": [
+          {"id": 1, "name": "Aster Foods", "region": "Seoul", "segment": "retail"},
+          {"id": 2, "name": "Blue Clinic", "region": "Busan", "segment": "healthcare"},
+          {"id": 3, "name": "Core Manufacturing", "region": "Seoul", "segment": "manufacturing"},
+          {"id": 4, "name": "Delta Learning", "region": "Incheon", "segment": "education"}
+        ]
+      },
+      {
+        "name": "orders",
+        "description": "Order facts for filtering, joining, and aggregation practice.",
+        "columns": [
+          {"name": "id", "type": "INTEGER", "description": "Order primary key"},
+          {"name": "customer_id", "type": "INTEGER", "description": "Customer foreign key"},
+          {"name": "order_date", "type": "TEXT", "description": "Order date in ISO format"},
+          {"name": "status", "type": "TEXT", "description": "Order workflow status"},
+          {"name": "total_amount", "type": "INTEGER", "description": "Order amount in KRW"}
+        ],
+        "primary_key": ["id"],
+        "foreign_keys": [
+          {"column": "customer_id", "references_table": "customers", "references_column": "id"}
+        ],
+        "rows": [
+          {"id": 101, "customer_id": 1, "order_date": "2026-01-05", "status": "paid", "total_amount": 125000},
+          {"id": 102, "customer_id": 1, "order_date": "2026-01-20", "status": "pending", "total_amount": 78000},
+          {"id": 103, "customer_id": 2, "order_date": "2026-02-03", "status": "paid", "total_amount": 43000},
+          {"id": 104, "customer_id": 3, "order_date": "2026-02-10", "status": "paid", "total_amount": 210000},
+          {"id": 105, "customer_id": 4, "order_date": "2026-03-01", "status": "cancelled", "total_amount": 56000},
+          {"id": 106, "customer_id": 3, "order_date": "2026-03-15", "status": "paid", "total_amount": 99000}
+        ]
+      },
+      {
+        "name": "support_tickets",
+        "description": "Support requests for status and priority filtering practice.",
+        "columns": [
+          {"name": "id", "type": "INTEGER", "description": "Ticket primary key"},
+          {"name": "customer_id", "type": "INTEGER", "description": "Customer foreign key"},
+          {"name": "opened_date", "type": "TEXT", "description": "Ticket open date in ISO format"},
+          {"name": "priority", "type": "TEXT", "description": "Ticket priority"},
+          {"name": "status", "type": "TEXT", "description": "Ticket status"}
+        ],
+        "primary_key": ["id"],
+        "foreign_keys": [
+          {"column": "customer_id", "references_table": "customers", "references_column": "id"}
+        ],
+        "rows": [
+          {"id": 501, "customer_id": 1, "opened_date": "2026-02-01", "priority": "high", "status": "open"},
+          {"id": 502, "customer_id": 2, "opened_date": "2026-02-04", "priority": "low", "status": "closed"},
+          {"id": 503, "customer_id": 3, "opened_date": "2026-03-11", "priority": "high", "status": "open"},
+          {"id": 504, "customer_id": 4, "opened_date": "2026-03-12", "priority": "medium", "status": "open"}
+        ]
+      }
+    ]
+  },
+  "examples": [
+    {
+      "title": "Show paid orders",
+      "sql": "SELECT id, customer_id, total_amount FROM orders WHERE status = 'paid' ORDER BY id"
+    },
+    {
+      "title": "Join customers and orders",
+      "sql": "SELECT customers.name, orders.total_amount FROM customers JOIN orders ON customers.id = orders.customer_id ORDER BY orders.id"
+    }
+  ],
+  "problems": [
+    {
+      "id": "basic_select_customers",
+      "title": "List all customers",
+      "difficulty": "beginner",
+      "prompt": "Return each customer id, name, and region ordered by id.",
+      "concepts": ["select", "order_by"],
+      "hint": "Start from the customers table and select only the requested columns.",
+      "expected_sql": "SELECT id, name, region FROM customers ORDER BY id"
+    },
+    {
+      "id": "paid_large_orders",
+      "title": "Find high-value paid orders",
+      "difficulty": "beginner",
+      "prompt": "Return order id, customer_id, and total_amount for paid orders with total_amount at least 100000, ordered by total_amount descending.",
+      "concepts": ["where", "and", "order_by"],
+      "hint": "Filter status and total_amount together.",
+      "expected_sql": "SELECT id, customer_id, total_amount FROM orders WHERE status = 'paid' AND total_amount >= 100000 ORDER BY total_amount DESC"
+    },
+    {
+      "id": "paid_order_customers",
+      "title": "Join paid orders to customers",
+      "difficulty": "intermediate",
+      "prompt": "Return customer name, order id, and total_amount for paid orders ordered by order id.",
+      "concepts": ["join", "where", "order_by"],
+      "hint": "Join customers.id to orders.customer_id.",
+      "expected_sql": "SELECT customers.name, orders.id, orders.total_amount FROM customers JOIN orders ON customers.id = orders.customer_id WHERE orders.status = 'paid' ORDER BY orders.id"
+    },
+    {
+      "id": "paid_orders_by_region",
+      "title": "Summarize paid orders by region",
+      "difficulty": "intermediate",
+      "prompt": "Return region, paid order count, and paid total amount by region ordered by region.",
+      "concepts": ["join", "group_by", "count", "sum"],
+      "hint": "Join customers to orders, filter paid orders, then group by region.",
+      "expected_sql": "SELECT customers.region, COUNT(orders.id) AS order_count, SUM(orders.total_amount) AS total_amount FROM customers JOIN orders ON customers.id = orders.customer_id WHERE orders.status = 'paid' GROUP BY customers.region ORDER BY customers.region"
+    },
+    {
+      "id": "open_high_tickets",
+      "title": "Find open high priority tickets",
+      "difficulty": "beginner",
+      "prompt": "Return ticket id and customer_id for open high priority tickets ordered by ticket id.",
+      "concepts": ["where", "and", "order_by"],
+      "hint": "Use support_tickets and filter both priority and status.",
+      "expected_sql": "SELECT id, customer_id FROM support_tickets WHERE status = 'open' AND priority = 'high' ORDER BY id"
+    }
+  ]
+}

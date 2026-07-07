@@ -7,9 +7,23 @@ from typing import Any, Optional
 
 from sql_cli.db_new import CoQueryDB, CoQueryDBError
 from sql_cli.dialect_rules import CoQueryKnowledgeError, lookup_knowledge
+from sql_cli.help_catalog import CoQueryHelpError, explain_command, explain_term, get_help_catalog
 from sql_cli.jpa import CoQueryJPAError, scan_jpa_project
 from sql_cli.knowledge_planner import build_generation_context, build_write_context
-from sql_cli.llm_registry import CoQueryLLMError, LLMProviderClient, LLMProviderRegistry
+from sql_cli.llm_registry import (
+    CoQueryLLMError,
+    LLMProviderClient,
+    LLMProviderRegistry,
+    get_provider_preset,
+    list_provider_presets,
+)
+from sql_cli.practice import (
+    practice_attempts_handler,
+    practice_grade_handler,
+    practice_list_handler,
+    practice_query_handler,
+    practice_schema_handler,
+)
 from sql_cli.schema_guard import (
     generation_schema_requirements,
     schema_validation_failed,
@@ -92,6 +106,10 @@ def _jpa_error(command: str, exc: CoQueryJPAError) -> dict[str, Any]:
 
 def _knowledge_error(command: str, exc: CoQueryKnowledgeError) -> dict[str, Any]:
     return _error(command, exc.code, exc.message)
+
+
+def _help_error(command: str, exc: CoQueryHelpError) -> dict[str, Any]:
+    return _error(command, exc.code, exc.message, exc.data)
 
 
 def _run_write_command(
@@ -399,6 +417,8 @@ def provider_add_handler(
     model_name: Optional[str],
     base_url: Optional[str] = None,
     api_key_env: Optional[str] = None,
+    chat_completions_url: Optional[str] = None,
+    models_url: Optional[str] = None,
 ) -> dict[str, Any]:
     try:
         registry = LLMProviderRegistry()
@@ -408,6 +428,8 @@ def provider_add_handler(
             model_name=model_name or "",
             base_url=base_url or "",
             api_key_env=api_key_env,
+            chat_completions_url=chat_completions_url,
+            models_url=models_url,
         )
         return _success(
             "provider_add",
@@ -420,6 +442,53 @@ def provider_add_handler(
         return _llm_error("provider_add", e)
     except Exception as e:
         return _error("provider_add", "execution_error", str(e))
+
+
+def provider_list_presets_handler() -> dict[str, Any]:
+    try:
+        return _success("provider_list_presets", {"presets": list_provider_presets()})
+    except CoQueryLLMError as e:
+        return _llm_error("provider_list_presets", e)
+    except Exception as e:
+        return _error("provider_list_presets", "execution_error", str(e))
+
+
+def provider_add_preset_handler(
+    preset: Optional[str],
+    provider_name: Optional[str],
+    model_name: Optional[str],
+    api_key_env: Optional[str] = None,
+    base_url: Optional[str] = None,
+    chat_completions_url: Optional[str] = None,
+    models_url: Optional[str] = None,
+) -> dict[str, Any]:
+    try:
+        preset_data = get_provider_preset(preset)
+        resolved_model = model_name or preset_data.get("default_model") or ""
+        registry = LLMProviderRegistry()
+        provider = registry.upsert_profile(
+            name=provider_name or preset_data["name"],
+            kind=str(preset_data["kind"]),
+            model_name=str(resolved_model),
+            base_url=base_url or str(preset_data.get("base_url") or ""),
+            api_key_env=api_key_env or preset_data.get("api_key_env"),
+            preset=preset_data["name"],
+            cost_profile=preset_data.get("cost_profile"),
+            chat_completions_url=chat_completions_url or preset_data.get("chat_completions_url"),
+            models_url=models_url or preset_data.get("models_url"),
+        )
+        return _success(
+            "provider_add_preset",
+            {
+                "preset": preset_data,
+                "provider": provider,
+                "registry_path": str(registry.path),
+            },
+        )
+    except CoQueryLLMError as e:
+        return _llm_error("provider_add_preset", e)
+    except Exception as e:
+        return _error("provider_add_preset", "execution_error", str(e))
 
 
 def provider_list_handler() -> dict[str, Any]:
@@ -484,6 +553,31 @@ def db_knowledge_handler(dialect: Optional[str] = None, topic: Optional[str] = N
         return _knowledge_error("db_knowledge", e)
     except Exception as e:
         return _error("db_knowledge", "execution_error", str(e))
+
+
+def help_catalog_handler(lang: Optional[str] = None) -> dict[str, Any]:
+    try:
+        return _success("help_catalog", get_help_catalog(lang))
+    except Exception as e:
+        return _error("help_catalog", "execution_error", str(e))
+
+
+def command_explain_handler(topic: Optional[str] = None, lang: Optional[str] = None) -> dict[str, Any]:
+    try:
+        return _success("command_explain", explain_command(topic, lang))
+    except CoQueryHelpError as e:
+        return _help_error("command_explain", e)
+    except Exception as e:
+        return _error("command_explain", "execution_error", str(e))
+
+
+def term_explain_handler(topic: Optional[str] = None, lang: Optional[str] = None) -> dict[str, Any]:
+    try:
+        return _success("term_explain", explain_term(topic, lang))
+    except CoQueryHelpError as e:
+        return _help_error("term_explain", e)
+    except Exception as e:
+        return _error("term_explain", "execution_error", str(e))
 
 
 def insert_handler(
