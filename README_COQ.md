@@ -27,6 +27,7 @@ Command API Adapter verified for app-shell handler reuse
 Responsive Terminal Shell Prototype verified as a local Command API app shell
 Provider Preset Mobile Flow verified in the dark-mode terminal shell prototype
 Practice Dataset Sandbox verified for DB-free sample schema, query, grading, attempts, CLI, and Command API paths
+Query Practice Flow UI verified for problem start, schema view, SQL submit, grading, and local attempt review
 Bilingual beginner help verified for Korean/English command and SQL term guidance
 GitHub Actions baseline and PostgreSQL smoke workflows last recorded as verified on 2026-04-27 UTC for `main` commit `7e677fe`
 Public GitHub repository verified
@@ -35,7 +36,7 @@ Public GitHub repository verified
 Service launch plan:
 
 - `SERVICE_LAUNCH_PLAN_2026-07-07.md`
-- Next recommended `/goal`: `Launch Goal 1: Query Practice Flow UI`
+- Next recommended `/goal`: `Launch Goal 2: Wrong Note And Feedback`
 
 Scope decision:
 

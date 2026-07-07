@@ -87,6 +87,23 @@ const i18n = {
     practiceSchema: "연습 데이터셋 구조입니다.",
     returnedRows: "연습 행 반환",
     practiceAnswer: "연습 답안",
+    practiceStart: "연습 시작",
+    practiceOpenProblem: "문제 열기",
+    practiceInspectSchema: "스키마 보기",
+    practiceShowAttempts: "시도 보기",
+    practiceProblemPrompt: "문제",
+    practiceHint: "힌트",
+    practiceSqlLabel: "SQL 입력",
+    practiceSqlPlaceholder: "SELECT 문을 입력하세요",
+    practiceSubmit: "실행 및 채점",
+    practiceRunning: "연습 쿼리 실행 중...",
+    practiceFlowSummary: "스키마를 확인하고 SQL을 입력한 뒤 실행 및 채점을 누르세요.",
+    practiceAttemptRecorded: "시도 기록 저장됨",
+    practiceAttempts: "최근 연습 시도",
+    practiceNoAttempts: "저장된 시도 없음",
+    submittedSql: "제출 SQL",
+    actualRows: "실제 행",
+    expectedRows: "예상 행",
     correct: "정답",
     needsReview: "복습 필요",
     commandCompleted: "명령 완료",
@@ -160,6 +177,23 @@ const i18n = {
     practiceSchema: "Practice dataset schema.",
     returnedRows: "Returned practice rows",
     practiceAnswer: "Practice answer",
+    practiceStart: "Start practice",
+    practiceOpenProblem: "Open problem",
+    practiceInspectSchema: "Inspect schema",
+    practiceShowAttempts: "Show attempts",
+    practiceProblemPrompt: "Problem",
+    practiceHint: "Hint",
+    practiceSqlLabel: "SQL input",
+    practiceSqlPlaceholder: "Type a SELECT statement",
+    practiceSubmit: "Run and grade",
+    practiceRunning: "Running practice query...",
+    practiceFlowSummary: "Inspect the schema, type SQL, then run and grade it.",
+    practiceAttemptRecorded: "Attempt recorded",
+    practiceAttempts: "Recent practice attempts",
+    practiceNoAttempts: "No attempts saved",
+    submittedSql: "Submitted SQL",
+    actualRows: "Actual rows",
+    expectedRows: "Expected rows",
     correct: "correct",
     needsReview: "needs review",
     commandCompleted: "Command completed",
@@ -342,6 +376,48 @@ function providerSetupResult(presetName = "gemini") {
   };
 }
 
+function practiceCliEquivalent(problemId, sql = "", packId = "sql_basics") {
+  const parts = [
+    "python",
+    "main.py",
+    "--command",
+    "practice_grade",
+    "--problem-id",
+    quoteCliValue(problemId || "basic_select_customers"),
+    "--sql",
+    quoteCliValue(sql || "SELECT ..."),
+  ];
+  if (packId && packId !== "sql_basics") {
+    parts.push("--pack", quoteCliValue(packId));
+  }
+  parts.push("--format", "json");
+  return parts.join(" ");
+}
+
+function practiceStartResult(problem = {}, packId = "sql_basics") {
+  const problemId = problem.id || "basic_select_customers";
+  const values = {
+    packId,
+    problem: {
+      id: problemId,
+      title: problem.title || problemId,
+      difficulty: problem.difficulty || "practice",
+      prompt: problem.prompt || t("practiceProblemPrompt"),
+      concepts: Array.isArray(problem.concepts) ? problem.concepts : [],
+      hint: problem.hint || "",
+    },
+  };
+  return {
+    ok: true,
+    command: "practice_start",
+    block_type: "practice_flow",
+    actions: ["show_schema", "grade", "save_attempt", "review_wrong_notes"],
+    cli_equivalent: practiceCliEquivalent(problemId, "", packId),
+    data: values,
+    error: null,
+  };
+}
+
 function parseCommand(raw) {
   const text = raw.trim();
   if (!text) {
@@ -380,6 +456,9 @@ function parseCommand(raw) {
   }
   if (command === "provider_setup") {
     return { local: "provider_setup", preset: rest[0] || "gemini" };
+  }
+  if (command === "practice_start") {
+    return { local: "practice_start", problem: { id: rest[0] || "basic_select_customers" }, pack: rest[1] || "sql_basics" };
   }
   if (command === "practice_schema") {
     return { command, args: { table: tail || undefined }, context: {} };
@@ -427,6 +506,10 @@ async function loadHelpCatalog() {
 async function runParsedCommand(parsed) {
   if (parsed.local === "provider_setup") {
     addBlock(providerSetupResult(parsed.preset));
+    return;
+  }
+  if (parsed.local === "practice_start") {
+    addBlock(practiceStartResult(parsed.problem, parsed.pack));
     return;
   }
 
@@ -650,17 +733,77 @@ function summarizeResult(result) {
   }
 
   if (result.command === "practice_list") {
+    const packId = result.data?.selected_pack || "sql_basics";
     const rows = (result.data?.problems || [])
       .slice(0, 6)
       .map((problem) => {
-        return `<div class="schema-row"><strong>${escapeHtml(problem.id)}</strong><span>${escapeHtml(
-          problem.difficulty || "practice"
-        )}</span></div>`;
+        const concepts = (problem.concepts || []).join(",");
+        return `<div class="preset-row practice-problem-row"
+          data-pack-id="${escapeHtml(packId)}"
+          data-problem-id="${escapeHtml(problem.id)}"
+          data-problem-title="${escapeHtml(problem.title || problem.id)}"
+          data-problem-difficulty="${escapeHtml(problem.difficulty || "practice")}"
+          data-problem-prompt="${escapeHtml(problem.prompt || "")}"
+          data-problem-hint="${escapeHtml(problem.hint || "")}"
+          data-problem-concepts="${escapeHtml(concepts)}">
+          <span class="practice-problem-copy">
+            <strong>${escapeHtml(problem.title || problem.id)}</strong>
+            <span class="preset-meta">${escapeHtml(problem.id)} · ${escapeHtml(problem.difficulty || "practice")}</span>
+            <span>${escapeHtml(problem.prompt || "")}</span>
+          </span>
+          <span class="preset-row-actions">
+            <button class="mini-button practice-start-button" type="button">${escapeHtml(t("practiceOpenProblem"))}</button>
+            <button class="mini-button practice-schema-button" type="button">${escapeHtml(t("practiceInspectSchema"))}</button>
+          </span>
+        </div>`;
       })
       .join("");
     return `<p class="block-summary">${escapeHtml(t("practiceProblems"))} <strong>${escapeHtml(
-      result.data?.selected_pack || "sql_basics"
+      packId
     )}</strong>.</p><div class="block-grid">${rows}</div>`;
+  }
+
+  if (result.command === "practice_start") {
+    const problem = result.data?.problem || {};
+    const packId = result.data?.packId || "sql_basics";
+    const concepts = (problem.concepts || []).map((concept) => `<span class="pill">${escapeHtml(concept)}</span>`).join("");
+    return `<p class="block-summary">${escapeHtml(t("practiceStart"))}: <strong>${escapeHtml(
+      problem.title || problem.id || "practice"
+    )}</strong></p>
+      <form class="practice-flow-form" data-practice-form data-problem-id="${escapeHtml(
+        problem.id || "basic_select_customers"
+      )}" data-pack-id="${escapeHtml(packId)}">
+        <div class="practice-problem-card">
+          <div class="practice-problem-head">
+            <span class="pill">${escapeHtml(problem.difficulty || "practice")}</span>
+            ${concepts}
+          </div>
+          <div class="section-label">${escapeHtml(t("practiceProblemPrompt"))}</div>
+          <p>${escapeHtml(problem.prompt || "")}</p>
+          ${
+            problem.hint
+              ? `<div class="practice-hint"><strong>${escapeHtml(t("practiceHint"))}</strong><span>${escapeHtml(problem.hint)}</span></div>`
+              : ""
+          }
+        </div>
+        <div class="practice-flow-actions">
+          <button class="ghost-button practice-schema-button" type="button">${escapeHtml(t("practiceInspectSchema"))}</button>
+          <button class="ghost-button practice-attempts-button" type="button">${escapeHtml(t("practiceShowAttempts"))}</button>
+        </div>
+        <label class="field practice-sql-field">
+          <span>${escapeHtml(t("practiceSqlLabel"))}</span>
+          <textarea name="sql" spellcheck="false" autocomplete="off" placeholder="${escapeHtml(
+            t("practiceSqlPlaceholder")
+          )}"></textarea>
+        </label>
+        <div class="cli-line practice-preview" data-practice-preview>${escapeHtml(
+          practiceCliEquivalent(problem.id, "", packId)
+        )}</div>
+        <div class="practice-flow-actions">
+          <button class="primary-button" type="submit" data-practice-submit>${escapeHtml(t("practiceSubmit"))}</button>
+        </div>
+        <div class="practice-status" data-practice-status>${escapeHtml(t("practiceFlowSummary"))}</div>
+      </form>`;
   }
 
   if (result.command === "practice_schema") {
@@ -690,7 +833,40 @@ function summarizeResult(result) {
     return `<p class="block-summary">${escapeHtml(t("practiceAnswer"))}: <strong>${
       result.data?.correct ? escapeHtml(t("correct")) : escapeHtml(t("needsReview"))
     }</strong></p>
+      <div class="block-grid">
+        <div class="metric-row"><strong>${escapeHtml(t("actualRows"))}</strong><span>${escapeHtml(
+          result.data?.actual?.row_count ?? 0
+        )}</span></div>
+        <div class="metric-row"><strong>${escapeHtml(t("expectedRows"))}</strong><span>${escapeHtml(
+          result.data?.expected?.row_count ?? 0
+        )}</span></div>
+        <div class="metric-row"><strong>${escapeHtml(t("practiceAttemptRecorded"))}</strong><span>${escapeHtml(
+          result.data?.attempt_recorded ? "yes" : "no"
+        )}</span></div>
+      </div>
       <div class="cli-line">${escapeHtml(result.data?.feedback || "")}</div>`;
+  }
+
+  if (result.command === "practice_attempts") {
+    const rows = (result.data?.attempts || [])
+      .slice()
+      .reverse()
+      .map((attempt) => {
+        return `<div class="attempt-row">
+          <div class="attempt-row-head">
+            <strong>${escapeHtml(attempt.problem_id || "practice")}</strong>
+            <span class="pill">${escapeHtml(attempt.correct ? t("correct") : t("needsReview"))}</span>
+          </div>
+          <div class="preset-meta">${escapeHtml(attempt.timestamp || "")}</div>
+          <div class="cli-line">${escapeHtml(t("submittedSql"))}: ${escapeHtml(attempt.sql || "")}</div>
+        </div>`;
+      })
+      .join("");
+    return `<p class="block-summary">${escapeHtml(t("practiceAttempts"))}: <strong>${escapeHtml(
+      result.data?.attempt_count || 0
+    )}</strong>.</p><div class="block-grid">${
+      rows || `<div class="schema-row"><strong>${escapeHtml(t("practiceNoAttempts"))}</strong><span>${escapeHtml(t("practiceStart"))}</span></div>`
+    }</div>`;
   }
 
   return `<p class="block-summary">${escapeHtml(t("commandCompleted"))}: <strong>${escapeHtml(
@@ -792,6 +968,132 @@ function bindPresetButtons(block) {
   });
 }
 
+function problemFromRow(row) {
+  if (!row) {
+    return { id: "basic_select_customers", title: "Practice", difficulty: "practice", prompt: "", hint: "", concepts: [] };
+  }
+  const concepts = row.dataset.problemConcepts
+    ? row.dataset.problemConcepts.split(",").map((item) => item.trim()).filter(Boolean)
+    : [];
+  return {
+    id: row.dataset.problemId || "basic_select_customers",
+    title: row.dataset.problemTitle || row.dataset.problemId || "Practice",
+    difficulty: row.dataset.problemDifficulty || "practice",
+    prompt: row.dataset.problemPrompt || "",
+    hint: row.dataset.problemHint || "",
+    concepts,
+  };
+}
+
+function updatePracticePreview(form) {
+  const preview = form.querySelector("[data-practice-preview]");
+  const textarea = form.querySelector('textarea[name="sql"]');
+  if (preview && textarea) {
+    preview.textContent = practiceCliEquivalent(form.dataset.problemId, textarea.value.trim(), form.dataset.packId);
+  }
+}
+
+function bindPracticeButtons(block) {
+  block.querySelectorAll(".practice-problem-row .practice-start-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      const row = button.closest(".practice-problem-row");
+      addBlock(practiceStartResult(problemFromRow(row), row?.dataset.packId || "sql_basics"));
+    });
+  });
+  block.querySelectorAll(".practice-problem-row .practice-schema-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      const row = button.closest(".practice-problem-row");
+      runParsedCommand({
+        command: "practice_schema",
+        args: { pack: row?.dataset.packId || "sql_basics" },
+        context: {},
+      });
+    });
+  });
+}
+
+function bindPracticeFlow(block) {
+  const form = block.querySelector("[data-practice-form]");
+  if (!form) {
+    return;
+  }
+
+  const textarea = form.querySelector('textarea[name="sql"]');
+  const status = form.querySelector("[data-practice-status]");
+  const problemId = form.dataset.problemId || "basic_select_customers";
+  const packId = form.dataset.packId || "sql_basics";
+
+  const setStatus = (message, state = "") => {
+    if (status) {
+      status.textContent = message;
+      status.className = `practice-status ${state}`.trim();
+    }
+  };
+
+  if (textarea) {
+    textarea.addEventListener("input", () => updatePracticePreview(form));
+  }
+
+  const schemaButton = form.querySelector(".practice-schema-button");
+  if (schemaButton) {
+    schemaButton.addEventListener("click", () => {
+      runParsedCommand({ command: "practice_schema", args: { pack: packId }, context: {} });
+    });
+  }
+
+  const attemptsButton = form.querySelector(".practice-attempts-button");
+  if (attemptsButton) {
+    attemptsButton.addEventListener("click", () => {
+      runParsedCommand({ command: "practice_attempts", args: { pack: packId, problem_id: problemId, limit: 5 }, context: {} });
+    });
+  }
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const sql = textarea?.value.trim() || "";
+    if (!sql) {
+      setStatus(t("practiceSqlPlaceholder"), "error");
+      return;
+    }
+
+    setStatus(t("practiceRunning"));
+    updatePracticePreview(form);
+
+    try {
+      const queryResult = await postCommand("practice_query", { sql, pack: packId, limit: 20 }, {});
+      addBlock(queryResult);
+      if (!queryResult.ok) {
+        setStatus(queryResult.error?.message || t("commandFailed"), "error");
+        return;
+      }
+
+      const gradeResult = await postCommand("practice_grade", { problem_id: problemId, sql, pack: packId }, {});
+      addBlock(gradeResult);
+      if (!gradeResult.ok) {
+        setStatus(gradeResult.error?.message || t("commandFailed"), "error");
+        return;
+      }
+
+      const verdict = gradeResult.data?.correct ? t("correct") : t("needsReview");
+      const recorded = gradeResult.data?.attempt_recorded ? ` · ${t("practiceAttemptRecorded")}` : "";
+      setStatus(`${verdict}${recorded}`, gradeResult.data?.correct ? "ok" : "error");
+
+      if (!gradeResult.data?.correct) {
+        const attemptsResult = await postCommand(
+          "practice_attempts",
+          { pack: packId, problem_id: problemId, limit: 5 },
+          {}
+        );
+        addBlock(attemptsResult);
+      }
+    } catch (error) {
+      setStatus(error.message, "error");
+    }
+  });
+
+  updatePracticePreview(form);
+}
+
 function blockTemplate(result) {
   return `
     <div class="block-command">
@@ -811,6 +1113,8 @@ function renderBlock(block, result) {
   block.innerHTML = blockTemplate(result);
   bindPresetButtons(block);
   bindProviderSetup(block);
+  bindPracticeButtons(block);
+  bindPracticeFlow(block);
 }
 
 function addBlock(result) {

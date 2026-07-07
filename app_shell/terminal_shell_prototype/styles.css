@@ -58,7 +58,8 @@ html[lang="en"] body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -503,6 +504,17 @@ pre {
   gap: 3px;
 }
 
+.practice-problem-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.practice-problem-copy span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .preset-copy strong,
 .schema-row strong,
 .metric-row strong {
@@ -520,7 +532,9 @@ pre {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
   flex: 0 0 auto;
+  min-width: 0;
 }
 
 .pill {
@@ -578,20 +592,36 @@ pre {
 }
 
 .field input,
-.field select {
+.field select,
+.field textarea {
   width: 100%;
   min-width: 0;
-  min-height: 40px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 0 11px;
   outline: 0;
   background: #10110f;
   color: var(--text);
 }
 
+.field input,
+.field select {
+  min-height: 40px;
+  padding: 0 11px;
+}
+
+.field textarea {
+  min-height: 132px;
+  max-width: 100%;
+  padding: 11px;
+  resize: vertical;
+  font-family: var(--mono);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
 .field input:focus,
-.field select:focus {
+.field select:focus,
+.field textarea:focus {
   border-color: var(--accent-strong);
 }
 
@@ -616,6 +646,87 @@ pre {
 }
 
 .provider-status.error {
+  color: var(--danger);
+}
+
+.practice-flow-form {
+  margin-top: 14px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.practice-problem-row {
+  align-items: flex-start;
+}
+
+.practice-problem-card,
+.attempt-row {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--panel-raised);
+}
+
+.practice-problem-card p {
+  margin: 7px 0 0;
+  color: #d9d6cb;
+  line-height: 1.6;
+}
+
+.practice-problem-head,
+.attempt-row-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.practice-hint {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.practice-hint strong {
+  color: var(--text);
+}
+
+.practice-flow-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+.practice-flow-actions button {
+  max-width: 100%;
+}
+
+.practice-sql-field {
+  max-width: 100%;
+}
+
+.practice-preview {
+  margin-top: 0;
+}
+
+.practice-status {
+  min-height: 20px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.practice-status.ok {
+  color: var(--ok);
+}
+
+.practice-status.error {
   color: var(--danger);
 }
 
@@ -883,6 +994,11 @@ pre {
   }
 
   .provider-flow-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .practice-flow-actions {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
   }

@@ -47,6 +47,7 @@ def request_json(port: int, method: str, path: str, payload: dict[str, Any] | No
 def run_server_smoke() -> None:
     with tempfile.TemporaryDirectory() as tmpdir:
         os.environ["COQUERY_LLM_REGISTRY_PATH"] = str(Path(tmpdir) / "llm_providers.json")
+        os.environ["COQUERY_PRACTICE_ATTEMPT_LOG"] = str(Path(tmpdir) / "practice_attempts.jsonl")
         server = ThreadingHTTPServer(("127.0.0.1", 0), TerminalShellHandler)
         port = server.server_address[1]
         thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -105,6 +106,61 @@ def run_server_smoke() -> None:
             assert practice["ok"] is True
             assert practice["block_type"] == "practice_list"
             assert practice["data"]["selected_pack"] == "sql_basics"
+            assert any(item["id"] == "basic_select_customers" for item in practice["data"]["problems"])
+
+            practice_schema = request_json(
+                port,
+                "POST",
+                "/api/commands/run",
+                {"command": "practice_schema", "args": {}, "context": {}},
+            )
+            assert practice_schema["ok"] is True
+            assert practice_schema["block_type"] == "practice_schema"
+            assert practice_schema["data"]["table_count"] >= 1
+
+            practice_query = request_json(
+                port,
+                "POST",
+                "/api/commands/run",
+                {
+                    "command": "practice_query",
+                    "args": {"sql": "SELECT id, name, region FROM customers ORDER BY id", "limit": 20},
+                    "context": {},
+                },
+            )
+            assert practice_query["ok"] is True
+            assert practice_query["block_type"] == "practice_query_result"
+            assert practice_query["data"]["row_count"] == 4
+
+            wrong_grade = request_json(
+                port,
+                "POST",
+                "/api/commands/run",
+                {
+                    "command": "practice_grade",
+                    "args": {"problem_id": "basic_select_customers", "sql": "SELECT id, name FROM customers ORDER BY id"},
+                    "context": {},
+                },
+            )
+            assert wrong_grade["ok"] is True
+            assert wrong_grade["block_type"] == "practice_grade"
+            assert wrong_grade["data"]["correct"] is False
+            assert wrong_grade["data"]["attempt_recorded"] is True
+
+            practice_attempts = request_json(
+                port,
+                "POST",
+                "/api/commands/run",
+                {
+                    "command": "practice_attempts",
+                    "args": {"problem_id": "basic_select_customers", "limit": 5},
+                    "context": {},
+                },
+            )
+            assert practice_attempts["ok"] is True
+            assert practice_attempts["block_type"] == "practice_attempts"
+            assert practice_attempts["data"]["attempt_count"] >= 1
+            assert practice_attempts["data"]["attempts"][-1]["correct"] is False
 
             help_catalog = request_json(
                 port,
@@ -179,6 +235,10 @@ def main() -> int:
     assert_contains(ROOT / "app.js", 'documentTitle: "CoQuery 터미널 쉘"')
     assert_contains(ROOT / "app.js", 'copy_sql: "Copy SQL"')
     assert_contains(ROOT / "app.js", "practice_list")
+    assert_contains(ROOT / "app.js", "practice_start")
+    assert_contains(ROOT / "app.js", "practice-flow-form")
+    assert_contains(ROOT / "app.js", "data-practice-submit")
+    assert_contains(ROOT / "app.js", "practice_attempts")
     assert_contains(ROOT / "app.js", "/api/commands/run")
     run_server_smoke()
     print("terminal shell prototype smoke passed")

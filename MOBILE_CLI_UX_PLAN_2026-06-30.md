@@ -346,16 +346,29 @@ Current proof:
 - `Save provider` calls `provider_add_preset` through `/api/commands/run`
 - `app_shell/terminal_shell_prototype/smoke.py` verifies provider preset save through the local Command API
 
-### Goal D: Query Practice Flow
+### Goal D: Query Practice Flow - Done
 
 Use the same terminal shell for SQL learning.
 
 Done when:
 
 - practice problem appears as a terminal block
-- user submits SQL
-- result block shows static review
-- LLM-enhanced feedback can appear when provider is configured
+- user can open a problem, inspect schema, type SQL, and submit
+- result and grading appear as terminal blocks
+- wrong answers create local attempt records
+- recent attempts can be opened from the UI
+
+Implemented in `app_shell/terminal_shell_prototype`.
+
+Current proof:
+
+- `practice_list` renders problem cards with start and schema actions
+- `practice_start` opens a local SQL entry form while preserving the CLI equivalent
+- submit calls `practice_query` and `practice_grade` through `/api/commands/run`
+- wrong results open `practice_attempts` so the local attempt record is visible
+- `app_shell/terminal_shell_prototype/smoke.py` verifies schema, query, wrong grading, and attempt logging
+
+Provider-backed feedback remains intentionally deferred to the Wrong Note And Feedback launch goal.
 
 ### Goal E: Bilingual Beginner Help - Done
 

@@ -220,12 +220,12 @@ Completed:
 - Responsive dark-mode terminal shell prototype.
 - Provider Preset Mobile Flow.
 - Practice Dataset Sandbox backend and CLI.
+- Query Practice Flow UI.
 - Bilingual beginner help.
 - Korean font/readability improvement.
 
 Still required for service launch:
 
-- Practice submission UI.
 - Wrong-note UI.
 - Provider test/remove/select UI.
 - Training/Production Assist mode separation.
@@ -234,8 +234,8 @@ Still required for service launch:
 
 ## Immediate Next Action
 
-After committing the current work, the next implementation `/goal` should be:
+After completing Launch Goal 1, the next implementation `/goal` should be:
 
 ```text
-Launch Goal 1: Query Practice Flow UI
+Launch Goal 2: Wrong Note And Feedback
 ```

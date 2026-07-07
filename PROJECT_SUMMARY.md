@@ -29,6 +29,7 @@ Verified on 2026-04-28
 - Responsive Terminal Shell Prototype is implemented as a local app shell over the Command API
 - Terminal Shell defaults to dark mode and includes Provider Preset Mobile Flow for preset selection, CLI preview, and saving provider profiles
 - Practice Dataset Sandbox is verified for built-in sample schema, read-only query, grading, attempt logging, CLI, and Command API paths
+- Query Practice Flow UI is verified for problem start, schema view, SQL submit, grading, and local attempt review
 - Bilingual beginner help is verified for Korean/English command and SQL term guidance
 - Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-04-27 UTC for `main` commit `7e677fe`
 - GitHub repository `redsunjin/CoQuery` is public and can run Actions-based log demos
@@ -43,7 +44,7 @@ Scope decision:
 Service launch plan:
 
 - Launch roadmap: `SERVICE_LAUNCH_PLAN_2026-07-07.md`
-- Next recommended `/goal`: `Launch Goal 1: Query Practice Flow UI`
+- Next recommended `/goal`: `Launch Goal 2: Wrong Note And Feedback`
 
 ---
 
