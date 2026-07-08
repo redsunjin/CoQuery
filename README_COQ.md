@@ -5,7 +5,7 @@ Date: 2026-06-30
 ## Result
 
 ```text
-119/119 executable baseline tests pass
+121/121 executable baseline tests pass
 SQLite-first CLI verified
 Explicit write contract verified
 Shared DB URI contract verified
@@ -30,6 +30,11 @@ Practice Dataset Sandbox verified for DB-free sample schema, query, grading, att
 Query Practice Flow UI verified for problem start, schema view, SQL submit, grading, and local attempt review
 iOS Launch Feasibility And Packaging Decision documented for a TestFlight-first Training App path
 iOS Training Runtime Contract documented for Python-server-free Training Mode on iOS
+iOS TestFlight Shell Skeleton verified with Capacitor SPM project, local `practice_list` runtime, and iPhone/iPad simulator launch proof
+Training/Production Assist mode separation verified with Command API mode context and external-provider production guard
+Desktop/Local Packaging Decision documented for local web app first launch
+Production Assist Safety Gate verified with read-only profiles, SQL review/approval state, SELECT-only enforcement, and JSONL audit logging
+Release Candidate Hardening verified with `npm run rc:verify`
 Bilingual beginner help verified for Korean/English command and SQL term guidance
 GitHub Actions baseline and PostgreSQL smoke workflows last recorded as verified on 2026-04-27 UTC for `main` commit `7e677fe`
 Public GitHub repository verified
@@ -40,8 +45,11 @@ Service launch plan:
 - `SERVICE_LAUNCH_PLAN_2026-07-07.md`
 - iOS decision: `IOS_LAUNCH_FEASIBILITY_2026-07-07.md`
 - iOS runtime contract: `IOS_TRAINING_RUNTIME_CONTRACT_2026-07-08.md`
+- iOS TestFlight checklist: `docs/testflight-metadata-checklist.md`
+- desktop/local packaging decision: `docs/desktop-local-packaging-decision.md`
+- production assist safety gate: `docs/production-assist-safety-gate.md`
 - Mac handoff: `IOS_MAC_HANDOFF_2026-07-08.md`
-- Next recommended `/goal`: `Launch Goal 4: iOS TestFlight Shell Skeleton`
+- Next recommended action: commit and push the release-candidate branch after `npm run rc:verify` passes.
 
 Scope decision:
 
@@ -76,6 +84,12 @@ Scope decision:
 - `practice_query`
 - `practice_grade`
 - `practice_attempts`
+- `practice_feedback`
+- `production_profile_add`
+- `production_profile_list`
+- `production_review`
+- `production_approve`
+- `production_execute`
 
 ## Support Matrix
 
@@ -104,10 +118,14 @@ Scope decision:
 | Provider presets | Experimental secondary track | presets exist for OpenAI, Groq, OpenRouter, Gemini, and DeepSeek-style APIs; run `provider_test` to verify selected model availability |
 | Command API Adapter | Working baseline | `sql_cli.command_api.run_command` reuses existing handlers and adds `cli_equivalent`, `block_type`, and `actions` for mobile/web shells |
 | Responsive terminal shell | Local prototype | `app_shell/terminal_shell_prototype` serves a dark-mode mobile/tablet/desktop terminal UI over the Command API; not a packaged mobile app |
-| iOS launch path | Decision documented | TestFlight-first Training App, Capacitor iOS shell selected, Python local server rejected for iOS runtime |
+| iOS launch path | Shell skeleton verified | TestFlight-first Training App, Capacitor SPM iOS shell exists under `ios/`, Python local server rejected for iOS runtime |
 | iOS Training Runtime Contract | Decision documented | portable Training Mode command envelope, practice/help command shapes, local storage, and Python-server-free adapter boundary are defined |
 | Provider Preset Mobile Flow | Local prototype | setup form can choose preset, edit provider/model/env, preview CLI, and save through `provider_add_preset` |
 | Practice Dataset Sandbox | Working baseline | built-in `sql_basics` pack runs in-memory SQLite for DB-free SQL learning, query checks, grading, and attempts |
+| Mode Separation | Working baseline | terminal shell exposes Training/Assist mode, Command API returns `mode_context`, and Production Assist blocks saved external providers unless explicitly overridden |
+| Desktop/Local Packaging Decision | Documented | first non-iOS package is local web app first with `python3 scripts/start_local_shell.py --host 127.0.0.1 --port 8765`; Tauri/Electron are deferred |
+| Production Assist Safety Gate | Working baseline | read-only profiles, generated SQL review, explicit approval, SELECT-only execution guard, and JSONL audit logging are verified; broader production DB support is not claimed |
+| Release Candidate Hardening | Working baseline | `npm run rc:verify` runs the launch checks and release-claim contract smoke |
 | Bilingual beginner help | Working baseline | `help_catalog`, `command_explain`, and `term_explain` expose Korean/English command and SQL term explanations through CLI, Command API, and terminal shell |
 | JPA | Source introspection only | `jpa_schema` scans annotation-based entity source; JPQL runtime execution is not implemented |
 | DB knowledge planner | Seed | generation, natural, and write planning attach local dialect/safety context |
@@ -134,6 +152,9 @@ python3 main.py --command command_explain --topic natural --lang ko --format jso
 python3 main.py --command term_explain --topic join --lang en --format json
 python3 main.py --command practice_list --format json
 python3 main.py --command practice_grade --problem-id basic_select_customers --sql "SELECT id, name, region FROM customers ORDER BY id" --no-record --format json
+python3 main.py --command production_profile_add --profile-name prod_readonly --db-uri example.db --format json
+python3 main.py --command production_review --profile-name prod_readonly --sql "SELECT COUNT(*) FROM users" --request-text "count users" --format json
+npm run rc:verify
 python app_shell/terminal_shell_prototype/smoke.py
 python3 sql_cli/tests/test_core.py
 bash scripts/run_postgresql_local_smoke.sh
@@ -162,7 +183,8 @@ bash scripts/run_postgresql_local_smoke.sh
 - `provider_add_preset` can register OpenAI, Groq, OpenRouter, Gemini, and DeepSeek-style API providers with provider-specific chat-completions endpoints
 - `provider_add` also accepts direct `--chat-completions-url` and `--models-url` overrides for custom OpenAI-compatible services
 - `sql_cli.command_api.run_command` is the app-facing adapter for mobile/web shells; it is not an HTTP server yet
-- `app_shell/terminal_shell_prototype/server.py` is a local prototype HTTP shell over that adapter for responsive UI verification
+- `scripts/start_local_shell.py` is the stable local start wrapper for the responsive terminal shell
+- `app_shell/terminal_shell_prototype/server.py` remains the underlying local prototype HTTP shell over the Command API
 - `practice_packs/sql_basics.json` is the built-in sample pack for SQL learning without a user DB connection
 - `jpa_schema --jpa-project ...` can provide entity model context for Java/JPA projects
 - the PostgreSQL smoke runner checks `PATH` for PostgreSQL binaries before falling back to known Homebrew paths
@@ -173,8 +195,8 @@ bash scripts/run_postgresql_local_smoke.sh
 - GitHub Actions `baseline` and `postgresql-smoke` were last recorded successful on 2026-04-27 UTC for `main` commit `7e677fe`
 - use `USAGE_AND_DEMO.md` for local CLI usage and GitHub Actions demo steps
 
-Version: v0.7.1
-Last Updated: 2026-07-06
-Status: Baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` proof, local DB knowledge-first planning, schema-detail-aware identifier validation, direct schema-detail join inference, provider preset registration, OpenAI-compatible endpoint override, Command API Adapter metadata, dark-mode terminal shell, Provider Preset Mobile Flow, Practice Dataset Sandbox, bilingual beginner help, and verified GitHub Actions baseline / PostgreSQL smoke workflows
+Version: v0.7.2
+Last Updated: 2026-07-08
+Status: Baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` proof, local DB knowledge-first planning, schema-detail-aware identifier validation, direct schema-detail join inference, provider preset registration, OpenAI-compatible endpoint override, Command API Adapter metadata, dark-mode terminal shell, Provider Preset Mobile Flow, Practice Dataset Sandbox, Training/Production Assist mode separation, Desktop/Local Packaging Decision, Production Assist Safety Gate, Release Candidate Hardening, bilingual beginner help, and verified GitHub Actions baseline / PostgreSQL smoke workflows
 Reference: `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 Smoke Result: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`

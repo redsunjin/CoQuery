@@ -17,12 +17,21 @@ from sql_cli.llm_registry import (
     get_provider_preset,
     list_provider_presets,
 )
+from sql_cli.mode_policy import build_mode_context, provider_policy_block_result
 from sql_cli.practice import (
     practice_attempts_handler,
+    practice_feedback_handler,
     practice_grade_handler,
     practice_list_handler,
     practice_query_handler,
     practice_schema_handler,
+)
+from sql_cli.production_assist import (
+    production_approve_handler,
+    production_execute_handler,
+    production_profile_add_handler,
+    production_profile_list_handler,
+    production_review_handler,
 )
 from sql_cli.schema_guard import (
     generation_schema_requirements,
@@ -96,8 +105,75 @@ def _db_error(command: str, exc: CoQueryDBError) -> dict[str, Any]:
     return _error(command, exc.code, exc.message, exc.data)
 
 
+def _llm_error_guidance(exc: CoQueryLLMError) -> dict[str, Any]:
+    code = exc.code
+    message = exc.message
+
+    if code == "missing_api_key":
+        env_name = message
+        marker = "Environment variable "
+        if marker in message:
+            env_name = message.split(marker, 1)[1].split(" ", 1)[0].strip(".")
+        return {
+            "readable_message": "API key is not configured for this provider.",
+            "next_step": (
+                f"Set {env_name} in your local environment, then run the provider test again. "
+                "CoQuery stores the environment variable name, not the secret value."
+            ),
+            "severity": "action_required",
+        }
+
+    if code == "provider_unreachable":
+        return {
+            "readable_message": "The provider server could not be reached.",
+            "next_step": "Check that the local model server or API endpoint is running and that the base URL is correct.",
+            "severity": "blocked",
+        }
+
+    if code == "provider_timeout":
+        return {
+            "readable_message": "The provider did not respond in time.",
+            "next_step": "Try the test again, or choose a faster model/provider if this repeats.",
+            "severity": "retry",
+        }
+
+    if code == "model_not_found":
+        return {
+            "readable_message": "The configured model was not found by the provider.",
+            "next_step": "Check the model name in the provider profile, then save and test it again.",
+            "severity": "action_required",
+        }
+
+    if code == "provider_not_found":
+        return {
+            "readable_message": "No saved provider matches that name.",
+            "next_step": "Save a provider from a preset or choose one from the saved provider list.",
+            "severity": "action_required",
+        }
+
+    if code == "missing_provider_name":
+        return {
+            "readable_message": "Choose a provider before testing or removing it.",
+            "next_step": "Open the saved provider list and use one of its action buttons.",
+            "severity": "action_required",
+        }
+
+    if code == "provider_request_failed":
+        return {
+            "readable_message": "The provider rejected the test request.",
+            "next_step": "Check the provider endpoint, model name, and account/API key status.",
+            "severity": "action_required",
+        }
+
+    return {
+        "readable_message": message,
+        "next_step": "Review the provider profile, then test it again.",
+        "severity": "unknown",
+    }
+
+
 def _llm_error(command: str, exc: CoQueryLLMError) -> dict[str, Any]:
-    return _error(command, exc.code, exc.message)
+    return _error(command, exc.code, exc.message, _llm_error_guidance(exc))
 
 
 def _jpa_error(command: str, exc: CoQueryJPAError) -> dict[str, Any]:
@@ -651,9 +727,21 @@ def natural_handler(
     sql: Optional[str] = None,
     format: str = "json",
     provider_name: Optional[str] = None,
+    mode: Optional[str] = None,
+    allow_external_provider: bool = False,
+    provider_policy: Optional[str] = None,
 ) -> dict[str, Any]:
     try:
         from sql_cli.nl_core import NaturalLanguageEngine
+
+        mode_context = build_mode_context(
+            mode=mode,
+            allow_external_provider=allow_external_provider,
+            provider_policy=provider_policy,
+        )
+        policy_result = provider_policy_block_result("natural", provider_name, mode_context)
+        if policy_result:
+            return policy_result
 
         result = NaturalLanguageEngine(provider_name=provider_name, db_target=db).process(sql or "show users")
         return {
@@ -672,6 +760,7 @@ def natural_handler(
             "knowledge_context": result.get("knowledge_context"),
             "schema_validation": result.get("schema_validation"),
             "table_inference": result.get("table_inference"),
+            "mode_context": mode_context,
             "error": result.get("error"),
         }
     except CoQueryLLMError as e:

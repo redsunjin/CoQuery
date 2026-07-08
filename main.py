@@ -19,10 +19,16 @@ from sql_cli.cli import (
     jpa_schema_handler,
     natural_handler,
     practice_attempts_handler,
+    practice_feedback_handler,
     practice_grade_handler,
     practice_list_handler,
     practice_query_handler,
     practice_schema_handler,
+    production_approve_handler,
+    production_execute_handler,
+    production_profile_add_handler,
+    production_profile_list_handler,
+    production_review_handler,
     provider_add_handler,
     provider_add_preset_handler,
     provider_list_handler,
@@ -55,7 +61,7 @@ def main() -> int:
         "--command",
         type=str,
         default=None,
-        help="schema, schema_detail, doctor, query, generate, insert, update, delete, natural, jpa_schema, db_knowledge, help_catalog, command_explain, term_explain, practice_list, practice_schema, practice_query, practice_grade, practice_attempts, provider_add, provider_list_presets, provider_add_preset, provider_list, provider_remove, provider_test",
+        help="schema, schema_detail, doctor, query, generate, insert, update, delete, natural, jpa_schema, db_knowledge, help_catalog, command_explain, term_explain, practice_list, practice_schema, practice_query, practice_grade, practice_attempts, practice_feedback, provider_add, provider_list_presets, provider_add_preset, provider_list, provider_remove, provider_test, production_profile_add, production_profile_list, production_review, production_approve, production_execute",
     )
     parser.add_argument("--db", type=str, default="example.db", help="Legacy SQLite path or DB URI")
     parser.add_argument("--db-uri", type=str, default=None, help="Preferred multi-backend database URI")
@@ -71,6 +77,17 @@ def main() -> int:
     parser.add_argument("--chat-completions-url", type=str, default=None, help="Direct chat completions endpoint override")
     parser.add_argument("--models-url", type=str, default=None, help="Direct model listing endpoint override")
     parser.add_argument("--api-key-env", type=str, default=None, help="Environment variable name for API key")
+    parser.add_argument("--profile-name", type=str, default=None, help="Production Assist read-only profile name")
+    parser.add_argument("--db-uri-env", type=str, default=None, help="Environment variable containing a production DB URI")
+    parser.add_argument("--review-id", type=str, default=None, help="Production Assist SQL review id")
+    parser.add_argument("--request-text", type=str, default=None, help="Original request text for a Production Assist review")
+    parser.add_argument("--source-command", type=str, default=None, help="Source command that generated reviewed production SQL")
+    parser.add_argument(
+        "--read-write",
+        action="store_true",
+        default=False,
+        help="Mark a Production Assist profile as read-write; this is rejected by the safety gate",
+    )
     parser.add_argument("--jpa-project", type=str, default=None, help="Path to a Java/JPA project or .java entity file")
     parser.add_argument("--dialect", type=str, default=None, help="Knowledge dialect: sqlite, postgresql, mysql, jpql")
     parser.add_argument("--topic", type=str, default=None, help="Knowledge/help topic, such as schema, coverage, natural, or join")
@@ -78,6 +95,14 @@ def main() -> int:
     parser.add_argument("--pack", type=str, default=None, help="Practice pack id")
     parser.add_argument("--problem-id", type=str, default=None, help="Practice problem id")
     parser.add_argument("--limit", type=int, default=None, help="Practice query or attempts row limit")
+    parser.add_argument("--mode", type=str, default=None, help="App mode context: training or production_assist")
+    parser.add_argument(
+        "--allow-external-provider",
+        action="store_true",
+        default=False,
+        help="Explicitly allow an external AI provider in Production Assist mode",
+    )
+    parser.add_argument("--provider-policy", type=str, default=None, help="Optional named provider policy for audit context")
     parser.add_argument(
         "--no-record",
         action="store_true",
@@ -112,8 +137,8 @@ def main() -> int:
     args = parser.parse_args()
 
     if not args.command:
-        print("CoQuery v0.7.1")
-        print("commands: schema, schema_detail, doctor, query, generate, insert, update, delete, natural, jpa_schema, db_knowledge, help_catalog, command_explain, term_explain, practice_list, practice_schema, practice_query, practice_grade, practice_attempts, provider_add, provider_list_presets, provider_add_preset, provider_list, provider_remove, provider_test")
+        print("CoQuery v0.7.2")
+        print("commands: schema, schema_detail, doctor, query, generate, insert, update, delete, natural, jpa_schema, db_knowledge, help_catalog, command_explain, term_explain, practice_list, practice_schema, practice_query, practice_grade, practice_attempts, practice_feedback, provider_add, provider_list_presets, provider_add_preset, provider_list, provider_remove, provider_test, production_profile_add, production_profile_list, production_review, production_approve, production_execute")
         print("write commands require explicit --write and --sql")
         print("state-changing commands support optional --dry-run preview and --max-affected-rows guard")
         print("full-table UPDATE/DELETE requires explicit --allow-full-table-write")
@@ -172,7 +197,15 @@ def main() -> int:
             args.allow_full_table_write,
         )
     elif args.command == "natural":
-        result = natural_handler(db_target, args.sql, args.format, args.provider_name)
+        result = natural_handler(
+            db_target,
+            args.sql,
+            args.format,
+            args.provider_name,
+            args.mode,
+            args.allow_external_provider,
+            args.provider_policy,
+        )
     elif args.command == "jpa_schema":
         result = jpa_schema_handler(args.jpa_project, args.format)
     elif args.command == "db_knowledge":
@@ -193,6 +226,24 @@ def main() -> int:
         result = practice_grade_handler(args.problem_id, args.sql, args.pack, record=not args.no_record)
     elif args.command == "practice_attempts":
         result = practice_attempts_handler(args.pack, args.problem_id, args.limit)
+    elif args.command == "practice_feedback":
+        result = practice_feedback_handler(args.problem_id, args.sql, args.pack, args.provider_name, args.mode)
+    elif args.command == "production_profile_add":
+        result = production_profile_add_handler(
+            args.profile_name,
+            args.db_uri,
+            args.db_uri_env,
+            read_only=not args.read_write,
+            dialect=args.dialect,
+        )
+    elif args.command == "production_profile_list":
+        result = production_profile_list_handler()
+    elif args.command == "production_review":
+        result = production_review_handler(args.profile_name, args.sql, args.request_text, args.source_command)
+    elif args.command == "production_approve":
+        result = production_approve_handler(args.review_id)
+    elif args.command == "production_execute":
+        result = production_execute_handler(args.review_id)
     elif args.command == "provider_add":
         result = provider_add_handler(
             args.provider_name,

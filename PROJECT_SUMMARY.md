@@ -1,4 +1,4 @@
-# CoQuery - Project Summary v0.7.1
+# CoQuery - Project Summary v0.7.2
 
 **AI-assisted SQL CLI baseline**
 **Current focus: stabilization after CLI repair**
@@ -8,8 +8,8 @@
 ## Current Status
 
 ```text
-Verified on 2026-04-28
-- 119 executable baseline tests pass
+Verified on 2026-07-08
+- 121 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
 - explicit write contract is enforced
@@ -32,6 +32,10 @@ Verified on 2026-04-28
 - Query Practice Flow UI is verified for problem start, schema view, SQL submit, grading, and local attempt review
 - iOS Launch Feasibility And Packaging Decision is documented for a TestFlight-first Training App path
 - iOS Training Runtime Contract is documented for Python-server-free Training Mode on iOS
+- iOS TestFlight Shell Skeleton is verified with a Capacitor SPM project, local `practice_list` adapter, and iPhone/iPad simulator launch proof
+- Training/Production Assist mode separation is verified with Command API mode context and external-provider production guard
+- Desktop/Local Packaging Decision selects local web app first with a stable start wrapper
+- Release Candidate Hardening adds `npm run rc:verify` as the one-command launch check
 - Bilingual beginner help is verified for Korean/English command and SQL term guidance
 - Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-04-27 UTC for `main` commit `7e677fe`
 - GitHub repository `redsunjin/CoQuery` is public and can run Actions-based log demos
@@ -48,8 +52,11 @@ Service launch plan:
 - Launch roadmap: `SERVICE_LAUNCH_PLAN_2026-07-07.md`
 - iOS decision: `IOS_LAUNCH_FEASIBILITY_2026-07-07.md`
 - iOS runtime contract: `IOS_TRAINING_RUNTIME_CONTRACT_2026-07-08.md`
+- iOS TestFlight checklist: `docs/testflight-metadata-checklist.md`
+- desktop/local packaging decision: `docs/desktop-local-packaging-decision.md`
+- production assist safety gate: `docs/production-assist-safety-gate.md`
 - Mac handoff: `IOS_MAC_HANDOFF_2026-07-08.md`
-- Next recommended `/goal`: `Launch Goal 4: iOS TestFlight Shell Skeleton`
+- Next recommended action: commit and push the release-candidate branch after `npm run rc:verify` passes.
 
 ---
 
@@ -57,7 +64,7 @@ Service launch plan:
 
 - Delivery harness: `Plan -> Review -> Execute -> Verify` in `STABILIZATION_PLAN_2026-04-04.md`
 - Runtime harness: `main.py` routes one command into `sql_cli/cli.py`, which fans into `sql_cli/db_new.py`, `sql_cli/core.py`, or `sql_cli/nl_core.py`
-- Verification harness: baseline CLI checks, `python3 sql_cli/tests/test_core.py`, `bash scripts/run_postgresql_local_smoke.sh`, and GitHub Actions workflows under `.github/workflows/`
+- Verification harness: `npm run rc:verify`, baseline CLI checks, `python3 sql_cli/tests/test_core.py`, `bash scripts/run_postgresql_local_smoke.sh`, and GitHub Actions workflows under `.github/workflows/`
 - Usage/demo guide: `USAGE_AND_DEMO.md`
 
 ---
@@ -74,6 +81,8 @@ Service launch plan:
 ├── STABILIZATION_PLAN_2026-04-04.md
 ├── app_shell/
 │   └── terminal_shell_prototype/ # Local responsive terminal shell prototype
+├── scripts/start_local_shell.py   # Stable local web app start wrapper
+├── docs/desktop-local-packaging-decision.md
 └── sql_cli/
     ├── cli.py                  # Canonical command handlers
     ├── core.py                 # SQL generation and validation
@@ -108,12 +117,13 @@ Service launch plan:
 - `provider_add_preset`: add a provider profile from a built-in preset
 - `provider_list`: list registered provider profiles
 - `provider_remove`: remove one provider profile
-- `provider_test`: test one provider connection
+- `provider_test`: test one provider connection and return readable next-step guidance on failure
 - `practice_list`: list built-in SQL practice packs and problems
 - `practice_schema`: inspect built-in practice dataset schema without connecting to a user DB
 - `practice_query`: run read-only `SELECT` SQL against the built-in sample dataset
 - `practice_grade`: grade a SQL answer against an expected result set
 - `practice_attempts`: inspect recorded practice attempts for review and wrong-note flows
+- `practice_feedback`: return static wrong-note feedback without a provider, or provider-backed AI feedback only in Training Mode
 - `jpa_schema`: inspect annotation-based JPA entity source as ORM/model context
 - `--db-uri`: preferred shared connection input for non-SQLite backends
 
@@ -123,6 +133,7 @@ App-facing Python API:
 
 Local app-shell prototype:
 
+- `scripts/start_local_shell.py`: stable local web app start wrapper
 - `app_shell/terminal_shell_prototype/server.py`: local HTTP wrapper for the Command API
 - `app_shell/terminal_shell_prototype/index.html`: responsive terminal shell
 - `app_shell/terminal_shell_prototype/smoke.py`: API and static UI smoke check
@@ -137,7 +148,7 @@ Current executable baseline:
 python3 sql_cli/tests/test_core.py
 ```
 
-This passes 119 baseline tests covering:
+This passes 121 baseline tests covering:
 
 - SQL generation
 - SQL validation
@@ -162,6 +173,7 @@ This passes 119 baseline tests covering:
 - schema-detail-backed direct join inference, no-path rejection, ambiguous-path rejection, and explicit join-column validation
 - doctor readiness checks and PostgreSQL failure classification
 - dry-run write previews, affected-row rollback guards, and full-table write protection
+- Desktop/Local Packaging Decision smoke for the stable start command and decision documentation
 
 ---
 
@@ -175,9 +187,10 @@ This passes 119 baseline tests covering:
 - natural-language behavior is lightweight by default; provider-backed quality and backend parity are not broadly proven
 - provider-backed natural is currently a secondary experimental track
 - provider presets simplify API registration but do not guarantee current provider pricing, free-tier limits, or model availability
-- Command API Adapter is a Python handler adapter; the terminal shell prototype is a local proof slice, not a packaged mobile app or hosted production service
-- iOS packaging is selected as a TestFlight-first Capacitor Training App path, but the repo does not yet contain an `ios/` project or an iOS-safe Training Runtime implementation
-- iOS Training Runtime Contract defines the portable command envelope and data shapes, but no Capacitor or Xcode project has been generated yet
+- Command API Adapter is a Python handler adapter; the terminal shell prototype remains local, while the new Capacitor iOS shell is a TestFlight skeleton, not a hosted production service
+- Non-iOS local packaging is local web app first; Tauri/Electron and hosted service packaging are deferred
+- iOS packaging now has a Capacitor SPM project under `ios/` and a minimal local Training Runtime adapter for `practice_list`
+- iOS Training Runtime Contract defines more portable command envelopes than the current skeleton implements; `practice_query`, grading, attempts, and help commands remain future implementation work
 - Practice Dataset Sandbox uses a small built-in sample pack and in-memory SQLite; it is not connected to production data and is not yet a full curriculum engine
 - Bilingual beginner help is a curated local guide, not a complete SQL education product or adaptive tutor yet
 - generated SQL templates validate basic identifiers and direct foreign-key joins, but are not yet multi-hop relationship-aware, alias-aware, or expression-aware
@@ -243,7 +256,7 @@ python3 main.py --command insert --db example.db --write --dry-run \
 python3 sql_cli/tests/test_core.py
 
 # run the local responsive terminal shell prototype
-python app_shell/terminal_shell_prototype/server.py --host 127.0.0.1 --port 8765
+python3 scripts/start_local_shell.py --host 127.0.0.1 --port 8765
 
 # run DB-free practice sandbox commands
 python3 main.py --command practice_list --format json
@@ -284,5 +297,5 @@ Current runner improvement:
 
 ---
 
-Last Updated: 2026-07-06
-Status: SQLite-first baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, direct `generate join_inner` / `generate join_left` proof, provider presets, Command API Adapter, dark-mode responsive terminal shell prototype, Provider Preset Mobile Flow, Practice Dataset Sandbox, bilingual beginner help, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
+Last Updated: 2026-07-08
+Status: SQLite-first baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, direct `generate join_inner` / `generate join_left` proof, provider presets, Command API Adapter, dark-mode responsive terminal shell prototype, Provider Preset Mobile Flow, Practice Dataset Sandbox, Training/Production Assist mode separation, Desktop/Local Packaging Decision, bilingual beginner help, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows

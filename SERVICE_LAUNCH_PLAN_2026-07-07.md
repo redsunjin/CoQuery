@@ -37,7 +37,7 @@ Current product boundary:
 - CoQuery is not yet a packaged mobile app.
 - CoQuery is not yet a production DB agent.
 - CoQuery is currently a verified CLI core plus local responsive terminal shell prototype.
-- CoQuery's iOS path is now selected as a TestFlight-first Training App, but no iOS project exists yet.
+- CoQuery's iOS path is now a TestFlight-first Training App skeleton with a Capacitor iOS project.
 
 ## Launch Tracks
 
@@ -177,6 +177,22 @@ Done when:
 - The shell can run at least one local Training Runtime command without the Python server.
 - TestFlight metadata checklist exists.
 
+Implemented with:
+
+- `package.json`
+- `capacitor.config.json`
+- `app_shell/ios_training_shell/src/trainingRuntime.ts`
+- `ios/`
+- `docs/testflight-metadata-checklist.md`
+
+Current proof:
+
+- `practice_packs/sql_basics.json` is bundled into the Capacitor web assets.
+- `postCommand("practice_list")` routes to the local iOS Training Runtime adapter without calling the Python HTTP API.
+- The iOS Training Runtime also exposes local `practice_attempts` and static `practice_feedback` contracts.
+- iPhone 17 simulator launch renders the terminal shell and `practice_list`.
+- iPad Pro 13-inch simulator launch renders the terminal shell and `practice_list`.
+
 ### Launch Goal 5: Wrong Note And Feedback
 
 Turn attempt records into a usable learning loop.
@@ -189,6 +205,13 @@ Done when:
 - Optional provider feedback can be requested only in Training Mode.
 - Feedback is labeled as AI-generated when provider-backed.
 
+Implemented with:
+
+- wrong-note metadata on `practice_grade` attempt records
+- `practice_feedback` CLI and Command API handler
+- terminal-shell wrong-note cards with submitted SQL, expected issue, retry action, static feedback, and Training Mode provider request action
+- iOS Training Runtime static `practice_feedback` and `practice_attempts` support
+
 ### Launch Goal 6: Provider Test And Model Readiness UI
 
 Make provider setup launch-ready.
@@ -199,6 +222,13 @@ Done when:
 - Test failures are readable for non-specialists.
 - Provider status is visible near the command input.
 - CLI equivalent is shown for each provider action.
+
+Implemented with:
+
+- saved provider rows in the app shell with Select, Test, and Remove actions
+- provider readiness status beside the command input
+- readable `provider_test` failure guidance with a next step
+- CLI-equivalent blocks for save, list, select, test, and remove provider actions
 
 ### Launch Goal 7: Mode Separation
 
@@ -211,6 +241,14 @@ Done when:
 - Training Mode can use sample datasets and commercial/low-cost providers.
 - Production Assist Mode blocks external provider use unless explicitly overridden by policy.
 - Docs explain the security boundary.
+
+Implemented with:
+
+- terminal-shell `Training` / `Assist` mode indicator in the command bar
+- Command API `mode_context` metadata on mode-aware commands
+- `production_external_provider_blocked` guard for saved external providers in Production Assist Mode
+- `allow_external_provider=true` policy override support
+- security boundary documentation in `docs/mode-security-boundary.md`
 
 ### Launch Goal 8: Desktop/Local Packaging Decision
 
@@ -229,6 +267,15 @@ Done when:
 - Runtime storage paths are documented.
 - Update and rollback path is documented.
 
+Implemented with:
+
+- Selected launch target: local web app first
+- stable start wrapper: `python3 scripts/start_local_shell.py --host 127.0.0.1 --port 8765`
+- npm convenience script: `npm run local:shell`
+- runtime storage path documentation for provider profiles and practice attempts
+- update and rollback documentation in `docs/desktop-local-packaging-decision.md`
+- smoke coverage in `tests/local_packaging_decision_smoke.py`
+
 ### Launch Goal 9: Production Assist Safety Gate
 
 Prepare production DB support without overclaiming.
@@ -241,6 +288,16 @@ Done when:
 - `SELECT`-only guard is enforced for production assist.
 - Audit log is written.
 
+Implemented with:
+
+- Read-only profile registry commands: `production_profile_add` and `production_profile_list`.
+- Generated SQL review records: `production_review`.
+- Approval-required execution path: `production_approve` then `production_execute`.
+- `SELECT`-only rejection for review and execution.
+- JSONL audit log for profile, review, approval, blocked execution, and completed execution events.
+- Terminal shell review/approve/execute blocks and smoke coverage.
+- Boundary documentation in `docs/production-assist-safety-gate.md`.
+
 ### Launch Goal 10: Release Candidate Hardening
 
 Make the service release candidate testable.
@@ -251,6 +308,14 @@ Done when:
 - Tests cover CLI, Command API, app shell smoke, practice flow, provider setup, and bilingual help.
 - README has a launch quickstart.
 - Release notes list exact supported and unsupported claims.
+
+Implemented with:
+
+- One-command RC verifier: `npm run rc:verify`.
+- Shell verifier: `scripts/verify-rc.sh`.
+- RC contract smoke: `python3 tests/rc_hardening_smoke.py`.
+- Launch quickstart in `readme.md`.
+- Exact supported/unsupported release claims in `RELEASE.md`.
 
 ## Launch Readiness Gates
 
@@ -280,22 +345,24 @@ Completed:
 - Query Practice Flow UI.
 - iOS Launch Feasibility And Packaging Decision.
 - iOS Training Runtime Contract.
+- iOS TestFlight Shell Skeleton.
 - Bilingual beginner help.
 - Korean font/readability improvement.
+- Wrong Note And Feedback.
+- Provider Test And Model Readiness UI.
+- Mode Separation.
+- Desktop/Local Packaging Decision.
+- Production Assist Safety Gate.
+- Release Candidate Hardening.
 
 Still required for service launch:
 
-- iOS TestFlight Shell Skeleton.
-- Wrong-note UI.
-- Provider test/remove/select UI.
-- Training/Production Assist mode separation.
-- Desktop/local packaging decision.
-- Release candidate hardening.
+- Commit and push current changes.
 
 ## Immediate Next Action
 
-After completing Launch Goal 3, the next implementation `/goal` should be:
+After completing Launch Goal 10 and passing `npm run rc:verify`, the next implementation step should be:
 
 ```text
-Launch Goal 4: iOS TestFlight Shell Skeleton
+Commit and push the release-candidate branch.
 ```

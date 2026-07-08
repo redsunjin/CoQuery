@@ -1,7 +1,7 @@
 # CoQuery Stage Status Report
 
-Version: v0.7.1
-Last Update: 2026-06-30
+Version: v0.7.2
+Last Update: 2026-07-08
 
 ## Current Status
 
@@ -24,6 +24,11 @@ Responsive Terminal Shell Prototype added as a local mobile/tablet/desktop app s
 Provider Preset Mobile Flow added to the dark-mode terminal shell
 Practice Dataset Sandbox added for DB-free SQL learning over built-in sample data
 Bilingual beginner help added for Korean/English command and SQL term guidance
+iOS TestFlight Shell Skeleton added with Capacitor SPM packaging and local `practice_list` runtime proof
+Training/Production Assist mode separation added with Command API provider policy guard
+Desktop/Local Packaging Decision added for local web app first launch
+Production Assist Safety Gate added with read-only profiles, reviewed SQL approval, SELECT-only enforcement, and JSONL audit logging
+Release Candidate Hardening added with `npm run rc:verify` as the one-command launch check
 Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-04-27 UTC for `main` commit `7e677fe`
 GitHub repository `redsunjin/CoQuery` is public
 Phase 5 remains narrow and experimental
@@ -67,6 +72,12 @@ Phase 5 remains narrow and experimental
 - `practice_query`
 - `practice_grade`
 - `practice_attempts`
+- `practice_feedback`
+- `production_profile_add`
+- `production_profile_list`
+- `production_review`
+- `production_approve`
+- `production_execute`
 
 Write-command baseline:
 
@@ -104,12 +115,39 @@ Natural-language note:
 - `sql_cli.command_api.run_command` exposes app-shell metadata around existing handlers without replacing the CLI
 - `app_shell/terminal_shell_prototype` is a dark-mode local responsive terminal prototype, not a packaged mobile app or production web service
 - `Setup AI` can save a provider profile through `provider_add_preset`
+- saved providers can be selected, tested, and removed from the shell, and provider readiness is visible near the command input
+- mode-aware Command API responses include `mode_context`
+- Production Assist Mode blocks saved external providers by default unless `allow_external_provider=true` is explicitly supplied
+- Production Assist execution requires a read-only profile, a generated SQL review, explicit approval, a SELECT-only statement, and an audit record
+
+iOS shell note:
+
+- `ios/` is a Capacitor SPM TestFlight skeleton for Training Mode
+- `app_shell/ios_training_shell/src/trainingRuntime.ts` currently handles local `practice_list`, `practice_schema`, `practice_attempts`, and static `practice_feedback`
+- the skeleton intentionally does not embed or start the Python local server
 
 Practice sandbox note:
 
 - `practice_packs/sql_basics.json` is the current built-in pack
 - `practice_query` and `practice_grade` run against in-memory SQLite, not production data
 - `practice_attempts` reads local attempt records for review and wrong-note flows
+- `practice_feedback` returns static feedback without a provider; provider-backed feedback is Training Mode only and labeled as AI-generated
+- Training Mode is the only launch mode for sample-dataset practice; Production Assist is policy-gated and limited to reviewed read-only SELECT support
+
+Mode boundary note:
+
+- `docs/mode-security-boundary.md` documents the Training vs Production Assist trust boundary
+- `docs/production-assist-safety-gate.md` documents the read-only review/approval/audit gate
+- external OpenAI-compatible providers are allowed for Training Mode sample-data learning flows
+- external providers are blocked for Production Assist natural/provider payloads unless an explicit policy override is supplied
+- Goal 9 is implemented for read-only production connection profiles, SQL approval state, SELECT-only guard, audit logging, and redaction; broader production DB support is still not claimed
+
+Desktop/local packaging note:
+
+- non-iOS local launch target is local web app first: Python local server plus browser
+- stable start command is `python3 scripts/start_local_shell.py --host 127.0.0.1 --port 8765`
+- `docs/desktop-local-packaging-decision.md` documents runtime storage, update path, and rollback path
+- Tauri/Electron wrappers are deferred until the local shell and release checks stabilize
 
 Doctor note:
 
@@ -123,6 +161,8 @@ python3 main.py --help
 python3 main.py --command schema --db example.db --format json
 python3 main.py --command doctor --db example.db --format json
 python3 sql_cli/tests/test_core.py
+python3 app_shell/terminal_shell_prototype/smoke.py
+python3 tests/local_packaging_decision_smoke.py
 python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
 bash scripts/run_postgresql_local_smoke.sh
 ```
@@ -139,6 +179,7 @@ bash scripts/run_postgresql_local_smoke.sh
 8. keep provider setup UI honest about model/API key env configuration before any provider call
 9. expand practice packs and feedback only after keeping the DB-free baseline green
 10. do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
+11. use `npm run rc:verify` as the local release-candidate gate before publication
 
-Last Updated: 2026-07-06
-Phase Status: SQLite-first baseline verified with `doctor`, PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke proof plus agent skill packaging, JPA source introspection, provider presets, Command API Adapter, dark-mode responsive terminal shell prototype, Provider Preset Mobile Flow, Practice Dataset Sandbox, bilingual beginner help, explicit write safety guards, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
+Last Updated: 2026-07-08
+Phase Status: SQLite-first baseline verified with `doctor`, PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke proof plus agent skill packaging, JPA source introspection, provider presets, Command API Adapter, dark-mode responsive terminal shell prototype, Provider Preset Mobile Flow, Practice Dataset Sandbox, bilingual beginner help, Training/Production Assist mode separation, Desktop/Local Packaging Decision, Production Assist Safety Gate, Release Candidate Hardening, explicit write safety guards, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows

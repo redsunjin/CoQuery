@@ -9,14 +9,22 @@ const detailActions = document.getElementById("detailActions");
 const detailHelp = document.getElementById("detailHelp");
 const sessionList = document.getElementById("sessionList");
 const drawerButton = document.getElementById("drawerButton");
+const commandMenuToggle = document.getElementById("commandMenuToggle");
+const commandMenuPanel = document.getElementById("commandMenuPanel");
+const providerStatus = document.getElementById("providerStatus");
+const modeToggle = document.getElementById("modeToggle");
 const detailToggle = document.getElementById("detailToggle");
 const closeDetail = document.getElementById("closeDetail");
 const languageButtons = document.querySelectorAll("[data-lang]");
+const modeButtons = document.querySelectorAll("[data-mode-option]");
 
 let selectedBlock = null;
 let selectedResult = null;
 let providerPresets = [];
 let helpCatalog = null;
+let selectedProviderName = localStorage.getItem("coquery_selected_provider") || "";
+const savedAppMode = localStorage.getItem("coquery_app_mode");
+let currentAppMode = savedAppMode === "production_assist" ? "production_assist" : "training";
 const savedLanguage = localStorage.getItem("coquery_language");
 let currentLanguage = savedLanguage === "en" ? "en" : "ko";
 const renderedBlocks = [];
@@ -39,13 +47,21 @@ const i18n = {
     headerKicker: "로컬 SQL 랩",
     appTitle: "반응형 터미널 쉘",
     detailsButton: "상세",
+    commandMenuButton: "명령",
     languageToggleLabel: "언어",
+    appModeLabel: "작업 모드",
+    modeTrainingShort: "Training",
+    modeProductionShort: "Assist",
+    modeTrainingSummary: "Training Mode: 샘플 데이터와 저비용 AI 제공자 사용",
+    modeProductionSummary: "Production Assist Mode: 외부 AI 제공자 기본 차단",
+    modeBoundaryBlocked: "Production Assist에서는 정책 승인 없이 외부 AI 제공자를 사용할 수 없습니다.",
     contextLabel: "작업 메뉴",
     chipPresets: "프리셋",
     chipSetupAi: "AI 설정",
     chipSchema: "스키마",
     chipNatural: "자연어",
     chipPractice: "연습",
+    chipProduction: "운영 검토",
     chipHelp: "도움말",
     chipTerms: "용어",
     terminalHistoryLabel: "터미널 명령 기록",
@@ -80,6 +96,19 @@ const i18n = {
     savedProviders: "저장된 제공자 프로필입니다.",
     noProviders: "저장된 제공자 없음",
     useSetupAi: "AI 설정을 먼저 사용하세요",
+    providerStatusNoProvider: "AI 제공자 선택 안 됨",
+    providerStatusSelected: "선택된 AI 제공자",
+    providerStatusReady: "연결 준비됨",
+    providerStatusNeedsSetup: "설정 확인 필요",
+    providerSelect: "선택",
+    providerTest: "테스트",
+    providerRemove: "삭제",
+    providerSelectedSummary: "자연어/AI 요청에 사용할 제공자를 선택했습니다.",
+    providerRemoved: "제공자를 삭제했습니다.",
+    providerTestPassed: "제공자 테스트 통과",
+    providerTestFailed: "제공자 테스트 필요",
+    nextStep: "다음 단계",
+    responsePreview: "응답 미리보기",
     schemaDetailFor: "스키마 상세",
     mode: "모드",
     noSqlReturned: "반환된 SQL 없음",
@@ -101,11 +130,27 @@ const i18n = {
     practiceAttemptRecorded: "시도 기록 저장됨",
     practiceAttempts: "최근 연습 시도",
     practiceNoAttempts: "저장된 시도 없음",
+    wrongNotes: "오답 노트",
+    expectedIssue: "예상 문제",
+    staticFeedback: "정적 피드백",
+    retryPractice: "다시 풀기",
+    aiFeedback: "AI 생성 피드백",
+    requestAiFeedback: "AI 피드백 요청",
+    trainingModeOnly: "Training Mode 전용",
     submittedSql: "제출 SQL",
     actualRows: "실제 행",
     expectedRows: "예상 행",
     correct: "정답",
     needsReview: "복습 필요",
+    productionProfileSummary: "운영 Assist 읽기 전용 프로필입니다.",
+    productionReviewSummary: "운영 SQL 리뷰 블록입니다.",
+    productionApprovalRequired: "실행 전 승인이 필요합니다.",
+    productionApproved: "승인됨",
+    productionRunReviewed: "검토된 SQL 실행",
+    productionApproveSql: "SQL 승인",
+    productionAuditLog: "감사 로그",
+    productionRows: "반환 행",
+    productionSelectOnly: "SELECT 전용",
     commandCompleted: "명령 완료",
     useButton: "사용",
     helpCatalogSummary: "기능 안내와 SQL 용어를 한영으로 볼 수 있습니다.",
@@ -129,13 +174,21 @@ const i18n = {
     headerKicker: "Local SQL Lab",
     appTitle: "Responsive Terminal Shell",
     detailsButton: "Details",
+    commandMenuButton: "Commands",
     languageToggleLabel: "Language",
+    appModeLabel: "Work mode",
+    modeTrainingShort: "Training",
+    modeProductionShort: "Assist",
+    modeTrainingSummary: "Training Mode: sample datasets and low-cost AI providers",
+    modeProductionSummary: "Production Assist Mode: external AI providers blocked by default",
+    modeBoundaryBlocked: "Production Assist blocks external AI providers unless policy explicitly overrides it.",
     contextLabel: "Context",
     chipPresets: "Presets",
     chipSetupAi: "Setup AI",
     chipSchema: "Schema",
     chipNatural: "Natural",
     chipPractice: "Practice",
+    chipProduction: "Prod Review",
     chipHelp: "Help",
     chipTerms: "Terms",
     terminalHistoryLabel: "Terminal command history",
@@ -170,6 +223,19 @@ const i18n = {
     savedProviders: "Saved provider profiles.",
     noProviders: "No providers",
     useSetupAi: "Use Setup AI first",
+    providerStatusNoProvider: "No AI provider selected",
+    providerStatusSelected: "Selected AI provider",
+    providerStatusReady: "Connection ready",
+    providerStatusNeedsSetup: "Setup needs attention",
+    providerSelect: "Select",
+    providerTest: "Test",
+    providerRemove: "Remove",
+    providerSelectedSummary: "Selected provider for natural-language and AI requests.",
+    providerRemoved: "Provider removed.",
+    providerTestPassed: "Provider test passed",
+    providerTestFailed: "Provider test needs attention",
+    nextStep: "Next step",
+    responsePreview: "Response preview",
     schemaDetailFor: "Schema detail for",
     mode: "Mode",
     noSqlReturned: "No SQL returned",
@@ -191,11 +257,27 @@ const i18n = {
     practiceAttemptRecorded: "Attempt recorded",
     practiceAttempts: "Recent practice attempts",
     practiceNoAttempts: "No attempts saved",
+    wrongNotes: "Wrong notes",
+    expectedIssue: "Expected issue",
+    staticFeedback: "Static feedback",
+    retryPractice: "Retry",
+    aiFeedback: "AI-generated feedback",
+    requestAiFeedback: "Request AI feedback",
+    trainingModeOnly: "Training Mode only",
     submittedSql: "Submitted SQL",
     actualRows: "Actual rows",
     expectedRows: "Expected rows",
     correct: "correct",
     needsReview: "needs review",
+    productionProfileSummary: "Production Assist read-only profile.",
+    productionReviewSummary: "Production SQL review block.",
+    productionApprovalRequired: "Approval is required before execution.",
+    productionApproved: "Approved",
+    productionRunReviewed: "Run reviewed SQL",
+    productionApproveSql: "Approve SQL",
+    productionAuditLog: "Audit log",
+    productionRows: "Returned rows",
+    productionSelectOnly: "SELECT-only",
     commandCompleted: "Command completed",
     useButton: "Use",
     helpCatalogSummary: "Feature guidance and SQL terms are available in Korean and English.",
@@ -230,6 +312,8 @@ const actionLabels = {
     save_attempt: "시도 저장",
     save_wrong_note: "오답 저장",
     review_wrong_notes: "오답 보기",
+    request_provider_feedback: "AI 피드백",
+    select_provider: "제공자 선택",
     add_provider: "제공자 추가",
     test_provider: "연결 테스트",
     use_provider: "사용",
@@ -243,6 +327,9 @@ const actionLabels = {
     show_terms: "용어 보기",
     show_related_commands: "관련 명령",
     insert_template: "템플릿 입력",
+    approve: "승인",
+    execute: "실행",
+    audit: "감사",
   },
   en: {
     copy: "Copy",
@@ -261,6 +348,8 @@ const actionLabels = {
     save_attempt: "Save attempt",
     save_wrong_note: "Save wrong note",
     review_wrong_notes: "Review wrong notes",
+    request_provider_feedback: "AI feedback",
+    select_provider: "Select provider",
     add_provider: "Add provider",
     test_provider: "Test provider",
     use_provider: "Use provider",
@@ -274,6 +363,9 @@ const actionLabels = {
     show_terms: "Show terms",
     show_related_commands: "Related commands",
     insert_template: "Insert template",
+    approve: "Approve",
+    execute: "Execute",
+    audit: "Audit",
   },
 };
 
@@ -304,6 +396,43 @@ function actionLabel(action) {
   return actionLabels[currentLanguage]?.[action] || action;
 }
 
+function normalizeAppMode(mode) {
+  return mode === "production_assist" ? "production_assist" : "training";
+}
+
+function modeLabel(mode = currentAppMode) {
+  return normalizeAppMode(mode) === "production_assist" ? t("modeProductionShort") : t("modeTrainingShort");
+}
+
+function modeSummary(mode = currentAppMode) {
+  return normalizeAppMode(mode) === "production_assist" ? t("modeProductionSummary") : t("modeTrainingSummary");
+}
+
+function resultModeLabel(result = {}) {
+  return modeLabel(result.mode_context?.mode || result.data?.mode_context?.mode || currentAppMode);
+}
+
+function modeContext(extra = {}) {
+  return {
+    mode: currentAppMode,
+    allow_external_provider: false,
+    ...extra,
+  };
+}
+
+function applyModeIndicator() {
+  document.documentElement.dataset.appMode = currentAppMode;
+  modeButtons.forEach((button) => {
+    const isActive = normalizeAppMode(button.dataset.modeOption) === currentAppMode;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-pressed", isActive ? "true" : "false");
+    button.title = modeSummary(button.dataset.modeOption);
+  });
+  if (modeToggle) {
+    modeToggle.setAttribute("aria-label", `${t("appModeLabel")}: ${modeLabel()}`);
+  }
+}
+
 function applyStaticTranslations() {
   document.documentElement.lang = currentLanguage;
   document.title = t("documentTitle");
@@ -324,6 +453,47 @@ function applyStaticTranslations() {
   languageButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.lang === currentLanguage);
   });
+  applyModeIndicator();
+  updateProviderReadinessStatus();
+}
+
+function setCommandMenuOpen(open) {
+  if (!commandMenuToggle || !commandMenuPanel) {
+    return;
+  }
+  commandMenuToggle.setAttribute("aria-expanded", open ? "true" : "false");
+  commandMenuPanel.hidden = !open;
+}
+
+function updateProviderReadinessStatus(providerName = selectedProviderName, state = "selected", detail = "") {
+  if (!providerStatus) {
+    return;
+  }
+  const summary = providerStatus.querySelector("[data-provider-status-summary]");
+  providerStatus.dataset.state = providerName ? state : "none";
+  providerStatus.dataset.providerName = providerName || "";
+  providerStatus.dataset.mode = currentAppMode;
+  const prefix = modeLabel();
+  if (summary) {
+    if (!providerName) {
+      summary.textContent = `${prefix} · ${t("providerStatusNoProvider")}`;
+    } else {
+      const stateLabel =
+        state === "ready" ? t("providerStatusReady") : state === "error" ? t("providerStatusNeedsSetup") : t("providerStatusSelected");
+      const boundary = currentAppMode === "production_assist" ? ` · ${t("modeBoundaryBlocked")}` : "";
+      summary.textContent = `${prefix} · ${stateLabel}: ${providerName}${detail ? ` · ${detail}` : ""}${boundary}`;
+    }
+  }
+}
+
+function selectProvider(providerName, state = "selected", detail = "") {
+  selectedProviderName = providerName || "";
+  if (selectedProviderName) {
+    localStorage.setItem("coquery_selected_provider", selectedProviderName);
+  } else {
+    localStorage.removeItem("coquery_selected_provider");
+  }
+  updateProviderReadinessStatus(selectedProviderName, state, detail);
 }
 
 function providerDefaultsFor(presetName) {
@@ -376,6 +546,39 @@ function providerSetupResult(presetName = "gemini") {
   };
 }
 
+function providerSelectCliEquivalent(providerName) {
+  return [
+    "python",
+    "main.py",
+    "--command",
+    "natural",
+    "--db",
+    "example.db",
+    "--sql",
+    quoteCliValue("show users"),
+    "--provider-name",
+    quoteCliValue(providerName || "provider_name"),
+    "--mode",
+    currentAppMode,
+    "--format",
+    "json",
+  ].join(" ");
+}
+
+function providerSelectResult(provider = {}) {
+  const providerName = provider.name || selectedProviderName || "";
+  return {
+    ok: true,
+    command: "provider_select",
+    block_type: "provider_status",
+    actions: ["copy", "select_provider", "test_provider"],
+    cli_equivalent: providerSelectCliEquivalent(providerName),
+    data: { provider, mode_context: modeContext() },
+    mode_context: modeContext(),
+    error: null,
+  };
+}
+
 function practiceCliEquivalent(problemId, sql = "", packId = "sql_basics") {
   const parts = [
     "python",
@@ -390,14 +593,16 @@ function practiceCliEquivalent(problemId, sql = "", packId = "sql_basics") {
   if (packId && packId !== "sql_basics") {
     parts.push("--pack", quoteCliValue(packId));
   }
+  parts.push("--mode", "training");
   parts.push("--format", "json");
   return parts.join(" ");
 }
 
-function practiceStartResult(problem = {}, packId = "sql_basics") {
+function practiceStartResult(problem = {}, packId = "sql_basics", initialSql = "") {
   const problemId = problem.id || "basic_select_customers";
   const values = {
     packId,
+    initialSql,
     problem: {
       id: problemId,
       title: problem.title || problemId,
@@ -412,10 +617,68 @@ function practiceStartResult(problem = {}, packId = "sql_basics") {
     command: "practice_start",
     block_type: "practice_flow",
     actions: ["show_schema", "grade", "save_attempt", "review_wrong_notes"],
-    cli_equivalent: practiceCliEquivalent(problemId, "", packId),
+    cli_equivalent: practiceCliEquivalent(problemId, initialSql, packId),
     data: values,
     error: null,
   };
+}
+
+function practiceProblemFromWrongNote(note = {}) {
+  return {
+    id: note.problem_id || "basic_select_customers",
+    title: note.problem_title || note.problem_id || "Practice",
+    difficulty: note.difficulty || "practice",
+    prompt: note.prompt || "",
+    concepts: Array.isArray(note.concepts) ? note.concepts : [],
+    hint: note.hint || "",
+  };
+}
+
+function wrongNoteCard(note = {}, index = 0) {
+  const retryAction = note.retry_action || {};
+  const staticFeedback = note.static_feedback || {};
+  const providerFeedback = note.provider_feedback || {};
+  const packId = retryAction.pack_id || note.pack_id || "sql_basics";
+  const problemId = retryAction.problem_id || note.problem_id || "basic_select_customers";
+  const submittedSql = retryAction.sql || note.submitted_sql || "";
+  return `<div class="wrong-note-card"
+      data-wrong-note
+      data-pack-id="${escapeHtml(packId)}"
+      data-problem-id="${escapeHtml(problemId)}"
+      data-problem-title="${escapeHtml(note.problem_title || problemId)}"
+      data-problem-prompt="${escapeHtml(note.prompt || "")}"
+      data-submitted-sql="${escapeHtml(submittedSql)}">
+      <div class="attempt-row-head">
+        <strong>${escapeHtml(note.problem_title || problemId)}</strong>
+        <span class="pill">${escapeHtml(t("wrongNotes"))}</span>
+      </div>
+      ${note.timestamp ? `<div class="preset-meta">${escapeHtml(note.timestamp)}</div>` : ""}
+      <div class="wrong-note-section">
+        <span class="section-label">${escapeHtml(t("submittedSql"))}</span>
+        <div class="cli-line">${escapeHtml(submittedSql)}</div>
+      </div>
+      <div class="wrong-note-section">
+        <span class="section-label">${escapeHtml(t("expectedIssue"))}</span>
+        <p>${escapeHtml(note.expected_issue || "")}</p>
+      </div>
+      <div class="wrong-note-section">
+        <span class="section-label">${escapeHtml(staticFeedback.label || t("staticFeedback"))}</span>
+        <p>${escapeHtml(staticFeedback.message || "")}</p>
+      </div>
+      <div class="practice-flow-actions">
+        <button class="ghost-button wrong-note-retry-button" type="button" data-retry-practice="${escapeHtml(index)}">${escapeHtml(
+          retryAction.label || t("retryPractice")
+        )}</button>
+        ${
+          providerFeedback.mode_required === "training"
+            ? `<button class="ghost-button wrong-note-provider-button" type="button" data-provider-feedback="${escapeHtml(
+                index
+              )}" title="${escapeHtml(t("trainingModeOnly"))}">${escapeHtml(t("requestAiFeedback"))}</button>`
+            : ""
+        }
+      </div>
+      <div class="practice-status" data-feedback-status>${escapeHtml(t("trainingModeOnly"))}</div>
+    </div>`;
 }
 
 function parseCommand(raw) {
@@ -436,11 +699,15 @@ function parseCommand(raw) {
     return { command, args: { topic: rest[0] || "join" }, context: { lang: currentLanguage } };
   }
   if (command === "schema_detail") {
-    return { command, args: { table: tail || "users" }, context: { db: "example.db" } };
+    return { command, args: { table: tail || "users" }, context: modeContext({ db: "example.db" }) };
   }
   if (command === "natural") {
     const cleaned = tail.replace(/^["']|["']$/g, "") || "show users";
-    return { command, args: { sql: cleaned }, context: { db: "example.db", provider_name: "local_ollama" } };
+    return {
+      command,
+      args: { sql: cleaned },
+      context: modeContext({ db: "example.db", provider_name: selectedProviderName || "local_ollama" }),
+    };
   }
   if (command === "provider_add_preset") {
     return {
@@ -457,14 +724,23 @@ function parseCommand(raw) {
   if (command === "provider_setup") {
     return { local: "provider_setup", preset: rest[0] || "gemini" };
   }
+  if (command === "provider_list") {
+    return { command, args: {}, context: {} };
+  }
+  if (command === "provider_test" || command === "provider_remove") {
+    return { command, args: { provider_name: rest[0] || selectedProviderName || "" }, context: {} };
+  }
+  if (command === "provider_select") {
+    return { local: "provider_select", provider: { name: rest[0] || selectedProviderName || "" } };
+  }
   if (command === "practice_start") {
     return { local: "practice_start", problem: { id: rest[0] || "basic_select_customers" }, pack: rest[1] || "sql_basics" };
   }
   if (command === "practice_schema") {
-    return { command, args: { table: tail || undefined }, context: {} };
+    return { command, args: { table: tail || undefined }, context: { mode: "training" } };
   }
   if (command === "practice_query") {
-    return { command, args: { sql: tail || "SELECT * FROM customers", limit: 20 }, context: {} };
+    return { command, args: { sql: tail || "SELECT * FROM customers", limit: 20 }, context: { mode: "training" } };
   }
   if (command === "practice_grade") {
     const [problemId, ...sqlParts] = rest;
@@ -474,16 +750,67 @@ function parseCommand(raw) {
         problem_id: problemId || "basic_select_customers",
         sql: sqlParts.join(" ") || "SELECT id, name, region FROM customers ORDER BY id",
       },
-      context: {},
+      context: { mode: "training" },
+    };
+  }
+  if (command === "practice_feedback") {
+    const [problemId, ...sqlParts] = rest;
+    return {
+      command,
+      args: {
+        problem_id: problemId || "basic_select_customers",
+        sql: sqlParts.join(" ") || "SELECT id, name FROM customers ORDER BY id",
+        provider_name: selectedProviderName || "local_ollama",
+        mode: "training",
+      },
+      context: { mode: "training" },
     };
   }
   if (command === "practice_list" || command === "practice_attempts") {
-    return { command, args: {}, context: {} };
+    return { command, args: {}, context: { mode: "training" } };
   }
-  return { command, args: {}, context: command === "provider_list_presets" ? {} : { db: "example.db" } };
+  if (command === "production_profile_add") {
+    const [profileName, ...targetParts] = rest;
+    return {
+      command,
+      args: {
+        profile_name: profileName || "prod_readonly",
+        db_uri: targetParts.join(" ") || "example.db",
+      },
+      context: { mode: "production_assist" },
+    };
+  }
+  if (command === "production_profile_list") {
+    return { command, args: {}, context: { mode: "production_assist" } };
+  }
+  if (command === "production_review") {
+    const [profileName, ...sqlParts] = rest;
+    const sql = sqlParts.join(" ") || "SELECT COUNT(*) FROM users";
+    return {
+      command,
+      args: {
+        profile_name: profileName || "prod_readonly",
+        sql,
+        request_text: sql,
+        source_command: "terminal_shell",
+      },
+      context: { mode: "production_assist" },
+    };
+  }
+  if (command === "production_approve" || command === "production_execute") {
+    return {
+      command,
+      args: { review_id: rest[0] || "" },
+      context: { mode: "production_assist" },
+    };
+  }
+  return { command, args: {}, context: command === "provider_list_presets" ? {} : modeContext({ db: "example.db" }) };
 }
 
 async function postCommand(command, args = {}, context = {}) {
+  if (window.coqueryCommandRuntime?.postCommand) {
+    return window.coqueryCommandRuntime.postCommand(command, args, context);
+  }
   const response = await fetch("/api/commands/run", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -508,6 +835,11 @@ async function runParsedCommand(parsed) {
     addBlock(providerSetupResult(parsed.preset));
     return;
   }
+  if (parsed.local === "provider_select") {
+    selectProvider(parsed.provider?.name || "", "selected");
+    addBlock(providerSelectResult(parsed.provider || {}));
+    return;
+  }
   if (parsed.local === "practice_start") {
     addBlock(practiceStartResult(parsed.problem, parsed.pack));
     return;
@@ -519,6 +851,20 @@ async function runParsedCommand(parsed) {
   }
   if (result.command === "help_catalog" && result.ok) {
     helpCatalog = result.data;
+  }
+  if (result.command === "provider_add_preset" && result.ok) {
+    selectProvider(result.data?.provider?.name || "", "selected");
+  }
+  if (result.command === "provider_test") {
+    const providerName = result.data?.provider_name || parsed.args?.provider_name || selectedProviderName;
+    if (result.ok) {
+      selectProvider(providerName, "ready", result.data?.model_name || "");
+    } else if (providerName) {
+      updateProviderReadinessStatus(providerName, "error", result.data?.readable_message || result.error?.message || "");
+    }
+  }
+  if (result.command === "provider_remove" && result.ok && result.data?.provider?.name === selectedProviderName) {
+    selectProvider("", "none");
   }
   addBlock(result);
 }
@@ -581,11 +927,35 @@ function detailHelpHtml(result) {
   return helpHtmlForCommand(commandHelp(result.command));
 }
 
+function productionReviewButtons(review = {}) {
+  const reviewId = review.review_id || "";
+  if (!reviewId) {
+    return "";
+  }
+  if (review.status === "pending_approval") {
+    return `<div class="practice-flow-actions">
+      <button class="primary-button" type="button" data-production-approve="${escapeHtml(reviewId)}">${escapeHtml(
+        t("productionApproveSql")
+      )}</button>
+    </div>`;
+  }
+  if (review.status === "approved") {
+    return `<div class="practice-flow-actions">
+      <button class="primary-button" type="button" data-production-execute="${escapeHtml(reviewId)}">${escapeHtml(
+        t("productionRunReviewed")
+      )}</button>
+    </div>`;
+  }
+  return "";
+}
+
 function summarizeResult(result) {
-  if (!result.ok) {
+  if (!result.ok && !String(result.command || "").startsWith("production_")) {
+    const readable = result.data?.readable_message || result.error?.message || "Unknown error";
+    const nextStep = result.data?.next_step || "";
     return `<p class="block-summary">${escapeHtml(t("commandFailed"))}: ${escapeHtml(
-      result.error?.message || "Unknown error"
-    )}</p>`;
+      readable
+    )}</p>${nextStep ? `<div class="cli-line"><strong>${escapeHtml(t("nextStep"))}</strong>: ${escapeHtml(nextStep)}</div>` : ""}`;
   }
 
   if (result.command === "help_catalog") {
@@ -700,14 +1070,112 @@ function summarizeResult(result) {
   if (result.command === "provider_list") {
     const rows = (result.data?.providers || [])
       .map((provider) => {
-        return `<div class="schema-row"><strong>${escapeHtml(provider.name)}</strong><span>${escapeHtml(
-          provider.model_name || provider.kind || "model pending"
-        )}</span></div>`;
+        const isSelected = provider.name === selectedProviderName;
+        return `<div class="provider-row" data-provider-name="${escapeHtml(provider.name)}" data-provider-kind="${escapeHtml(
+          provider.kind || ""
+        )}" data-provider-model="${escapeHtml(provider.model_name || "")}" data-provider-api-key-env="${escapeHtml(provider.api_key_env || "")}">
+          <span class="provider-copy">
+            <strong>${escapeHtml(provider.name)}${isSelected ? ` · ${escapeHtml(t("providerStatusSelected"))}` : ""}</strong>
+            <span class="preset-meta">${escapeHtml(provider.kind || "provider")} · ${escapeHtml(
+              provider.model_name || "model pending"
+            )}</span>
+            <span>${escapeHtml(provider.api_key_env || "no API key env")}</span>
+          </span>
+          <span class="preset-row-actions">
+            <button class="mini-button provider-select-button" type="button" data-provider-select="${escapeHtml(provider.name)}">${escapeHtml(
+              t("providerSelect")
+            )}</button>
+            <button class="mini-button provider-test-button" type="button" data-provider-test="${escapeHtml(provider.name)}">${escapeHtml(
+              t("providerTest")
+            )}</button>
+            <button class="mini-button provider-remove-button" type="button" data-provider-remove="${escapeHtml(provider.name)}">${escapeHtml(
+              t("providerRemove")
+            )}</button>
+          </span>
+        </div>`;
       })
       .join("");
     return `<p class="block-summary">${escapeHtml(t("savedProviders"))}</p><div class="block-grid">${
       rows || `<div class="schema-row"><strong>${escapeHtml(t("noProviders"))}</strong><span>${escapeHtml(t("useSetupAi"))}</span></div>`
     }</div>`;
+  }
+
+  if (result.command === "provider_select") {
+    const provider = result.data?.provider || {};
+    return `<p class="block-summary">${escapeHtml(t("providerSelectedSummary"))}</p>
+      <div class="block-grid">
+        <div class="schema-row"><strong>${escapeHtml(t("providerName"))}</strong><span>${escapeHtml(provider.name || selectedProviderName)}</span></div>
+      </div>`;
+  }
+
+  if (result.command === "provider_test") {
+    return `<p class="block-summary">${escapeHtml(t("providerTestPassed"))}: <strong>${escapeHtml(
+      result.data?.provider_name || "provider"
+    )}</strong></p>
+      <div class="block-grid">
+        <div class="schema-row"><strong>${escapeHtml(t("model"))}</strong><span>${escapeHtml(result.data?.model_name || "")}</span></div>
+        <div class="schema-row"><strong>${escapeHtml(t("responsePreview"))}</strong><span>${escapeHtml(
+          result.data?.response_preview || ""
+        )}</span></div>
+      </div>`;
+  }
+
+  if (result.command === "provider_remove") {
+    const provider = result.data?.provider || {};
+    return `<p class="block-summary">${escapeHtml(t("providerRemoved"))} <strong>${escapeHtml(
+      provider.name || "provider"
+    )}</strong>.</p>
+      <div class="block-grid">
+        <div class="schema-row"><strong>${escapeHtml(t("model"))}</strong><span>${escapeHtml(provider.model_name || "")}</span></div>
+      </div>`;
+  }
+
+  if (result.command === "production_profile_add" || result.command === "production_profile_list") {
+    const profiles = result.data?.profiles || (result.data?.profile ? [result.data.profile] : []);
+    const rows = profiles
+      .map((profile) => {
+        return `<div class="schema-row"><strong>${escapeHtml(profile.name || "profile")}</strong><span>${escapeHtml(
+          profile.read_only ? "read_only" : "not_read_only"
+        )}</span></div>`;
+      })
+      .join("");
+    return `<p class="block-summary">${escapeHtml(
+      result.ok ? t("productionProfileSummary") : result.error?.message || t("commandFailed")
+    )}</p>
+      <div class="block-grid">${rows}</div>
+      ${result.data?.profile_path ? `<div class="cli-line">${escapeHtml(result.data.profile_path)}</div>` : ""}`;
+  }
+
+  if (result.command === "production_review" || result.command === "production_approve") {
+    const review = result.data?.review || {};
+    const statusLabel = result.ok ? review.status || "pending_approval" : result.error?.message || t("commandFailed");
+    return `<p class="block-summary">${escapeHtml(t("productionReviewSummary"))} <strong>${escapeHtml(statusLabel)}</strong>.</p>
+      <div class="block-grid">
+        <div class="schema-row"><strong>${escapeHtml(t("productionProfileSummary"))}</strong><span>${escapeHtml(
+          review.profile_name || result.data?.profile?.name || "profile"
+        )}</span></div>
+        <div class="schema-row"><strong>${escapeHtml(t("productionSelectOnly"))}</strong><span>${escapeHtml(
+          review.select_only ? "yes" : "no"
+        )}</span></div>
+        <div class="schema-row"><strong>${escapeHtml(t("productionApprovalRequired"))}</strong><span>${escapeHtml(
+          review.approval_required ? "yes" : t("productionApproved")
+        )}</span></div>
+      </div>
+      <div class="cli-line">${escapeHtml(review.sql || "")}</div>
+      ${productionReviewButtons(review)}
+      ${result.data?.audit_log ? `<div class="cli-line">${escapeHtml(t("productionAuditLog"))}: ${escapeHtml(result.data.audit_log)}</div>` : ""}`;
+  }
+
+  if (result.command === "production_execute") {
+    const rows = (result.data?.rows || [])
+      .slice(0, 5)
+      .map((row) => `<div class="metric-row"><strong>${escapeHtml(JSON.stringify(row))}</strong></div>`)
+      .join("");
+    return `<p class="block-summary">${escapeHtml(
+      result.ok ? t("productionRunReviewed") : result.error?.message || t("commandFailed")
+    )}: <strong>${escapeHtml(result.data?.row_count ?? 0)}</strong> ${escapeHtml(t("productionRows"))}.</p>
+      <div class="block-grid">${rows}</div>
+      ${result.data?.audit_log ? `<div class="cli-line">${escapeHtml(t("productionAuditLog"))}: ${escapeHtml(result.data.audit_log)}</div>` : ""}`;
   }
 
   if (result.command === "schema_detail") {
@@ -728,7 +1196,9 @@ function summarizeResult(result) {
   }
 
   if (result.command === "natural") {
-    return `<p class="block-summary">${escapeHtml(t("mode"))}: <strong>${escapeHtml(result.mode)}</strong></p>
+    return `<p class="block-summary">${escapeHtml(t("mode"))}: <strong>${escapeHtml(resultModeLabel(result))}</strong> · ${escapeHtml(
+      result.mode || "natural"
+    )}</p>
       <div class="cli-line">${escapeHtml(result.sql || t("noSqlReturned"))}</div>`;
   }
 
@@ -766,6 +1236,7 @@ function summarizeResult(result) {
   if (result.command === "practice_start") {
     const problem = result.data?.problem || {};
     const packId = result.data?.packId || "sql_basics";
+    const initialSql = result.data?.initialSql || "";
     const concepts = (problem.concepts || []).map((concept) => `<span class="pill">${escapeHtml(concept)}</span>`).join("");
     return `<p class="block-summary">${escapeHtml(t("practiceStart"))}: <strong>${escapeHtml(
       problem.title || problem.id || "practice"
@@ -794,10 +1265,10 @@ function summarizeResult(result) {
           <span>${escapeHtml(t("practiceSqlLabel"))}</span>
           <textarea name="sql" spellcheck="false" autocomplete="off" placeholder="${escapeHtml(
             t("practiceSqlPlaceholder")
-          )}"></textarea>
+          )}">${escapeHtml(initialSql)}</textarea>
         </label>
         <div class="cli-line practice-preview" data-practice-preview>${escapeHtml(
-          practiceCliEquivalent(problem.id, "", packId)
+          practiceCliEquivalent(problem.id, initialSql, packId)
         )}</div>
         <div class="practice-flow-actions">
           <button class="primary-button" type="submit" data-practice-submit>${escapeHtml(t("practiceSubmit"))}</button>
@@ -830,6 +1301,7 @@ function summarizeResult(result) {
   }
 
   if (result.command === "practice_grade") {
+    const wrongNote = result.data?.wrong_note;
     return `<p class="block-summary">${escapeHtml(t("practiceAnswer"))}: <strong>${
       result.data?.correct ? escapeHtml(t("correct")) : escapeHtml(t("needsReview"))
     }</strong></p>
@@ -844,29 +1316,65 @@ function summarizeResult(result) {
           result.data?.attempt_recorded ? "yes" : "no"
         )}</span></div>
       </div>
-      <div class="cli-line">${escapeHtml(result.data?.feedback || "")}</div>`;
+      <div class="cli-line">${escapeHtml(result.data?.feedback || "")}</div>
+      ${wrongNote ? `<div class="block-grid">${wrongNoteCard(wrongNote, 0)}</div>` : ""}`;
   }
 
   if (result.command === "practice_attempts") {
-    const rows = (result.data?.attempts || [])
+    const wrongAttempts = (result.data?.attempts || []).filter((attempt) => attempt.correct === false);
+    const rows = wrongAttempts
       .slice()
       .reverse()
-      .map((attempt) => {
-        return `<div class="attempt-row">
-          <div class="attempt-row-head">
-            <strong>${escapeHtml(attempt.problem_id || "practice")}</strong>
-            <span class="pill">${escapeHtml(attempt.correct ? t("correct") : t("needsReview"))}</span>
-          </div>
-          <div class="preset-meta">${escapeHtml(attempt.timestamp || "")}</div>
-          <div class="cli-line">${escapeHtml(t("submittedSql"))}: ${escapeHtml(attempt.sql || "")}</div>
-        </div>`;
+      .map((attempt, index) => {
+        const note =
+          attempt.wrong_note ||
+          {
+            pack_id: attempt.pack_id || result.data?.pack_id || "sql_basics",
+            problem_id: attempt.problem_id,
+            problem_title: attempt.problem_title || attempt.problem_id,
+            timestamp: attempt.timestamp,
+            submitted_sql: attempt.sql,
+            expected_issue: "",
+            static_feedback: { label: t("staticFeedback"), message: "" },
+            retry_action: {
+              label: t("retryPractice"),
+              command: "practice_start",
+              pack_id: attempt.pack_id || result.data?.pack_id || "sql_basics",
+              problem_id: attempt.problem_id,
+              sql: attempt.sql,
+            },
+            provider_feedback: { mode_required: "training" },
+          };
+        if (!note.timestamp) {
+          note.timestamp = attempt.timestamp;
+        }
+        return wrongNoteCard(note, index);
       })
       .join("");
-    return `<p class="block-summary">${escapeHtml(t("practiceAttempts"))}: <strong>${escapeHtml(
-      result.data?.attempt_count || 0
+    return `<p class="block-summary">${escapeHtml(t("wrongNotes"))}: <strong>${escapeHtml(
+      wrongAttempts.length
     )}</strong>.</p><div class="block-grid">${
       rows || `<div class="schema-row"><strong>${escapeHtml(t("practiceNoAttempts"))}</strong><span>${escapeHtml(t("practiceStart"))}</span></div>`
     }</div>`;
+  }
+
+  if (result.command === "practice_feedback") {
+    const feedback = result.data?.feedback || {};
+    return `<p class="block-summary">${escapeHtml(feedback.label || t("staticFeedback"))}: <strong>${escapeHtml(
+      feedback.ai_generated ? t("aiFeedback") : t("staticFeedback")
+    )}</strong></p>
+      <div class="block-grid">
+        <div class="wrong-note-card">
+          <div class="wrong-note-section">
+            <span class="section-label">${escapeHtml(t("expectedIssue"))}</span>
+            <p>${escapeHtml(result.data?.expected_issue || "")}</p>
+          </div>
+          <div class="wrong-note-section">
+            <span class="section-label">${escapeHtml(feedback.label || t("staticFeedback"))}</span>
+            <p>${escapeHtml(feedback.message || "")}</p>
+          </div>
+        </div>
+      </div>`;
   }
 
   return `<p class="block-summary">${escapeHtml(t("commandCompleted"))}: <strong>${escapeHtml(
@@ -960,6 +1468,38 @@ function bindProviderSetup(block) {
   updateProviderFormPreview(form);
 }
 
+function providerFromRow(row) {
+  return {
+    name: row?.dataset.providerName || "",
+    kind: row?.dataset.providerKind || "",
+    model_name: row?.dataset.providerModel || "",
+    api_key_env: row?.dataset.providerApiKeyEnv || "",
+  };
+}
+
+function bindProviderListButtons(block) {
+  block.querySelectorAll("[data-provider-select]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const row = button.closest(".provider-row");
+      const provider = providerFromRow(row);
+      selectProvider(provider.name, "selected");
+      addBlock(providerSelectResult(provider));
+    });
+  });
+
+  block.querySelectorAll("[data-provider-test]").forEach((button) => {
+    button.addEventListener("click", () => {
+      runParsedCommand({ command: "provider_test", args: { provider_name: button.dataset.providerTest || "" }, context: {} });
+    });
+  });
+
+  block.querySelectorAll("[data-provider-remove]").forEach((button) => {
+    button.addEventListener("click", () => {
+      runParsedCommand({ command: "provider_remove", args: { provider_name: button.dataset.providerRemove || "" }, context: {} });
+    });
+  });
+}
+
 function bindPresetButtons(block) {
   block.querySelectorAll(".preset-use-button").forEach((button) => {
     button.addEventListener("click", () => {
@@ -1006,7 +1546,7 @@ function bindPracticeButtons(block) {
       runParsedCommand({
         command: "practice_schema",
         args: { pack: row?.dataset.packId || "sql_basics" },
-        context: {},
+        context: { mode: "training" },
       });
     });
   });
@@ -1037,14 +1577,14 @@ function bindPracticeFlow(block) {
   const schemaButton = form.querySelector(".practice-schema-button");
   if (schemaButton) {
     schemaButton.addEventListener("click", () => {
-      runParsedCommand({ command: "practice_schema", args: { pack: packId }, context: {} });
+      runParsedCommand({ command: "practice_schema", args: { pack: packId }, context: { mode: "training" } });
     });
   }
 
   const attemptsButton = form.querySelector(".practice-attempts-button");
   if (attemptsButton) {
     attemptsButton.addEventListener("click", () => {
-      runParsedCommand({ command: "practice_attempts", args: { pack: packId, problem_id: problemId, limit: 5 }, context: {} });
+      runParsedCommand({ command: "practice_attempts", args: { pack: packId, problem_id: problemId, limit: 5 }, context: { mode: "training" } });
     });
   }
 
@@ -1060,14 +1600,14 @@ function bindPracticeFlow(block) {
     updatePracticePreview(form);
 
     try {
-      const queryResult = await postCommand("practice_query", { sql, pack: packId, limit: 20 }, {});
+      const queryResult = await postCommand("practice_query", { sql, pack: packId, limit: 20 }, { mode: "training" });
       addBlock(queryResult);
       if (!queryResult.ok) {
         setStatus(queryResult.error?.message || t("commandFailed"), "error");
         return;
       }
 
-      const gradeResult = await postCommand("practice_grade", { problem_id: problemId, sql, pack: packId }, {});
+      const gradeResult = await postCommand("practice_grade", { problem_id: problemId, sql, pack: packId }, { mode: "training" });
       addBlock(gradeResult);
       if (!gradeResult.ok) {
         setStatus(gradeResult.error?.message || t("commandFailed"), "error");
@@ -1082,7 +1622,7 @@ function bindPracticeFlow(block) {
         const attemptsResult = await postCommand(
           "practice_attempts",
           { pack: packId, problem_id: problemId, limit: 5 },
-          {}
+          { mode: "training" }
         );
         addBlock(attemptsResult);
       }
@@ -1094,12 +1634,98 @@ function bindPracticeFlow(block) {
   updatePracticePreview(form);
 }
 
+function bindWrongNoteButtons(block) {
+  block.querySelectorAll("[data-retry-practice]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const noteNode = button.closest("[data-wrong-note]");
+      if (!noteNode) {
+        return;
+      }
+      const note = {
+        pack_id: noteNode.dataset.packId || "sql_basics",
+        problem_id: noteNode.dataset.problemId || "basic_select_customers",
+        problem_title: noteNode.dataset.problemTitle || noteNode.dataset.problemId || "Practice",
+        prompt: noteNode.dataset.problemPrompt || "",
+        submitted_sql: noteNode.dataset.submittedSql || "",
+      };
+      addBlock(practiceStartResult(practiceProblemFromWrongNote(note), note.pack_id, note.submitted_sql));
+    });
+  });
+
+  block.querySelectorAll("[data-provider-feedback]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const noteNode = button.closest("[data-wrong-note]");
+      const status = noteNode?.querySelector("[data-feedback-status]");
+      if (!noteNode) {
+        return;
+      }
+      if (status) {
+        status.textContent = t("requestAiFeedback");
+        status.className = "practice-status";
+      }
+      try {
+        const feedbackResult = await postCommand(
+          "practice_feedback",
+          {
+            pack: noteNode.dataset.packId || "sql_basics",
+            problem_id: noteNode.dataset.problemId || "basic_select_customers",
+            sql: noteNode.dataset.submittedSql || "",
+            provider_name: selectedProviderName || "local_ollama",
+            mode: "training",
+          },
+          { mode: "training" }
+        );
+        addBlock(feedbackResult);
+        if (status) {
+          status.textContent = feedbackResult.ok
+            ? feedbackResult.data?.feedback?.label || t("aiFeedback")
+            : feedbackResult.error?.message || t("commandFailed");
+          status.className = `practice-status ${feedbackResult.ok ? "ok" : "error"}`;
+        }
+      } catch (error) {
+        if (status) {
+          status.textContent = error.message;
+          status.className = "practice-status error";
+        }
+      }
+    });
+  });
+}
+
+function bindProductionButtons(block) {
+  block.querySelectorAll("[data-production-approve]").forEach((button) => {
+    button.addEventListener("click", () => {
+      runParsedCommand({
+        command: "production_approve",
+        args: { review_id: button.dataset.productionApprove || "" },
+        context: { mode: "production_assist" },
+      });
+    });
+  });
+
+  block.querySelectorAll("[data-production-execute]").forEach((button) => {
+    button.addEventListener("click", () => {
+      runParsedCommand({
+        command: "production_execute",
+        args: { review_id: button.dataset.productionExecute || "" },
+        context: { mode: "production_assist" },
+      });
+    });
+  });
+}
+
 function blockTemplate(result) {
+  const modePill = result.mode_context
+    ? `<span class="pill mode-context-pill" title="${escapeHtml(modeSummary(result.mode_context.mode))}">${escapeHtml(
+        resultModeLabel(result)
+      )}</span>`
+    : "";
   return `
     <div class="block-command">
       <span class="prompt">&gt;</span>
       <code>${escapeHtml(result.command)}</code>
       <span class="pill">${escapeHtml(result.block_type || "command_result")}</span>
+      ${modePill}
     </div>
     ${summarizeResult(result)}
     <div class="cli-line">${escapeHtml(result.cli_equivalent || "")}</div>
@@ -1113,8 +1739,11 @@ function renderBlock(block, result) {
   block.innerHTML = blockTemplate(result);
   bindPresetButtons(block);
   bindProviderSetup(block);
+  bindProviderListButtons(block);
   bindPracticeButtons(block);
   bindPracticeFlow(block);
+  bindWrongNoteButtons(block);
+  bindProductionButtons(block);
 }
 
 function addBlock(result) {
@@ -1167,8 +1796,13 @@ function localizedSession(session) {
 }
 
 async function loadSessions() {
-  const response = await fetch("/api/sessions");
-  const payload = await response.json();
+  let payload;
+  if (window.coqueryCommandRuntime?.getSessions) {
+    payload = await window.coqueryCommandRuntime.getSessions();
+  } else {
+    const response = await fetch("/api/sessions");
+    payload = await response.json();
+  }
   sessionList.innerHTML = (payload.sessions || [])
     .map((session) => {
       const copy = localizedSession(session);
@@ -1185,6 +1819,7 @@ async function loadSessions() {
 
 commandForm.addEventListener("submit", (event) => {
   event.preventDefault();
+  setCommandMenuOpen(false);
   runParsedCommand(parseCommand(commandInput.value)).catch((error) => {
     addBlock({
       ok: false,
@@ -1204,9 +1839,41 @@ document.querySelectorAll("[data-template]").forEach((button) => {
     button.classList.add("active");
     commandInput.value = button.getAttribute("data-template");
     commandInput.focus();
+    setCommandMenuOpen(false);
     if (button.getAttribute("data-template") === "provider_setup") {
       runParsedCommand(parseCommand(commandInput.value));
     }
+  });
+});
+
+if (commandMenuToggle && commandMenuPanel) {
+  commandMenuToggle.addEventListener("click", () => {
+    setCommandMenuOpen(commandMenuToggle.getAttribute("aria-expanded") !== "true");
+  });
+
+  document.addEventListener("click", (event) => {
+    if (
+      commandMenuToggle.getAttribute("aria-expanded") === "true" &&
+      !commandMenuPanel.contains(event.target) &&
+      !commandMenuToggle.contains(event.target)
+    ) {
+      setCommandMenuOpen(false);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      setCommandMenuOpen(false);
+    }
+  });
+}
+
+modeButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    currentAppMode = normalizeAppMode(button.dataset.modeOption);
+    localStorage.setItem("coquery_app_mode", currentAppMode);
+    applyModeIndicator();
+    updateProviderReadinessStatus();
   });
 });
 
@@ -1232,5 +1899,9 @@ closeDetail.addEventListener("click", () => {
 });
 
 applyStaticTranslations();
+const initialCommand = window.coqueryCommandRuntime?.initialCommand || "provider_list_presets";
+if (window.coqueryCommandRuntime?.initialCommand) {
+  commandInput.value = initialCommand;
+}
 loadSessions();
-loadHelpCatalog().finally(() => runParsedCommand(parseCommand("provider_list_presets")));
+loadHelpCatalog().finally(() => runParsedCommand(parseCommand(initialCommand)));

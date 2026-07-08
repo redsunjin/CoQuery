@@ -1,0 +1,22 @@
+{
+  "name": "coquery",
+  "version": "0.7.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "rc:verify": "./scripts/verify-rc.sh",
+    "local:shell": "python3 scripts/start_local_shell.py --host 127.0.0.1 --port 8765",
+    "ios:shell:build": "node scripts/build_ios_shell.mjs",
+    "ios:shell:test": "npm run ios:shell:build && node tests/ios_shell_smoke.mjs",
+    "ios:add": "npm run ios:shell:build && npx cap add ios --packagemanager SPM",
+    "ios:sync": "npm run ios:shell:build && npx cap sync ios",
+    "ios:open": "npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/ios": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0"
+  }
+}

@@ -17,10 +17,16 @@ from sql_cli.cli import (
     jpa_schema_handler,
     natural_handler,
     practice_attempts_handler,
+    practice_feedback_handler,
     practice_grade_handler,
     practice_list_handler,
     practice_query_handler,
     practice_schema_handler,
+    production_approve_handler,
+    production_execute_handler,
+    production_profile_add_handler,
+    production_profile_list_handler,
+    production_review_handler,
     provider_add_handler,
     provider_add_preset_handler,
     provider_list_handler,
@@ -33,6 +39,7 @@ from sql_cli.cli import (
     term_explain_handler,
     update_handler,
 )
+from sql_cli.mode_policy import build_mode_context, provider_policy_block_result
 
 
 CommandArgs = dict[str, Any]
@@ -60,6 +67,7 @@ BLOCK_TYPES = {
     "practice_query": "practice_query_result",
     "practice_grade": "practice_grade",
     "practice_attempts": "practice_attempts",
+    "practice_feedback": "practice_feedback",
     "jpa_schema": "model_schema",
     "db_knowledge": "knowledge",
     "provider_add": "provider_config",
@@ -68,6 +76,11 @@ BLOCK_TYPES = {
     "provider_list": "provider_list",
     "provider_remove": "provider_config",
     "provider_test": "provider_diagnostic",
+    "production_profile_add": "production_profile",
+    "production_profile_list": "production_profile",
+    "production_review": "production_review",
+    "production_approve": "production_review",
+    "production_execute": "production_execution",
 }
 
 
@@ -89,6 +102,7 @@ ACTIONS = {
     "practice_query": ["copy", "grade", "save_attempt"],
     "practice_grade": ["copy", "retry", "save_wrong_note"],
     "practice_attempts": ["copy", "review_wrong_notes"],
+    "practice_feedback": ["copy", "retry", "request_provider_feedback"],
     "jpa_schema": ["copy", "explain"],
     "db_knowledge": ["copy", "explain"],
     "provider_add": ["copy", "test_provider", "use_provider"],
@@ -97,6 +111,11 @@ ACTIONS = {
     "provider_list": ["copy", "test_provider", "remove_provider"],
     "provider_remove": ["copy"],
     "provider_test": ["copy", "retry", "use_provider"],
+    "production_profile_add": ["copy", "review"],
+    "production_profile_list": ["copy", "review"],
+    "production_review": ["copy_sql", "approve", "audit"],
+    "production_approve": ["copy_sql", "execute", "audit"],
+    "production_execute": ["copy", "export", "audit"],
 }
 
 
@@ -115,6 +134,12 @@ CLI_FLAG_ORDER = [
     "chat_completions_url",
     "models_url",
     "api_key_env",
+    "profile_name",
+    "db_uri_env",
+    "review_id",
+    "request_text",
+    "source_command",
+    "read_write",
     "jpa_project",
     "dialect",
     "topic",
@@ -122,6 +147,9 @@ CLI_FLAG_ORDER = [
     "pack",
     "problem_id",
     "limit",
+    "mode",
+    "allow_external_provider",
+    "provider_policy",
     "no_record",
     "format",
     "write",
@@ -146,6 +174,12 @@ CLI_FLAGS = {
     "chat_completions_url": "--chat-completions-url",
     "models_url": "--models-url",
     "api_key_env": "--api-key-env",
+    "profile_name": "--profile-name",
+    "db_uri_env": "--db-uri-env",
+    "review_id": "--review-id",
+    "request_text": "--request-text",
+    "source_command": "--source-command",
+    "read_write": "--read-write",
     "jpa_project": "--jpa-project",
     "dialect": "--dialect",
     "topic": "--topic",
@@ -153,12 +187,31 @@ CLI_FLAGS = {
     "pack": "--pack",
     "problem_id": "--problem-id",
     "limit": "--limit",
+    "mode": "--mode",
+    "allow_external_provider": "--allow-external-provider",
+    "provider_policy": "--provider-policy",
     "no_record": "--no-record",
     "format": "--format",
     "write": "--write",
     "dry_run": "--dry-run",
     "max_affected_rows": "--max-affected-rows",
     "allow_full_table_write": "--allow-full-table-write",
+}
+
+
+MODE_AWARE_COMMANDS = {
+    "natural",
+    "practice_list",
+    "practice_schema",
+    "practice_query",
+    "practice_grade",
+    "practice_attempts",
+    "practice_feedback",
+    "production_profile_add",
+    "production_profile_list",
+    "production_review",
+    "production_approve",
+    "production_execute",
 }
 
 
@@ -193,6 +246,21 @@ def _command_error(command: str, code: str, message: str, args: CommandArgs, con
         "error": {"code": code, "message": message},
     }
     return _enrich_result(result, command, args, context)
+
+
+def _mode_context(args: CommandArgs, context: CommandArgs) -> dict[str, Any]:
+    return build_mode_context(
+        mode=_get(args, context, "mode"),
+        allow_external_provider=_get(args, context, "allow_external_provider", False),
+        provider_policy=_get(args, context, "provider_policy"),
+    )
+
+
+def _has_mode_input(args: CommandArgs, context: CommandArgs) -> bool:
+    return any(
+        key in args or key in context
+        for key in ("mode", "allow_external_provider", "provider_policy")
+    )
 
 
 def _quote_cli_value(value: Any) -> str:
@@ -236,6 +304,18 @@ def _cli_args(command: str, args: CommandArgs, context: CommandArgs) -> CommandA
         cli_args["problem_id"] = "basic_select_customers"
     if command == "practice_grade" and "sql" not in cli_args:
         cli_args["sql"] = "SELECT id, name, region FROM customers ORDER BY id"
+    if command == "practice_feedback" and "problem_id" not in cli_args:
+        cli_args["problem_id"] = "basic_select_customers"
+    if command == "practice_feedback" and "sql" not in cli_args:
+        cli_args["sql"] = "SELECT id, name FROM customers ORDER BY id"
+    if command == "production_profile_add" and _get(args, context, "read_only") is False:
+        cli_args["read_write"] = True
+    if command in {"production_review", "production_profile_add"} and "profile_name" not in cli_args:
+        cli_args["profile_name"] = "prod_readonly"
+    if command == "production_review" and "sql" not in cli_args:
+        cli_args["sql"] = "SELECT * FROM users"
+    if command in {"production_approve", "production_execute"} and "review_id" not in cli_args:
+        cli_args["review_id"] = "prodrev_id"
 
     return cli_args
 
@@ -267,6 +347,11 @@ def _enrich_result(result: CommandResult, command: str, args: CommandArgs, conte
     enriched.setdefault("command", command)
     enriched.setdefault("data", {})
     enriched.setdefault("error", None)
+    if command in MODE_AWARE_COMMANDS or _has_mode_input(args, context):
+        mode_context = dict(enriched.get("mode_context") or _mode_context(args, context))
+        enriched["mode_context"] = mode_context
+        if isinstance(enriched["data"], dict):
+            enriched["data"].setdefault("mode_context", mode_context)
     enriched["block_type"] = BLOCK_TYPES.get(command, "command_result")
     enriched["actions"] = ACTIONS.get(command, ["copy"])
     enriched["cli_equivalent"] = build_cli_equivalent(command, args, context)
@@ -277,6 +362,15 @@ def _dispatch(command: str, args: CommandArgs, context: CommandArgs) -> CommandR
     fmt = str(_get(args, context, "format", DEFAULT_FORMAT))
     db = _db_target(args, context)
     params = _coerce_params(_get(args, context, "params"))
+    mode_context = _mode_context(args, context)
+    if command in {"natural", "practice_feedback"}:
+        policy_result = provider_policy_block_result(
+            command,
+            _get(args, context, "provider_name"),
+            mode_context,
+        )
+        if policy_result:
+            return policy_result
 
     dispatchers: dict[str, Callable[[], CommandResult]] = {
         "schema": lambda: schema_handler(db, fmt),
@@ -324,6 +418,9 @@ def _dispatch(command: str, args: CommandArgs, context: CommandArgs) -> CommandR
             _get(args, context, "sql"),
             fmt,
             _get(args, context, "provider_name"),
+            mode_context["mode"],
+            mode_context["allow_external_provider"],
+            mode_context["provider_policy"],
         ),
         "help_catalog": lambda: help_catalog_handler(_get(args, context, "lang")),
         "command_explain": lambda: command_explain_handler(
@@ -355,6 +452,13 @@ def _dispatch(command: str, args: CommandArgs, context: CommandArgs) -> CommandR
             _get(args, context, "problem_id"),
             _get(args, context, "limit"),
         ),
+        "practice_feedback": lambda: practice_feedback_handler(
+            _get(args, context, "problem_id"),
+            _get(args, context, "sql"),
+            _get(args, context, "pack"),
+            _get(args, context, "provider_name"),
+            _get(args, context, "mode"),
+        ),
         "jpa_schema": lambda: jpa_schema_handler(_get(args, context, "jpa_project"), fmt),
         "db_knowledge": lambda: db_knowledge_handler(_get(args, context, "dialect"), _get(args, context, "topic")),
         "provider_add": lambda: provider_add_handler(
@@ -379,6 +483,22 @@ def _dispatch(command: str, args: CommandArgs, context: CommandArgs) -> CommandR
         "provider_list": provider_list_handler,
         "provider_remove": lambda: provider_remove_handler(_get(args, context, "provider_name")),
         "provider_test": lambda: provider_test_handler(_get(args, context, "provider_name")),
+        "production_profile_add": lambda: production_profile_add_handler(
+            _get(args, context, "profile_name"),
+            _get(args, context, "db_uri"),
+            _get(args, context, "db_uri_env"),
+            bool(_get(args, context, "read_only", True)),
+            _get(args, context, "dialect"),
+        ),
+        "production_profile_list": production_profile_list_handler,
+        "production_review": lambda: production_review_handler(
+            _get(args, context, "profile_name"),
+            _get(args, context, "sql"),
+            _get(args, context, "request_text"),
+            _get(args, context, "source_command"),
+        ),
+        "production_approve": lambda: production_approve_handler(_get(args, context, "review_id")),
+        "production_execute": lambda: production_execute_handler(_get(args, context, "review_id")),
     }
 
     if command not in dispatchers:

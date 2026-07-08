@@ -11,11 +11,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
+from sql_cli.llm_registry import CoQueryLLMError, LLMProviderClient, LLMProviderRegistry
+
 
 DEFAULT_PACK = "sql_basics"
 PACK_DIR = Path(__file__).resolve().parents[1] / "practice_packs"
 DEFAULT_ATTEMPT_LOG = Path(".coquery") / "practice_attempts.jsonl"
 SAFE_PACK_RE = re.compile(r"^[A-Za-z0-9_-]+$")
+TRAINING_MODE = "training"
 
 
 class CoQueryPracticeError(Exception):
@@ -239,6 +242,157 @@ def _signature(result: dict[str, Any]) -> tuple[tuple[str, ...], tuple[tuple[Any
     return columns, rows
 
 
+def _problem_payload(problem: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": problem.get("id"),
+        "title": problem.get("title"),
+        "difficulty": problem.get("difficulty"),
+        "prompt": problem.get("prompt"),
+        "concepts": problem.get("concepts", []),
+        "hint": problem.get("hint"),
+    }
+
+
+def _expected_issue(actual: dict[str, Any], expected: dict[str, Any]) -> str:
+    actual_columns = [str(column) for column in actual.get("columns", [])]
+    expected_columns = [str(column) for column in expected.get("columns", [])]
+
+    if actual_columns != expected_columns:
+        missing = [column for column in expected_columns if column not in actual_columns]
+        extra = [column for column in actual_columns if column not in expected_columns]
+        details = []
+        if missing:
+            details.append(f"Expected column(s) missing from the result: {', '.join(missing)}.")
+        if extra:
+            details.append(f"Unexpected column(s) returned: {', '.join(extra)}.")
+        if not details:
+            details.append("Returned columns have a different order than the expected answer.")
+        return " ".join(details)
+
+    if actual.get("row_count") != expected.get("row_count"):
+        return (
+            f"Expected {expected.get('row_count')} row(s), but the submitted query returned "
+            f"{actual.get('row_count')} row(s). Check filters, joins, and grouping."
+        )
+
+    if actual.get("rows") != expected.get("rows"):
+        return "Returned rows differ from the expected answer. Check selected values, sorting, joins, and aggregate logic."
+
+    return "No issue detected. Result columns and rows match the expected answer."
+
+
+def _static_feedback_message(problem: dict[str, Any], expected_issue: str) -> str:
+    concepts = ", ".join(str(item) for item in problem.get("concepts", []) if item)
+    concept_part = f" Focus concept(s): {concepts}." if concepts else ""
+    hint_part = f" Hint: {problem.get('hint')}." if problem.get("hint") else ""
+    return f"{expected_issue} Retry by adjusting the submitted SQL, then run practice_grade again.{concept_part}{hint_part}"
+
+
+def _feedback_payload(source: str, message: str, ai_generated: bool, provider_name: Optional[str] = None) -> dict[str, Any]:
+    payload = {
+        "source": source,
+        "label": "AI-generated feedback" if ai_generated else "Static feedback",
+        "message": message,
+        "ai_generated": ai_generated,
+    }
+    if provider_name:
+        payload["provider_name"] = provider_name
+    return payload
+
+
+def _provider_feedback_prompt(problem: dict[str, Any], submitted_sql: str, expected_issue: str, static_feedback: str) -> str:
+    return (
+        "You are CoQuery's SQL training-mode tutor. "
+        "Return concise feedback in two short sentences. "
+        "Label no markdown, no JSON, no code fence. "
+        "Explain the likely mistake and one retry step.\n"
+        f"Problem: {problem.get('title')}\n"
+        f"Prompt: {problem.get('prompt')}\n"
+        f"Submitted SQL: {submitted_sql}\n"
+        f"Expected issue: {expected_issue}\n"
+        f"Static feedback: {static_feedback}"
+    )
+
+
+def _wrong_note(
+    pack_id: str,
+    problem: dict[str, Any],
+    submitted_sql: str,
+    actual: dict[str, Any],
+    expected: dict[str, Any],
+) -> dict[str, Any]:
+    expected_issue = _expected_issue(actual, expected)
+    static_message = _static_feedback_message(problem, expected_issue)
+    return {
+        "pack_id": pack_id,
+        "problem_id": problem.get("id"),
+        "problem_title": problem.get("title"),
+        "prompt": problem.get("prompt"),
+        "submitted_sql": submitted_sql,
+        "expected_issue": expected_issue,
+        "static_feedback": _feedback_payload("static", static_message, ai_generated=False),
+        "retry_action": {
+            "label": "Retry",
+            "command": "practice_start",
+            "pack_id": pack_id,
+            "problem_id": problem.get("id"),
+            "sql": submitted_sql,
+        },
+        "provider_feedback": {
+            "available": True,
+            "mode_required": TRAINING_MODE,
+            "request_command": "practice_feedback",
+            "label": "AI-generated feedback",
+        },
+    }
+
+
+def _fallback_wrong_note_from_attempt(entry: dict[str, Any], message: str) -> dict[str, Any]:
+    pack_id = str(entry.get("pack_id") or DEFAULT_PACK)
+    problem_id = entry.get("problem_id") or "practice"
+    submitted_sql = str(entry.get("sql") or "")
+    expected_issue = f"Stored attempt could not be regraded: {message}. Retry the problem to refresh the wrong note."
+    return {
+        "pack_id": pack_id,
+        "problem_id": problem_id,
+        "problem_title": entry.get("problem_title") or problem_id,
+        "prompt": "",
+        "submitted_sql": submitted_sql,
+        "expected_issue": expected_issue,
+        "static_feedback": _feedback_payload("static", expected_issue, ai_generated=False),
+        "retry_action": {
+            "label": "Retry",
+            "command": "practice_start",
+            "pack_id": pack_id,
+            "problem_id": problem_id,
+            "sql": submitted_sql,
+        },
+        "provider_feedback": {
+            "available": True,
+            "mode_required": TRAINING_MODE,
+            "request_command": "practice_feedback",
+            "label": "AI-generated feedback",
+        },
+    }
+
+
+def _attempt_with_wrong_note(entry: dict[str, Any]) -> dict[str, Any]:
+    if entry.get("correct") is not False or entry.get("wrong_note"):
+        return entry
+
+    augmented = dict(entry)
+    try:
+        loaded = _load_pack(str(entry.get("pack_id") or DEFAULT_PACK))
+        problem = _get_problem(loaded, str(entry.get("problem_id") or ""))
+        submitted_sql = _ensure_select(str(entry.get("sql") or ""))
+        actual = _execute_select(loaded, submitted_sql, limit=None)
+        expected = _execute_select(loaded, str(problem["expected_sql"]), limit=None)
+        augmented["wrong_note"] = _wrong_note(str(loaded.get("id")), problem, submitted_sql, actual, expected)
+    except CoQueryPracticeError as exc:
+        augmented["wrong_note"] = _fallback_wrong_note_from_attempt(entry, exc.message)
+    return augmented
+
+
 def _attempt_log_path() -> Path:
     override = os.environ.get("COQUERY_PRACTICE_ATTEMPT_LOG")
     return Path(override) if override else DEFAULT_ATTEMPT_LOG
@@ -361,36 +515,36 @@ def practice_grade_handler(
         actual = _execute_select(loaded, _ensure_select(sql), limit=None)
         expected = _execute_select(loaded, str(problem["expected_sql"]), limit=None)
         correct = _signature(actual) == _signature(expected)
+        wrong_note = None if correct else _wrong_note(str(loaded.get("id")), problem, str(sql or ""), actual, expected)
         feedback = (
             "Correct. Result columns and rows match the expected answer."
             if correct
-            else "Result differs from the expected answer. Compare columns, filters, joins, grouping, and ordering."
+            else wrong_note["static_feedback"]["message"]
         )
         attempt = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "pack_id": loaded.get("id"),
             "problem_id": problem.get("id"),
+            "problem_title": problem.get("title"),
             "correct": correct,
             "sql": sql,
             "actual_row_count": actual["row_count"],
             "expected_row_count": expected["row_count"],
         }
+        if wrong_note is not None:
+            attempt["wrong_note"] = wrong_note
         log_path = str(_write_attempt(attempt)) if record else None
         return _success(
             command,
             {
                 "pack_id": loaded.get("id"),
                 "dataset_id": loaded.get("dataset", {}).get("id"),
-                "problem": {
-                    "id": problem.get("id"),
-                    "title": problem.get("title"),
-                    "difficulty": problem.get("difficulty"),
-                    "prompt": problem.get("prompt"),
-                    "concepts": problem.get("concepts", []),
-                    "hint": problem.get("hint"),
-                },
+                "problem": _problem_payload(problem),
                 "correct": correct,
                 "feedback": feedback,
+                "feedback_source": "static",
+                "ai_generated": False,
+                "wrong_note": wrong_note,
                 "actual": actual,
                 "expected": expected,
                 "expected_sql": problem.get("expected_sql"),
@@ -400,6 +554,74 @@ def practice_grade_handler(
         )
     except CoQueryPracticeError as exc:
         return _error(command, exc)
+    except Exception as exc:
+        return _error(command, CoQueryPracticeError("practice_error", str(exc)))
+
+
+def practice_feedback_handler(
+    problem_id: Optional[str],
+    sql: Optional[str],
+    pack: Optional[str] = None,
+    provider_name: Optional[str] = None,
+    mode: Optional[str] = None,
+) -> dict[str, Any]:
+    command = "practice_feedback"
+    try:
+        loaded = _load_pack(pack)
+        problem = _get_problem(loaded, problem_id)
+        submitted_sql = _ensure_select(sql)
+        actual = _execute_select(loaded, submitted_sql, limit=None)
+        expected = _execute_select(loaded, str(problem["expected_sql"]), limit=None)
+        note = _wrong_note(str(loaded.get("id")), problem, submitted_sql, actual, expected)
+
+        requested_provider = (provider_name or "").strip()
+        normalized_mode = (mode or "static").strip().lower()
+        if requested_provider and normalized_mode != TRAINING_MODE:
+            raise CoQueryPracticeError(
+                "provider_feedback_training_only",
+                "Provider-backed practice feedback can only be requested in Training Mode.",
+                {
+                    "mode": normalized_mode,
+                    "required_mode": TRAINING_MODE,
+                    "provider_name": requested_provider,
+                },
+            )
+
+        feedback = note["static_feedback"]
+        provider_feedback_allowed = False
+        if requested_provider:
+            profile = LLMProviderRegistry().get_profile(requested_provider)
+            static_message = str(note["static_feedback"]["message"])
+            provider_message = LLMProviderClient(profile).complete_text(
+                _provider_feedback_prompt(problem, submitted_sql, str(note["expected_issue"]), static_message)
+            )
+            feedback = _feedback_payload(
+                "provider",
+                provider_message or static_message,
+                ai_generated=True,
+                provider_name=profile.name,
+            )
+            provider_feedback_allowed = True
+
+        return _success(
+            command,
+            {
+                "pack_id": loaded.get("id"),
+                "dataset_id": loaded.get("dataset", {}).get("id"),
+                "problem": _problem_payload(problem),
+                "submitted_sql": submitted_sql,
+                "expected_issue": note["expected_issue"],
+                "wrong_note": note,
+                "feedback": feedback,
+                "provider_feedback_allowed": provider_feedback_allowed,
+                "mode": normalized_mode,
+                "requested_provider_name": requested_provider or None,
+            },
+        )
+    except CoQueryPracticeError as exc:
+        return _error(command, exc)
+    except CoQueryLLMError as exc:
+        return _error(command, CoQueryPracticeError(exc.code, exc.message, getattr(exc, "data", {})))
     except Exception as exc:
         return _error(command, CoQueryPracticeError("practice_error", str(exc)))
 
@@ -414,7 +636,7 @@ def practice_attempts_handler(
         if resolved_limit < 0:
             raise CoQueryPracticeError("invalid_practice_limit", "limit must be zero or greater.")
         pack_id = _resolve_pack_id(pack) if pack else None
-        attempts = _read_attempts(resolved_limit, pack=pack_id, problem_id=problem_id)
+        attempts = [_attempt_with_wrong_note(entry) for entry in _read_attempts(resolved_limit, pack=pack_id, problem_id=problem_id)]
         return _success(
             "practice_attempts",
             {

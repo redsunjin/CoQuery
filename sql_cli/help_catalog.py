@@ -170,11 +170,26 @@ COMMANDS: list[dict[str, Any]] = [
             "en": "Checks whether your SQL matches the expected result for a practice problem.",
         },
         "beginner": {
-            "ko": "틀린 답은 나중에 오답노트와 AI 피드백으로 확장할 수 있는 핵심 입력입니다.",
-            "en": "Wrong answers become useful inputs for future wrong-note and AI feedback features.",
+            "ko": "틀린 답은 제출 SQL, 예상 문제, 다시 풀기 액션이 포함된 오답노트로 저장됩니다.",
+            "en": "Wrong answers are saved as wrong notes with submitted SQL, expected issue, and retry action.",
         },
         "example": "python main.py --command practice_grade --problem-id basic_select_customers --sql \"SELECT id, name, region FROM customers ORDER BY id\" --format json",
         "related_terms": ["query", "order_by", "wrong_note"],
+    },
+    {
+        "id": "practice_feedback",
+        "category": "learn",
+        "label": {"ko": "연습 피드백", "en": "Practice feedback"},
+        "summary": {
+            "ko": "오답 SQL에 대해 제공자 없이 정적 피드백을 만들고, Training Mode에서만 provider 피드백을 요청합니다.",
+            "en": "Returns static feedback without a provider and requests provider feedback only in Training Mode.",
+        },
+        "beginner": {
+            "ko": "AI가 붙은 피드백은 AI 생성 피드백으로 표시됩니다. provider가 없으면 로컬 정적 피드백만 반환합니다.",
+            "en": "Provider-backed feedback is labeled as AI-generated. Without a provider, CoQuery returns local static feedback.",
+        },
+        "example": "python main.py --command practice_feedback --problem-id basic_select_customers --sql \"SELECT id, name FROM customers ORDER BY id\" --format json",
+        "related_terms": ["wrong_note", "training_mode", "provider"],
     },
     {
         "id": "schema_detail",
@@ -296,6 +311,81 @@ COMMANDS: list[dict[str, Any]] = [
         "example": "python main.py --command doctor --db example.db --format json",
         "related_terms": ["db_connection", "read_only", "write_safety"],
     },
+    {
+        "id": "production_profile_add",
+        "category": "safety",
+        "label": {"ko": "운영 읽기 전용 프로필 저장", "en": "Save read-only production profile"},
+        "summary": {
+            "ko": "Production Assist에서 사용할 읽기 전용 DB 프로필을 저장합니다.",
+            "en": "Saves a read-only DB profile for Production Assist.",
+        },
+        "beginner": {
+            "ko": "실제 운영 대상은 DB 비밀번호를 파일에 쓰지 않도록 `--db-uri-env`를 사용합니다.",
+            "en": "Use `--db-uri-env` for real production targets so passwords stay out of files.",
+        },
+        "example": "python main.py --command production_profile_add --profile-name prod_readonly --db-uri-env COQUERY_PROD_READONLY_DB_URI",
+        "related_terms": ["db_connection", "read_only", "write_safety"],
+    },
+    {
+        "id": "production_profile_list",
+        "category": "safety",
+        "label": {"ko": "운영 프로필 목록", "en": "List production profiles"},
+        "summary": {
+            "ko": "저장된 Production Assist 읽기 전용 프로필을 확인합니다.",
+            "en": "Lists saved Production Assist read-only profiles.",
+        },
+        "beginner": {
+            "ko": "실행 전에 어떤 프로필이 운영 보조용으로 등록되어 있는지 확인할 때 사용합니다.",
+            "en": "Use it to check which profiles are available before reviewing SQL.",
+        },
+        "example": "python main.py --command production_profile_list --format json",
+        "related_terms": ["db_connection", "read_only"],
+    },
+    {
+        "id": "production_review",
+        "category": "safety",
+        "label": {"ko": "운영 SQL 리뷰", "en": "Review production SQL"},
+        "summary": {
+            "ko": "운영 보조용 SQL을 실행 전 리뷰 상태로 저장합니다.",
+            "en": "Stores production-assist SQL as a pre-execution review.",
+        },
+        "beginner": {
+            "ko": "SELECT 문만 통과하며, 승인되기 전에는 실행되지 않습니다.",
+            "en": "Only SELECT statements pass, and they cannot execute before approval.",
+        },
+        "example": "python main.py --command production_review --profile-name prod_readonly --sql \"SELECT COUNT(*) FROM users\"",
+        "related_terms": ["select", "read_only", "write_safety"],
+    },
+    {
+        "id": "production_approve",
+        "category": "safety",
+        "label": {"ko": "운영 SQL 승인", "en": "Approve production SQL"},
+        "summary": {
+            "ko": "리뷰된 운영 보조 SQL을 실행 가능 상태로 승인합니다.",
+            "en": "Approves reviewed production-assist SQL for execution.",
+        },
+        "beginner": {
+            "ko": "승인은 실행과 분리되어 있어, SQL을 한 번 더 확인하는 단계입니다.",
+            "en": "Approval is separate from execution, giving you one more checkpoint.",
+        },
+        "example": "python main.py --command production_approve --review-id prodrev_...",
+        "related_terms": ["read_only", "write_safety"],
+    },
+    {
+        "id": "production_execute",
+        "category": "safety",
+        "label": {"ko": "승인 SQL 실행", "en": "Execute approved SQL"},
+        "summary": {
+            "ko": "승인된 Production Assist SELECT 문만 실행합니다.",
+            "en": "Executes only approved Production Assist SELECT statements.",
+        },
+        "beginner": {
+            "ko": "실행 시에도 SELECT 전용 가드를 다시 확인하고 감사 로그를 남깁니다.",
+            "en": "Execution rechecks the SELECT-only guard and writes an audit log.",
+        },
+        "example": "python main.py --command production_execute --review-id prodrev_...",
+        "related_terms": ["select", "read_only", "write_safety"],
+    },
 ]
 
 
@@ -398,6 +488,15 @@ TERMS: list[dict[str, Any]] = [
             "en": "A profile for the LLM service or local model that handles AI requests.",
         },
         "example": {"ko": "Ollama 로컬 모델, Groq API, Gemini API", "en": "Ollama local model, Groq API, Gemini API"},
+    },
+    {
+        "id": "training_mode",
+        "label": {"ko": "Training Mode", "en": "Training Mode"},
+        "plain": {
+            "ko": "연습 문제와 오답노트에서만 AI 피드백 요청을 허용하는 학습 전용 모드입니다.",
+            "en": "A learning-only mode that allows AI feedback requests only for practice and wrong notes.",
+        },
+        "example": {"ko": "`practice_feedback --mode training`", "en": "`practice_feedback --mode training`"},
     },
     {
         "id": "local_llm",

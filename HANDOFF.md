@@ -75,19 +75,25 @@ The GitHub repository `redsunjin/CoQuery` is public as verified on 2026-04-23.
 - `update`, `delete`, and write-mode `query` statements without `WHERE` fail closed unless `--allow-full-table-write` is provided
 - `natural` is heuristic by default, skips provider calls for simple covered requests, and can optionally route complex requests through a registered provider
 - provider-backed natural is currently a secondary experimental track, not the primary loop
+- Training/Production Assist mode separation is implemented at the Command API and terminal-shell level
+- Production Assist Safety Gate is implemented with read-only profiles, reviewed SQL approval, SELECT-only execution, and JSONL audit logging
+- Release Candidate Hardening is implemented with `npm run rc:verify` as the one-command launch check
+- non-iOS local packaging is local web app first, with `python3 scripts/start_local_shell.py --host 127.0.0.1 --port 8765` as the stable start command
 - PostgreSQL is proven only for narrow `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` paths, write-safety guard slices, `generate select_simple`, `generate count_simple`, and direct `generate join_inner` / `generate join_left` slices through local smoke runs
 - `doctor` classifies common PostgreSQL failures such as `auth_failed`, `database_not_found`, `host_unreachable`, `connection_refused`, `timeout`, and `ssl_error`
 - MySQL URIs return a structured `unsupported_backend` placeholder error
 - JPA support is source introspection only and does not execute JPQL
 - GitHub Actions proof has only been observed for the committed `baseline` and `postgresql-smoke` workflows so far
-- no GitHub Pages or hosted browser demo exists yet
+- no GitHub Pages, hosted browser demo, Tauri wrapper, or Electron wrapper exists yet
 
 ## Official Next Work
 
-1. Keep the GitHub Actions `baseline` and `postgresql-smoke` workflows green
-2. Keep top-level docs aligned with the verified baseline
-3. Use the verification matrix and scope lock to gate any broader Phase 5 claim changes
-4. Do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
+1. Run `npm run rc:verify`
+2. Commit and push the release-candidate branch if the user asks for publication
+3. Keep the GitHub Actions `baseline` and `postgresql-smoke` workflows green
+4. Keep top-level docs aligned with the verified baseline
+5. Use the verification matrix and scope lock to gate any broader Phase 5 claim changes
+6. Do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
 
 Current runner note:
 
@@ -111,6 +117,7 @@ Current runner note:
 - `POSTGRESQL_SCOPE_LOCK_2026-04-07.md`
 - `USAGE_AND_DEMO.md`
 - `SCOPE_DECISION_2026-04-10.md`
+- `docs/desktop-local-packaging-decision.md`
 - `.github/workflows/baseline.yml`
 - `.github/workflows/postgresql-smoke.yml`
 
@@ -126,9 +133,12 @@ python3 main.py --command generate --db /tmp/join-test.db --skill join_inner --p
 python3 sql_cli/tests/test_core.py
 python3 -c "import sql_cli.cli, sql_cli.core, sql_cli.db_new"
 python3 main.py --command db_knowledge --topic coverage
+python3 tests/rc_hardening_smoke.py
+npm run rc:verify
+python3 tests/local_packaging_decision_smoke.py
 bash scripts/run_postgresql_local_smoke.sh
 ```
 
-Last Updated: 2026-04-28
-Status: SQLite-first baseline verified with `doctor`, PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke proof, local DB knowledge-first planning, schema-detail-aware identifier validation, explicit write safety guards, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows
-Next: keep workflows green, keep docs aligned, use `USAGE_AND_DEMO.md` for public usage/demo guidance, and avoid broadening join-generation claims beyond direct schema-detail foreign-key inference
+Last Updated: 2026-07-08
+Status: SQLite-first baseline verified with `doctor`, PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke proof, local DB knowledge-first planning, schema-detail-aware identifier validation, explicit write safety guards, direct schema-detail join inference, Training/Production Assist mode separation, Desktop/Local Packaging Decision, Production Assist Safety Gate, Release Candidate Hardening, and verified GitHub Actions baseline / PostgreSQL smoke workflows
+Next: commit and push if publication is requested, after `npm run rc:verify` passes

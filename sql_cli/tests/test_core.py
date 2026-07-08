@@ -26,6 +26,7 @@ from sql_cli.cli import (
     jpa_schema_handler,
     natural_handler,
     practice_attempts_handler,
+    practice_feedback_handler,
     practice_grade_handler,
     practice_list_handler,
     practice_query_handler,
@@ -714,6 +715,31 @@ assert "--preset gemini" in command_api_add_preset["cli_equivalent"]
 assert command_api_list["data"]["providers"][0]["name"] == "gemini_flash"
 print("36e. test_command_api_provider_add_preset_and_list ✓")
 
+with TemporaryDirectory() as tmpdir:
+    registry_path = Path(tmpdir) / "llm_registry.json"
+    with patch.dict(os.environ, {"COQUERY_LLM_REGISTRY_PATH": str(registry_path)}, clear=False):
+        run_command(
+            "provider_add_preset",
+            args={
+                "preset": "gemini",
+                "provider_name": "gemini_ready",
+                "model_name": "gemini-3.5-flash",
+                "api_key_env": "MISSING_GEMINI_KEY",
+            },
+        )
+        provider_test_missing_key = run_command("provider_test", args={"provider_name": "gemini_ready"})
+        provider_remove_ready = run_command("provider_remove", args={"provider_name": "gemini_ready"})
+assert provider_test_missing_key["ok"] is False
+assert provider_test_missing_key["block_type"] == "provider_diagnostic"
+assert provider_test_missing_key["error"]["code"] == "missing_api_key"
+assert provider_test_missing_key["data"]["readable_message"]
+assert provider_test_missing_key["data"]["next_step"]
+assert "--provider-name gemini_ready" in provider_test_missing_key["cli_equivalent"]
+assert provider_remove_ready["ok"] is True
+assert provider_remove_ready["block_type"] == "provider_config"
+assert "--provider-name gemini_ready" in provider_remove_ready["cli_equivalent"]
+print("36e2. test_command_api_provider_test_failure_and_remove_readiness ✓")
+
 command_api_schema_detail = run_command(
     "schema_detail",
     args={"table": "users"},
@@ -740,6 +766,179 @@ assert command_api_natural["provider_skipped"] is True
 assert command_api_natural["sql"] == "SELECT * FROM users"
 assert "--provider-name local_ollama" in command_api_natural["cli_equivalent"]
 print("36g. test_command_api_natural_context ✓")
+
+with TemporaryDirectory() as tmpdir:
+    registry_path = Path(tmpdir) / "llm_registry.json"
+    with patch.dict(os.environ, {"COQUERY_LLM_REGISTRY_PATH": str(registry_path)}):
+        provider_add_preset_handler("gemini", "gemini_prod", "gemini-3.5-flash", "GEMINI_API_KEY")
+        production_external_blocked = run_command(
+            "natural",
+            args={"sql": "show users"},
+            context={"db": "example.db", "provider_name": "gemini_prod", "mode": "production_assist"},
+        )
+        production_external_override = run_command(
+            "natural",
+            args={"sql": "show users"},
+            context={
+                "db": "example.db",
+                "provider_name": "gemini_prod",
+                "mode": "production_assist",
+                "allow_external_provider": True,
+            },
+        )
+        training_external_allowed = run_command(
+            "natural",
+            args={"sql": "show users"},
+            context={"db": "example.db", "provider_name": "gemini_prod", "mode": "training"},
+        )
+assert production_external_blocked["ok"] is False
+assert production_external_blocked["error"]["code"] == "production_external_provider_blocked"
+assert production_external_blocked["data"]["mode_context"]["mode"] == "production_assist"
+assert production_external_blocked["data"]["mode_context"]["allow_external_provider"] is False
+assert "policy" in production_external_blocked["data"]["next_step"].lower()
+assert production_external_override["ok"] is True
+assert production_external_override["mode_context"]["mode"] == "production_assist"
+assert production_external_override["mode_context"]["allow_external_provider"] is True
+assert training_external_allowed["ok"] is True
+assert training_external_allowed["mode_context"]["mode"] == "training"
+print("36g2. test_command_api_mode_policy_for_external_providers ✓")
+
+with TemporaryDirectory() as tmpdir:
+    profile_path = Path(tmpdir) / "production_profiles.json"
+    review_path = Path(tmpdir) / "production_reviews.json"
+    audit_path = Path(tmpdir) / "production_audit.jsonl"
+    db_path = Path(tmpdir) / "prod-readonly.db"
+    copy2(FIXTURE_DB, db_path)
+    with patch.dict(
+        os.environ,
+        {
+            "COQUERY_PRODUCTION_PROFILE_PATH": str(profile_path),
+            "COQUERY_PRODUCTION_REVIEW_PATH": str(review_path),
+            "COQUERY_PRODUCTION_AUDIT_LOG": str(audit_path),
+        },
+    ):
+        profile = run_command(
+            "production_profile_add",
+            args={"profile_name": "prod_readonly", "db_uri": str(db_path)},
+            context={"mode": "production_assist"},
+        )
+        profile_list = run_command("production_profile_list", context={"mode": "production_assist"})
+        review = run_command(
+            "production_review",
+            args={
+                "profile_name": "prod_readonly",
+                "sql": "SELECT COUNT(*) FROM users",
+                "request_text": "show users",
+            },
+            context={"mode": "production_assist"},
+        )
+        review_id = review["data"]["review"]["review_id"]
+        blocked_execute = run_command(
+            "production_execute",
+            args={"review_id": review_id},
+            context={"mode": "production_assist"},
+        )
+        approved = run_command(
+            "production_approve",
+            args={"review_id": review_id},
+            context={"mode": "production_assist"},
+        )
+        executed = run_command(
+            "production_execute",
+            args={"review_id": review_id},
+            context={"mode": "production_assist"},
+        )
+        rejected_write = run_command(
+            "production_review",
+            args={"profile_name": "prod_readonly", "sql": "DELETE FROM users"},
+            context={"mode": "production_assist"},
+        )
+        read_write_profile = run_command(
+            "production_profile_add",
+            args={"profile_name": "unsafe_profile", "db_uri": str(db_path), "read_only": False},
+            context={"mode": "production_assist"},
+        )
+        audit_events = [json.loads(line)["event"] for line in audit_path.read_text(encoding="utf-8").splitlines()]
+
+assert profile["ok"] is True
+assert profile["block_type"] == "production_profile"
+assert profile["data"]["profile"]["read_only"] is True
+assert profile["data"]["profile"]["db_uri"] == str(db_path)
+assert profile_list["ok"] is True
+assert profile_list["data"]["profiles"][0]["name"] == "prod_readonly"
+assert profile_list["data"]["profiles"][0]["read_only"] is True
+assert review["ok"] is True
+assert review["block_type"] == "production_review"
+assert review["data"]["review"]["status"] == "pending_approval"
+assert review["data"]["review"]["approval_required"] is True
+assert review["data"]["review"]["execution_allowed"] is False
+assert review["data"]["review"]["select_only"] is True
+assert blocked_execute["ok"] is False
+assert blocked_execute["error"]["code"] == "production_approval_required"
+assert blocked_execute["block_type"] == "production_execution"
+assert approved["ok"] is True
+assert approved["data"]["review"]["status"] == "approved"
+assert approved["data"]["review"]["execution_allowed"] is True
+assert executed["ok"] is True
+assert executed["block_type"] == "production_execution"
+assert executed["data"]["row_count"] >= 1
+assert executed["data"]["profile"]["read_only"] is True
+assert rejected_write["ok"] is False
+assert rejected_write["error"]["code"] == "production_select_only"
+assert read_write_profile["ok"] is False
+assert read_write_profile["error"]["code"] == "production_read_only_required"
+assert "profile_added" in audit_events
+assert "review_created" in audit_events
+assert "execution_blocked" in audit_events
+assert "review_approved" in audit_events
+assert "execution_completed" in audit_events
+assert "review_rejected" in audit_events
+assert "profile_rejected" in audit_events
+print("36g3. test_production_assist_safety_gate ✓")
+
+with TemporaryDirectory() as tmpdir:
+    cli_profile_path = Path(tmpdir) / "production_profiles.json"
+    cli_review_path = Path(tmpdir) / "production_reviews.json"
+    cli_audit_path = Path(tmpdir) / "production_audit.jsonl"
+    cli_db_path = Path(tmpdir) / "prod-cli.db"
+    copy2(FIXTURE_DB, cli_db_path)
+    with patch.dict(
+        os.environ,
+        {
+            "COQUERY_PRODUCTION_PROFILE_PATH": str(cli_profile_path),
+            "COQUERY_PRODUCTION_REVIEW_PATH": str(cli_review_path),
+            "COQUERY_PRODUCTION_AUDIT_LOG": str(cli_audit_path),
+        },
+    ):
+        rc, cli_profile = run_cli(
+            [
+                "--command",
+                "production_profile_add",
+                "--profile-name",
+                "prod_cli",
+                "--db-uri",
+                str(cli_db_path),
+            ]
+        )
+        rc_review, cli_review = run_cli(
+            [
+                "--command",
+                "production_review",
+                "--profile-name",
+                "prod_cli",
+                "--sql",
+                "SELECT COUNT(*) FROM users",
+                "--request-text",
+                "show ids",
+            ]
+        )
+assert rc == 0
+assert cli_profile["ok"] is True
+assert cli_profile["data"]["profile"]["name"] == "prod_cli"
+assert rc_review == 0
+assert cli_review["ok"] is True
+assert cli_review["data"]["review"]["approval_required"] is True
+print("36g4. test_cli_production_assist_review_contract ✓")
 
 command_api_unknown = run_command("not_a_command")
 assert command_api_unknown["ok"] is False
@@ -831,9 +1030,76 @@ assert practice_grade_correct["data"]["correct"] is True
 assert practice_grade_correct["data"]["attempt_recorded"] is True
 assert practice_grade_wrong["ok"] is True
 assert practice_grade_wrong["data"]["correct"] is False
+assert practice_grade_wrong["data"]["wrong_note"]["submitted_sql"] == "SELECT id, name FROM customers ORDER BY id"
+assert practice_grade_wrong["data"]["wrong_note"]["static_feedback"]["ai_generated"] is False
+assert practice_grade_wrong["data"]["wrong_note"]["provider_feedback"]["mode_required"] == "training"
 assert practice_attempts["data"]["attempt_count"] == 2
 assert practice_attempts["data"]["attempts"][-1]["correct"] is False
+assert practice_attempts["data"]["attempts"][-1]["wrong_note"]["expected_issue"]
+assert practice_attempts["data"]["attempts"][-1]["wrong_note"]["retry_action"]["command"] == "practice_start"
 print("36m. test_practice_grade_and_attempts ✓")
+
+static_feedback = practice_feedback_handler(
+    "basic_select_customers",
+    "SELECT id, name FROM customers ORDER BY id",
+)
+assert static_feedback["ok"] is True
+assert static_feedback["data"]["feedback"]["source"] == "static"
+assert static_feedback["data"]["feedback"]["ai_generated"] is False
+assert static_feedback["data"]["provider_feedback_allowed"] is False
+print("36m2. test_practice_feedback_static_without_provider ✓")
+
+provider_feedback_blocked = practice_feedback_handler(
+    "basic_select_customers",
+    "SELECT id, name FROM customers ORDER BY id",
+    provider_name="local_ollama",
+    mode="review",
+)
+assert provider_feedback_blocked["ok"] is False
+assert provider_feedback_blocked["error"]["code"] == "provider_feedback_training_only"
+print("36m3. test_practice_feedback_provider_training_gate ✓")
+
+with TemporaryDirectory() as tmpdir:
+    registry_path = Path(tmpdir) / "llm_registry.json"
+    with patch.dict(os.environ, {"COQUERY_LLM_REGISTRY_PATH": str(registry_path)}):
+        provider_add_handler("local_ollama", "ollama", "qwen3.5:4b-nvfp4", "http://127.0.0.1:11434")
+        with patch("sql_cli.llm_registry.urlopen", side_effect=_fake_llm_urlopen):
+            provider_feedback = practice_feedback_handler(
+                "basic_select_customers",
+                "SELECT id, name FROM customers ORDER BY id",
+                provider_name="local_ollama",
+                mode="training",
+            )
+assert provider_feedback["ok"] is True
+assert provider_feedback["data"]["feedback"]["source"] == "provider"
+assert provider_feedback["data"]["feedback"]["ai_generated"] is True
+assert provider_feedback["data"]["feedback"]["label"] == "AI-generated feedback"
+assert provider_feedback["data"]["feedback"]["provider_name"] == "local_ollama"
+print("36m4. test_practice_feedback_provider_label ✓")
+
+with TemporaryDirectory() as tmpdir:
+    attempt_log = Path(tmpdir) / "legacy_attempts.jsonl"
+    attempt_log.write_text(
+        json.dumps(
+            {
+                "timestamp": "2026-07-08T00:00:00+00:00",
+                "pack_id": "sql_basics",
+                "problem_id": "basic_select_customers",
+                "correct": False,
+                "sql": "SELECT id, name FROM customers ORDER BY id",
+                "actual_row_count": 4,
+                "expected_row_count": 4,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    with patch.dict(os.environ, {"COQUERY_PRACTICE_ATTEMPT_LOG": str(attempt_log)}):
+        legacy_attempts = practice_attempts_handler(limit=5)
+assert legacy_attempts["ok"] is True
+assert legacy_attempts["data"]["attempts"][0]["wrong_note"]["expected_issue"]
+assert "region" in legacy_attempts["data"]["attempts"][0]["wrong_note"]["expected_issue"]
+print("36m5. test_practice_attempts_backfills_legacy_wrong_note ✓")
 
 rc, payload = run_cli(["--command", "practice_schema", "--table", "customers"])
 assert rc == 0
@@ -1682,4 +1948,4 @@ assert postgres_ssl_error["data"]["connection"]["hint"] == (
 print("96. test_doctor_postgresql_ssl_error_classification ✓")
 
 print("")
-print("=== ALL 119 TESTS PASS ✅ ===")
+print("=== ALL 121 TESTS PASS ✅ ===")
