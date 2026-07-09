@@ -109,8 +109,8 @@ python3 main.py --command natural --sql "count users"
 | Terminal shell prototype smoke | passing |
 | Agent wrapper verify | passing |
 | Local PostgreSQL smoke | passing |
-| GitHub Actions baseline | success on 2026-04-27 UTC for `7e677fe` |
-| GitHub Actions postgresql-smoke | success on 2026-04-27 UTC for `7e677fe` |
+| GitHub Actions baseline | success on 2026-07-09 UTC for `20e5d8f` |
+| GitHub Actions postgresql-smoke | success on 2026-07-09 UTC for `20e5d8f` |
 
 ## Release Notes
 
@@ -199,8 +199,10 @@ Unsupported claims:
 ## Next Release
 
 **v0.8.0 Planned**:
-- run `npm run rc:verify` before publication
-- commit and push the release-candidate branch when publication is requested
+- PR #4 (`Harden CoQuery release candidate shell`) is merged into `main` at `20e5d8f`
+- `npm run rc:verify` has passed for the release-candidate checkpoint
+- GitHub Actions `baseline` and `postgresql-smoke` succeeded on 2026-07-09 for commit `20e5d8f`
+- prepare and push the `v0.8.0` tag when publication is requested
 - decide the next PostgreSQL verification slice before widening claims
 - keep GitHub Actions `baseline` and `postgresql-smoke` green
 - consider a hosted or browser-facing demo only after CLI proof remains stable

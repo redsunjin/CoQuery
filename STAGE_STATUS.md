@@ -1,7 +1,7 @@
 # CoQuery Stage Status Report
 
 Version: v0.7.2
-Last Update: 2026-07-08
+Last Update: 2026-07-09
 
 ## Current Status
 
@@ -29,7 +29,8 @@ Training/Production Assist mode separation added with Command API provider polic
 Desktop/Local Packaging Decision added for local web app first launch
 Production Assist Safety Gate added with read-only profiles, reviewed SQL approval, SELECT-only enforcement, and JSONL audit logging
 Release Candidate Hardening added with `npm run rc:verify` as the one-command launch check
-Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-04-27 UTC for `main` commit `7e677fe`
+PR #4 (`Harden CoQuery release candidate shell`) merged into `main` at commit `20e5d8f`
+Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-07-09 UTC for `main` commit `20e5d8f`
 GitHub repository `redsunjin/CoQuery` is public
 Phase 5 remains narrow and experimental
 ```
@@ -99,7 +100,7 @@ CI note:
 - GitHub Actions workflow files now exist for baseline and PostgreSQL smoke automation
 - the latest local PostgreSQL smoke re-run succeeded on 2026-04-22
 - the first observed runs for `baseline` and `postgresql-smoke` both succeeded on 2026-04-12
-- the last recorded `main` runs for `baseline` and `postgresql-smoke` both succeeded on 2026-04-27 UTC for commit `7e677fe`
+- the last recorded `main` runs for `baseline` and `postgresql-smoke` both succeeded on 2026-07-09 UTC for commit `20e5d8f`
 - the public GitHub repository can run a log-based demo through manual `workflow_dispatch`
 
 ORM/model support:

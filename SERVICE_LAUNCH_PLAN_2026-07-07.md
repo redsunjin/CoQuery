@@ -355,14 +355,15 @@ Completed:
 - Production Assist Safety Gate.
 - Release Candidate Hardening.
 
-Still required for service launch:
+Still required before declaring `v0.8.0` released:
 
-- Commit and push current changes.
+- Create and push the `v0.8.0` tag if publication is requested.
+- Publish release notes that keep Training Mode, local shell, iOS skeleton, and Production Assist limits explicit.
 
 ## Immediate Next Action
 
-After completing Launch Goal 10 and passing `npm run rc:verify`, the next implementation step should be:
+After Launch Goal 10, PR #4 merge, `npm run rc:verify`, and green `baseline` / `postgresql-smoke` Actions, the next release step should be:
 
 ```text
-Commit and push the release-candidate branch.
+Prepare the v0.8.0 release tag and release notes, or choose the next PostgreSQL verification slice before feature work resumes.
 ```
