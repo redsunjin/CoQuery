@@ -36,6 +36,12 @@ practice_schema
 practice_query
 practice_grade
 practice_attempts
+practice_feedback
+production_profile_add
+production_profile_list
+production_review
+production_approve
+production_execute
 ```
 
 ### Stabilized in v0.7.1
@@ -57,6 +63,10 @@ practice_attempts
 - Codex skill package lives under `skills/coquery-cli`
 - `coquery_agent.py` supports `describe`, `verify`, `demo`, `run`, and `install-skill`
 - GitHub Actions `baseline` and `postgresql-smoke` are verified
+
+**Launch safety additions after the stabilization snapshot:**
+- Production Assist Safety Gate supports read-only profiles, reviewed SQL approval, SELECT-only execution, and JSONL audit logging.
+- Boundary documentation lives at `docs/production-assist-safety-gate.md`.
 
 ## Installation
 
@@ -95,7 +105,7 @@ python3 main.py --command natural --sql "count users"
 
 | Test Suite | Status |
 |------------|--------|
-| Baseline tests | 119/119 passing |
+| Baseline tests | 121/121 passing |
 | Terminal shell prototype smoke | passing |
 | Agent wrapper verify | passing |
 | Local PostgreSQL smoke | passing |
@@ -103,6 +113,46 @@ python3 main.py --command natural --sql "count users"
 | GitHub Actions postgresql-smoke | success on 2026-04-27 UTC for `7e677fe` |
 
 ## Release Notes
+
+## Exact Release Claims
+
+Supported claims:
+
+- SQLite-first CLI commands are verified by the executable baseline tests.
+- Command API adapter reuses the CLI handlers and returns app-shell metadata.
+- Local browser shell can be started with `npm run local:shell` or `python3 scripts/start_local_shell.py --host 127.0.0.1 --port 8765`.
+- Practice flow works without connecting to a user database or provider.
+- Provider setup stores provider profiles with API key environment variable names, not secret key values.
+- Korean/English command help and SQL term explanations are available through CLI, Command API, and terminal shell.
+- Production Assist Safety Gate supports read-only profiles, reviewed SQL approval, SELECT-only execution, and JSONL audit logging.
+- iOS TestFlight shell skeleton is available for Training Mode only.
+- One RC command, `npm run rc:verify`, runs the launch checks.
+
+Unsupported claims:
+
+- CoQuery is not a hosted public web service.
+- CoQuery does not ship a Tauri or Electron desktop installer.
+- CoQuery is not a packaged production DB assistant.
+- The iOS shell is not a production DB client.
+- Production Assist is not write access to production data.
+- MySQL runtime support is not implemented beyond the structured stub.
+- PostgreSQL remains experimental outside the documented smoke-proven slices.
+- Provider pricing, model availability, model quality, and external API uptime are not guaranteed.
+
+### Current iOS TestFlight shell update (2026-07-08)
+- Capacitor SPM project files and `ios/` native shell are present for `app.coquery.training`
+- `app_shell/ios_training_shell/src/trainingRuntime.ts` provides a Python-server-free local Training Runtime skeleton
+- The packaged shell starts with `practice_list` and bundles `practice_packs/sql_basics.json`
+- iPhone and iPad simulator launches were verified through XcodeBuildMCP screenshots
+- TestFlight metadata checklist lives at `docs/testflight-metadata-checklist.md`
+
+### Current mode and local packaging update (2026-07-08)
+- The terminal shell exposes Training/Assist mode separation in the command bar
+- Command API mode-aware responses include `mode_context`
+- Production Assist blocks saved external providers unless `allow_external_provider=true` is explicitly supplied
+- Non-iOS local packaging is selected as local web app first, not Tauri/Electron for the first local release
+- Stable local start command is `python3 scripts/start_local_shell.py --host 127.0.0.1 --port 8765`
+- Runtime storage, update path, and rollback path are documented at `docs/desktop-local-packaging-decision.md`
 
 ### Current provider preset update (2026-06-30)
 - Provider preset registration is available for OpenAI, Groq, OpenRouter, Gemini, and DeepSeek-style APIs
@@ -123,12 +173,15 @@ python3 main.py --command natural --sql "count users"
 - Terminal shell now defaults to dark mode
 - `Setup AI` opens a provider preset form for mobile/tablet/desktop use
 - Users can choose a preset, edit provider name/model/API key env, preview the CLI equivalent, and save through `provider_add_preset`
+- Saved providers can be listed, selected, tested, and removed in the terminal shell with CLI equivalents shown for each action
+- Provider test failures include readable next-step guidance for non-specialists
 - `app_shell/terminal_shell_prototype/smoke.py` verifies provider preset saving through the local Command API
 
 ### Current practice dataset update (2026-07-01)
 - `practice_packs/sql_basics.json` adds a built-in sample dataset and five SQL practice problems
-- `practice_list`, `practice_schema`, `practice_query`, `practice_grade`, and `practice_attempts` work without connecting to a user DB
-- Practice execution uses in-memory SQLite, read-only query enforcement, result-set grading, and local attempt records
+- `practice_list`, `practice_schema`, `practice_query`, `practice_grade`, `practice_attempts`, and static `practice_feedback` work without connecting to a user DB or provider
+- Practice execution uses in-memory SQLite, read-only query enforcement, result-set grading, local attempt records, and wrong-note metadata
+- Provider-backed `practice_feedback` is gated to Training Mode and labeled as AI-generated
 - Practice commands are available through both the CLI and `sql_cli.command_api.run_command`
 
 ### Current bilingual help update (2026-07-06)
@@ -146,6 +199,8 @@ python3 main.py --command natural --sql "count users"
 ## Next Release
 
 **v0.8.0 Planned**:
+- run `npm run rc:verify` before publication
+- commit and push the release-candidate branch when publication is requested
 - decide the next PostgreSQL verification slice before widening claims
 - keep GitHub Actions `baseline` and `postgresql-smoke` green
 - consider a hosted or browser-facing demo only after CLI proof remains stable

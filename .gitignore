@@ -48,6 +48,8 @@ htmlcov/
 .nox/
 
 # Misc
+node_modules/
+dist/
 *.md.bak
 LOG*
 *.log

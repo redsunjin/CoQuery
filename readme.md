@@ -8,7 +8,51 @@ Visibility: `PUBLIC` as verified on 2026-04-23.
 Recorded proof commit: `7e677fe Clarify recorded CI proof status`.
 
 Service launch roadmap: `SERVICE_LAUNCH_PLAN_2026-07-07.md`
-Next recommended `/goal`: `Launch Goal 1: Query Practice Flow UI`
+Local packaging decision: `docs/desktop-local-packaging-decision.md`
+Production Assist safety gate: `docs/production-assist-safety-gate.md`
+Next recommended action: commit and push the release-candidate branch after `npm run rc:verify` passes.
+
+## Launch Quickstart
+
+Run the full release-candidate verifier:
+
+```bash
+npm run rc:verify
+```
+
+Start the local launch shell:
+
+```bash
+npm run local:shell
+```
+
+Open:
+
+```text
+http://127.0.0.1:8765
+```
+
+The RC verifier covers CLI, Command API, app shell smoke, practice flow, provider setup, bilingual help, local packaging, iOS shell packaging smoke, and release-claim documentation.
+
+Supported launch claims:
+
+- SQLite-first CLI and Command API baseline.
+- Local browser shell through `scripts/start_local_shell.py`.
+- DB-free SQL practice flow over the built-in `sql_basics` sample pack.
+- Provider setup profiles that store API key environment variable names, not secret values.
+- Bilingual Korean/English help for commands and SQL terms.
+- Production Assist Safety Gate for reviewed read-only `SELECT` execution with audit logging.
+- iOS TestFlight shell skeleton for Training Mode only.
+
+Unsupported launch claims:
+
+- Hosted public web service.
+- Tauri/Electron desktop installer.
+- Packaged production DB assistant.
+- iOS production DB client.
+- MySQL runtime support beyond the structured stub.
+- Broad PostgreSQL support outside the documented experimental smoke slices.
+- Provider pricing, availability, or model quality guarantees.
 
 ## Available Commands
 
@@ -45,6 +89,10 @@ python3 main.py --command practice_schema --table orders --format json
 python3 main.py --command practice_query --sql "SELECT id, name FROM customers ORDER BY id" --format json
 python3 main.py --command practice_grade --problem-id basic_select_customers --sql "SELECT id, name, region FROM customers ORDER BY id" --no-record --format json
 python3 main.py --command practice_attempts --limit 5 --format json
+python3 main.py --command production_profile_add --profile-name prod_readonly --db-uri-env COQUERY_PROD_READONLY_DB_URI --format json
+python3 main.py --command production_review --profile-name prod_readonly --sql "SELECT COUNT(*) FROM users" --request-text "count users" --format json
+python3 main.py --command production_approve --review-id prodrev_... --format json
+python3 main.py --command production_execute --review-id prodrev_... --format json
 ```
 
 ## Provider Presets
@@ -93,7 +141,7 @@ python3 main.py --command provider_add \
 ## Verified Baseline
 
 - `main.py` routes to the package handlers in `sql_cli/cli.py`
-- `python3 sql_cli/tests/test_core.py` passes with 119 tests
+- `python3 sql_cli/tests/test_core.py` passes with 121 tests
 - SQLite is the working backend
 - `--db-uri` is the preferred multi-backend connection contract
 - `doctor` reports masked targets, readiness checks, and classified PostgreSQL connection failures
@@ -104,6 +152,7 @@ python3 main.py --command provider_add \
 - provider registry commands are available for optional `natural` fallback routing
 - provider presets are available for OpenAI, Groq, OpenRouter, Gemini, and DeepSeek-style API registration
 - `practice_*` commands provide a DB-free SQL learning sandbox over built-in sample data
+- `production_*` commands provide a read-only Production Assist safety gate with SQL review, approval state, SELECT-only enforcement, and JSONL audit logging
 - `jpa_schema` can inspect annotation-based JPA entity source as an ORM/model context
 - `db_knowledge` can retrieve local SQL/JPA dialect and write-safety rules before using an LLM/provider
 - `help_catalog`, `command_explain`, and `term_explain` provide Korean/English beginner guidance for commands and SQL terms
@@ -172,6 +221,7 @@ Minimum mobile-shell commands currently covered by tests:
 - `practice_query`
 - `practice_grade`
 - `practice_attempts`
+- `practice_feedback`
 
 ## Bilingual Help
 
@@ -195,6 +245,7 @@ Available practice commands:
 - `practice_query`: run read-only `SELECT` SQL against the sample dataset
 - `practice_grade`: compare a submitted answer to the expected result for a problem
 - `practice_attempts`: review recorded attempts for wrong-note and learning flows
+- `practice_feedback`: get static feedback without a provider, or provider-backed AI feedback only in Training Mode
 
 Example:
 
@@ -211,6 +262,20 @@ python3 main.py --command practice_grade \
 
 Attempt records default to `.coquery/practice_attempts.jsonl`.
 Set `COQUERY_PRACTICE_ATTEMPT_LOG` to redirect them during tests or custom local use.
+
+## Training And Production Assist Modes
+
+The app-facing Command API accepts a mode context:
+
+- `training`: sample datasets, practice commands, and optional low-cost/commercial provider feedback for learning
+- `production_assist`: read-only reviewed SQL assistance boundary; saved external providers are blocked by default
+
+The terminal shell shows a `Training` / `Assist` segmented control near the command input.
+Mode-aware command results include `mode_context`, and Production Assist returns `production_external_provider_blocked` when a saved external provider is used without an explicit `allow_external_provider=true` policy override.
+
+The security boundary is documented in `docs/mode-security-boundary.md`.
+The read-only review/approval/audit gate is documented in `docs/production-assist-safety-gate.md`.
+This is not broad production DB automation; Production Assist is limited to read-only profiles, reviewed SQL, explicit approval, SELECT-only execution, and audit logging.
 
 ## Responsive Terminal Shell Prototype
 
@@ -232,7 +297,7 @@ The shell also includes a provider preset mobile flow:
 Run from the repository root:
 
 ```bash
-python app_shell/terminal_shell_prototype/server.py --host 127.0.0.1 --port 8765
+python3 scripts/start_local_shell.py --host 127.0.0.1 --port 8765
 ```
 
 Open:
@@ -243,6 +308,7 @@ http://127.0.0.1:8765
 
 The prototype exposes `GET /api/health`, `GET /api/sessions`, and `POST /api/commands/run`.
 The command endpoint calls `sql_cli.command_api.run_command`, so the UI does not duplicate CLI behavior.
+The local packaging decision, runtime storage paths, update path, and rollback path are documented in `docs/desktop-local-packaging-decision.md`.
 
 ## Agent Skill
 
@@ -278,6 +344,7 @@ This is enough for basic SQL/JPA boundary decisions, deterministic lookup, norma
 - write commands support `--dry-run` and `--max-affected-rows`, but a broader transaction control layer does not exist yet
 - natural-language support is lightweight by default; provider-backed quality is not broadly proven
 - provider-backed natural is currently a secondary experimental track
+- Production Assist Mode blocks saved external AI providers by default and only permits reviewed read-only SELECT execution through the safety gate
 - provider pricing, free tiers, and model availability are not hardcoded guarantees; use provider docs and `provider_test` to verify a selected model before relying on it
 - practice commands use a small built-in sample dataset and result comparison; they are not a full SQL course or production grader yet
 - generated SQL templates validate basic identifiers and direct joins, but are not yet multi-hop relationship-aware, alias-aware, or expression-aware
@@ -298,6 +365,10 @@ python3 main.py --command db_knowledge --topic coverage
 python3 main.py --command help_catalog --lang ko --format json
 python3 main.py --command practice_list --format json
 python3 main.py --command practice_grade --problem-id basic_select_customers --sql "SELECT id, name, region FROM customers ORDER BY id" --no-record --format json
+python3 main.py --command production_profile_add --profile-name prod_readonly --db-uri example.db --format json
+python3 main.py --command production_review --profile-name prod_readonly --sql "SELECT COUNT(*) FROM users" --request-text "count users" --format json
+python3 app_shell/terminal_shell_prototype/smoke.py
+python3 tests/local_packaging_decision_smoke.py
 bash scripts/run_postgresql_local_smoke.sh
 ```
 
@@ -306,6 +377,6 @@ Runner note:
 - `scripts/run_postgresql_local_smoke.sh` prefers PostgreSQL binaries from `PATH`, uses a per-run socket directory, and auto-selects a free port when the preferred smoke port is unavailable
 - the smoke runner bootstraps `.tmp/pg-venv` and installs `psycopg[binary]` there if needed, so it remains the repeatable PostgreSQL proof path even when the default `python3` environment lacks the driver
 
-Version: v0.7.1
-Last Updated: 2026-07-06
-Status: SQLite-first baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated select/count generation, direct join generation proof, provider presets for low-cost/API-backed natural fallback, bilingual beginner help, public GitHub repository, and verified GitHub Actions baseline / PostgreSQL smoke workflows
+Version: v0.7.2
+Last Updated: 2026-07-08
+Status: SQLite-first baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated select/count generation, direct join generation proof, provider presets for low-cost/API-backed natural fallback, Training/Production Assist mode separation, Desktop/Local Packaging Decision, Production Assist Safety Gate, bilingual beginner help, public GitHub repository, and verified GitHub Actions baseline / PostgreSQL smoke workflows

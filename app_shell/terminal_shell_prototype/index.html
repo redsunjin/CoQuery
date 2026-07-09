@@ -36,6 +36,16 @@
             <h1 data-i18n="appTitle">반응형 터미널 쉘</h1>
           </div>
           <div class="header-actions">
+            <button
+              class="ghost-button command-menu-toggle"
+              type="button"
+              id="commandMenuToggle"
+              aria-expanded="false"
+              aria-controls="commandMenuPanel"
+              data-i18n="commandMenuButton"
+            >
+              명령
+            </button>
             <div class="language-toggle" role="group" aria-label="언어" data-i18n-attr="aria-label:languageToggleLabel">
               <button class="lang-button active" type="button" data-lang="ko">KR</button>
               <button class="lang-button" type="button" data-lang="en">EN</button>
@@ -44,35 +54,47 @@
           </div>
         </header>
 
-        <section class="context-strip" aria-label="작업 메뉴" data-i18n-attr="aria-label:contextLabel">
-          <button class="context-chip active" type="button" data-template="provider_list_presets">
-            <span class="chip-avatar">P</span>
-            <span data-i18n="chipPresets">프리셋</span>
-          </button>
-          <button class="context-chip" type="button" data-template="provider_setup">
-            <span class="chip-avatar">A</span>
-            <span data-i18n="chipSetupAi">AI 설정</span>
-          </button>
-          <button class="context-chip" type="button" data-template="schema_detail users">
-            <span class="chip-avatar">S</span>
-            <span data-i18n="chipSchema">스키마</span>
-          </button>
-          <button class="context-chip" type="button" data-template="natural show users">
-            <span class="chip-avatar">N</span>
-            <span data-i18n="chipNatural">자연어</span>
-          </button>
-          <button class="context-chip" type="button" data-template="practice_list">
-            <span class="chip-avatar">Q</span>
-            <span data-i18n="chipPractice">연습</span>
-          </button>
-          <button class="context-chip" type="button" data-template="help_catalog">
-            <span class="chip-avatar">H</span>
-            <span data-i18n="chipHelp">도움말</span>
-          </button>
-          <button class="context-chip" type="button" data-template="term_explain join">
-            <span class="chip-avatar">T</span>
-            <span data-i18n="chipTerms">용어</span>
-          </button>
+        <section
+          class="command-menu-popover"
+          id="commandMenuPanel"
+          aria-label="작업 메뉴"
+          data-i18n-attr="aria-label:contextLabel"
+          hidden
+        >
+          <div class="context-strip" role="menu">
+            <button class="context-chip active" type="button" role="menuitem" data-template="provider_list_presets">
+              <span class="chip-avatar">P</span>
+              <span data-i18n="chipPresets">프리셋</span>
+            </button>
+            <button class="context-chip" type="button" role="menuitem" data-template="provider_setup">
+              <span class="chip-avatar">A</span>
+              <span data-i18n="chipSetupAi">AI 설정</span>
+            </button>
+            <button class="context-chip" type="button" role="menuitem" data-template="schema_detail users">
+              <span class="chip-avatar">S</span>
+              <span data-i18n="chipSchema">스키마</span>
+            </button>
+            <button class="context-chip" type="button" role="menuitem" data-template="natural show users">
+              <span class="chip-avatar">N</span>
+              <span data-i18n="chipNatural">자연어</span>
+            </button>
+            <button class="context-chip" type="button" role="menuitem" data-template="practice_list">
+              <span class="chip-avatar">Q</span>
+              <span data-i18n="chipPractice">연습</span>
+            </button>
+            <button class="context-chip" type="button" role="menuitem" data-template="production_review prod_readonly SELECT COUNT(*) FROM users">
+              <span class="chip-avatar">R</span>
+              <span data-i18n="chipProduction">운영 검토</span>
+            </button>
+            <button class="context-chip" type="button" role="menuitem" data-template="help_catalog">
+              <span class="chip-avatar">H</span>
+              <span data-i18n="chipHelp">도움말</span>
+            </button>
+            <button class="context-chip" type="button" role="menuitem" data-template="term_explain join">
+              <span class="chip-avatar">T</span>
+              <span data-i18n="chipTerms">용어</span>
+            </button>
+          </div>
         </section>
 
         <section class="terminal-scroll" id="terminalScroll" aria-label="터미널 명령 기록" data-i18n-attr="aria-label:terminalHistoryLabel">
@@ -110,6 +132,24 @@
               data-i18n-attr="aria-label:commandInputLabel"
             />
           </label>
+          <div class="mode-toggle" id="modeToggle" role="group" aria-label="작업 모드" data-i18n-attr="aria-label:appModeLabel">
+            <button class="mode-option active" type="button" data-mode-option="training" aria-pressed="true" data-i18n="modeTrainingShort">
+              Training
+            </button>
+            <button
+              class="mode-option"
+              type="button"
+              data-mode-option="production_assist"
+              aria-pressed="false"
+              data-i18n="modeProductionShort"
+            >
+              Assist
+            </button>
+          </div>
+          <div class="provider-readiness" id="providerStatus" aria-live="polite">
+            <span class="provider-readiness-dot"></span>
+            <span data-provider-status-summary>AI 제공자 선택 안 됨</span>
+          </div>
           <button class="primary-button" type="submit" data-i18n="runButton">실행</button>
           <button class="ghost-button drawer-button" type="button" id="drawerButton" data-i18n="panelButton">패널</button>
         </form>
