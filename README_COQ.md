@@ -1,6 +1,6 @@
 # CoQuery Baseline Verification
 
-Date: 2026-06-30
+Date: 2026-07-09
 
 ## Result
 
@@ -35,8 +35,9 @@ Training/Production Assist mode separation verified with Command API mode contex
 Desktop/Local Packaging Decision documented for local web app first launch
 Production Assist Safety Gate verified with read-only profiles, SQL review/approval state, SELECT-only enforcement, and JSONL audit logging
 Release Candidate Hardening verified with `npm run rc:verify`
+PR #4 (`Harden CoQuery release candidate shell`) merged into `main` at commit `20e5d8f`
 Bilingual beginner help verified for Korean/English command and SQL term guidance
-GitHub Actions baseline and PostgreSQL smoke workflows last recorded as verified on 2026-04-27 UTC for `main` commit `7e677fe`
+GitHub Actions baseline and PostgreSQL smoke workflows last recorded as verified on 2026-07-09 UTC for `main` commit `20e5d8f`
 Public GitHub repository verified
 ```
 
@@ -49,7 +50,7 @@ Service launch plan:
 - desktop/local packaging decision: `docs/desktop-local-packaging-decision.md`
 - production assist safety gate: `docs/production-assist-safety-gate.md`
 - Mac handoff: `IOS_MAC_HANDOFF_2026-07-08.md`
-- Next recommended action: commit and push the release-candidate branch after `npm run rc:verify` passes.
+- Next recommended action: prepare the `v0.8.0` release tag/notes, or choose the next PostgreSQL verification slice before feature work resumes.
 
 Scope decision:
 
@@ -132,7 +133,7 @@ Scope decision:
 | Schema detail knowledge | Seed | `schema_detail` exposes normalized columns, keys, indexes, constraints, and SQLite create SQL for verified paths |
 | Schema validation | Seed | `generate` and simple `natural` requests validate table and simple column identifiers against `schema_detail` |
 | Direct join generation | Working baseline | `generate` can infer one-step join `ON` clauses from schema-detail foreign keys; no-path and ambiguous joins fail closed |
-| CI automation | Working baseline | GitHub Actions `baseline` and `postgresql-smoke` last recorded successfully on 2026-04-27 UTC for `main` commit `7e677fe` |
+| CI automation | Working baseline | GitHub Actions `baseline` and `postgresql-smoke` last recorded successfully on 2026-07-09 UTC for `main` commit `20e5d8f` |
 | GitHub log demo | Available | public repository can run `baseline` and `postgresql-smoke` manually from GitHub Actions |
 
 ## Verification Commands
@@ -192,11 +193,11 @@ bash scripts/run_postgresql_local_smoke.sh
 - GitHub Actions workflow files exist at `.github/workflows/baseline.yml` and `.github/workflows/postgresql-smoke.yml`
 - the PostgreSQL smoke workflow uses an external PostgreSQL service URI, while the local smoke runner still supports managed local startup
 - GitHub Actions `baseline` and `postgresql-smoke` first succeeded on 2026-04-12 in PR `#3`
-- GitHub Actions `baseline` and `postgresql-smoke` were last recorded successful on 2026-04-27 UTC for `main` commit `7e677fe`
+- GitHub Actions `baseline` and `postgresql-smoke` were last recorded successful on 2026-07-09 UTC for `main` commit `20e5d8f`
 - use `USAGE_AND_DEMO.md` for local CLI usage and GitHub Actions demo steps
 
 Version: v0.7.2
-Last Updated: 2026-07-08
+Last Updated: 2026-07-09
 Status: Baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` proof, local DB knowledge-first planning, schema-detail-aware identifier validation, direct schema-detail join inference, provider preset registration, OpenAI-compatible endpoint override, Command API Adapter metadata, dark-mode terminal shell, Provider Preset Mobile Flow, Practice Dataset Sandbox, Training/Production Assist mode separation, Desktop/Local Packaging Decision, Production Assist Safety Gate, Release Candidate Hardening, bilingual beginner help, and verified GitHub Actions baseline / PostgreSQL smoke workflows
 Reference: `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
 Smoke Result: `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`

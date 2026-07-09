@@ -8,7 +8,7 @@
 ## Current Status
 
 ```text
-Verified on 2026-07-08
+Verified on 2026-07-09
 - 121 executable baseline tests pass
 - SQLite-first command surface works
 - package handlers are the canonical runtime path
@@ -37,7 +37,9 @@ Verified on 2026-07-08
 - Desktop/Local Packaging Decision selects local web app first with a stable start wrapper
 - Release Candidate Hardening adds `npm run rc:verify` as the one-command launch check
 - Bilingual beginner help is verified for Korean/English command and SQL term guidance
-- Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-04-27 UTC for `main` commit `7e677fe`
+- PR #4 (`Harden CoQuery release candidate shell`) is merged into `main` at commit `20e5d8f`
+- Local RC verification passed with `npm run rc:verify` after the merge
+- Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-07-09 UTC for `main` commit `20e5d8f`
 - GitHub repository `redsunjin/CoQuery` is public and can run Actions-based log demos
 ```
 
@@ -45,6 +47,7 @@ Scope decision:
 
 - `main` remains the active line.
 - PR `#1` for the reduced cleanup branch was closed unmerged.
+- PR `#4` for release-candidate hardening was merged into `main` on 2026-07-09.
 - DB/JPA knowledge, JPA source introspection, and Codex skill packaging are retained experimental tracks.
 
 Service launch plan:
@@ -56,7 +59,7 @@ Service launch plan:
 - desktop/local packaging decision: `docs/desktop-local-packaging-decision.md`
 - production assist safety gate: `docs/production-assist-safety-gate.md`
 - Mac handoff: `IOS_MAC_HANDOFF_2026-07-08.md`
-- Next recommended action: commit and push the release-candidate branch after `npm run rc:verify` passes.
+- Next recommended action: prepare the `v0.8.0` release tag/notes, or choose the next PostgreSQL verification slice before feature work resumes.
 
 ---
 
@@ -269,10 +272,11 @@ python3 main.py --command command_explain --topic natural --lang ko --format jso
 
 ## Next Steps
 
-1. keep the GitHub Actions `baseline` and `postgresql-smoke` workflows green as the repo-managed proof path
-2. keep status docs aligned with observed behavior
-3. use the verification matrix before changing any broader multi-DB status claim
-4. do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
+1. prepare the `v0.8.0` release tag and release notes if publication is requested
+2. keep the GitHub Actions `baseline` and `postgresql-smoke` workflows green as the repo-managed proof path
+3. keep status docs aligned with observed behavior
+4. use the verification matrix before changing any broader multi-DB status claim
+5. do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
 
 Current runner improvement:
 
@@ -297,5 +301,5 @@ Current runner improvement:
 
 ---
 
-Last Updated: 2026-07-08
+Last Updated: 2026-07-09
 Status: SQLite-first baseline verified with `doctor`, explicit write safety guards, experimental PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, direct `generate join_inner` / `generate join_left` proof, provider presets, Command API Adapter, dark-mode responsive terminal shell prototype, Provider Preset Mobile Flow, Practice Dataset Sandbox, Training/Production Assist mode separation, Desktop/Local Packaging Decision, bilingual beginner help, direct schema-detail join inference, and verified GitHub Actions baseline / PostgreSQL smoke workflows

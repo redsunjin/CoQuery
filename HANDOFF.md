@@ -1,13 +1,13 @@
 # CoQuery Handoff v0.7.1
 
-Date: 2026-04-28
+Date: 2026-07-09
 
 ## Current Handoff State
 
 CoQuery is no longer in emergency repair.
 The verified state is now a working SQLite-first CLI baseline.
 The reduced cleanup PR was closed unmerged; current `main` remains the active line with DB/JPA knowledge retained.
-The last recorded GitHub Actions proof is commit `7e677fe` on `origin/main`.
+The last recorded GitHub Actions proof is merge commit `20e5d8f` on `origin/main`.
 The GitHub repository `redsunjin/CoQuery` is public as verified on 2026-04-23.
 
 ## Verified Baseline
@@ -52,7 +52,7 @@ The GitHub repository `redsunjin/CoQuery` is public as verified on 2026-04-23.
 - real PostgreSQL smoke proof for direct `generate join_inner` and `generate join_left` slices
 - real PostgreSQL smoke proof for write-safety rollback and guard paths
 - repo-local GitHub Actions workflows for baseline and PostgreSQL smoke automation
-- Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-04-27 UTC for `main` commit `7e677fe`
+- Last recorded GitHub Actions `baseline` and `postgresql-smoke` proof succeeded on 2026-07-09 UTC for `main` commit `20e5d8f`
 - structured write results with `affected_rows`, `warnings`, and `safety_level`
 - GitHub Actions can be used as a log-based demo through manual `workflow_dispatch` runs of `baseline` and `postgresql-smoke`
 
@@ -86,14 +86,21 @@ The GitHub repository `redsunjin/CoQuery` is public as verified on 2026-04-23.
 - GitHub Actions proof has only been observed for the committed `baseline` and `postgresql-smoke` workflows so far
 - no GitHub Pages, hosted browser demo, Tauri wrapper, or Electron wrapper exists yet
 
+## Post-Merge Release Checkpoint
+
+- PR #4 (`Harden CoQuery release candidate shell`) was merged into `main` on 2026-07-09.
+- Merge commit: `20e5d8f77eaee455755060a4428dc32a98950723`.
+- Local release-candidate verification passed with `npm run rc:verify` after the merge.
+- GitHub Actions `baseline` and `postgresql-smoke` both succeeded on `main` for merge commit `20e5d8f`.
+
 ## Official Next Work
 
-1. Run `npm run rc:verify`
-2. Commit and push the release-candidate branch if the user asks for publication
-3. Keep the GitHub Actions `baseline` and `postgresql-smoke` workflows green
-4. Keep top-level docs aligned with the verified baseline
-5. Use the verification matrix and scope lock to gate any broader Phase 5 claim changes
-6. Do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice
+1. Prepare the `v0.8.0` release tag and release notes if publication is requested.
+2. Keep the GitHub Actions `baseline` and `postgresql-smoke` workflows green.
+3. Keep top-level docs aligned with the verified baseline and post-merge release checkpoint.
+4. Use the verification matrix and scope lock to gate any broader Phase 5 claim changes.
+5. Do not broaden join-generation claims beyond direct schema-detail foreign-key inference without a new proof slice.
+6. If feature work resumes before release tagging, choose the next PostgreSQL verification slice first.
 
 Current runner note:
 
@@ -139,6 +146,6 @@ python3 tests/local_packaging_decision_smoke.py
 bash scripts/run_postgresql_local_smoke.sh
 ```
 
-Last Updated: 2026-07-08
+Last Updated: 2026-07-09
 Status: SQLite-first baseline verified with `doctor`, PostgreSQL schema, schema_detail, query, insert, update, delete, write-safety guard, schema-detail-validated `generate select_simple` / `generate count_simple`, and direct `generate join_inner` / `generate join_left` smoke proof, local DB knowledge-first planning, schema-detail-aware identifier validation, explicit write safety guards, direct schema-detail join inference, Training/Production Assist mode separation, Desktop/Local Packaging Decision, Production Assist Safety Gate, Release Candidate Hardening, and verified GitHub Actions baseline / PostgreSQL smoke workflows
-Next: commit and push if publication is requested, after `npm run rc:verify` passes
+Next: prepare the `v0.8.0` release tag/notes or choose the next PostgreSQL verification slice

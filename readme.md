@@ -5,12 +5,13 @@ Phase 5 multi-DB support is now early experimental and is not complete.
 
 Repository: `https://github.com/redsunjin/CoQuery`
 Visibility: `PUBLIC` as verified on 2026-04-23.
-Recorded proof commit: `7e677fe Clarify recorded CI proof status`.
+Current release checkpoint: PR #4 (`Harden CoQuery release candidate shell`) merged into `main` at `20e5d8f`.
+Latest recorded GitHub Actions `baseline` and `postgresql-smoke` runs succeeded on 2026-07-09 for commit `20e5d8f`.
 
 Service launch roadmap: `SERVICE_LAUNCH_PLAN_2026-07-07.md`
 Local packaging decision: `docs/desktop-local-packaging-decision.md`
 Production Assist safety gate: `docs/production-assist-safety-gate.md`
-Next recommended action: commit and push the release-candidate branch after `npm run rc:verify` passes.
+Next recommended action: prepare the `v0.8.0` release tag/notes, or choose the next PostgreSQL verification slice before feature work resumes.
 
 ## Launch Quickstart
 
@@ -160,7 +161,7 @@ python3 main.py --command provider_add \
 - `generate` and simple `natural` requests validate table and simple column identifiers against `schema_detail`
 - generation, natural-language, and write-planning paths attach local DB/JPA knowledge context first
 - PostgreSQL `schema`, `schema_detail`, `query`, `insert`, `update`, `delete`, write-safety guards, select/count generation, and direct join generation are smoke-proven on the documented experimental path
-- GitHub Actions `baseline` and `postgresql-smoke` were last recorded successful on 2026-04-27 UTC for commit `7e677fe`
+- GitHub Actions `baseline` and `postgresql-smoke` were last recorded successful on 2026-07-09 UTC for commit `20e5d8f`
 
 ## GitHub Demo
 
