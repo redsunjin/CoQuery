@@ -29,12 +29,15 @@ Launch Goal 4: iOS TestFlight Shell Skeleton
 
 ## Assets Still Needed Before Upload
 
-- iPhone screenshots from simulator or device.
-- iPad screenshots from simulator or device.
-- App icon set.
-- Privacy nutrition answers.
-- Support URL.
-- Marketing URL, if needed.
+- iPhone screenshot candidates: `app_store_assets/ios-registration/screenshots/iphone-69/`
+- iPad screenshot candidates: `app_store_assets/ios-registration/screenshots/ipad-13/`
+- App icon candidate: `app_store_assets/ios-registration/icons/app-icon-1024.png`
+- App Store Connect metadata draft: `docs/app-store-registration/app-store-connect-metadata.md`
+- Privacy policy draft: `docs/app-store-registration/privacy-policy-draft.md`
+- Support page draft: `docs/app-store-registration/support-page-draft.md`
+- Screenshot upload plan: `docs/app-store-registration/screenshot-plan.md`
+- Hosted privacy/support URLs still need to be created outside the repo before App Store submission.
+- Marketing URL can be omitted for the first TestFlight registration unless a public landing page is available.
 
 ## Verification Before External Testers
 
