@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Support - CoQuery Training</title>
+    <meta name="description" content="Support information for the CoQuery Training iOS app.">
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f8fafc;
+        --fg: #111827;
+        --muted: #4b5563;
+        --panel: #ffffff;
+        --border: #d1d5db;
+        --accent: #0f766e;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f172a;
+          --fg: #f8fafc;
+          --muted: #cbd5e1;
+          --panel: #111827;
+          --border: #334155;
+          --accent: #5eead4;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.6;
+      }
+
+      main {
+        width: min(880px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 40px 0 56px;
+      }
+
+      .page {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: clamp(24px, 5vw, 44px);
+      }
+
+      nav {
+        margin-bottom: 28px;
+      }
+
+      nav a,
+      a {
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(2rem, 6vw, 3rem);
+        line-height: 1.08;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        margin: 32px 0 10px;
+        font-size: 1.25rem;
+        line-height: 1.3;
+        letter-spacing: 0;
+      }
+
+      p,
+      li {
+        color: var(--fg);
+      }
+
+      .meta {
+        margin: 0 0 28px;
+        color: var(--muted);
+      }
+
+      ul,
+      ol {
+        padding-left: 1.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="page" aria-labelledby="title">
+        <nav aria-label="Site navigation">
+          <a href="../">CoQuery Training</a>
+        </nav>
+        <h1 id="title">Support</h1>
+        <p class="meta">Last updated: July 10, 2026</p>
+
+        <h2>CoQuery Training Support</h2>
+        <p>
+          CoQuery Training is a TestFlight-first SQL practice shell for iPhone and
+          iPad. The first iOS build is intended to validate packaging, launch
+          behavior, and the bundled Training Mode practice path.
+        </p>
+
+        <h2>What This Build Supports</h2>
+        <ul>
+          <li>Bundled SQL practice problems.</li>
+          <li>Sample schema inspection.</li>
+          <li>Read-only practice queries.</li>
+          <li>Local practice attempt review.</li>
+          <li>Training Mode boundary checks.</li>
+        </ul>
+
+        <h2>What This Build Does Not Support</h2>
+        <ul>
+          <li>Production database connections.</li>
+          <li>Production database credentials.</li>
+          <li>Hosted public web service behavior.</li>
+          <li>Embedded Python local server behavior.</li>
+          <li>Provider-backed AI feedback as a required path.</li>
+        </ul>
+
+        <h2>Tester Checklist</h2>
+        <ol>
+          <li>Launch the app.</li>
+          <li>Confirm Training Mode is visible.</li>
+          <li>Run <code>practice_list</code>.</li>
+          <li>Open a practice problem.</li>
+          <li>Submit a read-only SELECT answer.</li>
+          <li>Confirm production database actions are unavailable in the iOS Training shell.</li>
+        </ol>
+
+        <h2>Known Limits</h2>
+        <p>
+          This is an early TestFlight shell. It is not a production database client
+          and does not embed the desktop local server.
+        </p>
+
+        <h2>Contact</h2>
+        <p>
+          Use the feedback email configured in the app's TestFlight or App Store
+          listing.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

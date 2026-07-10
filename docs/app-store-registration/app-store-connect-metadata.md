@@ -28,9 +28,9 @@ References checked on 2026-07-09:
 | --- | --- |
 | Version | 0.8.0 |
 | Copyright | 2026 CoQuery |
-| Support URL | Pending hosted URL; draft content lives in `docs/app-store-registration/support-page-draft.md` |
+| Support URL | `https://redsunjin.github.io/CoQuery/support/` after GitHub Pages is enabled for `main` `/docs` |
 | Marketing URL | Optional; can be omitted for first TestFlight |
-| Privacy Policy URL | Pending hosted URL; draft content lives in `docs/app-store-registration/privacy-policy-draft.md` |
+| Privacy Policy URL | `https://redsunjin.github.io/CoQuery/privacy/` after GitHub Pages is enabled for `main` `/docs` |
 
 ## Product Page Copy
 
