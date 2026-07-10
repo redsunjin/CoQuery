@@ -1,0 +1,82 @@
+{
+  "generated_at": "2026-07-09",
+  "app_name": "CoQuery Training",
+  "bundle_id": "app.coquery.training",
+  "scope": "TestFlight-first Training Mode registration assets",
+  "icon": {
+    "path": "app_store_assets/ios-registration/icons/app-icon-1024.png",
+    "size": [
+      1024,
+      1024
+    ],
+    "source": "ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png"
+  },
+  "screenshots": [
+    {
+      "kind": "screenshot",
+      "device": "iPhone 6.9 display",
+      "size": [
+        1320,
+        2868
+      ],
+      "path": "app_store_assets/ios-registration/screenshots/iphone-69/01-training-home.png",
+      "source": "Generated from CoQuery Training first-TestFlight scope."
+    },
+    {
+      "kind": "screenshot",
+      "device": "iPhone 6.9 display",
+      "size": [
+        1320,
+        2868
+      ],
+      "path": "app_store_assets/ios-registration/screenshots/iphone-69/02-practice-flow.png",
+      "source": "Generated from CoQuery Training first-TestFlight scope."
+    },
+    {
+      "kind": "screenshot",
+      "device": "iPhone 6.9 display",
+      "size": [
+        1320,
+        2868
+      ],
+      "path": "app_store_assets/ios-registration/screenshots/iphone-69/03-safety-boundary.png",
+      "source": "Generated from CoQuery Training first-TestFlight scope."
+    },
+    {
+      "kind": "screenshot",
+      "device": "iPad 13 display",
+      "size": [
+        2048,
+        2732
+      ],
+      "path": "app_store_assets/ios-registration/screenshots/ipad-13/01-training-home.png",
+      "source": "Generated from CoQuery Training first-TestFlight scope."
+    },
+    {
+      "kind": "screenshot",
+      "device": "iPad 13 display",
+      "size": [
+        2048,
+        2732
+      ],
+      "path": "app_store_assets/ios-registration/screenshots/ipad-13/02-practice-flow.png",
+      "source": "Generated from CoQuery Training first-TestFlight scope."
+    },
+    {
+      "kind": "screenshot",
+      "device": "iPad 13 display",
+      "size": [
+        2048,
+        2732
+      ],
+      "path": "app_store_assets/ios-registration/screenshots/ipad-13/03-safety-boundary.png",
+      "source": "Generated from CoQuery Training first-TestFlight scope."
+    }
+  ],
+  "not_included": [
+    "Apple Developer team signing assets",
+    "Hosted privacy/support URLs",
+    "Archived .ipa upload",
+    "Device-captured screenshots after signing"
+  ]
+}
