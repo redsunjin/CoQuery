@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CoQuery Training</title>
+    <meta name="description" content="Support and privacy information for CoQuery Training.">
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f8fafc;
+        --fg: #111827;
+        --muted: #4b5563;
+        --panel: #ffffff;
+        --border: #d1d5db;
+        --accent: #0f766e;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f172a;
+          --fg: #f8fafc;
+          --muted: #cbd5e1;
+          --panel: #111827;
+          --border: #334155;
+          --accent: #5eead4;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.6;
+      }
+
+      main {
+        width: min(880px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 56px 0;
+      }
+
+      .page {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: clamp(24px, 5vw, 44px);
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(2rem, 6vw, 3rem);
+        line-height: 1.08;
+        letter-spacing: 0;
+      }
+
+      p {
+        margin: 0 0 18px;
+      }
+
+      a {
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      nav a {
+        min-height: 44px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 14px;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="page" aria-labelledby="title">
+        <h1 id="title">CoQuery Training</h1>
+        <p>
+          CoQuery Training is a TestFlight-first SQL practice shell for iPhone and iPad.
+          This site hosts the support and privacy pages used for app registration.
+        </p>
+        <nav aria-label="CoQuery Training pages">
+          <a href="./privacy/">Privacy Policy</a>
+          <a href="./support/">Support</a>
+        </nav>
+      </section>
+    </main>
+  </body>
+</html>
