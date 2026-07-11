@@ -1,4 +1,4 @@
-# CoQuery Training TestFlight Metadata Checklist
+# CoQuery TestFlight Metadata Checklist
 
 Goal:
 
@@ -6,7 +6,7 @@ Launch Goal 4: iOS TestFlight Shell Skeleton
 
 ## App Identity
 
-- App name: `CoQuery Training`
+- App name: `CoQuery`
 - Bundle ID: `app.coquery.training`
 - Distribution target: TestFlight first, not public App Store release yet
 - Primary category: Education or Developer Tools
@@ -14,7 +14,7 @@ Launch Goal 4: iOS TestFlight Shell Skeleton
 
 ## Beta App Information
 
-- Short description explains that CoQuery Training is a local SQL practice shell.
+- Short description explains that CoQuery is a local SQL practice shell.
 - Beta notes state that the build does not connect to production databases.
 - Beta notes state that the first build uses bundled sample practice data.
 - Feedback contact is set for tester reports.
@@ -31,7 +31,8 @@ Launch Goal 4: iOS TestFlight Shell Skeleton
 
 - iPhone screenshot candidates: `app_store_assets/ios-registration/screenshots/iphone-69/`
 - iPad screenshot candidates: `app_store_assets/ios-registration/screenshots/ipad-13/`
-- App icon candidate: `app_store_assets/ios-registration/icons/app-icon-1024.png`
+- Approved primary app icon: `app_store_assets/ios-registration/icons/app-icon-1024.png`
+- Approved brand master: `app_store_assets/brand/coquery-liquid-glass-sql-tokens-master-v4.png`
 - App Store Connect metadata draft: `docs/app-store-registration/app-store-connect-metadata.md`
 - Privacy policy page source: `docs/privacy/index.html`
 - Support page source: `docs/support/index.html`

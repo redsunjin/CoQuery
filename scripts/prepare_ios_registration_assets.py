@@ -119,7 +119,7 @@ def screenshot(device: str, size: tuple[int, int], title: str, subtitle: str, co
     status_bar(draw, width, margin)
 
     y = int(height * 0.105)
-    draw.text((margin, y), "CoQuery Training", font=font(int(width * 0.044), bold=True), fill="#67e8c4")
+    draw.text((margin, y), "CoQuery", font=font(int(width * 0.044), bold=True), fill="#67e8c4")
     y += int(height * 0.055)
     y = draw_multiline(draw, (margin, y), title, font(int(width * 0.07), bold=True), "#f6fbff", width - margin * 2, spacing=18)
     y += int(height * 0.022)
@@ -164,7 +164,7 @@ def main() -> None:
         (
             "01-training-home.png",
             "Learn SQL without connecting a real database",
-            "CoQuery Training opens in a local practice shell, so first testers can inspect commands safely before any production workflow exists.",
+            "CoQuery opens in a local practice shell, so first testers can inspect commands safely before any production workflow exists.",
             "practice_list",
             "3 SQL basics problems ready\n- Select customers\n- Filter regions\n- Review attempts",
         ),
@@ -200,19 +200,20 @@ def main() -> None:
                     "device": label,
                     "size": list(size),
                     "path": str(path.relative_to(ROOT)),
-                    "source": "Generated from CoQuery Training first-TestFlight scope.",
+                    "source": "Generated from CoQuery first-TestFlight scope.",
                 }
             )
 
     manifest = {
-        "generated_at": "2026-07-09",
-        "app_name": "CoQuery Training",
+        "generated_at": "2026-07-11",
+        "app_name": "CoQuery",
         "bundle_id": "app.coquery.training",
         "scope": "TestFlight-first Training Mode registration assets",
         "icon": {
             "path": str((icon_dir / "app-icon-1024.png").relative_to(ROOT)),
             "size": [1024, 1024],
             "source": str(SOURCE_ICON.relative_to(ROOT)),
+            "status": "approved primary brand icon",
         },
         "screenshots": generated,
         "not_included": [

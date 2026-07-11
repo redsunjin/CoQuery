@@ -1,4 +1,4 @@
-# CoQuery Training Screenshot Plan
+# CoQuery Screenshot Plan
 
 Date: 2026-07-09
 Scope: iPhone/iPad App Store Connect screenshot package.

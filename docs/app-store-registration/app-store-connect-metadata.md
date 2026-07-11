@@ -1,4 +1,4 @@
-# CoQuery Training App Store Connect Metadata Draft
+# CoQuery App Store Connect Metadata Draft
 
 Date: 2026-07-09
 Scope: iPhone/iPad registration package for the TestFlight-first Training Mode app.
@@ -13,7 +13,7 @@ References checked on 2026-07-09:
 
 | Field | Draft value |
 | --- | --- |
-| App name | CoQuery Training |
+| App name | CoQuery |
 | Bundle ID | app.coquery.training |
 | SKU | coquery-training-ios |
 | Primary language | English (U.S.) |
@@ -44,7 +44,7 @@ Practice SQL with bundled sample data before connecting any real database.
 
 ### Description
 
-CoQuery Training is a focused SQL practice shell for learning query habits safely on iPhone and iPad.
+CoQuery is a focused SQL practice shell for learning query habits safely on iPhone and iPad.
 
 The first iOS build is Training Mode only. It uses bundled sample data, local practice commands, and clear command output so testers can learn SQL flow without creating an account, adding an API key, or connecting to a production database.
 
@@ -69,13 +69,13 @@ SQL,database,SQLite,practice,training,developer,query,learning
 
 ### What's New
 
-Initial TestFlight registration package for the CoQuery Training iOS shell. This build focuses on bundled SQL practice data and Training Mode boundaries.
+Initial TestFlight registration package for the CoQuery iOS shell. This build focuses on bundled SQL practice data and Training Mode boundaries.
 
 ## TestFlight Beta Information
 
 ### Beta App Description
 
-CoQuery Training is a TestFlight-first SQL practice shell. This beta uses bundled sample data and local Training Mode commands only. It does not connect to production databases, request production credentials, or require API keys.
+CoQuery is a TestFlight-first SQL practice shell. This beta uses bundled sample data and local Training Mode commands only. It does not connect to production databases, request production credentials, or require API keys.
 
 ### What to Test
 

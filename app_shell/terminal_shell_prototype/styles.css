@@ -1044,12 +1044,14 @@ html[data-app-mode="production_assist"] .mode-option.active {
 
 @media (max-width: 760px) {
   .app-shell {
-    min-height: 100dvh;
+    min-height: 100%;
     display: block;
   }
 
   .terminal-pane {
-    height: 100dvh;
+    min-height: 100dvh;
+    height: auto;
+    display: block;
   }
 
   .terminal-header {
@@ -1099,6 +1101,7 @@ html[data-app-mode="production_assist"] .mode-option.active {
   }
 
   .terminal-scroll {
+    overflow: visible;
     padding: 14px 10px 18px;
     gap: 12px;
   }
@@ -1147,10 +1150,16 @@ html[data-app-mode="production_assist"] .mode-option.active {
   }
 
   .command-bar {
-    position: sticky;
-    bottom: 0;
+    position: static;
     grid-template-columns: 1fr auto auto;
     padding: 10px;
+  }
+
+  .command-input-wrap input,
+  .field input,
+  .field select,
+  .field textarea {
+    font-size: 16px;
   }
 
   .mode-toggle {
@@ -1226,8 +1235,7 @@ html[data-app-mode="production_assist"] .mode-option.active {
     justify-content: center;
   }
 
-  .block-command code,
-  .command-input-wrap input {
+  .block-command code {
     font-size: 13px;
   }
 

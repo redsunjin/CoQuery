@@ -86,7 +86,7 @@ The next implementation should extract the Training Mode command contract so the
 Public positioning for the first iOS release should be narrow:
 
 ```text
-CoQuery Training
+CoQuery
 Learn SQL with a terminal-style practice app.
 ```
 

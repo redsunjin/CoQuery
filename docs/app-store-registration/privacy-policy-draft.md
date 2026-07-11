@@ -1,4 +1,4 @@
-# CoQuery Training Privacy Policy Draft
+# CoQuery Privacy Policy Draft
 
 Date: 2026-07-09
 Status: Draft for a hosted privacy policy page before TestFlight/App Store submission.
@@ -9,7 +9,7 @@ Reference checked on 2026-07-09:
 
 ## Overview
 
-CoQuery Training is a SQL practice app for iPhone and iPad. The first TestFlight build is Training Mode only and uses bundled sample data.
+CoQuery is a SQL practice app for iPhone and iPad. The first TestFlight build is Training Mode only and uses bundled sample data.
 
 ## Data Collection
 

@@ -402,7 +402,7 @@ def run_server_smoke() -> None:
 
 def main() -> int:
     assert_contains(ROOT / "index.html", '<html lang="ko">')
-    assert_contains(ROOT / "index.html", "반응형 터미널 쉘")
+    assert_contains(ROOT / "index.html", '<h1 data-i18n="appTitle">CoQuery</h1>')
     assert_contains(ROOT / "index.html", "세션 검색...")
     assert_contains(ROOT / "index.html", "초보자 안내")
     assert_contains(ROOT / "index.html", "commandForm")
@@ -447,7 +447,7 @@ def main() -> int:
     assert_contains(ROOT / "app.js", "readable_message")
     assert_contains(ROOT / "app.js", "help_catalog")
     assert_contains(ROOT / "app.js", "currentLanguage")
-    assert_contains(ROOT / "app.js", 'documentTitle: "CoQuery 터미널 쉘"')
+    assert_contains(ROOT / "app.js", 'documentTitle: "CoQuery"')
     assert_contains(ROOT / "app.js", 'copy_sql: "Copy SQL"')
     assert_contains(ROOT / "app.js", "practice_list")
     assert_contains(ROOT / "app.js", "practice_start")

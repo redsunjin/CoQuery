@@ -1,6 +1,6 @@
 {
   "appId": "app.coquery.training",
-  "appName": "CoQuery Training",
+  "appName": "CoQuery",
   "webDir": "dist/ios-shell",
   "bundledWebRuntime": false,
   "ios": {

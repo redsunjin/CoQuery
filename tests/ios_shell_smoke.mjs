@@ -19,7 +19,7 @@ function assertFile(path) {
 assertFile(capacitorConfigPath);
 const capacitorConfig = readJson(capacitorConfigPath);
 assert.equal(capacitorConfig.appId, "app.coquery.training");
-assert.equal(capacitorConfig.appName, "CoQuery Training");
+assert.equal(capacitorConfig.appName, "CoQuery");
 assert.equal(capacitorConfig.webDir, "dist/ios-shell");
 
 assertFile(join(distDir, "index.html"));
@@ -34,6 +34,7 @@ assert.match(indexHtml, /<script type="module" src="\.\/app\.js"><\/script>/);
 assert.match(indexHtml, /commandMenuToggle/);
 assert.match(indexHtml, /aria-expanded="false"/);
 assert.match(indexHtml, /commandMenuPanel/);
+assert.match(indexHtml, /<h1 data-i18n="appTitle">CoQuery<\/h1>/);
 assert.match(indexHtml, /hidden/);
 assert.ok(
   indexHtml.indexOf("ios-training-runtime.js") < indexHtml.indexOf("./app.js"),
@@ -47,6 +48,7 @@ assert.match(appJs, /wrong-note-card/);
 assert.match(appJs, /data-retry-practice/);
 assert.match(appJs, /data-provider-feedback/);
 assert.match(appJs, /AI-generated feedback/);
+assert.match(appJs, /documentTitle: "CoQuery"/);
 
 const runtime = await import(pathToFileURL(runtimePath).href);
 let apiFetchCalled = false;

@@ -72,7 +72,10 @@ Responsive behavior:
 
 - desktop/wide: session rail, terminal pane, detail panel
 - tablet: terminal pane plus detail panel
-- phone: terminal pane plus bottom command bar and bottom detail drawer
+- phone: terminal pane with a scrolling command-entry area and an on-demand bottom detail drawer
+
+Mobile UX verification and screenshots are recorded in
+`docs/terminal-shell-mobile-ux-verification-2026-07-11.md`.
 
 Smoke check:
 

@@ -1,4 +1,4 @@
-# CoQuery Training Support Page Draft
+# CoQuery Support Page Draft
 
 Date: 2026-07-09
 Status: Draft for a hosted support page before TestFlight/App Store submission.
@@ -7,9 +7,9 @@ Reference checked on 2026-07-09:
 
 - Apple required properties include Support URL as platform version information: https://developer.apple.com/help/app-store-connect/reference/app-information/required-localizable-and-editable-properties/
 
-## CoQuery Training Support
+## CoQuery Support
 
-CoQuery Training is a TestFlight-first SQL practice shell for iPhone and iPad.
+CoQuery is a TestFlight-first SQL practice shell for iPhone and iPad.
 
 ## What This Build Supports
 

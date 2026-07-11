@@ -39,13 +39,13 @@ const providerDefaults = {
 
 const i18n = {
   ko: {
-    documentTitle: "CoQuery 터미널 쉘",
+    documentTitle: "CoQuery",
     sessionRailLabel: "세션",
     sessionListLabel: "세션 목록",
     searchPlaceholder: "세션 검색...",
     brandSubtitle: "터미널 쉘",
     headerKicker: "로컬 SQL 랩",
-    appTitle: "반응형 터미널 쉘",
+    appTitle: "CoQuery",
     detailsButton: "상세",
     commandMenuButton: "명령",
     languageToggleLabel: "언어",
@@ -166,13 +166,13 @@ const i18n = {
     sessionPracticeSubtitle: "복습과 오답노트 경로",
   },
   en: {
-    documentTitle: "CoQuery Terminal Shell",
+    documentTitle: "CoQuery",
     sessionRailLabel: "Sessions",
     sessionListLabel: "Session list",
     searchPlaceholder: "Search sessions...",
     brandSubtitle: "Terminal Shell",
     headerKicker: "Local SQL Lab",
-    appTitle: "Responsive Terminal Shell",
+    appTitle: "CoQuery",
     detailsButton: "Details",
     commandMenuButton: "Commands",
     languageToggleLabel: "Language",
