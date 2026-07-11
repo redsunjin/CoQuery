@@ -20,7 +20,7 @@ References checked on 2026-07-09:
 | Primary category | Education |
 | Secondary category | Developer Tools |
 | Distribution target | TestFlight first |
-| First public release posture | Not ready for public App Store sale until signed build, hosted URLs, and real screenshots are validated |
+| First public release posture | Not ready for public App Store sale until signed build, App Store Connect answers, and real-device screenshots are validated |
 
 ## Version Metadata
 
@@ -28,9 +28,9 @@ References checked on 2026-07-09:
 | --- | --- |
 | Version | 0.8.0 |
 | Copyright | 2026 CoQuery |
-| Support URL | `https://redsunjin.github.io/CoQuery/support/` after GitHub Pages is enabled for `main` `/docs` |
+| Support URL | `https://redsunjin.github.io/CoQuery/support/` (HTTP 200 verified 2026-07-11) |
 | Marketing URL | Optional; can be omitted for first TestFlight |
-| Privacy Policy URL | `https://redsunjin.github.io/CoQuery/privacy/` after GitHub Pages is enabled for `main` `/docs` |
+| Privacy Policy URL | `https://redsunjin.github.io/CoQuery/privacy/` (HTTP 200 verified 2026-07-11) |
 
 ## Product Page Copy
 

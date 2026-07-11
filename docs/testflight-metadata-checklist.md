@@ -27,7 +27,7 @@ Launch Goal 4: iOS TestFlight Shell Skeleton
 - No provider API key is required for the first TestFlight shell.
 - Any future provider-backed feedback must be clearly labeled and stay inside Training Mode.
 
-## Assets Still Needed Before Upload
+## Repository Package Ready
 
 - iPhone screenshot candidates: `app_store_assets/ios-registration/screenshots/iphone-69/`
 - iPad screenshot candidates: `app_store_assets/ios-registration/screenshots/ipad-13/`
@@ -39,15 +39,22 @@ Launch Goal 4: iOS TestFlight Shell Skeleton
 - Privacy policy draft: `docs/app-store-registration/privacy-policy-draft.md`
 - Support page draft: `docs/app-store-registration/support-page-draft.md`
 - Screenshot upload plan: `docs/app-store-registration/screenshot-plan.md`
-- Enable GitHub Pages from `main` `/docs` before App Store submission.
-- Expected Privacy Policy URL after Pages is enabled: `https://redsunjin.github.io/CoQuery/privacy/`
-- Expected Support URL after Pages is enabled: `https://redsunjin.github.io/CoQuery/support/`
+- GitHub Pages is enabled from `main` `/docs`.
+- Privacy Policy URL verified with HTTP 200 on 2026-07-11: `https://redsunjin.github.io/CoQuery/privacy/`
+- Support URL verified with HTTP 200 on 2026-07-11: `https://redsunjin.github.io/CoQuery/support/`
 - Marketing URL can be omitted for the first TestFlight registration unless a public landing page is available.
 
-## Verification Before External Testers
+## Repository Verification (2026-07-11)
 
-- `npm run ios:shell:test` passes.
+- `npm run rc:verify` passes: release contract, 121 core CLI/Command API tests, terminal shell, local packaging, and iOS shell smoke.
 - `npm run ios:sync` completes.
-- iPhone simulator launches the shell and shows `practice_list`.
-- iPad simulator launches the shell and shows `practice_list`.
-- TestFlight build uploads through App Store Connect.
+- Release iOS Simulator build passes with `CODE_SIGNING_ALLOWED=NO`.
+- GitHub Actions `baseline`, `postgresql-smoke`, and `pages-build-deployment` pass for commit `124ee89`.
+
+## Remaining Before External Testers
+
+- Select the Apple Developer Team and confirm the App ID for `app.coquery.training`; `DEVELOPMENT_TEAM` is intentionally not committed in the project.
+- Create or confirm the App Store Connect app record using the final App name, Bundle ID, SKU, category, and feedback email.
+- Complete App Privacy, export compliance, and age-rating answers in App Store Connect.
+- Open the signed archive in Xcode Organizer, validate, and upload it to App Store Connect.
+- On physical iPhone and iPad, launch the signed build and run `practice_list`; include the mobile focus/auto-zoom check recorded in `docs/terminal-shell-mobile-ux-verification-2026-07-11.md`.
