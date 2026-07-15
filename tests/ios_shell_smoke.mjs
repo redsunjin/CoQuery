@@ -31,6 +31,7 @@ assertFile(join(distDir, "practice_packs", "sql_basics.json"));
 const indexHtml = readFileSync(join(distDir, "index.html"), "utf8");
 assert.match(indexHtml, /<script type="module" src="\.\/ios-training-runtime\.js"><\/script>/);
 assert.match(indexHtml, /<script type="module" src="\.\/app\.js"><\/script>/);
+assert.match(indexHtml, /viewport-fit=cover/);
 assert.match(indexHtml, /commandMenuToggle/);
 assert.match(indexHtml, /aria-expanded="false"/);
 assert.match(indexHtml, /commandMenuPanel/);
@@ -49,6 +50,15 @@ assert.match(appJs, /data-retry-practice/);
 assert.match(appJs, /data-provider-feedback/);
 assert.match(appJs, /AI-generated feedback/);
 assert.match(appJs, /documentTitle: "CoQuery"/);
+
+const stylesCss = readFileSync(join(distDir, "styles.css"), "utf8");
+assert.match(stylesCss, /--safe-area-top:\s*env\(safe-area-inset-top, 0px\)/);
+assert.match(stylesCss, /--safe-area-bottom:\s*env\(safe-area-inset-bottom, 0px\)/);
+assert.match(stylesCss, /min-height:\s*calc\(60px \+ var\(--safe-area-top\)\)/);
+assert.match(stylesCss, /grid-template-rows:\s*auto minmax\(0, 1fr\) auto/);
+assert.match(stylesCss, /\.command-menu-popover\s*\{[^}]*position:\s*fixed;/s);
+assert.match(stylesCss, /\.lang-button\s*\{[^}]*min-width:\s*44px;[^}]*min-height:\s*44px;/s);
+assert.match(stylesCss, /\.context-chip\s*\{[^}]*min-height:\s*44px;/s);
 
 const runtime = await import(pathToFileURL(runtimePath).href);
 let apiFetchCalled = false;

@@ -20,6 +20,10 @@
   --warn-soft: #41321d;
   --danger: #ee766d;
   --danger-soft: #472322;
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
   --mono: "Cascadia Mono", "D2Coding", "SFMono-Regular", Consolas, "Malgun Gothic", "Liberation Mono", monospace;
   --sans: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", Inter, ui-sans-serif,
     system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -1044,20 +1048,31 @@ html[data-app-mode="production_assist"] .mode-option.active {
 
 @media (max-width: 760px) {
   .app-shell {
-    min-height: 100%;
+    min-height: 100dvh;
+    height: 100dvh;
     display: block;
   }
 
   .terminal-pane {
     min-height: 100dvh;
-    height: auto;
-    display: block;
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
   }
 
   .terminal-header {
-    min-height: 54px;
-    grid-template-columns: 30px 1fr auto;
-    padding: 0 10px;
+    min-height: calc(60px + var(--safe-area-top));
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: var(--safe-area-top) max(10px, var(--safe-area-right)) 0 max(10px, var(--safe-area-left));
+    z-index: 30;
+  }
+
+  .window-controls {
+    display: none;
+  }
+
+  .header-center {
+    text-align: left;
   }
 
   .header-actions {
@@ -1065,26 +1080,29 @@ html[data-app-mode="production_assist"] .mode-option.active {
   }
 
   .command-menu-popover {
-    top: 60px;
-    right: 10px;
-    left: 10px;
+    position: fixed;
+    top: calc(60px + var(--safe-area-top));
+    right: max(10px, var(--safe-area-right));
+    left: max(10px, var(--safe-area-left));
+    z-index: 40;
     width: auto;
-    max-height: calc(100dvh - 134px);
+    max-height: calc(100dvh - 134px - var(--safe-area-top) - var(--safe-area-bottom));
     padding: 8px;
   }
 
   .language-toggle {
-    min-height: 32px;
+    min-height: 48px;
     padding: 2px;
   }
 
   .lang-button {
-    min-width: 32px;
+    min-width: 44px;
+    min-height: 44px;
   }
 
-  .window-controls span {
-    width: 8px;
-    height: 8px;
+  .command-menu-toggle {
+    min-width: 52px;
+    min-height: 44px;
   }
 
   .header-kicker {
@@ -1096,12 +1114,14 @@ html[data-app-mode="production_assist"] .mode-option.active {
   }
 
   .context-chip {
-    min-height: 34px;
+    min-height: 44px;
     padding-right: 11px;
   }
 
   .terminal-scroll {
-    overflow: visible;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
     padding: 14px 10px 18px;
     gap: 12px;
   }
@@ -1150,9 +1170,11 @@ html[data-app-mode="production_assist"] .mode-option.active {
   }
 
   .command-bar {
-    position: static;
+    position: relative;
+    z-index: 15;
     grid-template-columns: 1fr auto auto;
-    padding: 10px;
+    padding: 10px max(10px, var(--safe-area-right)) max(10px, var(--safe-area-bottom))
+      max(10px, var(--safe-area-left));
   }
 
   .command-input-wrap input,
@@ -1178,7 +1200,7 @@ html[data-app-mode="production_assist"] .mode-option.active {
 
   .primary-button,
   .ghost-button {
-    min-height: 42px;
+    min-height: 44px;
     padding: 0 12px;
   }
 
@@ -1197,13 +1219,14 @@ html[data-app-mode="production_assist"] .mode-option.active {
     right: 0;
     bottom: 0;
     z-index: 10;
-    max-height: 74dvh;
+    max-height: calc(74dvh - var(--safe-area-top));
     transform: translateY(105%);
     transition: transform 180ms ease;
     border-width: 1px 0 0;
     border-radius: 8px 8px 0 0;
     box-shadow: 0 -12px 28px rgba(20, 20, 20, 0.16);
-    padding: 18px 16px;
+    padding: 18px max(16px, var(--safe-area-right)) max(18px, var(--safe-area-bottom))
+      max(16px, var(--safe-area-left));
   }
 
   .app-shell[data-detail-open="true"] .detail-panel {
