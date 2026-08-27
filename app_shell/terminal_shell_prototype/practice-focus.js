@@ -52,7 +52,7 @@ function hideTerminalChrome(block) {
   }
 
   const directCliLines = [...block.children].filter((node) => node.classList?.contains("cli-line"));
-  const cliEquivalent = directCliLines.at(-1);
+  const cliEquivalent = directCliLines[directCliLines.length - 1];
   if (cliEquivalent) {
     cliEquivalent.hidden = true;
   }
@@ -66,6 +66,42 @@ function leavePracticeForProblemBank() {
       const listBlock = blocks.reverse().find((block) => practiceCommandForBlock(block) === "practice_list");
       listBlock?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
+  }
+}
+
+function refreshPracticeFocusCopy(block = document.querySelector(".practice-focus-block")) {
+  if (!block) {
+    return;
+  }
+  const form = block.querySelector("[data-practice-form]");
+  if (!form) {
+    return;
+  }
+
+  const hint = form.querySelector(".practice-hint");
+  const hintButton = form.querySelector(".practice-hint-toggle");
+  if (hintButton) {
+    hintButton.textContent = practiceFocusText(hint?.hidden === false ? "hintHide" : "hintShow");
+  }
+
+  const bankButton = form.querySelector(".practice-bank-button");
+  if (bankButton) {
+    bankButton.textContent = practiceFocusText("problemBank");
+  }
+
+  const sqlLabel = form.querySelector(".practice-sql-field > span");
+  if (sqlLabel) {
+    sqlLabel.textContent = practiceFocusText("sqlLabel");
+  }
+
+  const submit = form.querySelector("[data-practice-submit]");
+  if (submit) {
+    submit.textContent = practiceFocusText("run");
+  }
+
+  const status = form.querySelector("[data-practice-status]");
+  if (status && !status.classList.contains("ok") && !status.classList.contains("error")) {
+    status.textContent = practiceFocusText("ready");
   }
 }
 
@@ -105,7 +141,6 @@ function enhancePracticeStart(block) {
     const hintButton = document.createElement("button");
     hintButton.className = "ghost-button practice-hint-toggle";
     hintButton.type = "button";
-    hintButton.textContent = practiceFocusText("hintShow");
     hintButton.addEventListener("click", () => {
       hint.hidden = !hint.hidden;
       hintButton.textContent = practiceFocusText(hint.hidden ? "hintShow" : "hintHide");
@@ -119,20 +154,8 @@ function enhancePracticeStart(block) {
     const bankButton = document.createElement("button");
     bankButton.className = "ghost-button practice-bank-button";
     bankButton.type = "button";
-    bankButton.textContent = practiceFocusText("problemBank");
     bankButton.addEventListener("click", leavePracticeForProblemBank);
     supportActions.append(bankButton);
-  }
-
-  const sqlField = form.querySelector(".practice-sql-field");
-  const sqlLabel = sqlField?.querySelector(":scope > span");
-  if (sqlLabel) {
-    sqlLabel.textContent = practiceFocusText("sqlLabel");
-  }
-
-  const submit = form.querySelector("[data-practice-submit]");
-  if (submit) {
-    submit.textContent = practiceFocusText("run");
   }
 
   const preview = form.querySelector("[data-practice-preview]");
@@ -140,10 +163,7 @@ function enhancePracticeStart(block) {
     preview.hidden = true;
   }
 
-  const status = form.querySelector("[data-practice-status]");
-  if (status && !status.classList.contains("ok") && !status.classList.contains("error")) {
-    status.textContent = practiceFocusText("ready");
-  }
+  refreshPracticeFocusCopy(block);
 
   const textarea = form.querySelector('textarea[name="sql"]');
   requestAnimationFrame(() => textarea?.focus());
@@ -204,13 +224,6 @@ advancedWorkspaceButton?.addEventListener("click", () => setPracticeFocusMode(fa
 
 languageButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    setTimeout(() => {
-      const current = document.querySelector(".practice-focus-block");
-      if (!current) {
-        return;
-      }
-      current.dataset.practiceFocusEnhanced = "false";
-      enhancePracticeStart(current);
-    }, 0);
+    setTimeout(() => refreshPracticeFocusCopy(), 0);
   });
 });
