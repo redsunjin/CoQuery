@@ -1,0 +1,229 @@
+.app-shell[data-practice-focus="true"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.app-shell[data-practice-focus="true"] .session-rail,
+.app-shell[data-practice-focus="true"] .detail-panel,
+.app-shell[data-practice-focus="true"] .command-bar,
+.app-shell[data-practice-focus="true"] .command-menu-popover,
+.app-shell[data-practice-focus="true"] .command-menu-toggle,
+.app-shell[data-practice-focus="true"] .detail-toggle {
+  display: none !important;
+}
+
+.app-shell[data-practice-focus="true"] .terminal-pane {
+  min-width: 0;
+}
+
+.app-shell[data-practice-focus="true"] .terminal-header {
+  grid-template-columns: 1fr auto;
+  padding-inline: 24px;
+}
+
+.app-shell[data-practice-focus="true"] .window-controls,
+.app-shell[data-practice-focus="true"] .header-center .header-kicker {
+  display: none;
+}
+
+.app-shell[data-practice-focus="true"] .header-center {
+  justify-self: start;
+  text-align: left;
+}
+
+.app-shell[data-practice-focus="true"] .header-center h1 {
+  font-size: 17px;
+}
+
+.app-shell[data-practice-focus="true"] .terminal-scroll {
+  width: 100%;
+  padding: 28px 24px 56px;
+  align-items: center;
+  gap: 14px;
+}
+
+.app-shell[data-practice-focus="true"] .learning-home,
+.app-shell[data-practice-focus="true"] .welcome-block,
+.app-shell[data-practice-focus="true"] .system-block,
+.app-shell[data-practice-focus="true"] .terminal-block:not(.practice-focus-block):not(.practice-feedback-block) {
+  display: none;
+}
+
+.practice-focus-block,
+.practice-feedback-block {
+  width: min(100%, 860px);
+  max-width: 860px;
+}
+
+.practice-focus-block {
+  padding: 22px;
+  border-color: var(--line-strong);
+  box-shadow: none;
+}
+
+.practice-focus-block.active {
+  border-color: var(--line-strong);
+  box-shadow: none;
+}
+
+.practice-title-summary {
+  margin: 0 0 18px;
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 760;
+  line-height: 1.4;
+}
+
+.practice-focus-block .practice-flow-form {
+  margin-top: 0;
+  gap: 16px;
+}
+
+.practice-focus-problem {
+  order: 1;
+  padding: 16px;
+  background: var(--panel-soft);
+}
+
+.practice-focus-problem .practice-problem-head {
+  margin-bottom: 12px;
+}
+
+.practice-focus-problem .section-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.practice-focus-problem p {
+  margin-top: 8px;
+  color: var(--text);
+  font-size: 17px;
+  line-height: 1.65;
+  font-weight: 650;
+}
+
+.practice-focus-block .practice-sql-field {
+  order: 2;
+  gap: 8px;
+}
+
+.practice-focus-block .practice-sql-field > span {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 760;
+}
+
+.practice-focus-block .practice-sql-field textarea {
+  min-height: 190px;
+  padding: 14px;
+  font-size: 15px;
+  line-height: 1.65;
+  border-color: var(--line-strong);
+  background: #10110f;
+}
+
+.practice-focus-block .practice-primary-actions {
+  order: 3;
+}
+
+.practice-focus-block .practice-primary-actions .primary-button {
+  min-height: 46px;
+  padding-inline: 20px;
+  font-weight: 760;
+}
+
+.practice-focus-block .practice-support-actions {
+  order: 4;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+
+.practice-focus-block .practice-support-actions .ghost-button {
+  min-height: 38px;
+}
+
+.practice-focus-block .practice-hint {
+  order: 5;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-raised);
+}
+
+.practice-focus-block .practice-hint[hidden],
+.practice-focus-block .practice-preview[hidden] {
+  display: none;
+}
+
+.practice-focus-block .practice-status {
+  order: 6;
+  min-height: 0;
+  padding-top: 2px;
+  font-size: 13px;
+}
+
+.practice-feedback-block {
+  padding: 14px 16px;
+  box-shadow: none;
+}
+
+.practice-feedback-block.active {
+  box-shadow: none;
+}
+
+.practice-feedback-block .block-summary {
+  margin-top: 0;
+}
+
+.practice-query-result {
+  border-style: dashed;
+}
+
+.practice-grade-result {
+  border-color: var(--line-strong);
+}
+
+.practice-grade-result .block-summary {
+  color: var(--text);
+  font-size: 16px;
+}
+
+@media (max-width: 760px) {
+  .app-shell[data-practice-focus="true"] .terminal-header {
+    padding-inline: 14px;
+  }
+
+  .app-shell[data-practice-focus="true"] .terminal-scroll {
+    padding: 18px 12px 40px;
+  }
+
+  .practice-focus-block,
+  .practice-feedback-block {
+    width: 100%;
+  }
+
+  .practice-focus-block {
+    padding: 16px;
+  }
+
+  .practice-title-summary {
+    font-size: 18px;
+  }
+
+  .practice-focus-problem p {
+    font-size: 16px;
+  }
+
+  .practice-focus-block .practice-primary-actions .primary-button {
+    width: 100%;
+  }
+
+  .practice-focus-block .practice-support-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .practice-focus-block .practice-support-actions .ghost-button {
+    width: 100%;
+  }
+}

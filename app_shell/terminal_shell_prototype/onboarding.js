@@ -146,4 +146,22 @@ document.querySelectorAll("[data-lang]").forEach((button) => {
   });
 });
 
+function loadPracticeFocusAssets() {
+  if (!document.querySelector('link[data-practice-focus-style]')) {
+    const style = document.createElement("link");
+    style.rel = "stylesheet";
+    style.href = "./practice-focus.css";
+    style.dataset.practiceFocusStyle = "true";
+    document.head.appendChild(style);
+  }
+
+  if (!document.querySelector('script[data-practice-focus-script]')) {
+    const script = document.createElement("script");
+    script.src = "./practice-focus.js";
+    script.dataset.practiceFocusScript = "true";
+    document.body.appendChild(script);
+  }
+}
+
 applyLearningHomeTranslations();
+loadPracticeFocusAssets();
