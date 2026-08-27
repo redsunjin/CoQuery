@@ -1,7 +1,7 @@
 {
   "id": "sql_basics",
   "title": "SQL Basics Practice Pack",
-  "description": "Small built-in commerce and support dataset for practicing SELECT, WHERE, JOIN, GROUP BY, and review flows without connecting to a production database.",
+  "description": "Built-in commerce and support dataset for a 24-problem learning path covering SELECT, filtering, JOIN, aggregation, and business-question practice without connecting to a production database.",
   "dataset": {
     "id": "commerce_support",
     "title": "Commerce Support Sample",
@@ -90,6 +90,42 @@
       "expected_sql": "SELECT id, name, region FROM customers ORDER BY id"
     },
     {
+      "id": "customer_names_segments",
+      "title": "Show customer names and segments",
+      "difficulty": "beginner",
+      "prompt": "Return customer name and segment for every customer ordered by id.",
+      "concepts": ["select", "order_by"],
+      "hint": "Use customers and return only name and segment.",
+      "expected_sql": "SELECT name, segment FROM customers ORDER BY id"
+    },
+    {
+      "id": "orders_chronological",
+      "title": "List orders by date",
+      "difficulty": "beginner",
+      "prompt": "Return order id, order_date, and status from earliest to latest order date.",
+      "concepts": ["select", "order_by"],
+      "hint": "Sort order_date ascending.",
+      "expected_sql": "SELECT id, order_date, status FROM orders ORDER BY order_date"
+    },
+    {
+      "id": "ticket_priority_list",
+      "title": "Review ticket priorities",
+      "difficulty": "beginner",
+      "prompt": "Return ticket id, priority, and status ordered by ticket id.",
+      "concepts": ["select", "order_by"],
+      "hint": "The support_tickets table contains all requested columns.",
+      "expected_sql": "SELECT id, priority, status FROM support_tickets ORDER BY id"
+    },
+    {
+      "id": "largest_orders",
+      "title": "Find the three largest orders",
+      "difficulty": "beginner",
+      "prompt": "Return order id and total_amount for the three largest orders, highest amount first.",
+      "concepts": ["select", "order_by", "limit"],
+      "hint": "Sort total_amount descending, then limit the result to three rows.",
+      "expected_sql": "SELECT id, total_amount FROM orders ORDER BY total_amount DESC LIMIT 3"
+    },
+    {
       "id": "paid_large_orders",
       "title": "Find high-value paid orders",
       "difficulty": "beginner",
@@ -97,6 +133,60 @@
       "concepts": ["where", "and", "order_by"],
       "hint": "Filter status and total_amount together.",
       "expected_sql": "SELECT id, customer_id, total_amount FROM orders WHERE status = 'paid' AND total_amount >= 100000 ORDER BY total_amount DESC"
+    },
+    {
+      "id": "open_high_tickets",
+      "title": "Find open high priority tickets",
+      "difficulty": "beginner",
+      "prompt": "Return ticket id and customer_id for open high priority tickets ordered by ticket id.",
+      "concepts": ["where", "and", "order_by"],
+      "hint": "Use support_tickets and filter both priority and status.",
+      "expected_sql": "SELECT id, customer_id FROM support_tickets WHERE status = 'open' AND priority = 'high' ORDER BY id"
+    },
+    {
+      "id": "seoul_customers",
+      "title": "Find Seoul customers",
+      "difficulty": "beginner",
+      "prompt": "Return customer id, name, and segment for customers in Seoul ordered by id.",
+      "concepts": ["where", "order_by"],
+      "hint": "Filter customers by the region column.",
+      "expected_sql": "SELECT id, name, segment FROM customers WHERE region = 'Seoul' ORDER BY id"
+    },
+    {
+      "id": "march_orders",
+      "title": "Find March orders",
+      "difficulty": "beginner",
+      "prompt": "Return order id, order_date, and total_amount for orders placed in March 2026 ordered by date.",
+      "concepts": ["where", "and", "date", "order_by"],
+      "hint": "Use an inclusive lower date bound and an exclusive April upper bound.",
+      "expected_sql": "SELECT id, order_date, total_amount FROM orders WHERE order_date >= '2026-03-01' AND order_date < '2026-04-01' ORDER BY order_date"
+    },
+    {
+      "id": "paid_or_pending_orders",
+      "title": "Find active orders",
+      "difficulty": "beginner",
+      "prompt": "Return order id and status for paid or pending orders ordered by id.",
+      "concepts": ["where", "or", "order_by"],
+      "hint": "Combine the two allowed statuses with OR.",
+      "expected_sql": "SELECT id, status FROM orders WHERE status = 'paid' OR status = 'pending' ORDER BY id"
+    },
+    {
+      "id": "selected_regions",
+      "title": "Find Seoul and Busan customers",
+      "difficulty": "beginner",
+      "prompt": "Return customer id, name, and region for customers in Seoul or Busan ordered by id.",
+      "concepts": ["where", "in", "order_by"],
+      "hint": "Use IN with the two region values.",
+      "expected_sql": "SELECT id, name, region FROM customers WHERE region IN ('Seoul', 'Busan') ORDER BY id"
+    },
+    {
+      "id": "customer_name_contains",
+      "title": "Search customer names",
+      "difficulty": "beginner",
+      "prompt": "Return customer id and name for customer names containing the letter sequence 'in', ordered by id.",
+      "concepts": ["where", "like", "order_by"],
+      "hint": "Use LIKE with wildcard characters before and after the text.",
+      "expected_sql": "SELECT id, name FROM customers WHERE name LIKE '%in%' ORDER BY id"
     },
     {
       "id": "paid_order_customers",
@@ -108,6 +198,42 @@
       "expected_sql": "SELECT customers.name, orders.id, orders.total_amount FROM customers JOIN orders ON customers.id = orders.customer_id WHERE orders.status = 'paid' ORDER BY orders.id"
     },
     {
+      "id": "order_customer_regions",
+      "title": "Attach customer regions to orders",
+      "difficulty": "intermediate",
+      "prompt": "Return order id, customer name, and customer region for every order ordered by order id.",
+      "concepts": ["join", "order_by"],
+      "hint": "Connect orders.customer_id to customers.id.",
+      "expected_sql": "SELECT orders.id, customers.name, customers.region FROM orders JOIN customers ON orders.customer_id = customers.id ORDER BY orders.id"
+    },
+    {
+      "id": "ticket_customer_names",
+      "title": "Attach customer names to tickets",
+      "difficulty": "intermediate",
+      "prompt": "Return ticket id, customer name, priority, and status for every support ticket ordered by ticket id.",
+      "concepts": ["join", "order_by"],
+      "hint": "Join support_tickets.customer_id to customers.id.",
+      "expected_sql": "SELECT support_tickets.id, customers.name, support_tickets.priority, support_tickets.status FROM support_tickets JOIN customers ON support_tickets.customer_id = customers.id ORDER BY support_tickets.id"
+    },
+    {
+      "id": "paid_order_segments",
+      "title": "See segments behind paid orders",
+      "difficulty": "intermediate",
+      "prompt": "Return order id, customer name, customer segment, and total_amount for paid orders ordered by order id.",
+      "concepts": ["join", "where", "order_by"],
+      "hint": "Join orders to customers, then filter orders.status.",
+      "expected_sql": "SELECT orders.id, customers.name, customers.segment, orders.total_amount FROM orders JOIN customers ON orders.customer_id = customers.id WHERE orders.status = 'paid' ORDER BY orders.id"
+    },
+    {
+      "id": "open_tickets_customer_regions",
+      "title": "Locate customers with open tickets",
+      "difficulty": "intermediate",
+      "prompt": "Return ticket id, customer name, and customer region for open tickets ordered by ticket id.",
+      "concepts": ["join", "where", "order_by"],
+      "hint": "Join tickets to customers and filter support_tickets.status.",
+      "expected_sql": "SELECT support_tickets.id, customers.name, customers.region FROM support_tickets JOIN customers ON support_tickets.customer_id = customers.id WHERE support_tickets.status = 'open' ORDER BY support_tickets.id"
+    },
+    {
       "id": "paid_orders_by_region",
       "title": "Summarize paid orders by region",
       "difficulty": "intermediate",
@@ -117,13 +243,58 @@
       "expected_sql": "SELECT customers.region, COUNT(orders.id) AS order_count, SUM(orders.total_amount) AS total_amount FROM customers JOIN orders ON customers.id = orders.customer_id WHERE orders.status = 'paid' GROUP BY customers.region ORDER BY customers.region"
     },
     {
-      "id": "open_high_tickets",
-      "title": "Find open high priority tickets",
-      "difficulty": "beginner",
-      "prompt": "Return ticket id and customer_id for open high priority tickets ordered by ticket id.",
-      "concepts": ["where", "and", "order_by"],
-      "hint": "Use support_tickets and filter both priority and status.",
-      "expected_sql": "SELECT id, customer_id FROM support_tickets WHERE status = 'open' AND priority = 'high' ORDER BY id"
+      "id": "order_count_by_status",
+      "title": "Count orders by status",
+      "difficulty": "intermediate",
+      "prompt": "Return order status and the number of orders in each status ordered by status.",
+      "concepts": ["group_by", "count", "order_by"],
+      "hint": "Group orders by status and count order ids.",
+      "expected_sql": "SELECT status, COUNT(id) AS order_count FROM orders GROUP BY status ORDER BY status"
+    },
+    {
+      "id": "paid_total_by_customer",
+      "title": "Calculate paid total by customer",
+      "difficulty": "intermediate",
+      "prompt": "Return customer name and total paid order amount for customers with paid orders, highest paid total first.",
+      "concepts": ["join", "where", "group_by", "sum", "order_by"],
+      "hint": "Join customers and orders, keep paid orders, group by customer, then sum total_amount.",
+      "expected_sql": "SELECT customers.name, SUM(orders.total_amount) AS paid_total FROM customers JOIN orders ON customers.id = orders.customer_id WHERE orders.status = 'paid' GROUP BY customers.id, customers.name ORDER BY paid_total DESC"
+    },
+    {
+      "id": "ticket_count_by_priority",
+      "title": "Count tickets by priority",
+      "difficulty": "intermediate",
+      "prompt": "Return ticket priority and the number of tickets for each priority ordered by priority.",
+      "concepts": ["group_by", "count", "order_by"],
+      "hint": "Group support_tickets by priority and count ids.",
+      "expected_sql": "SELECT priority, COUNT(id) AS ticket_count FROM support_tickets GROUP BY priority ORDER BY priority"
+    },
+    {
+      "id": "monthly_paid_sales",
+      "title": "Build a monthly paid-sales summary",
+      "difficulty": "advanced",
+      "prompt": "For each month with paid orders, return month (YYYY-MM), paid order count, and paid total amount ordered by month.",
+      "concepts": ["business", "where", "group_by", "count", "sum", "date", "order_by"],
+      "hint": "Use substr(order_date, 1, 7) to derive the month, filter paid orders, and aggregate by month.",
+      "expected_sql": "SELECT substr(order_date, 1, 7) AS month, COUNT(id) AS order_count, SUM(total_amount) AS total_amount FROM orders WHERE status = 'paid' GROUP BY substr(order_date, 1, 7) ORDER BY month"
+    },
+    {
+      "id": "high_value_paid_customers",
+      "title": "Identify high-value paid customers",
+      "difficulty": "advanced",
+      "prompt": "Return customer name and paid_total for customers whose paid order total is at least 200000, highest paid_total first.",
+      "concepts": ["business", "join", "where", "group_by", "sum", "having", "order_by"],
+      "hint": "Aggregate paid orders by customer and use HAVING on the SUM of total_amount.",
+      "expected_sql": "SELECT customers.name, SUM(orders.total_amount) AS paid_total FROM customers JOIN orders ON customers.id = orders.customer_id WHERE orders.status = 'paid' GROUP BY customers.id, customers.name HAVING SUM(orders.total_amount) >= 200000 ORDER BY paid_total DESC"
+    },
+    {
+      "id": "open_support_load_by_region",
+      "title": "Measure open support load by region",
+      "difficulty": "advanced",
+      "prompt": "Return customer region and open_ticket_count for regions with open support tickets, highest count first and region ascending for ties.",
+      "concepts": ["business", "join", "where", "group_by", "count", "order_by"],
+      "hint": "Join tickets to customers, filter open tickets, group by region, and count ticket ids.",
+      "expected_sql": "SELECT customers.region, COUNT(support_tickets.id) AS open_ticket_count FROM support_tickets JOIN customers ON support_tickets.customer_id = customers.id WHERE support_tickets.status = 'open' GROUP BY customers.region ORDER BY open_ticket_count DESC, customers.region"
     }
   ]
 }
