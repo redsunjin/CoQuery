@@ -1,0 +1,151 @@
+/* Learning-first entry surface. The existing terminal shell remains the workbench. */
+
+.learning-home {
+  display: none;
+  width: min(920px, 100%);
+  margin: auto;
+  padding: 48px 28px 56px;
+}
+
+.learning-home-inner {
+  display: grid;
+  gap: 24px;
+}
+
+.learning-home-eyebrow {
+  margin: 0;
+  color: var(--accent-strong);
+  font-size: 13px;
+  font-weight: 760;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.learning-home h2 {
+  max-width: 720px;
+  margin: 0;
+  font-size: clamp(32px, 5vw, 58px);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.learning-home-copy {
+  max-width: 660px;
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(16px, 2vw, 19px);
+  line-height: 1.7;
+}
+
+.learning-home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.learning-home-actions .primary-button,
+.learning-home-actions .ghost-button {
+  min-height: 48px;
+  padding-inline: 18px;
+}
+
+.learning-home-proof {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.learning-proof-item {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel-raised);
+}
+
+.learning-proof-item strong,
+.learning-proof-item span {
+  display: block;
+}
+
+.learning-proof-item strong {
+  margin-bottom: 5px;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.learning-proof-item span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.home-button {
+  display: inline-flex;
+}
+
+.app-shell[data-home-mode="true"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.app-shell[data-home-mode="true"] .session-rail,
+.app-shell[data-home-mode="true"] .detail-panel,
+.app-shell[data-home-mode="true"] .command-bar,
+.app-shell[data-home-mode="true"] .command-menu-popover,
+.app-shell[data-home-mode="true"] #commandMenuToggle,
+.app-shell[data-home-mode="true"] #detailToggle,
+.app-shell[data-home-mode="true"] .home-button {
+  display: none !important;
+}
+
+.app-shell[data-home-mode="true"] .terminal-pane {
+  min-width: 0;
+}
+
+.app-shell[data-home-mode="true"] .terminal-header {
+  border-bottom-color: transparent;
+}
+
+.app-shell[data-home-mode="true"] .window-controls {
+  visibility: hidden;
+}
+
+.app-shell[data-home-mode="true"] .terminal-scroll {
+  display: grid;
+  align-items: center;
+  overflow: auto;
+}
+
+.app-shell[data-home-mode="true"] .terminal-scroll > :not(.learning-home) {
+  display: none !important;
+}
+
+.app-shell[data-home-mode="true"] .learning-home {
+  display: block;
+}
+
+.app-shell[data-home-mode="false"] .learning-home {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .learning-home {
+    padding: 34px 18px 44px;
+  }
+
+  .learning-home-actions {
+    align-items: stretch;
+  }
+
+  .learning-home-actions .primary-button,
+  .learning-home-actions .ghost-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .learning-home-proof {
+    grid-template-columns: 1fr;
+  }
+}
