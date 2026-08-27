@@ -58,10 +58,14 @@ function setLearningHomeMode(enabled) {
   }
 }
 
-function hasPracticeListBlock() {
-  return [...document.querySelectorAll("#terminalScroll .terminal-block .block-command code")].some(
-    (node) => node.textContent?.trim() === "practice_list"
+function practiceListBlock() {
+  return [...document.querySelectorAll("#terminalScroll .terminal-block")].find(
+    (block) => block.__result?.command === "practice_list" || block.querySelector(".block-command code")?.textContent?.trim() === "practice_list"
   );
+}
+
+function hasPracticeListBlock() {
+  return Boolean(practiceListBlock());
 }
 
 async function ensurePracticeList() {
@@ -73,17 +77,36 @@ async function ensurePracticeList() {
   return result;
 }
 
+async function nextPracticeProblem(problems, packId) {
+  if (!problems.length) {
+    return null;
+  }
+  try {
+    const attemptResult = await postCommand("practice_attempts", { pack: packId, limit: 500 }, { mode: "training" });
+    if (attemptResult?.ok) {
+      const completed = new Set(
+        (attemptResult.data?.attempts || []).filter((attempt) => attempt.correct === true).map((attempt) => attempt.problem_id)
+      );
+      return problems.find((problem) => !completed.has(problem.id)) || problems[0];
+    }
+  } catch {
+    // Fall back to the first problem when progress cannot be read.
+  }
+  return problems[0];
+}
+
 async function startFirstPracticeProblem() {
   setLearningHomeMode(false);
   try {
     const result = await postCommand("practice_list", {}, { mode: "training" });
     const problems = result.data?.problems || [];
-    const firstProblem = problems[0];
-    if (!firstProblem) {
+    const packId = result.data?.selected_pack || "sql_basics";
+    const problem = await nextPracticeProblem(problems, packId);
+    if (!problem) {
       addBlock(result);
       return;
     }
-    addBlock(practiceStartResult(firstProblem, result.data?.selected_pack || "sql_basics"));
+    addBlock(practiceStartResult(problem, packId));
   } catch (error) {
     addBlock({
       ok: false,
@@ -163,5 +186,23 @@ function loadPracticeFocusAssets() {
   }
 }
 
+function loadLearningPathAssets() {
+  if (!document.querySelector('link[data-learning-path-style]')) {
+    const style = document.createElement("link");
+    style.rel = "stylesheet";
+    style.href = "./learning-path.css";
+    style.dataset.learningPathStyle = "true";
+    document.head.appendChild(style);
+  }
+
+  if (!document.querySelector('script[data-learning-path-script]')) {
+    const script = document.createElement("script");
+    script.src = "./learning-path.js";
+    script.dataset.learningPathScript = "true";
+    document.body.appendChild(script);
+  }
+}
+
 applyLearningHomeTranslations();
 loadPracticeFocusAssets();
+loadLearningPathAssets();
