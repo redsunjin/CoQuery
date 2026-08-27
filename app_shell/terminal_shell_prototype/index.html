@@ -6,9 +6,10 @@
     <title>CoQuery</title>
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./onboarding.css" />
   </head>
   <body>
-    <div class="app-shell" data-detail-open="false">
+    <div class="app-shell" data-detail-open="false" data-home-mode="true">
       <aside class="session-rail" aria-label="세션" data-i18n-attr="aria-label:sessionRailLabel">
         <div class="rail-top">
           <div class="brand-mark" aria-hidden="true">CQ</div>
@@ -36,6 +37,7 @@
             <h1 data-i18n="appTitle">CoQuery</h1>
           </div>
           <div class="header-actions">
+            <button class="ghost-button home-button" type="button" id="homeButton" data-home-copy="home">홈</button>
             <button
               class="ghost-button command-menu-toggle"
               type="button"
@@ -98,6 +100,35 @@
         </section>
 
         <section class="terminal-scroll" id="terminalScroll" aria-label="터미널 명령 기록" data-i18n-attr="aria-label:terminalHistoryLabel">
+          <section class="learning-home" aria-labelledby="learningHomeTitle">
+            <div class="learning-home-inner">
+              <p class="learning-home-eyebrow">SQL PRACTICE LAB</p>
+              <h2 id="learningHomeTitle" data-home-copy="title">데이터로 직접 확인하며 SQL을 배워보세요.</h2>
+              <p class="learning-home-copy" data-home-copy="copy">
+                별도 DB 연결이나 AI 설정 없이 샘플 데이터로 바로 시작할 수 있습니다. 첫 문제를 풀고, 필요할 때 실제 데이터와 고급 기능으로 확장하세요.
+              </p>
+              <div class="learning-home-actions" aria-label="시작 방법">
+                <button class="primary-button" type="button" id="firstProblemButton" data-home-copy="firstProblem">첫 문제 시작하기</button>
+                <button class="ghost-button" type="button" id="problemBankButton" data-home-copy="problemBank">문제 선택</button>
+                <button class="ghost-button" type="button" id="advancedWorkspaceButton" data-home-copy="advanced">고급 기능</button>
+              </div>
+              <div class="learning-home-proof" aria-label="학습 흐름">
+                <div class="learning-proof-item">
+                  <strong data-home-copy="step1Title">1. 문제를 읽고</strong>
+                  <span data-home-copy="step1Copy">실제 업무와 비슷한 데이터 질문에서 시작합니다.</span>
+                </div>
+                <div class="learning-proof-item">
+                  <strong data-home-copy="step2Title">2. SQL을 실행하고</strong>
+                  <span data-home-copy="step2Copy">내장 샘플 DB에서 결과를 바로 확인합니다.</span>
+                </div>
+                <div class="learning-proof-item">
+                  <strong data-home-copy="step3Title">3. 피드백을 받기</strong>
+                  <span data-home-copy="step3Copy">채점, 힌트, 오답 노트로 다음 문제까지 이어갑니다.</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
           <div class="welcome-block">
             <div class="user-badge">CM</div>
             <p data-i18n="welcomeCopy">
@@ -127,7 +158,7 @@
               type="text"
               autocomplete="off"
               spellcheck="false"
-              value="provider_list_presets"
+              value="practice_list"
               aria-label="명령 입력"
               data-i18n-attr="aria-label:commandInputLabel"
             />
@@ -185,6 +216,11 @@
       </aside>
     </div>
 
+    <script>
+      window.coqueryCommandRuntime = window.coqueryCommandRuntime || {};
+      window.coqueryCommandRuntime.initialCommand = window.coqueryCommandRuntime.initialCommand || "practice_list";
+    </script>
     <script src="./app.js"></script>
+    <script src="./onboarding.js"></script>
   </body>
 </html>
