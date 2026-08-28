@@ -81,7 +81,7 @@ def main() -> int:
             "directory": "./assets",
             "binding": "ASSETS",
             "not_found_handling": "single-page-application",
-            "run_worker_first": ["/api/*"],
+            "run_worker_first": True,
         },
         "observability": {"enabled": True},
     }
