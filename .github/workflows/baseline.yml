@@ -31,3 +31,4 @@ jobs:
           python3 app_shell/terminal_shell_prototype/learning_path_smoke.py
           python3 app_shell/terminal_shell_prototype/curriculum_smoke.py
           python3 app_shell/terminal_shell_prototype/user_flow_qa_smoke.py
+          python3 app_shell/terminal_shell_prototype/pwa_serverless_smoke.py

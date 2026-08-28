@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "coquery-pwa",
+  "main": "./cloudflare_worker.py",
+  "compatibility_date": "2026-08-28",
+  "compatibility_flags": ["python_workers"],
+  "find_additional_modules": true,
+  "base_dir": ".",
+  "rules": [
+    {
+      "type": "Data",
+      "globs": ["practice_packs/**/*.json"],
+      "fallthrough": true
+    }
+  ],
+  "assets": {
+    "directory": "./app_shell/terminal_shell_prototype",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "observability": {
+    "enabled": true
+  }
+}
