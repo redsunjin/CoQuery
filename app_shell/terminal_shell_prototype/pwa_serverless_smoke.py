@@ -36,7 +36,23 @@ def main() -> int:
     require(ROOT / "cloudflare_worker.py", 'HOSTED_COMMANDS = {')
     require(ROOT / "cloudflare_worker.py", 'args["no_record"] = True')
     require(ROOT / "cloudflare_worker.py", 'hosted_command_unavailable')
+    require(ROOT / "cloudflare_worker.py", 'return await self.env.ASSETS.fetch(request)')
     require(APP / ".assetsignore", "*.py")
+
+    bundle_script = ROOT / "scripts" / "prepare_cloudflare_bundle.py"
+    require(bundle_script, 'BUILD_ROOT = ROOT / ".cloudflare-build"')
+    require(bundle_script, '"run_worker_first": True')
+    require(bundle_script, '"configPath": "../../.cloudflare-build/wrangler.jsonc"')
+
+    workflow = ROOT / ".github" / "workflows" / "cloudflare-temporary-deploy.yml"
+    require(workflow, "pywrangler deploy --temporary")
+    require(workflow, "Verify hosted practice API")
+    require(workflow, '"command":"practice_grade"')
+
+    gitignore = ROOT / ".gitignore"
+    require(gitignore, ".cloudflare-build/")
+    require(gitignore, ".wrangler/")
+    require(gitignore, ".venv-workers/")
 
     print("PWA/serverless scaffold smoke passed")
     return 0
