@@ -1,0 +1,20 @@
+{
+  "name": "CoQuery SQL Practice",
+  "short_name": "CoQuery",
+  "description": "SQL practice and guided data-query learning with built-in sample data.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d0e0c",
+  "theme_color": "#0d0e0c",
+  "lang": "ko",
+  "categories": ["education", "productivity", "developer"],
+  "icons": [
+    {
+      "src": "./coquery-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
