@@ -5,11 +5,11 @@
   "compatibility_date": "2026-08-28",
   "compatibility_flags": ["python_workers"],
   "find_additional_modules": true,
-  "base_dir": ".",
+  "base_dir": "./practice_packs",
   "rules": [
     {
       "type": "Data",
-      "globs": ["practice_packs/**/*.json"],
+      "globs": ["**/*.json"],
       "fallthrough": true
     }
   ],
