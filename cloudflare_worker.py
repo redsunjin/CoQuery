@@ -42,10 +42,10 @@ def _json_response(payload: dict, status: int = 200) -> Response:
 
 class Default(WorkerEntrypoint):
     async def fetch(self, request):
-        path = urlparse(str(request.url)).path
-        method = str(request.method).upper()
+        path = urlparse(request.url).path
+        method = request.method
 
-        if path == "/api/health" and method == "GET":
+        if path == "/api/health" and "GET" in method:
             return _json_response(
                 {
                     "ok": True,
@@ -56,7 +56,7 @@ class Default(WorkerEntrypoint):
                 }
             )
 
-        if path == "/api/sessions" and method == "GET":
+        if path == "/api/sessions" and "GET" in method:
             return _json_response(
                 {
                     "ok": True,
@@ -71,7 +71,7 @@ class Default(WorkerEntrypoint):
                 }
             )
 
-        if path == "/api/commands/run" and method == "POST":
+        if path == "/api/commands/run" and "POST" in method:
             try:
                 payload = await request.json()
                 command = str(payload.get("command", "")).strip()
@@ -115,7 +115,10 @@ class Default(WorkerEntrypoint):
                     500,
                 )
 
-        return _json_response(
-            {"ok": False, "error": {"code": "not_found", "message": f"Unknown endpoint: {path}"}},
-            404,
-        )
+        if path.startswith("/api/"):
+            return _json_response(
+                {"ok": False, "error": {"code": "not_found", "message": f"Unknown endpoint: {path}"}},
+                404,
+            )
+
+        return await self.env.ASSETS.fetch(request)

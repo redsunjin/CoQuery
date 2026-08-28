@@ -7,38 +7,56 @@ Last Updated: 2026-08-28
 
 This file is the execution queue. Historical DB/backend stabilization work remains valid evidence, but it is not the only active product loop anymore.
 
-### P0-1. Finish PWA + Cloudflare serverless publication baseline
+### P0-1. Finish durable PWA + Cloudflare publication baseline
 
-Branch / PR:
+Merged baseline:
 
-- `feat/pwa-cloudflare-serverless`
-- Draft PR #13
-
-Completed on branch:
-
+- [x] PR #13 PWA/serverless scaffold merged
 - [x] PWA manifest
 - [x] service worker application-shell cache
 - [x] PWA runtime
 - [x] browser-local hosted practice progress
 - [x] Cloudflare Python Worker adapter
 - [x] Cloudflare Static Assets configuration
-- [x] `/api/*` worker-first routing
 - [x] hosted practice command allowlist
 - [x] hosted `practice_grade` without server-file recording
 - [x] PWA/serverless smoke in baseline CI
-- [x] deployment architecture documentation
 
-Remaining gate:
+Real temporary Cloudflare proof:
 
-- [ ] confirm PR #13 CI final state
+- [x] create isolated deployment bundle builder
+- [x] prevent repository-wide `.venv`/`node_modules` over-bundling
+- [x] package `sql_cli`, practice packs, knowledge, and PWA assets explicitly
+- [x] deploy a real authentication-free temporary Worker
+- [x] verify `/api/health` remotely
+- [x] verify PWA shell and manifest remotely
+- [x] verify 24-problem `practice_list` remotely
+- [x] verify `practice_query` SQL execution remotely
+- [x] verify `practice_grade` correct result remotely
+- [x] document deployment failures and fixes
+
+Active branch:
+
+- `ops/cloudflare-temporary-deploy`
+
+Current remaining gate:
+
+- [ ] confirm branch baseline/PostgreSQL CI after documentation updates
+- [ ] create Draft PR for the deployment proof/harness
 - [ ] explicit merge approval
-- [ ] merge PR #13
-- [ ] deploy to real `workers.dev`
+- [ ] merge deployment-proof PR
+- [ ] authenticate/connect the target Cloudflare account
+- [ ] deploy to durable `workers.dev`
 - [ ] browser QA: Home -> problem bank -> solve -> grade -> next problem
 - [ ] verify browser-local progress across reload
 - [ ] verify API responses are not service-worker cached
+- [ ] verify service-worker offline shell reopening
 - [ ] verify PWA installation on supported desktop/mobile browser
-- [ ] record hosted URL and verification result in HANDOFF/roadmap
+- [ ] record durable hosted URL and exact device/browser evidence
+
+Reference:
+
+- `docs/coquery-cloudflare-temporary-deploy-proof-2026-08-28.md`
 
 ### P0-2. AI Context-to-Prompt Handoff — first implementation slice
 
@@ -150,6 +168,7 @@ Only when required by product usage:
 - [x] PR #10 learning path and progress
 - [x] PR #11 curriculum expansion to 24 problems
 - [x] PR #12 learning-flow QA fixes
+- [x] PR #13 PWA/serverless scaffold + product harness currentization
 
 ## Existing Engineering Baseline — Retained
 
@@ -190,6 +209,6 @@ For active work:
 
 ## Current Next Action
 
-**Finish PR #13 gate first.**
+**Finish the `ops/cloudflare-temporary-deploy` proof/harness PR gate.**
 
-Do not begin AI Handoff implementation on an unmerged distribution baseline unless a separate stacking decision is explicitly made.
+After it is merged, connect the durable Cloudflare account and complete browser/device PWA QA before starting the AI Handoff implementation, unless a new explicit priority decision changes that gate.

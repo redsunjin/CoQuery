@@ -40,15 +40,36 @@ Native apps should reuse the same product logic rather than fork the product int
 
 ### Product distribution
 
-PR #13 prepares:
+PR #13 is merged and provides:
 
 - installable PWA manifest
 - application-shell service worker
-- Cloudflare Static Assets
+- Cloudflare Static Assets scaffold
 - Cloudflare Python Worker API adapter
 - browser-local learner progress for hosted MVP
 
-Cloudflare deployment is not yet part of the verified production baseline until a real `workers.dev` deployment and browser QA are completed.
+A real Cloudflare temporary Worker deployment has now been verified remotely.
+
+Verified against the public temporary Worker:
+
+- Worker deploy/startup
+- `/api/health`
+- PWA shell and manifest delivery
+- 24-problem `practice_list`
+- `practice_query` SQL execution
+- `practice_grade` correct grading
+
+Reference:
+
+- `docs/coquery-cloudflare-temporary-deploy-proof-2026-08-28.md`
+
+Still pending before the distribution baseline is called release-ready:
+
+- durable target-account `workers.dev` deployment
+- interactive browser visual-flow QA
+- progress persistence across a real browser refresh
+- offline/service-worker behavior on a real browser/device
+- actual PWA installation on supported target devices
 
 ## Product Architecture Direction
 
@@ -67,7 +88,7 @@ Platform-specific code should be limited to:
 
 Rule/local-knowledge behavior stays the deterministic baseline, but open-ended user meaning cannot be fully resolved by rules alone.
 
-The next AI direction is therefore two-layered:
+The AI direction is therefore two-layered:
 
 1. CoQuery creates SQL and exposes the evidence/limitations behind it.
 2. Context-to-Prompt Handoff lets the user ask an external AI to validate, challenge, reinterpret, or extend the result.
@@ -80,27 +101,32 @@ Reference:
 
 ## Active Priority Stack
 
-### P0-A. Finish PWA/serverless publication baseline
+### P0-A. Finish durable PWA/serverless publication baseline
 
-Goal:
+Completed proof:
 
-- merge the serverless/PWA scaffold only after CI is green
-- deploy to a Cloudflare `workers.dev` URL
-- verify installability and the complete learner flow in a real browser
+- [x] PWA/serverless scaffold merged in PR #13
+- [x] isolated Cloudflare deployment bundle created
+- [x] real temporary Cloudflare Worker deployed
+- [x] remote health/PWA manifest verified
+- [x] remote 24-problem listing verified
+- [x] remote SQL execution verified
+- [x] remote grading verified
 
-Acceptance:
+Remaining release gate:
 
-- Home loads from hosted URL
-- problem bank loads
-- SQL executes and grades
-- learner progress persists in browser storage
-- next-problem flow works
-- service worker does not cache API responses
-- PWA can be installed where platform/browser supports it
+- [ ] merge the deployment-proof/harness branch after CI and explicit approval
+- [ ] authenticate/connect the target Cloudflare account
+- [ ] deploy to a durable `workers.dev` URL
+- [ ] run interactive browser learner-flow QA
+- [ ] verify browser-local progress after reload
+- [ ] verify service-worker offline shell behavior
+- [ ] verify PWA installation where supported
+- [ ] record the durable hosted URL and device/browser evidence
 
 ### P0-B. AI validation handoff — first slice
 
-Starts only after P0-A is merged/verified.
+Starts after the durable hosted/browser baseline is recorded unless a new explicit priority decision changes the gate.
 
 First implementation boundary:
 
@@ -197,14 +223,24 @@ PR #12 — user-flow QA
 - schema/attempt/feedback visibility in focus mode
 - user-flow regression smoke
 
-### Distribution Phase
+### Distribution Phase 1
 
-PR #13 — currently Draft
+PR #13 — merged
 
 - PWA
 - Cloudflare Python Worker scaffold
 - Static Assets
 - browser-local hosted progress
+- roadmap/harness currentization
+
+### Distribution Phase 2 — active proof slice
+
+Branch: `ops/cloudflare-temporary-deploy`
+
+- isolated generated Worker bundle
+- authentication-free temporary Worker deployment workflow
+- real remote health/PWA/practice API verification
+- deployment failure history captured as regression knowledge
 
 ## Existing Engineering Tracks Kept Intact
 
@@ -244,8 +280,14 @@ Current baseline includes:
 - learning path smoke
 - curriculum smoke
 - user-flow QA smoke
-- PWA/serverless smoke on PR #13
+- PWA/serverless smoke
 - separate PostgreSQL smoke workflow
+
+Deployment proof additionally uses:
+
+- `.github/workflows/cloudflare-temporary-deploy.yml`
+- `scripts/prepare_cloudflare_bundle.py`
+- real remote health/PWA/practice API checks
 
 ## Scope Locks
 
@@ -255,15 +297,15 @@ Do not silently:
 - make external AI mandatory for SQL generation
 - automatically send data to an AI
 - broaden Production Assist external sharing
-- claim Cloudflare deployment is verified before real hosted QA
+- equate temporary HTTP/API proof with completed device/install QA
 - broaden PostgreSQL/MySQL claims without new proof
 
 ## Next Decision Gate
 
-Immediate gate: **PR #13 merge approval after CI readiness**.
+Immediate gate: **deployment-proof/harness Draft PR review and merge approval**.
 
-After merge, the active execution order is:
+After that, the active execution order remains:
 
-1. real Cloudflare hosted deployment + browser/PWA QA
+1. durable Cloudflare deployment + browser/PWA QA
 2. AI validation handoff first slice
 3. iOS/Android wrapper baseline
