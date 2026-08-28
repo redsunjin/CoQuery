@@ -1,0 +1,61 @@
+name: cloudflare-temporary-deploy
+
+on:
+  push:
+    branches:
+      - ops/cloudflare-temporary-deploy
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Wrangler
+        run: npm install --no-save wrangler@latest
+
+      - name: Install Python Worker tooling
+        run: uv sync
+
+      - name: Deploy temporary Cloudflare Worker
+        id: deploy
+        shell: bash
+        run: |
+          set -o pipefail
+          uv run pywrangler deploy --temporary 2>&1 | tee /tmp/cloudflare-deploy.log
+          WORKER_URL=$(grep -Eo 'https://[^ ]+\.workers\.dev' /tmp/cloudflare-deploy.log | tail -n 1 || true)
+          CLAIM_URL=$(grep -Eo 'https://[^ ]+' /tmp/cloudflare-deploy.log | grep -Ei 'claim|dash\.cloudflare\.com' | tail -n 1 || true)
+          echo "worker_url=${WORKER_URL}" >> "$GITHUB_OUTPUT"
+          echo "claim_url=${CLAIM_URL}" >> "$GITHUB_OUTPUT"
+          echo "## Cloudflare temporary deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "Worker URL: ${WORKER_URL:-not detected}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Claim URL: ${CLAIM_URL:-not detected}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify deployed health endpoint
+        if: steps.deploy.outputs.worker_url != ''
+        run: |
+          curl --fail --show-error --silent "${{ steps.deploy.outputs.worker_url }}/api/health"
+
+      - name: Verify PWA manifest is served
+        if: steps.deploy.outputs.worker_url != ''
+        run: |
+          curl --fail --show-error --silent "${{ steps.deploy.outputs.worker_url }}/manifest.webmanifest" | python3 -m json.tool
