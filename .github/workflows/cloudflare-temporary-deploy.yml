@@ -36,6 +36,9 @@ jobs:
       - name: Install Python Worker tooling
         run: uv sync
 
+      - name: Prepare isolated Worker bundle
+        run: python3 scripts/prepare_cloudflare_bundle.py
+
       - name: Deploy temporary Cloudflare Worker
         id: deploy
         shell: bash
