@@ -42,7 +42,7 @@ def _json_response(payload: dict, status: int = 200) -> Response:
 
 class Default(WorkerEntrypoint):
     async def fetch(self, request):
-        path = urlparse(str(request.url)).path
+        path = urlparse(request.url).path
         method = str(request.method).upper()
 
         if path == "/api/health" and method == "GET":
@@ -57,6 +57,19 @@ class Default(WorkerEntrypoint):
             )
 
         if path == "/api/sessions" and method == "GET":
+            return _json_response(
+                {
+                    "ok": True,
+                    "sessions": [
+                        {
+                            "id": "practice-flow",
+                            "title": "SQL Practice",
+                            "subtitle": "Hosted learning path",
+                            "active": True,
+                        }
+                    ],
+                }
+            )
             return _json_response(
                 {
                     "ok": True,
