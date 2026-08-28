@@ -5,275 +5,161 @@ Last Updated: 2026-08-28
 
 ## Product Definition
 
-CoQuery is a learning-first SQL product that helps a user move through:
+CoQuery is a learning-first SQL product:
 
 `Learn -> Practice -> Apply -> Assist`
 
-The canonical product surface is one shared web/PWA codebase. The distribution goal is:
+The canonical product surface is one shared Web/PWA codebase distributed as:
 
 - Web/PWA
 - iPhone app wrapper
 - Android app wrapper
 
-Native apps should reuse the same product logic rather than fork the product into separate implementations.
+Native applications must reuse the shared product logic instead of forking the learning flow.
 
 ## Current Verified Position
 
 ### Product UX
 
-- learning-first Home exists
-- focused SQL practice workspace exists
-- learning path and progress UI exist
-- built-in curriculum contains 24 verified problems
-- learner progress uses existing practice-attempt history locally
-- successful grading can continue directly to the next incomplete problem
-- user-flow QA smoke is part of baseline CI
+Verified and merged:
+
+- learning-first Home
+- focused SQL practice workspace
+- learning path/progress
+- 24-problem curriculum
+- next-incomplete-problem navigation
+- user-flow regression smoke
 
 ### SQL / data engine
 
 - SQLite remains the working baseline
 - built-in practice sandbox is working
-- local knowledge-first generation remains deterministic where covered
-- natural-language SQL remains assistive, heuristic/local-first, with optional provider support
-- PostgreSQL remains a narrow experimental track proven by smoke tests
-- MySQL remains outside the working product baseline
+- natural-language SQL remains assistive and local/rule-first where covered
+- optional provider infrastructure remains available
+- PostgreSQL remains a narrow experimental track with smoke proof
+- MySQL is not part of the working baseline
 
 ### Product distribution
 
-PR #13 is merged and provides:
+Merged distribution work:
 
-- installable PWA manifest
-- application-shell service worker
-- Cloudflare Static Assets scaffold
-- Cloudflare Python Worker API adapter
-- browser-local learner progress for hosted MVP
+- PR #13: installable PWA + Cloudflare Python Worker scaffold
+- PR #14: isolated Worker bundle + real temporary Cloudflare deployment proof
 
-A real Cloudflare temporary Worker deployment has now been verified remotely.
+PR #14 merge commit:
 
-Verified against the public temporary Worker:
+- `2f06ba761eb869c65f91a03f7588ec2d363e1173`
 
-- Worker deploy/startup
+Verified against a real public temporary Cloudflare Worker:
+
+- Worker deployment/startup
 - `/api/health`
-- PWA shell and manifest delivery
+- PWA shell and standalone manifest
 - 24-problem `practice_list`
-- `practice_query` SQL execution
-- `practice_grade` correct grading
+- SQL execution
+- correct grading
 
-Reference:
+The temporary deployment proof is documented in:
 
 - `docs/coquery-cloudflare-temporary-deploy-proof-2026-08-28.md`
 
-Still pending before the distribution baseline is called release-ready:
+## Active Priority Stack
 
-- durable target-account `workers.dev` deployment
-- interactive browser visual-flow QA
-- progress persistence across a real browser refresh
-- offline/service-worker behavior on a real browser/device
-- actual PWA installation on supported target devices
+### P0-A. Durable Cloudflare + PWA release baseline
 
-## Product Architecture Direction
+Active branch:
 
-### Shared application core
+- `ops/cloudflare-production-deploy`
 
-One shared product behavior should serve Web, iOS, and Android.
+Prepared on the branch:
 
-Platform-specific code should be limited to:
-
-- installation/package shell
-- clipboard/share integration
-- store metadata/assets
-- platform permissions where actually needed
-
-### AI role
-
-Rule/local-knowledge behavior stays the deterministic baseline, but open-ended user meaning cannot be fully resolved by rules alone.
-
-The AI direction is therefore two-layered:
-
-1. CoQuery creates SQL and exposes the evidence/limitations behind it.
-2. Context-to-Prompt Handoff lets the user ask an external AI to validate, challenge, reinterpret, or extend the result.
-
-This does not require CoQuery to become a full chatbot.
+- manual production deployment workflow
+- GitHub `production` environment gate
+- `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` secret contract
+- reuse of the proven isolated Worker bundle
+- post-deploy health/PWA/practice API verification
+- production deployment contract regression checks
+- manual browser/device PWA QA checklist
 
 Reference:
 
-- `docs/coquery-ai-context-to-prompt-handoff-2026-08-28.md`
-
-## Active Priority Stack
-
-### P0-A. Finish durable PWA/serverless publication baseline
-
-Completed proof:
-
-- [x] PWA/serverless scaffold merged in PR #13
-- [x] isolated Cloudflare deployment bundle created
-- [x] real temporary Cloudflare Worker deployed
-- [x] remote health/PWA manifest verified
-- [x] remote 24-problem listing verified
-- [x] remote SQL execution verified
-- [x] remote grading verified
+- `.github/workflows/cloudflare-production-deploy.yml`
+- `docs/coquery-production-cloudflare-pwa-qa-2026-08-28.md`
 
 Remaining release gate:
 
-- [ ] merge the deployment-proof/harness branch after CI and explicit approval
-- [ ] authenticate/connect the target Cloudflare account
-- [ ] deploy to a durable `workers.dev` URL
-- [ ] run interactive browser learner-flow QA
-- [ ] verify browser-local progress after reload
-- [ ] verify service-worker offline shell behavior
-- [ ] verify PWA installation where supported
-- [ ] record the durable hosted URL and device/browser evidence
+1. configure `CLOUDFLARE_ACCOUNT_ID` in GitHub Actions secrets
+2. configure `CLOUDFLARE_API_TOKEN` in GitHub Actions secrets
+3. manually run `cloudflare-production-deploy`
+4. record the durable `workers.dev` URL and workflow run ID
+5. execute browser learner-flow QA
+6. verify browser-local progress across reload/relaunch
+7. verify service-worker offline shell behavior
+8. verify PWA installation on supported desktop/iOS/Android browsers
 
-### P0-B. AI validation handoff — first slice
+Cloudflare's official CI/CD guidance requires the account ID and API token for non-interactive deployment. Do not commit either credential to the repository.
 
-Starts after the durable hosted/browser baseline is recorded unless a new explicit priority decision changes the gate.
+### P0-B. AI Context-to-Prompt Handoff — first slice
+
+Starts after the durable hosted/browser baseline is recorded unless an explicit priority decision changes the gate.
 
 First implementation boundary:
 
 `natural result -> Build AI validation prompt -> Preview -> Copy`
 
-Required modules:
+Core modules:
 
 - ContextAdapter
 - ExportPolicy
 - QuestionPolicy
 - PromptComposer
 - PromptPreview
-- HandoffAdapter(copy only in first slice)
+- HandoffAdapter
 
-No new backend is required.
+No new backend is required for the first slice.
 
-### P0-C. Mobile wrapper baseline
+Reference:
+
+- `docs/coquery-ai-context-to-prompt-handoff-2026-08-28.md`
+
+### P0-C. iOS / Android wrapper baseline
 
 After hosted PWA behavior is stable:
 
-- choose and document the minimal iOS/Android wrapper
-- keep shared web/PWA source as canonical
-- prove iOS simulator/device shell
-- prove Android emulator/device shell
-- add store-required assets and metadata separately
+- validate the minimal wrapper choice
+- keep shared Web/PWA source canonical
+- create thin iOS and Android wrappers
+- prove simulator/emulator flows
+- map clipboard/share through platform adapters where necessary
+- prepare store assets and metadata separately
 
-Current preferred direction: a thin Capacitor-style wrapper, subject to implementation-time validation of the current toolchain and store requirements.
+Preferred direction remains a thin Capacitor-style wrapper, subject to implementation-time toolchain/store validation.
 
-### P1. AI handoff expansion
+### P1
 
-After prompt-generation proof:
+- Practice-result AI handoff
+- system share / selectable external AI destination
+- My Data bridge
+- learner-feedback-driven curriculum refinement
 
-- Practice result handoff
-- system share
-- configurable external AI destination
-- copy + open flow with failure-safe behavior
+### P2
 
-### P1. My Data bridge
+- constrained Production Assist external handoff only after export-rights policy proof
+- optional cross-device progress sync
 
-Goal:
+## Completed Product History — August 2026
 
-- transition from sample-data learning to user-selected real data without exposing production complexity at first entry
-
-Keep Production Assist safety boundaries unchanged.
-
-### P2. Constrained Production Assist handoff
-
-Only after ExportPolicy and external-sharing rights are proven.
-
-Default remains OFF for production data.
-
-## Historical Product Slices Completed in August 2026
-
-### UX Phase 1
-
-PR #8 — first-run practice experience
-
-- learning Home
-- first-problem CTA
-- problem-bank entry
-- advanced workspace retained
-
-### UX Phase 2
-
-PR #9 — focused practice workspace
-
-- problem -> SQL -> run/check -> feedback
-- terminal chrome hidden during learning
-- hints made secondary
-
-### UX Phase 3
-
-PR #10 — learning path
-
-- progress
-- completed/in-progress/not-started state
-- continue learning
-- concept grouping
-
-### UX Phase 4
-
-PR #11 — curriculum expansion
-
-- 5 -> 24 problems
-- foundations, filters, joins, aggregation, business questions
-- all expected SQL automatically verified
-
-### UX Phase 5
-
-PR #12 — user-flow QA
-
-- problem-list return fixed
-- next-problem navigation
-- schema/attempt/feedback visibility in focus mode
-- user-flow regression smoke
-
-### Distribution Phase 1
-
-PR #13 — merged
-
-- PWA
-- Cloudflare Python Worker scaffold
-- Static Assets
-- browser-local hosted progress
-- roadmap/harness currentization
-
-### Distribution Phase 2 — active proof slice
-
-Branch: `ops/cloudflare-temporary-deploy`
-
-- isolated generated Worker bundle
-- authentication-free temporary Worker deployment workflow
-- real remote health/PWA/practice API verification
-- deployment failure history captured as regression knowledge
-
-## Existing Engineering Tracks Kept Intact
-
-These remain valid but are no longer the sole product roadmap:
-
-- PostgreSQL verification-gated experimental support
-- provider registry
-- DB/JPA knowledge base
-- JPA source introspection
-- write safety gates
-- Production Assist read-only review/approval boundary
-- agent reuse package
-
-Broader backend claims still require explicit verification slices.
-
-## Official Active Loop
-
-For every slice:
-
-1. confirm current main/PR baseline
-2. document the decision and scope boundary
-3. add a failing or contract test before behavior changes where practical
-4. make the smallest implementation
-5. keep baseline and PostgreSQL smoke green
-6. record what was actually verified
-7. merge only after explicit approval
-8. update roadmap/TODO/handoff when product direction or verified state changes
+- PR #8 — first-run learning Home
+- PR #9 — focused practice workspace
+- PR #10 — learning path/progress
+- PR #11 — curriculum expansion to 24 problems
+- PR #12 — learner-flow QA and next-problem navigation
+- PR #13 — PWA + Cloudflare serverless scaffold
+- PR #14 — real temporary Cloudflare deployment proof and isolated deployment harness
 
 ## Verification Baseline
 
-Core CI remains the source of truth.
-
-Current baseline includes:
+Core CI:
 
 - CLI/core verification
 - practice focus smoke
@@ -281,31 +167,46 @@ Current baseline includes:
 - curriculum smoke
 - user-flow QA smoke
 - PWA/serverless smoke
-- separate PostgreSQL smoke workflow
+- separate PostgreSQL smoke
 
-Deployment proof additionally uses:
+Deployment verification:
 
-- `.github/workflows/cloudflare-temporary-deploy.yml`
-- `scripts/prepare_cloudflare_bundle.py`
-- real remote health/PWA/practice API checks
+- temporary Cloudflare remote proof workflow
+- production deployment workflow contract checks
 
 ## Scope Locks
 
 Do not silently:
 
-- replace the shared PWA codebase with separate native apps
+- split the canonical PWA into separate native product implementations
 - make external AI mandatory for SQL generation
 - automatically send data to an AI
-- broaden Production Assist external sharing
-- equate temporary HTTP/API proof with completed device/install QA
-- broaden PostgreSQL/MySQL claims without new proof
+- expose Production Assist data through AI handoff before ExportPolicy proof
+- describe temporary Cloudflare proof as durable production deployment
+- describe HTTP proof as completed browser/device/install QA
+- broaden PostgreSQL/MySQL support claims without new proof
+
+## Official Execution Loop
+
+For each slice:
+
+1. confirm current `main`
+2. create a branch
+3. document the scope and proof boundary
+4. add regression/contract tests where practical
+5. implement the smallest valid change
+6. keep baseline CI green
+7. keep PostgreSQL smoke truthful when relevant
+8. record exactly what was verified and skipped
+9. merge only after explicit approval
+10. currentize `EASY_SQL_ROADMAP.md`, `EASY_SQL_TODO.md`, and `HANDOFF.md`
 
 ## Next Decision Gate
 
-Immediate gate: **deployment-proof/harness Draft PR review and merge approval**.
+Immediate gate:
 
-After that, the active execution order remains:
+**configure the two Cloudflare GitHub Actions secrets and execute the manual durable production workflow.**
 
-1. durable Cloudflare deployment + browser/PWA QA
-2. AI validation handoff first slice
-3. iOS/Android wrapper baseline
+Execution order remains:
+
+`learning UX -> PWA/serverless -> hosted proof -> durable PWA QA -> AI validation handoff -> iOS/Android wrappers`
