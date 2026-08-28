@@ -46,19 +46,93 @@ jobs:
           set -o pipefail
           uv run pywrangler deploy --temporary 2>&1 | tee /tmp/cloudflare-deploy.log
           WORKER_URL=$(grep -Eo 'https://[^ ]+\.workers\.dev' /tmp/cloudflare-deploy.log | tail -n 1 || true)
-          CLAIM_URL=$(grep -Eo 'https://[^ ]+' /tmp/cloudflare-deploy.log | grep -Ei 'claim|dash\.cloudflare\.com' | tail -n 1 || true)
+          test -n "$WORKER_URL"
           echo "worker_url=${WORKER_URL}" >> "$GITHUB_OUTPUT"
-          echo "claim_url=${CLAIM_URL}" >> "$GITHUB_OUTPUT"
           echo "## Cloudflare temporary deployment" >> "$GITHUB_STEP_SUMMARY"
-          echo "Worker URL: ${WORKER_URL:-not detected}" >> "$GITHUB_STEP_SUMMARY"
-          echo "Claim URL: ${CLAIM_URL:-not detected}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Worker URL: ${WORKER_URL}" >> "$GITHUB_STEP_SUMMARY"
+          echo "This preview is temporary and is not a production deployment." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Verify deployed health endpoint
-        if: steps.deploy.outputs.worker_url != ''
+        shell: bash
+        env:
+          WORKER_URL: ${{ steps.deploy.outputs.worker_url }}
         run: |
-          curl --fail --show-error --silent "${{ steps.deploy.outputs.worker_url }}/api/health"
+          set -euo pipefail
+          status=""
+          for attempt in $(seq 1 12); do
+            status=$(curl --show-error --silent --output /tmp/health.json --write-out '%{http_code}' "$WORKER_URL/api/health" || true)
+            echo "health attempt ${attempt}: HTTP ${status}"
+            cat /tmp/health.json || true
+            echo
+            if [ "$status" = "200" ]; then
+              break
+            fi
+            sleep 2
+          done
+          test "$status" = "200"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('/tmp/health.json').read_text())
+          assert payload.get('ok') is True, payload
+          assert payload.get('service') == 'coquery-pwa-worker', payload
+          PY
 
-      - name: Verify PWA manifest is served
-        if: steps.deploy.outputs.worker_url != ''
+      - name: Verify PWA shell and manifest
+        shell: bash
+        env:
+          WORKER_URL: ${{ steps.deploy.outputs.worker_url }}
         run: |
-          curl --fail --show-error --silent "${{ steps.deploy.outputs.worker_url }}/manifest.webmanifest" | python3 -m json.tool
+          set -euo pipefail
+          curl --fail --show-error --silent "$WORKER_URL/" -o /tmp/index.html
+          grep -q 'manifest.webmanifest' /tmp/index.html
+          curl --fail --show-error --silent "$WORKER_URL/manifest.webmanifest" -o /tmp/manifest.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('/tmp/manifest.json').read_text())
+          assert payload.get('name'), payload
+          assert payload.get('display') == 'standalone', payload
+          PY
+
+      - name: Verify hosted practice API
+        shell: bash
+        env:
+          WORKER_URL: ${{ steps.deploy.outputs.worker_url }}
+        run: |
+          set -euo pipefail
+          curl --fail --show-error --silent \
+            -H 'Content-Type: application/json' \
+            -d '{"command":"practice_list","args":{},"context":{"mode":"training"}}' \
+            "$WORKER_URL/api/commands/run" -o /tmp/practice-list.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('/tmp/practice-list.json').read_text())
+          assert payload.get('ok') is True, payload
+          problems = payload.get('data', {}).get('problems', [])
+          assert len(problems) >= 24, len(problems)
+          PY
+
+          curl --fail --show-error --silent \
+            -H 'Content-Type: application/json' \
+            -d '{"command":"practice_query","args":{"pack":"sql_basics","sql":"SELECT id, name, region FROM customers ORDER BY id"},"context":{"mode":"training"}}' \
+            "$WORKER_URL/api/commands/run" -o /tmp/practice-query.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('/tmp/practice-query.json').read_text())
+          assert payload.get('ok') is True, payload
+          PY
+
+          curl --fail --show-error --silent \
+            -H 'Content-Type: application/json' \
+            -d '{"command":"practice_grade","args":{"pack":"sql_basics","problem_id":"basic_select_customers","sql":"SELECT id, name, region FROM customers ORDER BY id"},"context":{"mode":"training"}}' \
+            "$WORKER_URL/api/commands/run" -o /tmp/practice-grade.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('/tmp/practice-grade.json').read_text())
+          assert payload.get('ok') is True, payload
+          assert payload.get('data', {}).get('correct') is True, payload
+          PY
