@@ -106,10 +106,50 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --show-error --silent \
-            -H 'Content-Type: application/json' \
-            -d '{"command":"practice_list","args":{},"context":{"mode":"training"}}' \
-            "$WORKER_URL/api/commands/run" -o /tmp/practice-list.json
+
+          post_json_with_retry() {
+            local label="$1"
+            local payload="$2"
+            local output="$3"
+            local status=""
+
+            for attempt in $(seq 1 12); do
+              status=$(curl --show-error --silent \
+                --output "$output" \
+                --write-out '%{http_code}' \
+                -H 'Content-Type: application/json' \
+                -d "$payload" \
+                "$WORKER_URL/api/commands/run" || true)
+              echo "${label} attempt ${attempt}: HTTP ${status}"
+
+              if [ "$status" = "200" ]; then
+                return 0
+              fi
+
+              if [ -s "$output" ]; then
+                cat "$output"
+                echo
+              fi
+
+              case "$status" in
+                000|404|5??)
+                  sleep 2
+                  ;;
+                *)
+                  echo "${label} failed with non-retryable HTTP ${status}" >&2
+                  return 1
+                  ;;
+              esac
+            done
+
+            echo "${label} did not become ready after 12 attempts; last HTTP ${status}" >&2
+            return 1
+          }
+
+          post_json_with_retry \
+            "practice_list" \
+            '{"command":"practice_list","args":{},"context":{"mode":"training"}}' \
+            /tmp/practice-list.json
           python3 - <<'PY'
           import json
           from pathlib import Path
@@ -118,10 +158,10 @@ jobs:
           assert len(payload.get('data', {}).get('problems', [])) >= 24, payload
           PY
 
-          curl --fail --show-error --silent \
-            -H 'Content-Type: application/json' \
-            -d '{"command":"practice_grade","args":{"pack":"sql_basics","problem_id":"basic_select_customers","sql":"SELECT id, name, region FROM customers ORDER BY id"},"context":{"mode":"training"}}' \
-            "$WORKER_URL/api/commands/run" -o /tmp/practice-grade.json
+          post_json_with_retry \
+            "practice_grade" \
+            '{"command":"practice_grade","args":{"pack":"sql_basics","problem_id":"basic_select_customers","sql":"SELECT id, name, region FROM customers ORDER BY id"},"context":{"mode":"training"}}' \
+            /tmp/practice-grade.json
           python3 - <<'PY'
           import json
           from pathlib import Path
