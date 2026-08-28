@@ -6,6 +6,8 @@ const practiceFocusCopy = {
     sqlLabel: "내 SQL",
     run: "실행하고 확인하기",
     ready: "SQL을 작성한 뒤 실행해 보세요.",
+    nextProblem: "다음 문제",
+    reviewPath: "학습경로 보기",
   },
   en: {
     hintShow: "Show hint",
@@ -14,6 +16,8 @@ const practiceFocusCopy = {
     sqlLabel: "My SQL",
     run: "Run and check",
     ready: "Write your SQL, then run it.",
+    nextProblem: "Next problem",
+    reviewPath: "View learning path",
   },
 };
 
@@ -36,7 +40,13 @@ function setPracticeFocusMode(enabled) {
   appShell.dataset.practiceFocus = enabled ? "true" : "false";
   if (!enabled) {
     document.querySelectorAll(".practice-focus-block, .practice-feedback-block").forEach((block) => {
-      block.classList.remove("practice-focus-block", "practice-feedback-block", "practice-query-result", "practice-grade-result");
+      block.classList.remove(
+        "practice-focus-block",
+        "practice-feedback-block",
+        "practice-query-result",
+        "practice-grade-result",
+        "practice-support-result"
+      );
     });
   }
 }
@@ -58,15 +68,65 @@ function hideTerminalChrome(block) {
   }
 }
 
-function leavePracticeForProblemBank() {
+async function openPracticeLearningPath() {
   setPracticeFocusMode(false);
-  if (typeof ensurePracticeList === "function") {
-    Promise.resolve(ensurePracticeList()).finally(() => {
-      const blocks = [...document.querySelectorAll("#terminalScroll .terminal-block")];
-      const listBlock = blocks.reverse().find((block) => practiceCommandForBlock(block) === "practice_list");
-      listBlock?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+  if (typeof setLearningPathMode === "function") {
+    setLearningPathMode(true);
+  } else if (appShell) {
+    appShell.dataset.learningPath = "true";
   }
+
+  if (typeof refreshLearningPath === "function") {
+    const block = await refreshLearningPath();
+    block?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+
+  if (typeof ensurePracticeList === "function") {
+    await Promise.resolve(ensurePracticeList());
+    const blocks = [...document.querySelectorAll("#terminalScroll .terminal-block")];
+    const listBlock = blocks.reverse().find((block) => practiceCommandForBlock(block) === "practice_list");
+    listBlock?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+function leavePracticeForProblemBank() {
+  openPracticeLearningPath().catch((error) => {
+    console.error("Failed to open learning path", error);
+  });
+}
+
+async function startNextPracticeProblem(currentProblemId) {
+  const listResult = await postCommand("practice_list", {}, { mode: "training" });
+  if (!listResult?.ok) {
+    addBlock(listResult);
+    return;
+  }
+
+  const problems = listResult.data?.problems || [];
+  const packId = listResult.data?.selected_pack || "sql_basics";
+  const attemptResult = await postCommand("practice_attempts", { pack: packId, limit: 500 }, { mode: "training" });
+  const completed = new Set(
+    (attemptResult?.ok ? attemptResult.data?.attempts || [] : [])
+      .filter((attempt) => attempt.correct === true)
+      .map((attempt) => attempt.problem_id)
+  );
+
+  const currentIndex = Math.max(0, problems.findIndex((problem) => problem.id === currentProblemId));
+  const afterCurrent = problems.slice(currentIndex + 1).find((problem) => !completed.has(problem.id));
+  const nextProblem = afterCurrent || problems.find((problem) => !completed.has(problem.id));
+
+  if (!nextProblem) {
+    await openPracticeLearningPath();
+    return;
+  }
+
+  if (typeof setLearningPathMode === "function") {
+    setLearningPathMode(false);
+  } else if (appShell) {
+    appShell.dataset.learningPath = "false";
+  }
+  addBlock(practiceStartResult(nextProblem, packId));
 }
 
 function refreshPracticeFocusCopy(block = document.querySelector(".practice-focus-block")) {
@@ -112,7 +172,13 @@ function enhancePracticeStart(block) {
   block.dataset.practiceFocusEnhanced = "true";
 
   document.querySelectorAll(".practice-focus-block, .practice-feedback-block").forEach((item) => {
-    item.classList.remove("practice-focus-block", "practice-feedback-block", "practice-query-result", "practice-grade-result");
+    item.classList.remove(
+      "practice-focus-block",
+      "practice-feedback-block",
+      "practice-query-result",
+      "practice-grade-result",
+      "practice-support-result"
+    );
   });
 
   setPracticeFocusMode(true);
@@ -169,6 +235,52 @@ function enhancePracticeStart(block) {
   requestAnimationFrame(() => textarea?.focus());
 }
 
+function addPracticeGradeNavigation(block) {
+  const result = block?.__result;
+  if (!result?.ok || result.command !== "practice_grade" || result.data?.correct !== true) {
+    return;
+  }
+  if (block.querySelector("[data-practice-next-actions]")) {
+    return;
+  }
+
+  const actions = document.createElement("div");
+  actions.className = "practice-flow-actions practice-grade-next-actions";
+  actions.dataset.practiceNextActions = "true";
+
+  const nextButton = document.createElement("button");
+  nextButton.className = "primary-button";
+  nextButton.type = "button";
+  nextButton.textContent = practiceFocusText("nextProblem");
+  nextButton.addEventListener("click", () => {
+    nextButton.disabled = true;
+    startNextPracticeProblem(result.data?.problem?.id || "")
+      .catch((error) => {
+        addBlock({
+          ok: false,
+          command: "practice_next",
+          block_type: "practice_flow",
+          actions: ["copy"],
+          cli_equivalent: "practice_list",
+          error: { message: error.message },
+          data: {},
+        });
+      })
+      .finally(() => {
+        nextButton.disabled = false;
+      });
+  });
+
+  const pathButton = document.createElement("button");
+  pathButton.className = "ghost-button";
+  pathButton.type = "button";
+  pathButton.textContent = practiceFocusText("reviewPath");
+  pathButton.addEventListener("click", leavePracticeForProblemBank);
+
+  actions.append(nextButton, pathButton);
+  block.appendChild(actions);
+}
+
 function enhancePracticeFeedback(block, command) {
   if (!block || block.dataset.practiceFeedbackEnhanced === "true" || appShell?.dataset.practiceFocus !== "true") {
     return;
@@ -177,13 +289,15 @@ function enhancePracticeFeedback(block, command) {
   block.classList.add("practice-feedback-block");
   if (command === "practice_query") {
     block.classList.add("practice-query-result");
-  }
-  if (command === "practice_grade") {
+  } else if (command === "practice_grade") {
     block.classList.add("practice-grade-result");
+  } else {
+    block.classList.add("practice-support-result");
   }
   hideTerminalChrome(block);
 
   if (command === "practice_grade") {
+    addPracticeGradeNavigation(block);
     requestAnimationFrame(() => block.scrollIntoView({ behavior: "smooth", block: "nearest" }));
   }
 }
@@ -194,7 +308,7 @@ function enhancePracticeBlock(block) {
     enhancePracticeStart(block);
     return;
   }
-  if (command === "practice_query" || command === "practice_grade") {
+  if (["practice_query", "practice_grade", "practice_schema", "practice_attempts", "practice_feedback"].includes(command)) {
     enhancePracticeFeedback(block, command);
   }
 }
@@ -224,6 +338,13 @@ advancedWorkspaceButton?.addEventListener("click", () => setPracticeFocusMode(fa
 
 languageButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    setTimeout(() => refreshPracticeFocusCopy(), 0);
+    setTimeout(() => {
+      refreshPracticeFocusCopy();
+      document.querySelectorAll("[data-practice-next-actions]").forEach((actions) => {
+        const buttons = actions.querySelectorAll("button");
+        if (buttons[0]) buttons[0].textContent = practiceFocusText("nextProblem");
+        if (buttons[1]) buttons[1].textContent = practiceFocusText("reviewPath");
+      });
+    }, 0);
   });
 });
