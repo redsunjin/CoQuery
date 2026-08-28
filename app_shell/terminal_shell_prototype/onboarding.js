@@ -186,6 +186,16 @@ function loadPracticeFocusAssets() {
   }
 }
 
+function loadExpandedCurriculumAsset() {
+  if (document.querySelector('script[data-curriculum-expansion-script]')) {
+    return;
+  }
+  const script = document.createElement("script");
+  script.src = "./curriculum-expansion.js";
+  script.dataset.curriculumExpansionScript = "true";
+  document.body.appendChild(script);
+}
+
 function loadLearningPathAssets() {
   if (!document.querySelector('link[data-learning-path-style]')) {
     const style = document.createElement("link");
@@ -195,12 +205,21 @@ function loadLearningPathAssets() {
     document.head.appendChild(style);
   }
 
-  if (!document.querySelector('script[data-learning-path-script]')) {
-    const script = document.createElement("script");
-    script.src = "./learning-path.js";
-    script.dataset.learningPathScript = "true";
-    document.body.appendChild(script);
+  const existing = document.querySelector('script[data-learning-path-script]');
+  if (existing) {
+    if (typeof learningPathUnits !== "undefined") {
+      loadExpandedCurriculumAsset();
+    } else {
+      existing.addEventListener("load", loadExpandedCurriculumAsset, { once: true });
+    }
+    return;
   }
+
+  const script = document.createElement("script");
+  script.src = "./learning-path.js";
+  script.dataset.learningPathScript = "true";
+  script.addEventListener("load", loadExpandedCurriculumAsset, { once: true });
+  document.body.appendChild(script);
 }
 
 applyLearningHomeTranslations();

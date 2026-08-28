@@ -29,3 +29,4 @@ jobs:
           python3 skills/coquery-cli/scripts/coquery_agent.py demo
           python3 app_shell/terminal_shell_prototype/practice_focus_smoke.py
           python3 app_shell/terminal_shell_prototype/learning_path_smoke.py
+          python3 app_shell/terminal_shell_prototype/curriculum_smoke.py
