@@ -44,10 +44,23 @@ def main() -> int:
     require(bundle_script, '"run_worker_first": True')
     require(bundle_script, '"configPath": "../../.cloudflare-build/wrangler.jsonc"')
 
-    workflow = ROOT / ".github" / "workflows" / "cloudflare-temporary-deploy.yml"
-    require(workflow, "pywrangler deploy --temporary")
-    require(workflow, "Verify hosted practice API")
-    require(workflow, '"command":"practice_grade"')
+    temporary_workflow = ROOT / ".github" / "workflows" / "cloudflare-temporary-deploy.yml"
+    require(temporary_workflow, "pywrangler deploy --temporary")
+    require(temporary_workflow, "Verify hosted practice API")
+    require(temporary_workflow, '"command":"practice_grade"')
+
+    production_workflow = ROOT / ".github" / "workflows" / "cloudflare-production-deploy.yml"
+    require(production_workflow, "workflow_dispatch:")
+    require(production_workflow, "environment: production")
+    require(production_workflow, "CLOUDFLARE_API_TOKEN")
+    require(production_workflow, "CLOUDFLARE_ACCOUNT_ID")
+    require(production_workflow, "python3 scripts/prepare_cloudflare_bundle.py")
+    require(production_workflow, "uv run pywrangler deploy")
+    require(production_workflow, "Verify production health endpoint")
+    require(production_workflow, "Verify PWA shell and manifest")
+    require(production_workflow, "Verify hosted practice API")
+    if "pywrangler deploy --temporary" in production_workflow.read_text(encoding="utf-8"):
+        raise AssertionError("production deployment must not use a temporary Cloudflare account")
 
     gitignore = ROOT / ".gitignore"
     require(gitignore, ".cloudflare-build/")
