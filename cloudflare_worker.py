@@ -115,7 +115,10 @@ class Default(WorkerEntrypoint):
                     500,
                 )
 
-        return _json_response(
-            {"ok": False, "error": {"code": "not_found", "message": f"Unknown endpoint: {path}"}},
-            404,
-        )
+        if path.startswith("/api/"):
+            return _json_response(
+                {"ok": False, "error": {"code": "not_found", "message": f"Unknown endpoint: {path}"}},
+                404,
+            )
+
+        return await self.env.ASSETS.fetch(request)
