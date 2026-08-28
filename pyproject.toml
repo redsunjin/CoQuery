@@ -1,0 +1,12 @@
+[project]
+name = "coquery-pwa-worker"
+version = "0.1.0"
+description = "Cloudflare Python Worker deployment for CoQuery"
+requires-python = ">=3.13"
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "workers-py",
+  "workers-runtime-sdk",
+]
