@@ -8,6 +8,7 @@ __pycache__/
 # Virtual Environment
 venv/
 .venv/
+.venv-workers/
 env/
 .env/
 env.bak/
@@ -56,3 +57,5 @@ LOG*
 *.bak
 .tmp/
 .coquery/
+.cloudflare-build/
+.wrangler/
