@@ -40,7 +40,13 @@ function setPracticeFocusMode(enabled) {
   appShell.dataset.practiceFocus = enabled ? "true" : "false";
   if (!enabled) {
     document.querySelectorAll(".practice-focus-block, .practice-feedback-block").forEach((block) => {
-      block.classList.remove("practice-focus-block", "practice-feedback-block", "practice-query-result", "practice-grade-result");
+      block.classList.remove(
+        "practice-focus-block",
+        "practice-feedback-block",
+        "practice-query-result",
+        "practice-grade-result",
+        "practice-support-result"
+      );
     });
   }
 }
@@ -166,7 +172,13 @@ function enhancePracticeStart(block) {
   block.dataset.practiceFocusEnhanced = "true";
 
   document.querySelectorAll(".practice-focus-block, .practice-feedback-block").forEach((item) => {
-    item.classList.remove("practice-focus-block", "practice-feedback-block", "practice-query-result", "practice-grade-result");
+    item.classList.remove(
+      "practice-focus-block",
+      "practice-feedback-block",
+      "practice-query-result",
+      "practice-grade-result",
+      "practice-support-result"
+    );
   });
 
   setPracticeFocusMode(true);
@@ -277,9 +289,10 @@ function enhancePracticeFeedback(block, command) {
   block.classList.add("practice-feedback-block");
   if (command === "practice_query") {
     block.classList.add("practice-query-result");
-  }
-  if (command === "practice_grade") {
+  } else if (command === "practice_grade") {
     block.classList.add("practice-grade-result");
+  } else {
+    block.classList.add("practice-support-result");
   }
   hideTerminalChrome(block);
 
@@ -295,7 +308,7 @@ function enhancePracticeBlock(block) {
     enhancePracticeStart(block);
     return;
   }
-  if (command === "practice_query" || command === "practice_grade") {
+  if (["practice_query", "practice_grade", "practice_schema", "practice_attempts", "practice_feedback"].includes(command)) {
     enhancePracticeFeedback(block, command);
   }
 }
