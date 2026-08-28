@@ -5,58 +5,52 @@ Last Updated: 2026-08-28
 
 ## Active Priorities
 
-This file is the execution queue. Historical DB/backend stabilization work remains valid evidence, but it is not the only active product loop anymore.
+### P0-1. Durable PWA + Cloudflare publication baseline
 
-### P0-1. Finish durable PWA + Cloudflare publication baseline
-
-Merged baseline:
+Completed:
 
 - [x] PR #13 PWA/serverless scaffold merged
-- [x] PWA manifest
-- [x] service worker application-shell cache
-- [x] PWA runtime
-- [x] browser-local hosted practice progress
-- [x] Cloudflare Python Worker adapter
-- [x] Cloudflare Static Assets configuration
-- [x] hosted practice command allowlist
-- [x] hosted `practice_grade` without server-file recording
-- [x] PWA/serverless smoke in baseline CI
-
-Real temporary Cloudflare proof:
-
-- [x] create isolated deployment bundle builder
-- [x] prevent repository-wide `.venv`/`node_modules` over-bundling
-- [x] package `sql_cli`, practice packs, knowledge, and PWA assets explicitly
-- [x] deploy a real authentication-free temporary Worker
-- [x] verify `/api/health` remotely
-- [x] verify PWA shell and manifest remotely
-- [x] verify 24-problem `practice_list` remotely
-- [x] verify `practice_query` SQL execution remotely
-- [x] verify `practice_grade` correct result remotely
-- [x] document deployment failures and fixes
+- [x] PR #14 temporary hosted proof + isolated deployment harness merged
+- [x] PWA manifest / service worker / browser-local progress
+- [x] Cloudflare Python Worker practice API
+- [x] real temporary Worker deploy/startup proof
+- [x] remote `/api/health` proof
+- [x] remote PWA shell/manifest proof
+- [x] remote 24-problem listing
+- [x] remote SQL execution
+- [x] remote grading
+- [x] isolated deployment bundle prevents repository-wide over-bundling
+- [x] add manual production deployment workflow
+- [x] require GitHub `production` environment
+- [x] require `CLOUDFLARE_ACCOUNT_ID`
+- [x] require `CLOUDFLARE_API_TOKEN`
+- [x] add production health/PWA/practice post-deploy checks
+- [x] add production deployment regression contract to PWA smoke
+- [x] document browser/device installation QA gate
 
 Active branch:
 
-- `ops/cloudflare-temporary-deploy`
+- `ops/cloudflare-production-deploy`
 
-Current remaining gate:
+Current blocker / next actions:
 
-- [ ] confirm branch baseline/PostgreSQL CI after documentation updates
-- [ ] create Draft PR for the deployment proof/harness
-- [ ] explicit merge approval
-- [ ] merge deployment-proof PR
-- [ ] authenticate/connect the target Cloudflare account
-- [ ] deploy to durable `workers.dev`
+- [ ] add GitHub Actions secret `CLOUDFLARE_ACCOUNT_ID`
+- [ ] add GitHub Actions secret `CLOUDFLARE_API_TOKEN`
+- [ ] run `cloudflare-production-deploy` manually
+- [ ] record durable `workers.dev` URL
+- [ ] record production workflow run ID and deployment head SHA
 - [ ] browser QA: Home -> problem bank -> solve -> grade -> next problem
-- [ ] verify browser-local progress across reload
-- [ ] verify API responses are not service-worker cached
-- [ ] verify service-worker offline shell reopening
-- [ ] verify PWA installation on supported desktop/mobile browser
-- [ ] record durable hosted URL and exact device/browser evidence
+- [ ] verify progress across browser reload/relaunch
+- [ ] verify `/api/*` is not served from stale service-worker cache
+- [ ] verify offline shell reopening and explicit network-required execution failure
+- [ ] verify desktop PWA installation where supported
+- [ ] verify iOS Safari Add to Home Screen baseline
+- [ ] verify Android Chrome install/add-to-home-screen baseline
+- [ ] update roadmap/TODO/HANDOFF with actual device/browser evidence
 
 Reference:
 
-- `docs/coquery-cloudflare-temporary-deploy-proof-2026-08-28.md`
+- `docs/coquery-production-cloudflare-pwa-qa-2026-08-28.md`
 
 ### P0-2. AI Context-to-Prompt Handoff — first implementation slice
 
@@ -68,147 +62,130 @@ First boundary:
 
 `natural result -> AI validation prompt -> preview -> copy`
 
-Do not start from a full chatbot or provider SDK.
-
 Tasks:
 
-- [ ] add failing contract tests for deterministic prompt generation
-- [ ] define normalized ContextSnapshot
-- [ ] implement ExportPolicy allowlist and sensitive-field exclusion
-- [ ] implement QuestionPolicy for sufficient/limited/stale/insufficient context
+- [ ] add deterministic prompt contract tests
+- [ ] define ContextSnapshot
+- [ ] implement ExportPolicy allowlist / sensitive-field exclusion
+- [ ] implement QuestionPolicy quality states
 - [ ] implement versioned PromptComposer pure function
 - [ ] implement PromptPreview revision state
-- [ ] add explicit `Build AI validation prompt` action to `natural` result
-- [ ] show exact outgoing body before any side effect
-- [ ] implement copy-only HandoffAdapter first
-- [ ] preserve user edits when source context changes
-- [ ] ensure copy failure leaves selectable text
+- [ ] add `Build AI validation prompt` action to natural result
+- [ ] show exact outgoing body before clipboard action
+- [ ] implement copy-only HandoffAdapter
+- [ ] preserve user edits when source data changes
+- [ ] make copy failure leave selectable text
 - [ ] verify no automatic external open/share/send
 - [ ] add KR/EN prompt templates and tests
-- [ ] document actual verified behavior after implementation
 
 Acceptance:
 
 - same input/version/language => same body
-- unknown remains unknown; zero is not invented
-- data source and timestamps remain explicit
-- sensitive and unknown-permission fields are excluded
-- exact preview revision equals copied revision
-- user action is required before clipboard side effect
-- no claim that an external AI received the prompt
+- unknown stays unknown
+- zero is not treated as missing
+- source/timestamps/limitations remain explicit
+- sensitive or unknown-permission fields are excluded
+- copied revision equals reviewed preview revision
+- clipboard side effect requires explicit user action
+- CoQuery never claims an external AI received the prompt
 
 ### P0-3. iOS / Android wrapper baseline
 
-Goal:
+After durable PWA/browser proof:
 
-- distribute the same canonical product as Web/PWA, iPhone, and Android apps
-
-Tasks after hosted PWA proof:
-
-- [ ] validate current minimal wrapper choice (Capacitor-style preferred direction)
-- [ ] document canonical source / generated native project boundary
+- [ ] validate minimal Capacitor-style wrapper against current toolchain/store requirements
+- [ ] define canonical shared-source / generated-native boundary
 - [ ] create iOS wrapper
 - [ ] create Android wrapper
-- [ ] prove iOS simulator flow
-- [ ] prove Android emulator flow
-- [ ] map PWA clipboard/share behavior to native adapter where needed
-- [ ] prepare app icons/splash/store metadata separately
+- [ ] prove iOS simulator/device shell
+- [ ] prove Android emulator/device shell
+- [ ] map clipboard/share adapters
+- [ ] prepare app icons/splash/store metadata
 - [ ] record App Store / Play Store release checklist
 
-Do not fork learning logic or SQL UI into separate native implementations.
+Do not fork learning/business logic into separate native implementations.
 
-## P1 Product Tasks
+## P1
 
 ### AI handoff expansion
 
-- [ ] add Practice result handoff
-- [ ] add system share where supported
-- [ ] add user-selectable external AI destination
-- [ ] keep prompt out of URL query by default
-- [ ] handle open failure independently from copy success
-- [ ] treat share cancellation as cancellation, not success
+- [ ] Practice-result handoff
+- [ ] system share
+- [ ] user-selectable external AI destination
+- [ ] copy + open failure-safe behavior
 
 ### My Data bridge
 
-- [ ] define smallest path from built-in sample data to user-selected data
+- [ ] define sample-to-user-data transition
 - [ ] preserve beginner-first surface
-- [ ] keep production safety gates explicit
+- [ ] preserve Production Assist safety gates
 
 ### Learning quality
 
-- [ ] review 24-problem progression using real learner feedback
-- [ ] improve schema/data preview where needed
-- [ ] add more scenario packs only after evidence of gaps
+- [ ] collect real learner feedback on the 24-problem path
+- [ ] improve schema/data preview based on evidence
+- [ ] add scenario packs only when gaps are demonstrated
 
-## P2 Tasks
+## P2
 
 ### Constrained Production Assist AI handoff
 
-Default OFF.
+Default OFF until:
 
-Before enabling:
-
-- [ ] prove external-sharing ExportPolicy
-- [ ] distinguish display permission from external-provision permission
-- [ ] restrict to explicitly allowed schema/aggregates/non-sensitive context
-- [ ] test sensitive-field blocking
-- [ ] document audit/privacy boundary
+- [ ] external-sharing ExportPolicy is proven
+- [ ] display permission is separated from external-provision permission
+- [ ] explicitly allowed schema/aggregate/non-sensitive context is defined
+- [ ] sensitive-field blocking is tested
 
 ### Cross-device learner sync
 
-Only when required by product usage:
+Only when product evidence requires it:
 
 - [ ] decide D1/KV/account requirement
-- [ ] keep browser-local mode usable without login
+- [ ] keep no-login browser-local mode usable
 
 ## Completed August 2026 Product Work
 
 - [x] PR #8 first-run learning Home
 - [x] PR #9 focused practice workspace
-- [x] PR #10 learning path and progress
-- [x] PR #11 curriculum expansion to 24 problems
-- [x] PR #12 learning-flow QA fixes
-- [x] PR #13 PWA/serverless scaffold + product harness currentization
+- [x] PR #10 learning path/progress
+- [x] PR #11 24-problem curriculum
+- [x] PR #12 learner-flow QA
+- [x] PR #13 PWA/serverless scaffold
+- [x] PR #14 Cloudflare temporary hosted proof + deployment harness
 
-## Existing Engineering Baseline — Retained
+## Existing Engineering Baseline Retained
 
-The following are not deleted from the roadmap. They remain verified/experimental infrastructure:
-
-- [x] SQLite-first baseline
+- [x] SQLite-first working baseline
 - [x] shared DB URI contract
 - [x] PostgreSQL narrow experimental smoke path
-- [x] PostgreSQL safety guard smoke
+- [x] write safety guard
 - [x] provider registry direction
-- [x] Codex agent reuse package
+- [x] DB/JPA local knowledge
 - [x] JPA source introspection
-- [x] offline DB/JPA knowledge base
-- [x] schema-detail-backed identifier validation
+- [x] schema-detail identifier validation
 - [x] direct foreign-key join inference
 - [x] Production Assist safety gate
 
-Still not complete:
+Not complete:
 
 - [ ] broad PostgreSQL parity
 - [ ] working MySQL baseline
 - [ ] JPQL runtime
-- [ ] production-grade unrestricted NL-to-SQL
+- [ ] unrestricted production-grade NL-to-SQL
 
 ## Execution Rules
-
-For active work:
 
 1. branch + Draft PR
 2. no direct `main` implementation commits
 3. preserve existing contracts unless the slice explicitly changes them
-4. RED -> minimal implementation -> GREEN for behavior changes where practical
-5. baseline CI must stay green
-6. PostgreSQL smoke must stay green when relevant to the branch gate
-7. record limitations and skipped validation
+4. RED -> minimum implementation -> GREEN where practical
+5. baseline CI stays green
+6. PostgreSQL smoke stays truthful when part of the gate
+7. record skipped and completed validation explicitly
 8. merge only after explicit approval
-9. update `EASY_SQL_ROADMAP.md`, `EASY_SQL_TODO.md`, and `HANDOFF.md` whenever the verified product baseline materially changes
+9. currentize roadmap/TODO/HANDOFF after material baseline changes
 
 ## Current Next Action
 
-**Finish the `ops/cloudflare-temporary-deploy` proof/harness PR gate.**
-
-After it is merged, connect the durable Cloudflare account and complete browser/device PWA QA before starting the AI Handoff implementation, unless a new explicit priority decision changes that gate.
+**Configure the two Cloudflare GitHub Actions secrets, then manually run `cloudflare-production-deploy`.**
