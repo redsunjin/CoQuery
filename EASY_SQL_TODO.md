@@ -1,306 +1,195 @@
 # CoQuery Todo List
 
-Version: v0.7.x stabilization
-Last Updated: 2026-04-28
+Version: product baseline 2026-08-28
+Last Updated: 2026-08-28
 
-## Official Next Tasks
+## Active Priorities
 
-These tasks reflect the current stabilization loop.
-Do not treat old recovery steps as active work anymore.
+This file is the execution queue. Historical DB/backend stabilization work remains valid evidence, but it is not the only active product loop anymore.
 
-Scope decision:
+### P0-1. Finish PWA + Cloudflare serverless publication baseline
 
-- `main` remains active after closing the reduced cleanup PR unmerged.
-- DB/JPA knowledge, JPA source introspection, and Codex skill packaging are retained experimental tracks.
-- Provider-backed natural remains secondary and experimental.
+Branch / PR:
 
-### 1. Shared backend selector and DB URI contract
+- `feat/pwa-cloudflare-serverless`
+- Draft PR #13
 
-Goal:
+Completed on branch:
 
-- define one connection contract that can describe SQLite, PostgreSQL, and MySQL without overstating support
+- [x] PWA manifest
+- [x] service worker application-shell cache
+- [x] PWA runtime
+- [x] browser-local hosted practice progress
+- [x] Cloudflare Python Worker adapter
+- [x] Cloudflare Static Assets configuration
+- [x] `/api/*` worker-first routing
+- [x] hosted practice command allowlist
+- [x] hosted `practice_grade` without server-file recording
+- [x] PWA/serverless smoke in baseline CI
+- [x] deployment architecture documentation
 
-Open tasks:
+Remaining gate:
 
-- [x] choose the backend selector field or flag
-- [x] define the DB URI shape or equivalent connection fields
-- [x] define invalid-backend and invalid-URI errors
+- [ ] confirm PR #13 CI final state
+- [ ] explicit merge approval
+- [ ] merge PR #13
+- [ ] deploy to real `workers.dev`
+- [ ] browser QA: Home -> problem bank -> solve -> grade -> next problem
+- [ ] verify browser-local progress across reload
+- [ ] verify API responses are not service-worker cached
+- [ ] verify PWA installation on supported desktop/mobile browser
+- [ ] record hosted URL and verification result in HANDOFF/roadmap
 
-Current output:
+### P0-2. AI Context-to-Prompt Handoff — first implementation slice
 
-- `BACKEND_CONNECTION_CONTRACT_2026-04-05.md`
-- runtime implementation in `main.py` and `sql_cli/db_new.py`
+Reference:
 
-### 2. Driver dependency declaration
+- `docs/coquery-ai-context-to-prompt-handoff-2026-08-28.md`
 
-Goal:
+First boundary:
 
-- document what PostgreSQL and MySQL require before they can be called experimental
+`natural result -> AI validation prompt -> preview -> copy`
 
-Open tasks:
+Do not start from a full chatbot or provider SDK.
 
-- [x] declare PostgreSQL driver expectations
-- [x] declare MySQL driver expectations
-- [x] define missing-driver error wording
-- [x] define connection-failure error wording
+Tasks:
 
-Current output:
+- [ ] add failing contract tests for deterministic prompt generation
+- [ ] define normalized ContextSnapshot
+- [ ] implement ExportPolicy allowlist and sensitive-field exclusion
+- [ ] implement QuestionPolicy for sufficient/limited/stale/insufficient context
+- [ ] implement versioned PromptComposer pure function
+- [ ] implement PromptPreview revision state
+- [ ] add explicit `Build AI validation prompt` action to `natural` result
+- [ ] show exact outgoing body before any side effect
+- [ ] implement copy-only HandoffAdapter first
+- [ ] preserve user edits when source context changes
+- [ ] ensure copy failure leaves selectable text
+- [ ] verify no automatic external open/share/send
+- [ ] add KR/EN prompt templates and tests
+- [ ] document actual verified behavior after implementation
 
-- `POSTGRESQL_PROBE_REQUIREMENTS_2026-04-05.md`
-- `MYSQL_PROBE_REQUIREMENTS_2026-04-09.md`
+Acceptance:
 
-### 3. Phase 5 backend status policy
+- same input/version/language => same body
+- unknown remains unknown; zero is not invented
+- data source and timestamps remain explicit
+- sensitive and unknown-permission fields are excluded
+- exact preview revision equals copied revision
+- user action is required before clipboard side effect
+- no claim that an external AI received the prompt
 
-Goal:
-
-- prevent placeholder code from being described as real support
-
-Open tasks:
-
-- [x] define when a backend is `planned`
-- [x] define when a backend is `stub`
-- [x] define when a backend is `experimental`
-- [x] define when a backend is `working`
-
-Current outputs:
-
-- `MULTI_DB_ENTRY_CRITERIA_2026-04-05.md`
-- `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
-
-### 4. First real Phase 5 verification slice
-
-Goal:
-
-- prove one non-SQLite backend path with one real command and one real verification step
-
-Open tasks:
-
-- [x] pick PostgreSQL as the first probe
-- [x] add one documented local smoke path
-- [x] prove PostgreSQL `schema`
-- [x] prove PostgreSQL `schema_detail`
-- [x] prove PostgreSQL `query`
-- [x] prove PostgreSQL `insert`
-- [x] prove PostgreSQL `update`
-- [x] prove PostgreSQL `delete`
-- [x] prove PostgreSQL schema-detail-validated `generate select_simple`
-- [x] prove PostgreSQL schema-detail-validated `generate count_simple`
-- [x] prove PostgreSQL direct `generate join_inner`
-- [x] prove PostgreSQL direct `generate join_left`
-- [x] prove PostgreSQL `--dry-run` write rollback
-- [x] prove PostgreSQL `--max-affected-rows` rollback guard
-- [x] prove PostgreSQL full-table write rejection
-
-Current output:
-
-- `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
-- `scripts/run_postgresql_local_smoke.sh`
-
-Current next step:
-
-- keep GitHub Actions PostgreSQL smoke green and keep the runner portable before broadening any PostgreSQL claim
-- keep docs explicit about PostgreSQL driver requirements in the active Python environment
-- latest local PostgreSQL smoke re-run succeeded on 2026-04-22
-- last recorded `main` runs for `baseline` and `postgresql-smoke` succeeded on 2026-04-27 UTC for commit `7e677fe`
-
-### 5. Verification-gated backend promotion
+### P0-3. iOS / Android wrapper baseline
 
 Goal:
 
-- ensure backend labels change only after proof exists
+- distribute the same canonical product as Web/PWA, iPhone, and Android apps
 
-Open tasks:
+Tasks after hosted PWA proof:
 
-- [x] publish the initial Phase 5 verification matrix
-- [x] promote PostgreSQL from `stub` to `experimental` only after real proof
-- [x] decide whether MySQL remains `stub` or drops to `planned`
+- [ ] validate current minimal wrapper choice (Capacitor-style preferred direction)
+- [ ] document canonical source / generated native project boundary
+- [ ] create iOS wrapper
+- [ ] create Android wrapper
+- [ ] prove iOS simulator flow
+- [ ] prove Android emulator flow
+- [ ] map PWA clipboard/share behavior to native adapter where needed
+- [ ] prepare app icons/splash/store metadata separately
+- [ ] record App Store / Play Store release checklist
 
-Current output:
+Do not fork learning logic or SQL UI into separate native implementations.
 
-- `MYSQL_STATUS_DECISION_2026-04-05.md`
+## P1 Product Tasks
 
-### 6. PostgreSQL scope lock
+### AI handoff expansion
 
-Goal:
+- [ ] add Practice result handoff
+- [ ] add system share where supported
+- [ ] add user-selectable external AI destination
+- [ ] keep prompt out of URL query by default
+- [ ] handle open failure independently from copy success
+- [ ] treat share cancellation as cancellation, not success
 
-- freeze the current truthful PostgreSQL claim before any broader Phase 5 work begins
+### My Data bridge
 
-Open tasks:
+- [ ] define smallest path from built-in sample data to user-selected data
+- [ ] preserve beginner-first surface
+- [ ] keep production safety gates explicit
 
-- [x] state the currently proven PostgreSQL command set explicitly
-- [x] state what is still out of scope
-- [x] require a fresh verification slice before broadening PostgreSQL claims
+### Learning quality
 
-Current output:
+- [ ] review 24-problem progression using real learner feedback
+- [ ] improve schema/data preview where needed
+- [ ] add more scenario packs only after evidence of gaps
 
-- `POSTGRESQL_SCOPE_LOCK_2026-04-07.md`
+## P2 Tasks
 
-### 7. Provider registry direction decision
+### Constrained Production Assist AI handoff
 
-Goal:
+Default OFF.
 
-- decide whether provider-backed natural remains a sidecar experiment or enters the official active loop
+Before enabling:
 
-Open tasks:
+- [ ] prove external-sharing ExportPolicy
+- [ ] distinguish display permission from external-provision permission
+- [ ] restrict to explicitly allowed schema/aggregates/non-sensitive context
+- [ ] test sensitive-field blocking
+- [ ] document audit/privacy boundary
 
-- [x] decide whether the provider registry is an official roadmap track
-- [x] label provider-backed natural as primary or secondary relative to the PostgreSQL track
-- [x] truth-align official docs with that decision
+### Cross-device learner sync
 
-Current output:
+Only when required by product usage:
 
-- `LLM_PROVIDER_REGISTRY_2026-04-07.md`
-- `PROVIDER_TRACK_DECISION_2026-04-09.md`
-- `STATE_REVIEW_2026-04-09.md`
+- [ ] decide D1/KV/account requirement
+- [ ] keep browser-local mode usable without login
 
-### 8. Agent reuse package
+## Completed August 2026 Product Work
 
-Goal:
+- [x] PR #8 first-run learning Home
+- [x] PR #9 focused practice workspace
+- [x] PR #10 learning path and progress
+- [x] PR #11 curriculum expansion to 24 problems
+- [x] PR #12 learning-flow QA fixes
 
-- make the verified CoQuery CLI usable by other Codex sessions as an agent skill
+## Existing Engineering Baseline — Retained
 
-Open tasks:
+The following are not deleted from the roadmap. They remain verified/experimental infrastructure:
 
-- [x] create repo-local `skills/coquery-cli` skill package
-- [x] add a JSON-oriented agent wrapper for `verify`, `demo`, and single-command `run`
-- [x] validate the skill package
-- [x] install the skill under `~/.codex/skills/coquery-cli`
+- [x] SQLite-first baseline
+- [x] shared DB URI contract
+- [x] PostgreSQL narrow experimental smoke path
+- [x] PostgreSQL safety guard smoke
+- [x] provider registry direction
+- [x] Codex agent reuse package
+- [x] JPA source introspection
+- [x] offline DB/JPA knowledge base
+- [x] schema-detail-backed identifier validation
+- [x] direct foreign-key join inference
+- [x] Production Assist safety gate
 
-Current output:
+Still not complete:
 
-- `skills/coquery-cli/SKILL.md`
-- `skills/coquery-cli/scripts/coquery_agent.py`
-- `skills/coquery-cli/references/status.md`
-- `skills/coquery-cli/references/commands.md`
+- [ ] broad PostgreSQL parity
+- [ ] working MySQL baseline
+- [ ] JPQL runtime
+- [ ] production-grade unrestricted NL-to-SQL
 
-### 9. JPA ORM/model support
+## Execution Rules
 
-Goal:
+For active work:
 
-- support Java/JPA projects without pretending JPA is a direct database backend
+1. branch + Draft PR
+2. no direct `main` implementation commits
+3. preserve existing contracts unless the slice explicitly changes them
+4. RED -> minimal implementation -> GREEN for behavior changes where practical
+5. baseline CI must stay green
+6. PostgreSQL smoke must stay green when relevant to the branch gate
+7. record limitations and skipped validation
+8. merge only after explicit approval
+9. update `EASY_SQL_ROADMAP.md`, `EASY_SQL_TODO.md`, and `HANDOFF.md` whenever the verified product baseline materially changes
 
-Open tasks:
+## Current Next Action
 
-- [x] define JPA as an ORM/model track
-- [x] add annotation-based source introspection through `jpa_schema`
-- [x] keep JPQL runtime execution out of scope until a Java runner proof exists
+**Finish PR #13 gate first.**
 
-Current output:
-
-- `JPA_SUPPORT_PLAN_2026-04-10.md`
-- `sql_cli/jpa.py`
-- `python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json`
-
-### 10. Offline DB knowledge base
-
-Goal:
-
-- reduce LLM/provider calls by keeping local SQL, dialect, and JPA reference knowledge
-
-Open tasks:
-
-- [x] audit whether current DB knowledge is sufficient
-- [x] add a compact source-linked DB knowledge seed
-- [x] add structured machine-readable dialect rules
-- [x] add a deterministic `db_knowledge` lookup command
-- [x] add first type/operator/join/constraint knowledge topics
-- [x] add an inspectable coverage and gap report
-- [x] wire local knowledge lookup into generation before provider calls
-- [x] add schema-detail knowledge for columns, indexes, foreign keys, and constraints
-- [x] wire schema-detail output into generation and natural-language identifier validation
-- [x] use schema-detail relationships and constraints for safer join generation
-
-Current output:
-
-- `DB_KNOWLEDGE_AUDIT_2026-04-10.md`
-- `skills/coquery-cli/references/db-knowledge.md`
-- `knowledge/dialects/sqlite.json`
-- `knowledge/dialects/postgresql.json`
-- `knowledge/dialects/mysql.json`
-- `knowledge/dialects/jpql.json`
-- `knowledge/safety/write_rules.json`
-- `knowledge/coverage.json`
-- `sql_cli/knowledge_planner.py`
-- `python3 main.py --command schema_detail --db example.db --table users --format json`
-- `python3 main.py --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}' --format json`
-- `python3 main.py --command generate --db /tmp/join-test.db --skill join_inner --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}' --format json`
-- `python3 main.py --command generate --db /tmp/join-test.db --skill join_left --params '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}' --format json`
-- `python3 main.py --command db_knowledge --topic coverage`
-
-## Recently Closed Stabilization Slices
-
-- [x] truth-align top-level status docs
-- [x] freeze write-command contract
-- [x] define Phase 5 entry criteria
-- [x] implement shared DB URI validation and structured backend errors
-- [x] define verification matrix and backend status policy
-- [x] add docs-example smoke coverage to the baseline test file
-- [x] add persona review checkpoint
-- [x] add first real PostgreSQL `schema`, `schema_detail`, `query`, `insert`, `update`, and `delete` smoke
-- [x] package CoQuery as an agent-usable Codex skill
-- [x] add first JPA entity source introspection slice
-- [x] add first DB knowledge audit and reference seed
-- [x] add structured DB/JPA rules and `db_knowledge` lookup
-- [x] add DB knowledge coverage reporting
-- [x] add local-knowledge-first planning for generation, natural, and write flows
-- [x] add normalized schema-detail knowledge for columns, indexes, foreign keys, and constraints
-- [x] add schema-detail-backed identifier validation for generation and simple natural-language flows
-- [x] add schema-detail-backed direct join inference for built-in join skills
-- [x] prove PostgreSQL `generate select_simple` and `generate count_simple` smoke with generated SQL execution
-- [x] prove direct PostgreSQL `generate join_inner` and `generate join_left` smoke against a real schema
-- [x] re-run local PostgreSQL smoke on 2026-04-22
-- [x] prove PostgreSQL write-safety guard smoke for dry-run rollback, max-affected rollback, and full-table rejection
-- [x] add GitHub Actions workflows for baseline verification and PostgreSQL smoke automation
-- [x] observe first GitHub Actions `baseline` and `postgresql-smoke` success on 2026-04-12
-- [x] record GitHub Actions `baseline` and `postgresql-smoke` success on 2026-04-27 UTC for `main` commit `7e677fe`
-- [x] document public repository usage and GitHub Actions log demo path
-- [x] add `doctor` command with masked target reporting and readiness checks
-- [x] add write safety guards for `--dry-run`, `--max-affected-rows`, and `--allow-full-table-write`
-- [x] add PostgreSQL doctor failure classification for common connection errors
-- [x] truth-align top-level docs and skill references with the 96-test baseline and current PostgreSQL driver expectations
-
-## Reference Documents
-
-- `STATUS_AUDIT_2026-04-04.md`
-- `STABILIZATION_PLAN_2026-04-04.md`
-- `WRITE_COMMAND_CONTRACT_2026-04-05.md`
-- `PERSONA_REVIEW_2026-04-05.md`
-- `MULTI_DB_ENTRY_CRITERIA_2026-04-05.md`
-- `BACKEND_CONNECTION_CONTRACT_2026-04-05.md`
-- `POSTGRESQL_PROBE_REQUIREMENTS_2026-04-05.md`
-- `PHASE5_VERIFICATION_MATRIX_2026-04-05.md`
-- `POSTGRESQL_LOCAL_SMOKE_2026-04-05.md`
-- `MYSQL_STATUS_DECISION_2026-04-05.md`
-- `MYSQL_PROBE_REQUIREMENTS_2026-04-09.md`
-- `POSTGRESQL_SCOPE_LOCK_2026-04-07.md`
-- `LLM_PROVIDER_REGISTRY_2026-04-07.md`
-- `PROVIDER_TRACK_DECISION_2026-04-09.md`
-- `STATE_REVIEW_2026-04-09.md`
-
-## Verification Baseline
-
-```bash
-python3 main.py --help
-python3 main.py --command schema --db example.db --format json
-python3 main.py --command schema_detail --db example.db --table users --format json
-python3 main.py --command generate --db example.db --skill select_simple --params '{"table":"users","cols":["id","name"]}' --format json
-python3 main.py --command generate --db /tmp/join-test.db --skill join_inner --params '{"table1":"members","table2":"orgs","cols":["members.email","orgs.name"]}' --format json
-python3 main.py --command generate --db /tmp/join-test.db --skill join_left --params '{"table1":"orgs","table2":"members","cols":["orgs.name","members.email"]}' --format json
-python3 sql_cli/tests/test_core.py
-python3 -c "import sql_cli.cli, sql_cli.core, sql_cli.db_new"
-python3 skills/coquery-cli/scripts/coquery_agent.py verify
-python3 skills/coquery-cli/scripts/coquery_agent.py demo
-python3 main.py --command jpa_schema --jpa-project /path/to/java-project --format json
-python3 main.py --command db_knowledge --dialect sqlite --topic schema
-bash scripts/run_postgresql_local_smoke.sh
-```
-
-## Current Direction
-
-Current work is about stabilization and honest phase boundaries.
-
-It is not about:
-
-- broad new feature count
-- claiming multi-DB support early
-- expanding backend and provider scope in parallel unless the primary and secondary tracks stay explicit
+Do not begin AI Handoff implementation on an unmerged distribution baseline unless a separate stacking decision is explicitly made.
