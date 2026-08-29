@@ -39,7 +39,7 @@ Verified and merged:
 Current result-view gap:
 
 - `practice_query` still presents a limited JSON-row preview
-- no deterministic BI/visual interpretation layer yet
+- deterministic ResultShape classification now exists on the active BI branch, but is not yet wired into `practice_query` output or the visible result block
 
 ### SQL / data engine
 
@@ -125,14 +125,23 @@ Reference:
 
 - `docs/coquery-bi-result-intelligence-2026-08-30.md`
 
+Classifier proof completed on the active branch:
+
+- deterministic `ResultShape` module: `sql_cli/result_intelligence.py`
+- executable contract coverage: `sql_cli/tests/test_result_intelligence.py`
+- baseline CI now runs the classifier contracts
+- proven rules include category+measure, time-series order guardrail, explicit part-to-whole, numeric relationship without identifier columns, explicit ordered stages, exact source/target/value flow, single metric fallback, zero/null truthfulness, category-count fallback, and deterministic/non-mutating behavior
+- conservative SQL flow extraction records only explicitly recognized clauses
+
 Implementation order:
 
-1. ResultShape classifier + contract tests
-2. real Table renderer
-3. Bar renderer for category + measure
-4. SQL clause Flow renderer
-5. deterministic Explain copy
-6. Line/time-series support
+1. [done] ResultShape classifier + contract tests
+2. wire classifier metadata into `practice_query`
+3. real Table renderer
+4. Bar renderer for category + measure
+5. SQL clause Flow renderer
+6. deterministic Explain copy
+7. Line/time-series support
 
 ### P0-C. AI Context-to-Prompt Handoff — first slice
 
@@ -200,6 +209,7 @@ Preferred direction remains a thin Capacitor-style wrapper, subject to implement
 Core CI:
 
 - CLI/core verification
+- deterministic BI ResultShape contract tests
 - practice focus smoke
 - learning path smoke
 - curriculum smoke
@@ -213,7 +223,7 @@ Deployment verification:
 - durable production workflow
 - post-deploy health/PWA/practice API checks
 
-BI result intelligence must add deterministic classifier/fallback regression coverage before merge.
+The next BI integration must preserve the classifier/fallback contracts while replacing the visible JSON-row preview.
 
 ## Scope Locks
 
@@ -248,7 +258,7 @@ For each slice:
 
 Immediate implementation gate:
 
-**prove the deterministic BI ResultShape classifier and Table fallback before adding chart rendering.**
+**wire the proven ResultShape metadata into `practice_query`, then replace the JSON-string preview with the canonical real Table renderer before adding chart rendering.**
 
 Execution direction:
 
