@@ -1,7 +1,7 @@
 # CoQuery Handoff
 
-Date: 2026-08-28
-Status: Learning/PWA baseline merged through PR #14; durable Cloudflare production deploy harness active on `ops/cloudflare-production-deploy`
+Date: 2026-08-30
+Status: Durable Cloudflare production deployment proven; BI Result Intelligence is the active product slice
 
 ## Product Definition
 
@@ -17,6 +17,12 @@ Canonical product distribution:
 
 The shared Web/PWA product logic remains canonical. Native wrappers must stay thin.
 
+Approved result-understanding direction:
+
+`Table -> Visual -> Flow -> Explain`
+
+Table remains the canonical evidence view. Visual/Flow/Explain are derived, explainable views of the same query result and SQL structure.
+
 ## Merged Product History
 
 - PR #8 — first-run learning Home
@@ -26,10 +32,12 @@ The shared Web/PWA product logic remains canonical. Native wrappers must stay th
 - PR #12 — learner-flow QA and next-problem navigation
 - PR #13 — installable PWA + Cloudflare Python Worker scaffold
 - PR #14 — isolated deployment bundle + real temporary Cloudflare hosted proof
+- PR #15 — durable production deployment workflow + PWA QA contract
+- PR #16 — post-deploy practice API verification hardening
 
-Latest `main` after PR #14:
+Latest verified merge after PR #16:
 
-- `2f06ba761eb869c65f91a03f7588ec2d363e1173`
+- `5752cd24142da60496e42b66e35d1a546e4a0c06`
 
 ## Verified Learner/Product Baseline
 
@@ -46,73 +54,39 @@ Baseline CI contains dedicated checks for:
 - PWA/serverless contract
 - PostgreSQL smoke as a separate narrow experimental proof
 
-## Cloudflare Hosted Proof — Completed
+## Durable Cloudflare Production — Completed Automated Proof
 
-A real authentication-free temporary Cloudflare Worker was deployed and verified over the public network.
+Durable Worker:
 
-Verified:
+- `https://coquery-pwa.edu-public-app.workers.dev`
+
+Successful workflow run:
+
+- `33160202910`
+
+Verified automatically on the durable Worker:
 
 - Worker deployment/startup
-- `/api/health` HTTP 200
+- `/api/health`
 - PWA HTML shell
-- valid standalone manifest
-- 24-problem `practice_list`
-- SQL execution
-- correct grading
+- standalone manifest
+- hosted practice listing
+- hosted practice grading
 
-Deployment uses an explicit generated bundle created by:
+The production workflow uses GitHub `production` environment-scoped Cloudflare credentials. Credential values are not in the repository and must never be committed.
 
-- `scripts/prepare_cloudflare_bundle.py`
+PR #16 hardened the post-deploy API check so a short 404/5xx/transport propagation window can be retried while non-retryable responses still fail.
 
-Do not return to repository-wide Worker module discovery. The temporary proof already demonstrated that repository-wide discovery can accidentally include virtual environments and local tooling.
+This automated HTTP proof is **not** browser/device/install QA.
 
 Reference:
-
-- `docs/coquery-cloudflare-temporary-deploy-proof-2026-08-28.md`
-- `docs/coquery-pwa-cloudflare-serverless-2026-08-28.md`
-
-## Durable Cloudflare Production Gate — Active
-
-Active branch:
-
-- `ops/cloudflare-production-deploy`
-
-Prepared:
 
 - `.github/workflows/cloudflare-production-deploy.yml`
-- manual `workflow_dispatch` only
-- GitHub `production` environment
-- credential presence check before deploy
-- reuse of the isolated bundle builder
-- durable `pywrangler deploy`
-- post-deploy health verification
-- post-deploy PWA shell/manifest verification
-- post-deploy hosted practice verification
-- regression checks that production deployment does not use the temporary-account flow
-- browser/device QA checklist
-
-Reference:
-
 - `docs/coquery-production-cloudflare-pwa-qa-2026-08-28.md`
 
-Required GitHub Actions secrets:
+## Browser/PWA QA — Still Required
 
-- `CLOUDFLARE_ACCOUNT_ID`
-- `CLOUDFLARE_API_TOKEN`
-
-These values are not in the repository and must never be committed.
-
-Current durable deployment blocker:
-
-- the two Cloudflare secrets are not yet available to the GitHub workflow in this session
-
-Once configured, manually run `cloudflare-production-deploy`. The run must return a durable Worker URL and pass all automated post-deploy checks before browser/device QA starts.
-
-## Browser/PWA QA Required After Durable Deploy
-
-The automated HTTP proof is not a substitute for interactive browser evidence.
-
-Required checks:
+Required interactive evidence:
 
 1. open public URL without login
 2. Home -> first problem -> SQL -> grade -> next problem
@@ -124,17 +98,85 @@ Required checks:
 8. verify `/api/*` does not use stale service-worker cache
 9. verify install/add-to-home-screen behavior where supported
 
-Target PWA baseline evidence should cover:
+Target evidence:
 
 - desktop PWA-capable browser
 - iOS Safari/Add to Home Screen
 - Android Chrome/install flow
 
-This is PWA evidence, not yet native App Store/Play Store wrapper evidence.
+This remains a release-evidence track and must be completed before native wrapper release claims.
 
-## AI Direction — Approved, Not Yet Implemented
+## BI Result Intelligence — Active
 
-Rule/local-knowledge behavior is still the deterministic baseline, but open-ended user meaning cannot be completely resolved by rules.
+The immediate product direction was reprioritized after durable deployment.
+
+Problem:
+
+- current `practice_query` output still renders a limited JSON-string row preview
+- this proves SQL execution but teaches little about the returned data shape
+
+Approved result surface:
+
+`Table | Visual | Flow | Explain`
+
+First boundary:
+
+`practice_query result -> classify -> Table | Visual recommendation | SQL Flow | Explain`
+
+First implementation sequence:
+
+1. deterministic `ResultShape` classifier + contract tests
+2. real Table renderer
+3. lightweight Bar renderer for clear category + measure results
+4. SQL clause Flow renderer
+5. deterministic Explain copy
+6. Line/time-series support after the contract is stable
+
+Truthfulness rules:
+
+- Table is always available
+- ambiguous results fall back to Table
+- recommendation must state why it was selected
+- no target/geography/stage order/flow edge may be inferred when not explicit
+- zero is data, not missingness
+- null remains null unless a transformation is explicit
+- no external AI/provider is required for the first slice
+- no undeclared React migration
+
+Reference:
+
+- `docs/coquery-bi-result-intelligence-2026-08-30.md`
+
+## Bklit UI Reference Boundary
+
+Reference repository:
+
+- `bklit/bklit-ui`
+
+Useful patterns:
+
+- Bar
+- Line/Area
+- Ring/Pie
+- Scatter
+- Funnel
+- Gauge
+- Sankey
+- Choropleth
+
+Upstream boundary:
+
+- chart components are MIT-licensed
+- Bklit Studio is proprietary and must not be reused or redistributed
+
+Architecture boundary:
+
+- current CoQuery PWA is plain HTML/CSS/JavaScript
+- Bklit components are React-based and depend on React/visx-style packages
+
+Therefore the active BI slice uses Bklit as a product/design/component reference only. Direct component adoption or React migration requires a separate explicit architecture decision.
+
+## AI Direction — Approved, Deferred Behind BI First Slice
 
 Approved pattern:
 
@@ -153,7 +195,7 @@ Responsibilities:
 - PromptPreview
 - HandoffAdapter
 
-The app builds a deterministic, reviewable prompt from the current SQL/evidence/limitations. The user controls what is copied or later shared to an external AI.
+The app builds a deterministic, reviewable prompt from current SQL/evidence/limitations. The user controls what is copied or later shared to an external AI.
 
 Do not turn this into automatic external AI sending or automatic SQL execution.
 
@@ -200,22 +242,21 @@ Do not broaden PostgreSQL/MySQL/JPA claims without new verification evidence.
 
 ### P0-1
 
-Durable Cloudflare/PWA release gate:
-
-1. configure `CLOUDFLARE_ACCOUNT_ID`
-2. configure `CLOUDFLARE_API_TOKEN`
-3. run `cloudflare-production-deploy`
-4. record durable URL/run/head
-5. execute browser/device PWA QA
-6. currentize roadmap/TODO/HANDOFF with actual evidence
+Browser/device PWA QA evidence remains open in parallel.
 
 ### P0-2
 
-AI Context-to-Prompt Handoff first implementation:
+BI Result Intelligence:
+
+`practice_query -> ResultShape -> Table | Visual | Flow | Explain`
+
+### P0-3
+
+AI Context-to-Prompt Handoff:
 
 `natural result -> validation prompt -> preview -> copy`
 
-### P0-3
+### P0-4
 
 Shared-code mobile wrappers:
 
@@ -224,6 +265,7 @@ Shared-code mobile wrappers:
 
 ### P1
 
+- additional BI visuals after shape rules prove the need
 - Practice-result AI handoff
 - system share / selectable AI destination
 - My Data bridge
@@ -248,11 +290,11 @@ Shared-code mobile wrappers:
 
 ## Immediate Next Gate
 
-**Configure the two Cloudflare GitHub Actions secrets and run the manual production deployment workflow.**
+**Implement and test the deterministic `ResultShape` classifier before chart rendering.**
 
-Execution history:
+Execution direction:
 
-`learning UX -> PWA/serverless -> hosted proof -> durable PWA QA -> AI validation handoff -> iOS/Android wrappers`
+`learning UX -> hosted PWA -> durable deploy -> BI result intelligence -> AI validation handoff -> iOS/Android wrappers`
 
 ## Key Documents
 
@@ -262,4 +304,5 @@ Execution history:
 - `docs/coquery-pwa-cloudflare-serverless-2026-08-28.md`
 - `docs/coquery-cloudflare-temporary-deploy-proof-2026-08-28.md`
 - `docs/coquery-production-cloudflare-pwa-qa-2026-08-28.md`
+- `docs/coquery-bi-result-intelligence-2026-08-30.md`
 - `docs/coquery-ai-context-to-prompt-handoff-2026-08-28.md`
