@@ -1,7 +1,7 @@
 # CoQuery Roadmap
 
-Version: product baseline 2026-08-28
-Last Updated: 2026-08-28
+Version: product baseline 2026-08-30
+Last Updated: 2026-08-30
 
 ## Product Definition
 
@@ -17,6 +17,12 @@ The canonical product surface is one shared Web/PWA codebase distributed as:
 
 Native applications must reuse the shared product logic instead of forking the learning flow.
 
+A SQL result is not limited to an Excel-like grid. The approved result-intelligence direction is:
+
+`Table -> Visual -> Flow -> Explain`
+
+Table remains the canonical evidence view; Visual/Flow/Explain are derived, explainable views.
+
 ## Current Verified Position
 
 ### Product UX
@@ -29,6 +35,11 @@ Verified and merged:
 - 24-problem curriculum
 - next-incomplete-problem navigation
 - user-flow regression smoke
+
+Current result-view gap:
+
+- `practice_query` still presents a limited JSON-row preview
+- no deterministic BI/visual interpretation layer yet
 
 ### SQL / data engine
 
@@ -45,63 +56,87 @@ Merged distribution work:
 
 - PR #13: installable PWA + Cloudflare Python Worker scaffold
 - PR #14: isolated Worker bundle + real temporary Cloudflare deployment proof
+- PR #15: durable Cloudflare production deployment workflow + PWA QA contract
+- PR #16: hardened post-deploy practice API verification
 
-PR #14 merge commit:
+Durable production Worker:
 
-- `2f06ba761eb869c65f91a03f7588ec2d363e1173`
+- `https://coquery-pwa.edu-public-app.workers.dev`
 
-Verified against a real public temporary Cloudflare Worker:
+Successful production workflow proof:
 
-- Worker deployment/startup
-- `/api/health`
-- PWA shell and standalone manifest
-- 24-problem `practice_list`
-- SQL execution
-- correct grading
+- run `33160202910`
+- deployment: success
+- `/api/health`: success
+- PWA shell/manifest: success
+- hosted practice API: success
 
-The temporary deployment proof is documented in:
+PR #16 merge commit:
 
-- `docs/coquery-cloudflare-temporary-deploy-proof-2026-08-28.md`
+- `5752cd24142da60496e42b66e35d1a546e4a0c06`
+
+Browser/device installation QA remains separate and is not implied by the automated deployment proof.
 
 ## Active Priority Stack
 
-### P0-A. Durable Cloudflare + PWA release baseline
+### P0-A. Browser/device PWA QA — release evidence
 
-Active branch:
+Durable hosted deployment is complete. Remaining release evidence:
 
-- `ops/cloudflare-production-deploy`
-
-Prepared on the branch:
-
-- manual production deployment workflow
-- GitHub `production` environment gate
-- `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` secret contract
-- reuse of the proven isolated Worker bundle
-- post-deploy health/PWA/practice API verification
-- production deployment contract regression checks
-- manual browser/device PWA QA checklist
+- browser learner flow: Home -> problem -> execute/grade -> next problem
+- progress across reload/relaunch
+- explicit offline-shell/network-required behavior
+- service-worker API cache boundary
+- desktop PWA install where supported
+- iOS Safari Add to Home Screen
+- Android Chrome install/add-to-home-screen
 
 Reference:
 
-- `.github/workflows/cloudflare-production-deploy.yml`
 - `docs/coquery-production-cloudflare-pwa-qa-2026-08-28.md`
 
-Remaining release gate:
+This evidence remains required before native wrapper release claims.
 
-1. configure `CLOUDFLARE_ACCOUNT_ID` in GitHub Actions secrets
-2. configure `CLOUDFLARE_API_TOKEN` in GitHub Actions secrets
-3. manually run `cloudflare-production-deploy`
-4. record the durable `workers.dev` URL and workflow run ID
-5. execute browser learner-flow QA
-6. verify browser-local progress across reload/relaunch
-7. verify service-worker offline shell behavior
-8. verify PWA installation on supported desktop/iOS/Android browsers
+### P0-B. BI Result Intelligence — active product slice
 
-Cloudflare's official CI/CD guidance requires the account ID and API token for non-interactive deployment. Do not commit either credential to the repository.
+Priority was explicitly moved forward after durable production deployment.
 
-### P0-B. AI Context-to-Prompt Handoff — first slice
+Approved surface:
 
-Starts after the durable hosted/browser baseline is recorded unless an explicit priority decision changes the gate.
+`Table | Visual | Flow | Explain`
+
+First implementation boundary:
+
+`practice_query result -> classify -> Table | Visual recommendation | SQL Flow | Explain`
+
+Core rules:
+
+- deterministic first; no LLM required
+- Table is always available and remains the evidence baseline
+- high-confidence result shapes may recommend a chart
+- ambiguous shapes fall back to Table
+- SQL Flow contains only recognized query clauses
+- visualization recommendation explains why it was selected
+- no React migration in the first slice
+
+Bklit UI is a design/component reference for chart patterns such as Bar, Line, Funnel, Sankey, Gauge, and Choropleth. Current CoQuery is plain HTML/CSS/JS, so direct React registry adoption is deferred until a deliberate frontend architecture decision.
+
+Reference:
+
+- `docs/coquery-bi-result-intelligence-2026-08-30.md`
+
+Implementation order:
+
+1. ResultShape classifier + contract tests
+2. real Table renderer
+3. Bar renderer for category + measure
+4. SQL clause Flow renderer
+5. deterministic Explain copy
+6. Line/time-series support
+
+### P0-C. AI Context-to-Prompt Handoff — first slice
+
+Starts after the BI result-intelligence first slice unless an explicit priority decision changes the gate.
 
 First implementation boundary:
 
@@ -122,9 +157,9 @@ Reference:
 
 - `docs/coquery-ai-context-to-prompt-handoff-2026-08-28.md`
 
-### P0-C. iOS / Android wrapper baseline
+### P0-D. iOS / Android wrapper baseline
 
-After hosted PWA behavior is stable:
+After hosted PWA behavior and browser/device evidence are stable:
 
 - validate the minimal wrapper choice
 - keep shared Web/PWA source canonical
@@ -137,6 +172,7 @@ Preferred direction remains a thin Capacitor-style wrapper, subject to implement
 
 ### P1
 
+- additional BI visuals only when ResultShape rules justify them
 - Practice-result AI handoff
 - system share / selectable external AI destination
 - My Data bridge
@@ -156,6 +192,8 @@ Preferred direction remains a thin Capacitor-style wrapper, subject to implement
 - PR #12 — learner-flow QA and next-problem navigation
 - PR #13 — PWA + Cloudflare serverless scaffold
 - PR #14 — real temporary Cloudflare deployment proof and isolated deployment harness
+- PR #15 — durable production deployment workflow and PWA QA gate
+- PR #16 — production API verification hardening, proven by successful production deploy
 
 ## Verification Baseline
 
@@ -172,19 +210,24 @@ Core CI:
 Deployment verification:
 
 - temporary Cloudflare remote proof workflow
-- production deployment workflow contract checks
+- durable production workflow
+- post-deploy health/PWA/practice API checks
+
+BI result intelligence must add deterministic classifier/fallback regression coverage before merge.
 
 ## Scope Locks
 
 Do not silently:
 
 - split the canonical PWA into separate native product implementations
-- make external AI mandatory for SQL generation
+- make external AI mandatory for SQL generation or result interpretation
 - automatically send data to an AI
 - expose Production Assist data through AI handoff before ExportPolicy proof
-- describe temporary Cloudflare proof as durable production deployment
-- describe HTTP proof as completed browser/device/install QA
+- describe automated HTTP proof as completed browser/device/install QA
 - broaden PostgreSQL/MySQL support claims without new proof
+- turn the BI result slice into an undeclared React migration
+- reuse or redistribute Bklit Studio; only the upstream MIT chart-component boundary is eligible for later technical evaluation
+- invent chart dimensions, targets, flow edges, geographic meaning, or stage order
 
 ## Official Execution Loop
 
@@ -203,10 +246,12 @@ For each slice:
 
 ## Next Decision Gate
 
-Immediate gate:
+Immediate implementation gate:
 
-**configure the two Cloudflare GitHub Actions secrets and execute the manual durable production workflow.**
+**prove the deterministic BI ResultShape classifier and Table fallback before adding chart rendering.**
 
-Execution order remains:
+Execution direction:
 
-`learning UX -> PWA/serverless -> hosted proof -> durable PWA QA -> AI validation handoff -> iOS/Android wrappers`
+`learning UX -> hosted PWA -> durable deploy -> BI result intelligence -> AI validation handoff -> iOS/Android wrappers`
+
+Browser/device PWA QA remains an open release-evidence track in parallel.
