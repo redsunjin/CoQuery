@@ -1,7 +1,7 @@
 # CoQuery Handoff
 
 Date: 2026-08-30
-Status: Durable Cloudflare production deployment proven; BI Result Intelligence is the active product slice
+Status: Durable Cloudflare production deployment proven; BI ResultShape classifier proven on active branch; Table integration is next
 
 ## Product Definition
 
@@ -47,6 +47,8 @@ Verified learner-flow contract:
 
 Baseline CI contains dedicated checks for:
 
+- CLI/core
+- deterministic BI ResultShape contracts
 - practice focus
 - learning path
 - curriculum
@@ -123,14 +125,45 @@ First boundary:
 
 `practice_query result -> classify -> Table | Visual recommendation | SQL Flow | Explain`
 
+### ResultShape classifier — implemented and tested on PR #18 branch
+
+Files:
+
+- `sql_cli/result_intelligence.py`
+- `sql_cli/tests/test_result_intelligence.py`
+
+Proven deterministic behavior:
+
+- category + numeric measure -> Bar recommendation when category labels are stable and bounded
+- temporal + numeric measure -> Line only when the returned temporal sequence is safely ordered
+- explicit share/percentage forming a complete total -> Ring recommendation
+- two non-identifier numeric observation fields -> Scatter recommendation
+- explicit stage + numeric value + SQL `ORDER BY` -> Funnel recommendation
+- exact `source`, `target`, `value` contract -> Sankey/Flow recommendation
+- one numeric metric does not infer Gauge without a target/range
+- null/ambiguous/too-wide/too-many-category results fall back to Table
+- zero remains a valid numeric value
+- classifier output is deterministic and does not mutate returned rows
+- SQL flow extraction includes only explicitly recognized FROM/JOIN/WHERE/GROUP BY/aggregate/HAVING/ORDER BY/LIMIT fragments
+
+The baseline workflow now executes these classifier contracts.
+
+Important boundary:
+
+- classifier exists as a shared Python module
+- it is not yet wired into `practice_query` output
+- the visible PWA still shows the legacy JSON-string row preview
+- no chart renderer has been added yet
+
 First implementation sequence:
 
-1. deterministic `ResultShape` classifier + contract tests
-2. real Table renderer
-3. lightweight Bar renderer for clear category + measure results
-4. SQL clause Flow renderer
-5. deterministic Explain copy
-6. Line/time-series support after the contract is stable
+1. [done] deterministic `ResultShape` classifier + contract tests
+2. wire ResultShape metadata into `practice_query`
+3. real Table renderer
+4. lightweight Bar renderer for clear category + measure results
+5. SQL clause Flow renderer
+6. deterministic Explain copy
+7. Line/time-series support after the contract is stable
 
 Truthfulness rules:
 
@@ -250,6 +283,10 @@ BI Result Intelligence:
 
 `practice_query -> ResultShape -> Table | Visual | Flow | Explain`
 
+Immediate implementation:
+
+`wire ResultShape into practice_query -> real Table renderer`
+
 ### P0-3
 
 AI Context-to-Prompt Handoff:
@@ -290,7 +327,7 @@ Shared-code mobile wrappers:
 
 ## Immediate Next Gate
 
-**Implement and test the deterministic `ResultShape` classifier before chart rendering.**
+**Wire the proven ResultShape metadata into `practice_query`, then replace the legacy JSON-string preview with the canonical real Table renderer before chart rendering.**
 
 Execution direction:
 
