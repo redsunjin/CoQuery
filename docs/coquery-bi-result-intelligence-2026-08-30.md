@@ -1,7 +1,7 @@
 # CoQuery BI Result Intelligence
 
 Date: 2026-08-30
-Status: product/UX baseline for the next result-view slice
+Status: product/UX baseline plus proven deterministic ResultShape classifier
 
 ## Product decision
 
@@ -25,7 +25,7 @@ The current hosted practice result renders `practice_query` rows as JSON strings
 
 That is sufficient for execution proof but weak for data understanding.
 
-The next result view should preserve the raw result while adding a deterministic interpretation layer.
+The deterministic classification layer is now implemented and regression-tested, but it is not yet wired into `practice_query` output or the visible PWA result block.
 
 ## Result view contract
 
@@ -44,7 +44,15 @@ The user must always be able to return to the exact Table evidence.
 
 ## Deterministic ResultShape classifier
 
-The first slice must not require an LLM.
+Implemented in:
+
+- `sql_cli/result_intelligence.py`
+
+Executable contract coverage:
+
+- `sql_cli/tests/test_result_intelligence.py`
+
+The classifier does not require an LLM or chart runtime.
 
 Inputs:
 
@@ -52,7 +60,7 @@ Inputs:
 - returned values/types
 - row count
 - submitted SQL text
-- practice problem metadata when available
+- practice problem metadata when available (reserved for later deterministic teaching hints)
 
 Outputs:
 
@@ -63,9 +71,10 @@ Outputs:
 - `reason`
 - `dimensions`
 - `measures`
+- `column_profiles`
 - `flow_steps`
 
-Proposed shapes:
+Supported/proven shapes in the current classifier:
 
 - `single_metric`
 - `category_measure`
@@ -74,53 +83,58 @@ Proposed shapes:
 - `numeric_relationship`
 - `stage_funnel`
 - `source_target_flow`
-- `geographic_measure`
 - `tabular`
 - `unknown`
 
-## Initial visual recommendation rules
+`geographic_measure` remains deferred until a supported geography contract exists.
+
+## Current recommendation rules
 
 | Result shape | Default view | Visual | Guardrail |
 | --- | --- | --- | --- |
-| one category + one numeric measure | Visual | Bar | use Table when categories are too numerous or labels are unstable |
-| time/date + numeric measure | Visual | Line | preserve chronological order |
-| small category set representing a meaningful total | Visual | Ring/Pie | only when part-to-whole is explicit; prefer Bar otherwise |
-| two numeric fields per observation | Visual | Scatter | only when rows represent observations rather than aggregates |
-| ordered stage + count/value | Visual | Funnel | stage order must be explicit |
-| source + target + numeric value | Flow | Sankey | exact source/target/value columns required |
-| geography key/name + numeric measure | Visual | Choropleth | later slice; requires an explicit supported geography mapping |
-| single current value + explicit target/range | Visual | Gauge | do not infer a target |
-| mixed/raw records | Table | none | explain that a table is the truthful default |
+| one stable category + one numeric measure | Visual | Bar | max 20 categories, no missing category/measure values |
+| time/date + numeric measure | Visual | Line | returned temporal sequence must be safely ordered |
+| small explicit percentage/share set forming a complete total | Visual | Ring | max 6 parts; total must be approximately 100 or 1.0 |
+| two non-identifier numeric fields per observation | Visual | Scatter | no aggregate/GROUP BY; identifier-like numeric columns are excluded |
+| explicit stage + numeric value | Visual | Funnel | stage-like column plus SQL `ORDER BY` required |
+| exact `source` + `target` + numeric `value` columns | Flow | Sankey | exact three-column contract required |
+| single current numeric value | Table | none | Gauge is not inferred without an explicit target/range |
+| mixed/raw/incomplete/too-wide result | Table | none | Table is the truthful default |
 
-No chart should be selected solely because numeric values exist.
+No chart is selected solely because numeric values exist.
+
+Zero remains a valid numeric value. Null values are not silently converted to zero; ambiguous/incomplete chart candidates fall back to Table.
 
 ## SQL transformation Flow
 
-Flow has two meanings and they must remain distinct.
+Flow has two meanings and they remain distinct.
 
-### A. SQL reasoning flow — first implementation target
+### A. SQL reasoning flow — classifier metadata implemented
 
 Example:
 
 `customers -> WHERE active = 1 -> GROUP BY region -> COUNT(*) -> ORDER BY count DESC -> result`
 
-This teaches how SQL transforms data.
+The current conservative parser records only explicitly recognized fragments:
 
-The first slice can derive a simple sequence from explicit clauses:
-
-- FROM / JOIN
+- FROM
+- JOIN
 - WHERE
 - GROUP BY
-- aggregate expressions
+- aggregate expressions (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`)
 - HAVING
 - ORDER BY
 - LIMIT
 
-Unknown or unsupported syntax stays unknown; do not invent an interpretation.
+Unsupported syntax is not assigned invented meaning.
 
-### B. Returned-data flow — later visual target
+The visible Flow renderer remains a later step in this PR slice.
 
-If the result itself has an explicit `source`, `target`, `value` contract, CoQuery may render a Sankey-style flow.
+### B. Returned-data flow — renderer later
+
+If the result itself has an exact `source`, `target`, `value` contract, the classifier returns `source_target_flow` and recommends Sankey/Flow.
+
+The actual Sankey renderer is deferred until the first Table/Bar result surface is stable.
 
 Do not confuse this with the SQL reasoning flow.
 
@@ -168,18 +182,29 @@ Boundary:
 
 `practice_query result -> classify -> Table | Visual recommendation | SQL Flow | Explain`
 
-Minimum proof:
+Completed proof:
 
-- Table view renders real columns/rows instead of JSON-string rows
-- deterministic classifier selects `bar` for a clear category + measure result
-- ambiguous result stays `table`
-- SQL Flow displays explicit clause steps for a supported SELECT/GROUP BY query
-- Explain states the recommendation reason
+- deterministic ResultShape module
+- category+measure -> Bar recommendation
+- ambiguous result -> Table fallback
+- ordered time-series -> Line recommendation; unsafe order -> Table
+- explicit part-to-whole, numeric relationship, stage funnel, and source/target/value classification
+- single metric does not infer Gauge
+- zero/null/category-count guardrails
+- deterministic/non-mutating classifier behavior
+- conservative SQL flow-step extraction
+- classifier contracts run in baseline CI
 - no external AI call
 - no React dependency
-- exact raw result remains inspectable
 
-A first chart renderer may be limited to Bar. Line can follow immediately after the contract is stable.
+Still required for the first visible result slice:
+
+- wire ResultShape metadata into `practice_query`
+- Table view renders real columns/rows instead of JSON-string rows
+- recommendation reason appears in the result block
+- exact raw result remains inspectable
+- first chart renderer may be limited to Bar
+- visible SQL Flow and deterministic Explain follow after Table/Bar contract is stable
 
 ## Suggested UI placement
 
@@ -229,13 +254,13 @@ This makes the visualization choice teachable rather than magical.
 7. No React migration is introduced by this slice.
 8. Regression coverage protects the classifier and fallback behavior.
 
-## Next implementation order
+## Current implementation order
 
-1. `ResultShape` classifier + contract tests
-2. real Table renderer
-3. Bar renderer for `category_measure`
-4. SQL clause Flow renderer
-5. deterministic Explain copy
-6. Line/time-series support
-7. evaluate additional Bklit-inspired visuals only when result-shape rules require them
-
+1. [done] `ResultShape` classifier + contract tests
+2. wire classifier metadata into `practice_query`
+3. real Table renderer
+4. Bar renderer for `category_measure`
+5. SQL clause Flow renderer
+6. deterministic Explain copy
+7. Line/time-series support
+8. evaluate additional Bklit-inspired visuals only when result-shape rules require them
