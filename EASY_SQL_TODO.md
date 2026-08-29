@@ -1,7 +1,7 @@
 # CoQuery Todo List
 
-Version: product baseline 2026-08-28
-Last Updated: 2026-08-28
+Version: product baseline 2026-08-30
+Last Updated: 2026-08-30
 
 ## Active Priorities
 
@@ -11,52 +11,96 @@ Completed:
 
 - [x] PR #13 PWA/serverless scaffold merged
 - [x] PR #14 temporary hosted proof + isolated deployment harness merged
+- [x] PR #15 durable production workflow + PWA QA contract merged
+- [x] PR #16 production API verification hardening merged
 - [x] PWA manifest / service worker / browser-local progress
 - [x] Cloudflare Python Worker practice API
-- [x] real temporary Worker deploy/startup proof
-- [x] remote `/api/health` proof
-- [x] remote PWA shell/manifest proof
-- [x] remote 24-problem listing
-- [x] remote SQL execution
-- [x] remote grading
-- [x] isolated deployment bundle prevents repository-wide over-bundling
-- [x] add manual production deployment workflow
-- [x] require GitHub `production` environment
-- [x] require `CLOUDFLARE_ACCOUNT_ID`
-- [x] require `CLOUDFLARE_API_TOKEN`
-- [x] add production health/PWA/practice post-deploy checks
-- [x] add production deployment regression contract to PWA smoke
-- [x] document browser/device installation QA gate
+- [x] durable production Worker created
+- [x] production `/api/health` proof
+- [x] production PWA shell/manifest proof
+- [x] production hosted practice API proof
+- [x] deployment verification tolerates short propagation windows without masking non-retryable failures
 
-Active branch:
+Durable Worker:
 
-- `ops/cloudflare-production-deploy`
+- `https://coquery-pwa.edu-public-app.workers.dev`
 
-Current blocker / next actions:
+Successful production workflow:
 
-- [ ] add GitHub Actions secret `CLOUDFLARE_ACCOUNT_ID`
-- [ ] add GitHub Actions secret `CLOUDFLARE_API_TOKEN`
-- [ ] run `cloudflare-production-deploy` manually
-- [ ] record durable `workers.dev` URL
-- [ ] record production workflow run ID and deployment head SHA
-- [ ] browser QA: Home -> problem bank -> solve -> grade -> next problem
+- run `33160202910`
+
+Remaining browser/device evidence:
+
+- [ ] Home -> problem bank -> solve -> grade -> next problem
 - [ ] verify progress across browser reload/relaunch
 - [ ] verify `/api/*` is not served from stale service-worker cache
 - [ ] verify offline shell reopening and explicit network-required execution failure
 - [ ] verify desktop PWA installation where supported
 - [ ] verify iOS Safari Add to Home Screen baseline
 - [ ] verify Android Chrome install/add-to-home-screen baseline
-- [ ] update roadmap/TODO/HANDOFF with actual device/browser evidence
+- [ ] record actual browser/device evidence
 
 Reference:
 
 - `docs/coquery-production-cloudflare-pwa-qa-2026-08-28.md`
 
-### P0-2. AI Context-to-Prompt Handoff — first implementation slice
+### P0-2. BI Result Intelligence — active
+
+Reference:
+
+- `docs/coquery-bi-result-intelligence-2026-08-30.md`
+
+Product surface:
+
+`Table | Visual | Flow | Explain`
+
+First boundary:
+
+`practice_query result -> classify -> Table | Visual recommendation | SQL Flow | Explain`
+
+Tasks:
+
+- [ ] define `ResultShape` contract
+- [ ] add deterministic classifier tests
+- [ ] classify category + measure results
+- [ ] classify time-series candidates
+- [ ] classify source/target/value only when explicit
+- [ ] fall back to `tabular`/Table for ambiguous results
+- [ ] replace JSON-string row preview with a real column/row Table renderer
+- [ ] add recommendation reason to the result block
+- [ ] add first lightweight Bar renderer without React migration
+- [ ] add SQL clause Flow renderer for supported SELECT clauses
+- [ ] add deterministic Explain copy
+- [ ] keep exact raw result available in the detail panel
+- [ ] add KR/EN copy
+- [ ] add keyboard/accessibility baseline for view tabs
+- [ ] verify no external AI/provider call is required
+- [ ] verify zero/null handling is truthful
+
+Acceptance:
+
+- same rows/SQL => same classification
+- ambiguous result => Table
+- chart recommendation always explains why
+- SQL Flow never invents an unsupported clause/meaning
+- Table remains the canonical evidence view
+- no React dependency is added in the first slice
+- no external AI requirement is added
+
+Bklit reference boundary:
+
+- use `bklit/bklit-ui` as chart/BI design reference
+- upstream chart components are MIT-licensed
+- Bklit Studio is proprietary and is not reusable/redistributable
+- direct component adoption is deferred because current CoQuery is plain HTML/CSS/JS and Bklit components are React-based
+
+### P0-3. AI Context-to-Prompt Handoff — first implementation slice
 
 Reference:
 
 - `docs/coquery-ai-context-to-prompt-handoff-2026-08-28.md`
+
+Starts after the BI first slice unless explicitly reprioritized.
 
 First boundary:
 
@@ -89,7 +133,7 @@ Acceptance:
 - clipboard side effect requires explicit user action
 - CoQuery never claims an external AI received the prompt
 
-### P0-3. iOS / Android wrapper baseline
+### P0-4. iOS / Android wrapper baseline
 
 After durable PWA/browser proof:
 
@@ -106,6 +150,18 @@ After durable PWA/browser proof:
 Do not fork learning/business logic into separate native implementations.
 
 ## P1
+
+### BI expansion
+
+Only after the first ResultShape contract is proven:
+
+- [ ] Line/time-series renderer
+- [ ] part-to-whole Ring/Pie when the total is explicit
+- [ ] Scatter for true numeric observation pairs
+- [ ] Funnel for explicit ordered stages
+- [ ] Sankey for explicit source/target/value results
+- [ ] Gauge only with an explicit target/range
+- [ ] Choropleth only with a supported geography contract
 
 ### AI handoff expansion
 
@@ -153,6 +209,8 @@ Only when product evidence requires it:
 - [x] PR #12 learner-flow QA
 - [x] PR #13 PWA/serverless scaffold
 - [x] PR #14 Cloudflare temporary hosted proof + deployment harness
+- [x] PR #15 durable production deployment workflow + PWA QA gate
+- [x] PR #16 production API verification hardening + successful production proof
 
 ## Existing Engineering Baseline Retained
 
@@ -188,4 +246,4 @@ Not complete:
 
 ## Current Next Action
 
-**Configure the two Cloudflare GitHub Actions secrets, then manually run `cloudflare-production-deploy`.**
+**Implement and test the deterministic `ResultShape` classifier before adding chart rendering.**
