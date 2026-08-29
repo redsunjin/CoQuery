@@ -58,14 +58,23 @@ First boundary:
 
 `practice_query result -> classify -> Table | Visual recommendation | SQL Flow | Explain`
 
+Classifier baseline completed on the active branch:
+
+- `sql_cli/result_intelligence.py`
+- `sql_cli/tests/test_result_intelligence.py`
+- baseline CI executes the classifier contracts
+
 Tasks:
 
-- [ ] define `ResultShape` contract
-- [ ] add deterministic classifier tests
-- [ ] classify category + measure results
-- [ ] classify time-series candidates
-- [ ] classify source/target/value only when explicit
-- [ ] fall back to `tabular`/Table for ambiguous results
+- [x] define `ResultShape` contract
+- [x] add deterministic classifier tests
+- [x] classify category + measure results
+- [x] classify time-series candidates
+- [x] classify source/target/value only when explicit
+- [x] fall back to `tabular`/Table for ambiguous results
+- [x] cover single metric, part-to-whole, numeric relationship, ordered stage, zero/null, category-count guardrails, and deterministic/non-mutating behavior
+- [x] derive conservative SQL flow steps from explicitly recognized clauses
+- [ ] wire ResultShape metadata into `practice_query` output
 - [ ] replace JSON-string row preview with a real column/row Table renderer
 - [ ] add recommendation reason to the result block
 - [ ] add first lightweight Bar renderer without React migration
@@ -74,8 +83,7 @@ Tasks:
 - [ ] keep exact raw result available in the detail panel
 - [ ] add KR/EN copy
 - [ ] add keyboard/accessibility baseline for view tabs
-- [ ] verify no external AI/provider call is required
-- [ ] verify zero/null handling is truthful
+- [ ] verify no external AI/provider call is required in the rendered result flow
 
 Acceptance:
 
@@ -246,4 +254,4 @@ Not complete:
 
 ## Current Next Action
 
-**Implement and test the deterministic `ResultShape` classifier before adding chart rendering.**
+**Wire `ResultShape` into `practice_query`, then replace the JSON-string preview with the canonical real Table renderer before adding any chart.**
