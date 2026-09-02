@@ -1,7 +1,7 @@
 # CoQuery Handoff
 
-Date: 2026-08-30
-Status: Durable Cloudflare production deployment proven; BI ResultShape classifier proven on active branch; Table integration is next
+Date: 2026-09-02
+Status: Durable Cloudflare production deployment proven; PR #18 now has ResultShape classification + hosted metadata integration + canonical practice Table; first Bar renderer is next
 
 ## Product Definition
 
@@ -39,6 +39,8 @@ Latest verified merge after PR #16:
 
 - `5752cd24142da60496e42b66e35d1a546e4a0c06`
 
+PR #18 remains Draft and unmerged.
+
 ## Verified Learner/Product Baseline
 
 Verified learner-flow contract:
@@ -49,11 +51,12 @@ Baseline CI contains dedicated checks for:
 
 - CLI/core
 - deterministic BI ResultShape contracts
-- practice focus
+- practice-query regression gate
+- practice focus including canonical Table markers
 - learning path
 - curriculum
 - user-flow QA
-- PWA/serverless contract
+- PWA/serverless contract including hosted BI wiring
 - PostgreSQL smoke as a separate narrow experimental proof
 
 ## Durable Cloudflare Production — Completed Automated Proof
@@ -80,6 +83,8 @@ The production workflow uses GitHub `production` environment-scoped Cloudflare c
 PR #16 hardened the post-deploy API check so a short 404/5xx/transport propagation window can be retried while non-retryable responses still fail.
 
 This automated HTTP proof is **not** browser/device/install QA.
+
+The new PR #18 BI integration is branch-CI proven but has not yet been merged/redeployed to this durable Worker.
 
 Reference:
 
@@ -108,14 +113,7 @@ Target evidence:
 
 This remains a release-evidence track and must be completed before native wrapper release claims.
 
-## BI Result Intelligence — Active
-
-The immediate product direction was reprioritized after durable deployment.
-
-Problem:
-
-- current `practice_query` output still renders a limited JSON-string row preview
-- this proves SQL execution but teaches little about the returned data shape
+## BI Result Intelligence — Active PR #18
 
 Approved result surface:
 
@@ -125,7 +123,7 @@ First boundary:
 
 `practice_query result -> classify -> Table | Visual recommendation | SQL Flow | Explain`
 
-### ResultShape classifier — implemented and tested on PR #18 branch
+### ResultShape classifier — implemented and tested
 
 Files:
 
@@ -146,20 +144,52 @@ Proven deterministic behavior:
 - classifier output is deterministic and does not mutate returned rows
 - SQL flow extraction includes only explicitly recognized FROM/JOIN/WHERE/GROUP BY/aggregate/HAVING/ORDER BY/LIMIT fragments
 
-The baseline workflow now executes these classifier contracts.
+### Hosted `practice_query` integration — implemented and tested
 
-Important boundary:
+Files:
 
-- classifier exists as a shared Python module
-- it is not yet wired into `practice_query` output
-- the visible PWA still shows the legacy JSON-string row preview
-- no chart renderer has been added yet
+- `sql_cli/result_integration.py`
+- `cloudflare_worker.py`
+- `sql_cli/tests/test_practice_query_regression.py`
+
+Behavior:
+
+- successful hosted `practice_query` responses receive additive `data.result_intelligence`
+- `columns`, `rows`, `row_count`, actions, mode context, grading behavior, and structured non-SELECT errors remain protected
+- the integration helper copies the result/data mapping before attaching metadata, so the raw result object is not mutated
+- failed practice-query results are not rewritten
+
+### Canonical focused-practice Table — implemented and tested
+
+Files:
+
+- `app_shell/terminal_shell_prototype/practice-focus.js`
+- `app_shell/terminal_shell_prototype/practice-focus.css`
+- `app_shell/terminal_shell_prototype/practice_focus_smoke.py`
+- `app_shell/terminal_shell_prototype/pwa_serverless_smoke.py`
+
+Behavior:
+
+- the visible five-row JSON-string preview is hidden in focused practice
+- a real HTML table renders the returned columns and all rows in the current response
+- Table remains the canonical result evidence even when `result_intelligence` recommends Bar/Line/etc.
+- recommendation name/reason is shown above the Table
+- `NULL` is rendered as `NULL`; zero remains `0`
+- numeric cells use tabular alignment and mobile widths use horizontal scrolling
+- no React dependency or external AI/provider call is introduced
+
+Latest implementation verification before document-only currentization:
+
+- baseline: success
+- PostgreSQL smoke: success
+
+The documentation commits trigger CI again; merge remains blocked until the latest branch head is green.
 
 First implementation sequence:
 
 1. [done] deterministic `ResultShape` classifier + contract tests
-2. wire ResultShape metadata into `practice_query`
-3. real Table renderer
+2. [done] hosted `practice_query` metadata integration
+3. [done] real focused-practice Table renderer
 4. lightweight Bar renderer for clear category + measure results
 5. SQL clause Flow renderer
 6. deterministic Explain copy
@@ -175,6 +205,7 @@ Truthfulness rules:
 - null remains null unless a transformation is explicit
 - no external AI/provider is required for the first slice
 - no undeclared React migration
+- derived BI metadata must not mutate canonical query evidence
 
 Reference:
 
@@ -285,7 +316,7 @@ BI Result Intelligence:
 
 Immediate implementation:
 
-`wire ResultShape into practice_query -> real Table renderer`
+`proven category_measure -> lightweight Bar renderer`, while Table remains canonical evidence.
 
 ### P0-3
 
@@ -327,7 +358,7 @@ Shared-code mobile wrappers:
 
 ## Immediate Next Gate
 
-**Wire the proven ResultShape metadata into `practice_query`, then replace the legacy JSON-string preview with the canonical real Table renderer before chart rendering.**
+**Add the first lightweight Bar renderer for high-confidence `category_measure` results, with Table retained as canonical evidence and all regression gates green.**
 
 Execution direction:
 
