@@ -40,6 +40,7 @@ References:
 - `docs/coquery-bi-result-intelligence-2026-08-30.md`
 - `docs/coquery-query-graph-implementation-2026-09-02.md`
 - `docs/coquery-deterministic-explain-implementation-2026-09-02.md`
+- `docs/coquery-line-result-visual-implementation-2026-09-02.md`
 
 ## Current Verified Position
 
@@ -60,14 +61,17 @@ Active PR #18 result-understanding baseline now includes:
 - additive hosted `practice_query` result-intelligence metadata
 - real column/row Table instead of visible JSON-string row preview
 - truthful `NULL` and numeric-zero rendering
-- first lightweight Bar Result Visual for proven `category_measure`
+- lightweight Bar Result Visual for proven `category_measure`
+- deterministic Line Result Visual for safely ordered `time_series`
+- Line preserves exact returned temporal order and repeats the safe temporal-order gate in the frontend
+- Line explicitly treats horizontal spacing as returned sequence rather than inferred elapsed-time distance
 - visible Query Graph from recognized `flow_steps`
 - Query Graph labeled as logical SQL transformation, not database execution order
 - deterministic Explain covering recognized SQL transformation, conservative row meaning, view recommendation, and its own evidence boundary
 - Explain explicitly refuses business causality, hidden meaning, and physical execution-plan inference
 - KR/EN Explain copy without an external AI/provider
 - mobile-safe layouts without a React migration
-- PWA cache `coquery-pwa-v3` containing Bar + Query Graph + Explain assets while `/api/*` remains uncached
+- PWA cache `coquery-pwa-v4` containing the current Result Visual module plus Query Graph + Explain assets
 
 This branch work is not yet merged or deployed to the durable production Worker.
 
@@ -150,6 +154,9 @@ Core rules:
 - Query Graph/Flow is a first-class learning view
 - high-confidence result shapes may recommend a chart
 - ambiguous shapes fall back to Table
+- Bar is limited to proven category + numeric measure results
+- Line is limited to safely ordered temporal + numeric measure results
+- Line never sorts rows or invents elapsed-time spacing semantics
 - Query Graph contains only recognized SQL structure
 - Query Graph is not an execution-plan claim
 - Explain describes only what is supported by SQL/result metadata and never invents business causality
@@ -168,14 +175,17 @@ Proven on active PR #18:
 - hosted Worker wiring for successful `practice_query` responses
 - real Table renderer in focused practice
 - Bar Result Visual for proven category + measure only
+- Line Result Visual for safely ordered time-series only
+- frontend Line guard mirrors the classifier temporal-key/order contract and rejects stale unordered metadata
+- Line uses every returned row, preserves returned order, and keeps exact values in Table
 - Query Graph renderer preserving recognized step order/text
 - Query Graph filters unsupported step kinds and never invents physical execution nodes
 - deterministic Explain renderer with conservative shape-based row semantics and KR/EN copy
 - Explain filters unsupported flow kinds and explicitly blocks business-causality/hidden-semantics/execution-plan claims
 - practice-query regression gate protecting catalog/query/grading/error contracts
-- executable Bar, Query Graph, and Explain smokes
+- executable Bar/Line, Query Graph, and Explain smokes
 - practice-focus and PWA/serverless smoke coverage protecting visible wiring and app-shell cache
-- baseline CI is green on Explain implementation head `b67f4d81ba955cc1cf6a30868b4135c58016f1f4`; PostgreSQL smoke remains the separate gate on branch updates
+- Line implementation commit `6e0802ef35d7e376d7e2f7580cad1af5a4d3b9fa` passed both baseline CI and separate PostgreSQL smoke
 
 Implementation order:
 
@@ -185,10 +195,12 @@ Implementation order:
 4. [done] lightweight Bar Result Visual for proven category + measure
 5. [done] Query Graph/Flow renderer as core learning view
 6. [done] deterministic Explain copy
-7. **Line/time-series Result Visual**
-8. nested Query Graph support only after explicit parser contracts
-9. Execution Graph only with real `EXPLAIN`-style evidence
-10. additional BI visuals only when ResultShape rules justify them
+7. [done] Line/time-series Result Visual
+8. **localize remaining result-intelligence recommendation reasons**
+9. define keyboard/accessibility behavior for future view switching
+10. nested Query Graph support only after explicit parser contracts
+11. Execution Graph only with real `EXPLAIN`-style evidence
+12. additional BI visuals only when ResultShape rules justify them
 
 ### P0-C. AI Context-to-Prompt Handoff — first slice
 
@@ -230,7 +242,7 @@ Preferred direction remains a thin Capacitor-style wrapper, subject to implement
 
 - nested Query Graph support for subqueries/CTEs/window constructs after parser contracts exist
 - Execution Graph research and provider-specific `EXPLAIN` contracts
-- Line/time-series and additional BI visuals only when ResultShape rules justify them
+- Ring/Pie, Scatter, Funnel, Sankey and other BI visuals only when ResultShape rules justify them
 - Practice-result AI handoff
 - system share / selectable external AI destination
 - My Data bridge
@@ -260,14 +272,14 @@ Core CI:
 - CLI/core verification
 - deterministic BI ResultShape contract tests
 - practice-query regression gate
-- executable Bar Result Visual smoke
+- executable Bar + Line Result Visual smoke
 - executable Query Graph model smoke
 - executable deterministic Explain smoke
-- practice-focus smoke including Table/Bar/Query Graph/Explain asset wiring
+- practice-focus smoke including Table/Bar/Line/Query Graph/Explain asset and renderer markers
 - learning path smoke
 - curriculum smoke
 - user-flow QA smoke
-- PWA/serverless smoke including hosted result-intelligence wiring and `coquery-pwa-v3` shell assets
+- PWA/serverless smoke including hosted result-intelligence wiring and `coquery-pwa-v4` shell assets
 - separate PostgreSQL smoke
 
 Deployment verification:
@@ -290,7 +302,7 @@ Do not silently:
 - broaden PostgreSQL/MySQL support claims without new proof
 - turn BI result slice into an undeclared React migration
 - reuse or redistribute Bklit Studio; only upstream MIT chart-component boundary is eligible for later technical evaluation
-- invent chart dimensions, targets, flow edges, geographic meaning, stage order, or execution nodes
+- invent chart dimensions, targets, flow edges, geographic meaning, stage order, elapsed-time spacing, or execution nodes
 - replace or mutate canonical `columns`, `rows`, or `row_count` when adding derived BI metadata
 - teach Query Graph as if it were database physical execution plan
 - use Explain to invent causality, intent, or hidden business meaning
@@ -310,12 +322,13 @@ For each slice:
 8. record exactly what was verified and skipped
 9. merge only after explicit approval
 10. currentize `EASY_SQL_ROADMAP.md`, `EASY_SQL_TODO.md`, and `HANDOFF.md`
+11. prefer one cohesive implementation commit per logical slice; documentation-only currentization may follow after verified CI
 
 ## Next Decision Gate
 
 Immediate implementation gate:
 
-**implement the deterministic Line Result Visual only for safely ordered `time_series` results, while Table remains canonical evidence and all regression gates stay green.**
+**replace the remaining backend-English result-intelligence recommendation reason text with deterministic KR/EN copy, without changing classifier decisions.**
 
 Execution direction:
 

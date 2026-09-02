@@ -51,6 +51,7 @@ Reference:
 - `docs/coquery-bi-result-intelligence-2026-08-30.md`
 - `docs/coquery-query-graph-implementation-2026-09-02.md`
 - `docs/coquery-deterministic-explain-implementation-2026-09-02.md`
+- `docs/coquery-line-result-visual-implementation-2026-09-02.md`
 
 Product principle:
 
@@ -76,7 +77,9 @@ Implemented on active PR #18:
 - additive hosted `practice_query` result-intelligence metadata
 - real column/row Table renderer; `NULL` and zero preserved truthfully
 - lightweight Bar Result Visual for proven `category_measure` only
-- Bar uses exact returned order and refuses null/non-numeric/ambiguous results
+- deterministic Line Result Visual for safely ordered `time_series` only
+- Line preserves exact returned order, repeats the safe temporal-order guard in the frontend, and never infers elapsed-time distance from point spacing
+- Bar and Line both keep Table as canonical exact-value evidence
 - visible Query Graph renderer from recognized `flow_steps`
 - Query Graph preserves recognized SQL fragment text/order and ignores unsupported step kinds
 - Query Graph is explicitly labeled as logical transformation, not database execution order
@@ -84,9 +87,9 @@ Implemented on active PR #18:
 - deterministic Explain rendering for SQL transformation, row semantics, view recommendation, and explanation boundary
 - Explain filters unsupported flow kinds and never treats physical execution-plan nodes as evidence
 - Explain has KR/EN copy and remains provider-free
-- Query Graph, Bar, and Explain do not mutate canonical `columns`, `rows`, or `row_count`
-- PWA app-shell cache `coquery-pwa-v3` includes Bar/Query Graph/Explain assets while `/api/*` remains uncached
-- executable Bar, Query Graph, and Explain model smokes run inside the baseline gate
+- Query Graph, Result Visuals, and Explain do not mutate canonical `columns`, `rows`, or `row_count`
+- PWA app-shell cache `coquery-pwa-v4` carries the current Bar/Line visual module plus Query Graph/Explain assets while `/api/*` remains uncached
+- executable Bar/Line, Query Graph, and Explain model smokes run inside the baseline gate
 
 Tasks:
 
@@ -112,6 +115,10 @@ Tasks:
 - [x] add deterministic Explain copy connecting SQL transformation + row meaning + visual recommendation
 - [x] add explicit Explain boundary against business causality/hidden meaning/physical execution-plan inference
 - [x] add executable Explain smoke and PWA cache checks
+- [x] add deterministic Line Result Visual only for safely ordered `time_series`
+- [x] preserve exact temporal return order and reject unordered/stale Line metadata in the frontend
+- [x] disclose that Line horizontal spacing represents returned sequence, not inferred elapsed-time distance
+- [x] add Line regression coverage without weakening Bar regression coverage
 - [ ] complete KR/EN result-intelligence recommendation reason copy instead of backend-English reason text
 - [ ] add keyboard/accessibility baseline for future view tabs
 - [ ] keep exact raw result available in the detail panel as an explicit regression check
@@ -122,6 +129,9 @@ Acceptance:
 - same rows/SQL => same classification
 - ambiguous result => Table
 - chart recommendation always explains why
+- Bar renders only proven category + measure results
+- Line renders only safely ordered time-series results
+- Line does not sort returned rows or infer elapsed-time distance
 - Query Graph contains only recognized SQL structure
 - Query Graph is never presented as physical runtime order/execution plan
 - Execution Graph is never shown without actual planner/executor evidence
@@ -131,6 +141,12 @@ Acceptance:
 - existing practice catalog/query/grading/non-SELECT contracts remain green
 - no React dependency is added in the first slice
 - no external AI requirement is added
+
+Regression proof for the Line implementation commit:
+
+- commit `6e0802ef35d7e376d7e2f7580cad1af5a4d3b9fa`
+- `baseline` ✅
+- `postgresql-smoke` ✅
 
 Bklit reference boundary:
 
@@ -210,7 +226,7 @@ Only after the first Query Graph renderer is proven:
 
 Only after the first ResultShape contract is proven:
 
-- [ ] Line/time-series renderer
+- [x] Line/time-series renderer
 - [ ] part-to-whole Ring/Pie when the total is explicit
 - [ ] Scatter for true numeric observation pairs
 - [ ] Funnel for explicit ordered stages
@@ -298,7 +314,8 @@ Not complete:
 7. record skipped and completed validation explicitly
 8. merge only after explicit approval
 9. currentize roadmap/TODO/HANDOFF after material baseline changes
+10. prefer one cohesive implementation commit per logical slice; documentation-only currentization may be separate when it follows verified CI
 
 ## Current Next Action
 
-**Add the deterministic Line Result Visual for safely ordered `time_series` results while keeping Table canonical and all regression gates green.**
+**Localize the remaining result-intelligence recommendation reason text into deterministic KR/EN copy before adding more BI chart types.**

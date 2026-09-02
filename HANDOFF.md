@@ -1,7 +1,7 @@
 # CoQuery Handoff
 
 Date: 2026-09-02
-Status: Durable Cloudflare production deployment proven; PR #18 now has ResultShape classification + canonical Table + Bar Result Visual + Query Graph + deterministic Explain; Line/time-series Result Visual is next
+Status: Durable Cloudflare production deployment proven; PR #18 now has ResultShape classification + canonical Table + Bar + Line Result Visuals + Query Graph + deterministic Explain; recommendation-reason localization is next
 
 ## Product Definition
 
@@ -72,7 +72,7 @@ Verified automatically on durable Worker:
 
 The production workflow uses GitHub `production` environment-scoped Cloudflare credentials. Credential values are not in the repository and must never be committed.
 
-The new PR #18 BI/Query Graph/Explain integration is branch-CI proven but has not yet been merged/redeployed to the durable Worker.
+The PR #18 BI/Query Graph/Explain/Line integration is branch-CI proven but has not yet been merged/redeployed to the durable Worker.
 
 ## Browser/PWA QA — Still Required
 
@@ -162,6 +162,34 @@ Behavior:
 - null/non-numeric/ambiguous results refuse chart rendering
 - returned rows are not mutated
 
+### Line Result Visual — implemented and tested
+
+Files:
+
+- `app_shell/terminal_shell_prototype/practice-result-visual.js`
+- `app_shell/terminal_shell_prototype/practice-result-visual.css`
+- `app_shell/terminal_shell_prototype/practice_result_visual_smoke.js`
+- `docs/coquery-line-result-visual-implementation-2026-09-02.md`
+
+Behavior:
+
+- only proven `time_series + recommended_visual=line` is eligible
+- frontend repeats the safe temporal-key/order check instead of trusting stale metadata blindly
+- exact returned row order is preserved; no sorting or sampling
+- ascending and descending safe temporal order are both accepted and preserved
+- null/non-numeric/unparseable/unordered temporal results refuse Line rendering
+- vertical geometry uses exact returned min/max
+- horizontal geometry represents returned temporal sequence only; elapsed-time distance is not inferred
+- first/last temporal labels and min/max measure labels are visible
+- exact values remain in canonical Table
+- returned rows are not mutated
+
+Implementation commit:
+
+- `6e0802ef35d7e376d7e2f7580cad1af5a4d3b9fa`
+- baseline: success
+- PostgreSQL smoke: success
+
 ### Query Graph — implemented and tested
 
 Files:
@@ -204,9 +232,9 @@ Behavior:
 
 ### PWA shell cache — updated
 
-`service-worker.js` now uses `coquery-pwa-v3` and explicitly caches:
+`service-worker.js` now uses `coquery-pwa-v4` and caches the current result-understanding assets:
 
-- `practice-result-visual.js/css`
+- `practice-result-visual.js/css` — Bar + Line
 - `practice-query-flow.js/css`
 - `practice-result-explain.js/css`
 
@@ -214,18 +242,23 @@ Behavior:
 
 ## Regression proof
 
-Explain implementation head `b67f4d81ba955cc1cf6a30868b4135c58016f1f4` has baseline success; branch PostgreSQL smoke is retained as a separate gate. Documentation currentization commits also trigger both workflows and must remain green before merge.
+Line implementation commit `6e0802ef35d7e376d7e2f7580cad1af5a4d3b9fa` passed:
+
+- baseline: success
+- PostgreSQL smoke: success
 
 Baseline includes:
 
 - core CLI tests
 - deterministic ResultShape contracts
 - practice-query regression gate
-- Bar Result Visual executable smoke
+- Bar + Line Result Visual executable smoke
 - Query Graph executable smoke
 - deterministic Explain executable smoke
 - focused-practice asset checks
 - learning path/curriculum/user-flow/PWA smoke
+
+Documentation currentization commits must also remain green before merge.
 
 ## Bklit UI Reference Boundary
 
@@ -285,7 +318,7 @@ BI Result Intelligence:
 
 Immediate implementation:
 
-**deterministic Line Result Visual** for safely ordered `time_series` results, with Table kept as canonical evidence.
+**localize the remaining backend-English result-intelligence recommendation reason into deterministic Korean/English UI copy without changing classifier decisions.**
 
 ### P0-3
 
@@ -302,7 +335,7 @@ Shared-code mobile wrappers:
 
 ### P1
 
-- additional BI visuals after Line/time-series baseline
+- additional BI visuals only after the first BI result-understanding slice is closed
 - nested Query Graph only with explicit parser contracts
 - Execution Graph only with real provider-specific `EXPLAIN` evidence
 - Practice-result AI handoff
@@ -321,10 +354,11 @@ Shared-code mobile wrappers:
 7. record verified and skipped evidence separately
 8. merge only after explicit approval
 9. currentize roadmap/TODO/HANDOFF after material baseline changes
+10. prefer one cohesive implementation commit per logical slice; documentation-only currentization may be separate after verified CI
 
 ## Immediate Next Gate
 
-**Implement the Line Result Visual only for safely ordered `time_series` results.**
+**Localize deterministic result-intelligence recommendation reasons without changing ResultShape decisions.**
 
 ## Key Documents
 
@@ -334,5 +368,6 @@ Shared-code mobile wrappers:
 - `docs/coquery-bi-result-intelligence-2026-08-30.md`
 - `docs/coquery-query-graph-implementation-2026-09-02.md`
 - `docs/coquery-deterministic-explain-implementation-2026-09-02.md`
+- `docs/coquery-line-result-visual-implementation-2026-09-02.md`
 - `docs/coquery-production-cloudflare-pwa-qa-2026-08-28.md`
 - `docs/coquery-ai-context-to-prompt-handoff-2026-08-28.md`
