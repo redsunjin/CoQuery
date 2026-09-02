@@ -1,7 +1,7 @@
 # CoQuery Query Graph Implementation
 
 Date: 2026-09-02
-Status: implemented on Draft PR #18 branch; branch CI verified before merge
+Status: implemented on Draft PR #18 branch; implementation CI verified; roadmap/TODO/HANDOFF currentized
 
 ## Product principle
 
@@ -19,7 +19,7 @@ Table remains canonical evidence.
 
 ## Implemented Query Graph boundary
 
-The hosted practice result already receives deterministic `result_intelligence.flow_steps` from the Python classifier. The first visible Query Graph now renders only those recognized steps.
+The hosted practice result already receives deterministic `result_intelligence.flow_steps` from the Python classifier. The first visible Query Graph renders only those recognized steps.
 
 Recognized kinds:
 
@@ -34,7 +34,7 @@ Recognized kinds:
 
 The UI preserves the exact recognized SQL fragment text and its order. Unsupported step kinds are ignored rather than interpreted.
 
-A final **Result** node is derived only from the actual returned `row_count`/rows so the learner can see the transformation ending in concrete output.
+A final **Result** node is derived only from actual returned `row_count`/rows so the learner can see the transformation ending in concrete output.
 
 ## Truthfulness rules
 
@@ -57,7 +57,7 @@ Files:
 
 The graph is rendered as an accessible ordered list of step cards connected left-to-right. Small screens use horizontal scrolling instead of dropping or sampling steps. The visual uses explicit step labels in addition to styling, and reduced-motion behavior is safe by default.
 
-The onboarding loader now includes the Query Graph assets alongside the Bar Result Visual assets.
+The onboarding loader includes Query Graph assets alongside Bar Result Visual assets.
 
 The PWA app shell cache was bumped to `coquery-pwa-v2` and explicitly includes:
 
@@ -79,12 +79,19 @@ The implementation is protected by:
 - PWA/serverless smoke including shell-cache assertions
 - separate PostgreSQL smoke
 
-Verified on branch head `d30ce9f888db7b6bc2626ff2626fcf8eef0093c8` before this documentation commit:
+Verified on implementation head `d30ce9f888db7b6bc2626ff2626fcf8eef0093c8`:
 
 - `baseline` — success
 - `postgresql-smoke` — success
 
-The documentation commit must also remain green before merge.
+The following project state files were currentized after the implementation proof:
+
+- `docs/coquery-bi-result-intelligence-2026-08-30.md`
+- `EASY_SQL_ROADMAP.md`
+- `EASY_SQL_TODO.md`
+- `HANDOFF.md`
+
+Documentation-only heads must remain green before merge.
 
 ## Next implementation gate
 
