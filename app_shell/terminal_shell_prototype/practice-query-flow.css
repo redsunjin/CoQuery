@@ -1,0 +1,122 @@
+.practice-query-flow {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0 2px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-soft);
+}
+
+.practice-query-flow-header {
+  display: grid;
+  gap: 4px;
+}
+
+.practice-query-flow-title {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 760;
+}
+
+.practice-query-flow-description {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.practice-query-flow-scroll {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.practice-query-flow-track {
+  display: flex;
+  align-items: stretch;
+  gap: 28px;
+  width: max-content;
+  min-width: 100%;
+  margin: 0;
+  padding: 2px 0 6px;
+  list-style: none;
+}
+
+.practice-query-flow-node {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  width: min(240px, 58vw);
+  min-width: 170px;
+  padding: 11px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--panel-raised);
+}
+
+.practice-query-flow-node:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  top: 50%;
+  right: -22px;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.practice-query-flow-kind {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.practice-query-flow-sql {
+  display: block;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.practice-query-flow-node.is-result {
+  border-style: dashed;
+  align-content: center;
+}
+
+.practice-query-flow-result-rows {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 720;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 760px) {
+  .practice-query-flow {
+    padding: 12px;
+  }
+
+  .practice-query-flow-track {
+    gap: 24px;
+  }
+
+  .practice-query-flow-node {
+    min-width: 158px;
+    width: min(220px, 70vw);
+  }
+
+  .practice-query-flow-node:not(:last-child)::after {
+    right: -20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .practice-query-flow-scroll {
+    scroll-behavior: auto;
+  }
+}
