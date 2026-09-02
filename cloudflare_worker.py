@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 from workers import Response, WorkerEntrypoint
 
 from sql_cli.command_api import run_command
-from sql_cli.result_intelligence import classify_result
+from sql_cli.result_integration import enrich_practice_query_result
 
 
 HOSTED_COMMANDS = {
@@ -39,23 +39,6 @@ def _json_response(payload: dict, status: int = 200) -> Response:
             "Cache-Control": "no-store",
         },
     )
-
-
-def _enrich_practice_query(result: dict, args: dict) -> dict:
-    """Attach deterministic, additive BI metadata without changing raw evidence."""
-
-    if not result.get("ok") or result.get("command") != "practice_query":
-        return result
-
-    data = result.get("data")
-    if not isinstance(data, dict):
-        return result
-
-    columns = data.get("columns") or []
-    rows = data.get("rows") or []
-    sql = data.get("sql") or args.get("sql")
-    data["result_intelligence"] = classify_result(columns, rows, sql=sql)
-    return result
 
 
 class Default(WorkerEntrypoint):
@@ -124,7 +107,7 @@ class Default(WorkerEntrypoint):
 
                 result = run_command(command, args=args, context=context)
                 if command == "practice_query":
-                    result = _enrich_practice_query(result, args)
+                    result = enrich_practice_query_result(result, args)
                 return _json_response(result, 200 if result.get("ok") else 400)
             except Exception as exc:
                 return _json_response(
