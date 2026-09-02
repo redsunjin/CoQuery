@@ -1,7 +1,7 @@
 # CoQuery Todo List
 
-Version: product baseline 2026-08-30
-Last Updated: 2026-08-30
+Version: product baseline 2026-09-02
+Last Updated: 2026-09-02
 
 ## Active Priorities
 
@@ -64,6 +64,18 @@ Classifier baseline completed on the active branch:
 - `sql_cli/tests/test_result_intelligence.py`
 - baseline CI executes the classifier contracts
 
+Hosted integration completed on the active PR #18 branch:
+
+- `sql_cli/result_integration.py` attaches additive `result_intelligence` metadata without mutating raw result data
+- `cloudflare_worker.py` enriches successful hosted `practice_query` responses
+- focused practice UI replaces the visible JSON-string preview with a real column/row table
+- all returned rows from the current query response are rendered; the old five-row JSON preview is hidden
+- `NULL` remains visible as `NULL`; numeric zero remains `0`
+- recommendation metadata is shown above the canonical Table result
+- mobile table overflow is handled without introducing React
+- `sql_cli/tests/test_practice_query_regression.py` protects the existing learner/query/grading contract and additive enrichment boundary
+- existing practice-focus and PWA/serverless smoke checks protect the table enhancement and hosted wiring
+
 Tasks:
 
 - [x] define `ResultShape` contract
@@ -74,16 +86,18 @@ Tasks:
 - [x] fall back to `tabular`/Table for ambiguous results
 - [x] cover single metric, part-to-whole, numeric relationship, ordered stage, zero/null, category-count guardrails, and deterministic/non-mutating behavior
 - [x] derive conservative SQL flow steps from explicitly recognized clauses
-- [ ] wire ResultShape metadata into `practice_query` output
-- [ ] replace JSON-string row preview with a real column/row Table renderer
-- [ ] add recommendation reason to the result block
+- [x] wire ResultShape metadata into hosted `practice_query` output
+- [x] replace JSON-string row preview with a real column/row Table renderer in focused practice
+- [x] add recommendation reason to the result block
+- [x] keep zero/null handling truthful in the Table renderer
+- [x] verify no external AI/provider call is required in the rendered result flow
 - [ ] add first lightweight Bar renderer without React migration
 - [ ] add SQL clause Flow renderer for supported SELECT clauses
 - [ ] add deterministic Explain copy
-- [ ] keep exact raw result available in the detail panel
-- [ ] add KR/EN copy
-- [ ] add keyboard/accessibility baseline for view tabs
-- [ ] verify no external AI/provider call is required in the rendered result flow
+- [ ] keep exact raw result available in the detail panel as an explicit regression check
+- [ ] complete KR/EN result-intelligence reason copy instead of backend-English reason text
+- [ ] add keyboard/accessibility baseline for future view tabs
+- [ ] decide whether the local/advanced command runtime should attach the same additive metadata before the BI slice closes
 
 Acceptance:
 
@@ -92,6 +106,8 @@ Acceptance:
 - chart recommendation always explains why
 - SQL Flow never invents an unsupported clause/meaning
 - Table remains the canonical evidence view
+- BI enrichment does not mutate `columns`, `rows`, or `row_count`
+- existing practice catalog/query/grading/non-SELECT error contracts remain green
 - no React dependency is added in the first slice
 - no external AI requirement is added
 
@@ -254,4 +270,4 @@ Not complete:
 
 ## Current Next Action
 
-**Wire `ResultShape` into `practice_query`, then replace the JSON-string preview with the canonical real Table renderer before adding any chart.**
+**Add the first lightweight Bar renderer for proven `category_measure` results while keeping Table as canonical evidence and the full regression gate green.**
