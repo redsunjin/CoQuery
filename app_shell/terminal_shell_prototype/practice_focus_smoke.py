@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Static smoke checks for the focused SQL practice workspace."""
+"""Static and executable smoke checks for the focused SQL practice workspace."""
 
 from pathlib import Path
+import subprocess
 
 ROOT = Path(__file__).resolve().parent
 
@@ -18,8 +19,11 @@ def main() -> int:
     focus_css = ROOT / "practice-focus.css"
     visual_js = ROOT / "practice-result-visual.js"
     visual_css = ROOT / "practice-result-visual.css"
+    flow_js = ROOT / "practice-query-flow.js"
+    flow_css = ROOT / "practice-query-flow.css"
+    flow_smoke = ROOT / "practice_query_flow_smoke.js"
 
-    for path in (onboarding, focus_js, focus_css, visual_js, visual_css):
+    for path in (onboarding, focus_js, focus_css, visual_js, visual_css, flow_js, flow_css, flow_smoke):
         if not path.exists():
             raise AssertionError(f"missing practice focus asset: {path.name}")
 
@@ -27,7 +31,9 @@ def main() -> int:
     assert_contains(onboarding, "practice-focus.js")
     assert_contains(onboarding, "practice-result-visual.css")
     assert_contains(onboarding, "practice-result-visual.js")
-    assert_contains(onboarding, 'script.addEventListener("load", loadPracticeResultVisualAssets')
+    assert_contains(onboarding, "practice-query-flow.css")
+    assert_contains(onboarding, "practice-query-flow.js")
+    assert_contains(onboarding, 'script.addEventListener("load", loadPracticeResultIntelligenceAssets')
     assert_contains(focus_js, 'appShell.dataset.practiceFocus = enabled ? "true" : "false"')
     assert_contains(focus_js, "MutationObserver")
     assert_contains(focus_js, "practice-hint-toggle")
@@ -45,6 +51,11 @@ def main() -> int:
     assert_contains(visual_js, 'tableWrap.querySelector(".practice-result-table-scroll")')
     assert_contains(visual_js, 'point.value < 0')
     assert_contains(visual_js, 'width_percent: width')
+    assert_contains(flow_js, "buildPracticeQueryFlowModel")
+    assert_contains(flow_js, "RECOGNIZED_KINDS")
+    assert_contains(flow_js, 'step.text.trim()')
+    assert_contains(flow_js, 'figure.className = "practice-query-flow"')
+    assert_contains(flow_js, "This is not the database execution order")
     assert_contains(focus_css, '.app-shell[data-practice-focus="true"]')
     assert_contains(focus_css, ".practice-focus-block")
     assert_contains(focus_css, ".practice-support-actions")
@@ -54,7 +65,12 @@ def main() -> int:
     assert_contains(visual_css, ".practice-result-bar-zero")
     assert_contains(visual_css, ".practice-result-bar-fill.is-negative")
     assert_contains(visual_css, "@media (prefers-reduced-motion: reduce)")
+    assert_contains(flow_css, ".practice-query-flow-track")
+    assert_contains(flow_css, ".practice-query-flow-node:not(:last-child)::after")
+    assert_contains(flow_css, "@media (prefers-reduced-motion: reduce)")
     assert_contains(focus_css, "@media (max-width: 760px)")
+
+    subprocess.run(["node", str(flow_smoke)], cwd=ROOT, check=True)
 
     print("practice focus smoke: ok")
     return 0
