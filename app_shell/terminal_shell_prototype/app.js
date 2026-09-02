@@ -9,6 +9,7 @@ const detailActions = document.getElementById("detailActions");
 const detailHelp = document.getElementById("detailHelp");
 const sessionList = document.getElementById("sessionList");
 const drawerButton = document.getElementById("drawerButton");
+const detailBackdrop = document.getElementById("detailBackdrop");
 const commandMenuToggle = document.getElementById("commandMenuToggle");
 const commandMenuPanel = document.getElementById("commandMenuPanel");
 const providerStatus = document.getElementById("providerStatus");
@@ -463,6 +464,20 @@ function setCommandMenuOpen(open) {
   }
   commandMenuToggle.setAttribute("aria-expanded", open ? "true" : "false");
   commandMenuPanel.hidden = !open;
+}
+
+function setDetailOpen(open) {
+  if (!appShell) {
+    return;
+  }
+  const isOpen = Boolean(open);
+  appShell.dataset.detailOpen = isOpen ? "true" : "false";
+  [drawerButton, detailToggle].filter(Boolean).forEach((button) => {
+    button.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  });
+  if (isOpen) {
+    setCommandMenuOpen(false);
+  }
 }
 
 function updateProviderReadinessStatus(providerName = selectedProviderName, state = "selected", detail = "") {
@@ -1864,6 +1879,7 @@ if (commandMenuToggle && commandMenuPanel) {
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       setCommandMenuOpen(false);
+      setDetailOpen(false);
     }
   });
 }
@@ -1888,15 +1904,14 @@ languageButtons.forEach((button) => {
   });
 });
 
-[drawerButton, detailToggle].forEach((button) => {
+[drawerButton, detailToggle].filter(Boolean).forEach((button) => {
   button.addEventListener("click", () => {
-    appShell.dataset.detailOpen = appShell.dataset.detailOpen === "true" ? "false" : "true";
+    setDetailOpen(appShell.dataset.detailOpen !== "true");
   });
 });
 
-closeDetail.addEventListener("click", () => {
-  appShell.dataset.detailOpen = "false";
-});
+closeDetail?.addEventListener("click", () => setDetailOpen(false));
+detailBackdrop?.addEventListener("click", () => setDetailOpen(false));
 
 applyStaticTranslations();
 const initialCommand = window.coqueryCommandRuntime?.initialCommand || "provider_list_presets";

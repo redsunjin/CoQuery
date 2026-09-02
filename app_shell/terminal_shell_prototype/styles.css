@@ -4,8 +4,10 @@
   --panel: #171815;
   --panel-soft: #22231f;
   --panel-raised: #1c1d19;
+  --panel-overlay: #24261f;
   --line: #30322b;
   --line-strong: #4a4d42;
+  --line-overlay: #5a5d50;
   --text: #f3f1e8;
   --muted: #aaa79a;
   --faint: #787568;
@@ -69,6 +71,15 @@ textarea {
 
 button {
   cursor: pointer;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 3px;
 }
 
 code,
@@ -327,10 +338,12 @@ pre {
   max-height: min(520px, calc(100vh - 150px));
   overflow: auto;
   padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--panel);
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.34);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--panel-overlay);
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.52),
+    0 0 0 1px rgba(255, 255, 255, 0.035);
 }
 
 .language-toggle {
@@ -968,6 +981,10 @@ html[data-app-mode="production_assist"] .mode-option.active {
   display: none;
 }
 
+.detail-backdrop {
+  display: none;
+}
+
 .detail-panel {
   min-width: 0;
   border-width: 0 0 0 1px;
@@ -1218,15 +1235,40 @@ html[data-app-mode="production_assist"] .mode-option.active {
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 10;
+    z-index: 60;
     max-height: calc(74dvh - var(--safe-area-top));
     transform: translateY(105%);
     transition: transform 180ms ease;
     border-width: 1px 0 0;
-    border-radius: 8px 8px 0 0;
-    box-shadow: 0 -12px 28px rgba(20, 20, 20, 0.16);
+    border-top-color: var(--line-overlay);
+    border-radius: 18px 18px 0 0;
+    background: var(--panel-overlay);
+    box-shadow:
+      0 -20px 56px rgba(0, 0, 0, 0.56),
+      0 0 0 1px rgba(255, 255, 255, 0.035);
     padding: 18px max(16px, var(--safe-area-right)) max(18px, var(--safe-area-bottom))
       max(16px, var(--safe-area-left));
+  }
+
+  .detail-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgba(2, 3, 2, 0.58);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease, visibility 180ms ease;
+    visibility: hidden;
+  }
+
+  .app-shell[data-detail-open="true"] .detail-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
   }
 
   .app-shell[data-detail-open="true"] .detail-panel {
@@ -1236,6 +1278,13 @@ html[data-app-mode="production_assist"] .mode-option.active {
   .close-detail {
     display: inline-flex;
     align-items: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detail-panel,
+  .detail-backdrop {
+    transition-duration: 1ms;
   }
 }
 

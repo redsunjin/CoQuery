@@ -11,6 +11,7 @@ const learningHomeCopy = {
     firstProblem: "첫 문제 시작하기",
     problemBank: "문제 선택",
     advanced: "고급 기능",
+    privacy: "개인정보 처리방침",
     step1Title: "1. 문제를 읽고",
     step1Copy: "실제 업무와 비슷한 데이터 질문에서 시작합니다.",
     step2Title: "2. SQL을 실행하고",
@@ -25,6 +26,7 @@ const learningHomeCopy = {
     firstProblem: "Start first problem",
     problemBank: "Choose a problem",
     advanced: "Advanced tools",
+    privacy: "Privacy Policy",
     step1Title: "1. Read a problem",
     step1Copy: "Begin with a concrete data question similar to real work.",
     step2Title: "2. Run SQL",
@@ -43,6 +45,11 @@ function applyLearningHomeTranslations() {
       node.textContent = copy[key];
     }
   });
+
+  const privacyPolicyLink = document.getElementById("privacyPolicyLink");
+  if (privacyPolicyLink) {
+    privacyPolicyLink.href = `https://redsunjin.github.io/CoQuery/privacy/?lang=${lang}`;
+  }
 }
 
 function setLearningHomeMode(enabled) {
