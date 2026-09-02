@@ -1,7 +1,7 @@
 # CoQuery Roadmap
 
-Version: product baseline 2026-08-30
-Last Updated: 2026-08-30
+Version: product baseline 2026-09-02
+Last Updated: 2026-09-02
 
 ## Product Definition
 
@@ -36,10 +36,16 @@ Verified and merged:
 - next-incomplete-problem navigation
 - user-flow regression smoke
 
-Current result-view gap:
+Active PR #18 result-view baseline now includes:
 
-- `practice_query` still presents a limited JSON-row preview
-- deterministic ResultShape classification now exists on the active BI branch, but is not yet wired into `practice_query` output or the visible result block
+- deterministic ResultShape classification
+- additive hosted `practice_query` result-intelligence metadata
+- a real column/row Table in the focused practice result instead of the visible JSON-string row preview
+- visible recommendation metadata while Table remains the evidence baseline
+- truthful `NULL` and numeric-zero rendering
+- mobile horizontal overflow handling without a React migration
+
+This branch work is not yet merged or deployed to the durable production Worker.
 
 ### SQL / data engine
 
@@ -49,6 +55,8 @@ Current result-view gap:
 - optional provider infrastructure remains available
 - PostgreSQL remains a narrow experimental track with smoke proof
 - MySQL is not part of the working baseline
+- `sql_cli/result_intelligence.py` provides the deterministic classifier
+- `sql_cli/result_integration.py` attaches derived metadata without mutating canonical result fields
 
 ### Product distribution
 
@@ -125,19 +133,22 @@ Reference:
 
 - `docs/coquery-bi-result-intelligence-2026-08-30.md`
 
-Classifier proof completed on the active branch:
+Proven on the active PR #18 branch:
 
 - deterministic `ResultShape` module: `sql_cli/result_intelligence.py`
 - executable contract coverage: `sql_cli/tests/test_result_intelligence.py`
-- baseline CI now runs the classifier contracts
-- proven rules include category+measure, time-series order guardrail, explicit part-to-whole, numeric relationship without identifier columns, explicit ordered stages, exact source/target/value flow, single metric fallback, zero/null truthfulness, category-count fallback, and deterministic/non-mutating behavior
-- conservative SQL flow extraction records only explicitly recognized clauses
+- additive integration helper: `sql_cli/result_integration.py`
+- hosted Worker wiring for successful `practice_query` responses
+- real Table renderer in `practice-focus.js`/`practice-focus.css`
+- practice-query regression gate protecting catalog/query/grading/error contracts
+- practice-focus and PWA/serverless smoke coverage protecting the visible Table and hosted wiring
+- baseline CI and separate PostgreSQL smoke remain green after the integration
 
 Implementation order:
 
 1. [done] ResultShape classifier + contract tests
-2. wire classifier metadata into `practice_query`
-3. real Table renderer
+2. [done] hosted `practice_query` metadata integration
+3. [done] real Table renderer in focused practice
 4. Bar renderer for category + measure
 5. SQL clause Flow renderer
 6. deterministic Explain copy
@@ -210,11 +221,12 @@ Core CI:
 
 - CLI/core verification
 - deterministic BI ResultShape contract tests
-- practice focus smoke
+- practice-query regression gate
+- practice focus smoke including canonical Table markers
 - learning path smoke
 - curriculum smoke
 - user-flow QA smoke
-- PWA/serverless smoke
+- PWA/serverless smoke including hosted result-intelligence wiring
 - separate PostgreSQL smoke
 
 Deployment verification:
@@ -223,7 +235,7 @@ Deployment verification:
 - durable production workflow
 - post-deploy health/PWA/practice API checks
 
-The next BI integration must preserve the classifier/fallback contracts while replacing the visible JSON-row preview.
+The active BI integration is currently verified by branch CI, not yet by a new durable production deployment.
 
 ## Scope Locks
 
@@ -238,6 +250,7 @@ Do not silently:
 - turn the BI result slice into an undeclared React migration
 - reuse or redistribute Bklit Studio; only the upstream MIT chart-component boundary is eligible for later technical evaluation
 - invent chart dimensions, targets, flow edges, geographic meaning, or stage order
+- replace or mutate canonical `columns`, `rows`, or `row_count` when adding derived BI metadata
 
 ## Official Execution Loop
 
@@ -258,7 +271,7 @@ For each slice:
 
 Immediate implementation gate:
 
-**wire the proven ResultShape metadata into `practice_query`, then replace the JSON-string preview with the canonical real Table renderer before adding chart rendering.**
+**add the first lightweight Bar renderer for proven `category_measure` results while keeping the canonical Table evidence and regression gates green.**
 
 Execution direction:
 
