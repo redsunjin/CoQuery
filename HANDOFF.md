@@ -1,7 +1,7 @@
 # CoQuery Handoff
 
 Date: 2026-09-02
-Status: Durable Cloudflare production deployment proven; PR #18 now has ResultShape classification + canonical Table + Bar Result Visual + Query Graph; deterministic Explain is next
+Status: Durable Cloudflare production deployment proven; PR #18 now has ResultShape classification + canonical Table + Bar Result Visual + Query Graph + deterministic Explain; Line/time-series Result Visual is next
 
 ## Product Definition
 
@@ -72,7 +72,7 @@ Verified automatically on durable Worker:
 
 The production workflow uses GitHub `production` environment-scoped Cloudflare credentials. Credential values are not in the repository and must never be committed.
 
-The new PR #18 BI/Query Graph integration is branch-CI proven but has not yet been merged/redeployed to the durable Worker.
+The new PR #18 BI/Query Graph/Explain integration is branch-CI proven but has not yet been merged/redeployed to the durable Worker.
 
 ## Browser/PWA QA — Still Required
 
@@ -182,21 +182,39 @@ Behavior:
 - mobile uses horizontal scrolling rather than dropping steps
 - no mutation of canonical query result
 
+### Deterministic Explain — implemented and tested
+
+Files:
+
+- `app_shell/terminal_shell_prototype/practice-result-explain.js`
+- `app_shell/terminal_shell_prototype/practice-result-explain.css`
+- `app_shell/terminal_shell_prototype/practice_result_explain_smoke.js`
+- `docs/coquery-deterministic-explain-implementation-2026-09-02.md`
+
+Behavior:
+
+- no LLM/provider call is required
+- uses only recognized `flow_steps`, ResultShape, dimensions/measures, visual recommendation, and row count
+- answers: what the SQL did / what each row represents / why this view / explanation boundary
+- conservative row-semantics templates cover the currently proven result shapes
+- unsupported flow kinds are filtered instead of interpreted
+- business causality, hidden meaning, and physical execution-plan meaning are explicitly not inferred
+- Korean and English copy follows the existing language selector
+- no mutation of canonical query evidence
+
 ### PWA shell cache — updated
 
-`service-worker.js` now uses `coquery-pwa-v2` and explicitly caches:
+`service-worker.js` now uses `coquery-pwa-v3` and explicitly caches:
 
 - `practice-result-visual.js/css`
 - `practice-query-flow.js/css`
+- `practice-result-explain.js/css`
 
 `/api/*` remains uncached.
 
 ## Regression proof
 
-Implementation head `d30ce9f888db7b6bc2626ff2626fcf8eef0093c8` passed:
-
-- baseline: success
-- PostgreSQL smoke: success
+Explain implementation head `b67f4d81ba955cc1cf6a30868b4135c58016f1f4` has baseline success; branch PostgreSQL smoke is retained as a separate gate. Documentation currentization commits also trigger both workflows and must remain green before merge.
 
 Baseline includes:
 
@@ -204,11 +222,10 @@ Baseline includes:
 - deterministic ResultShape contracts
 - practice-query regression gate
 - Bar Result Visual executable smoke
-- Query Graph executable smoke through `practice_focus_smoke.py`
+- Query Graph executable smoke
+- deterministic Explain executable smoke
 - focused-practice asset checks
 - learning path/curriculum/user-flow/PWA smoke
-
-Documentation-only currentization commits must remain green before merge.
 
 ## Bklit UI Reference Boundary
 
@@ -268,7 +285,7 @@ BI Result Intelligence:
 
 Immediate implementation:
 
-**deterministic Explain** connecting recognized SQL transformation, row meaning when deterministically knowable, and visual recommendation reason.
+**deterministic Line Result Visual** for safely ordered `time_series` results, with Table kept as canonical evidence.
 
 ### P0-3
 
@@ -285,7 +302,7 @@ Shared-code mobile wrappers:
 
 ### P1
 
-- Line/time-series and additional BI visuals after Explain baseline
+- additional BI visuals after Line/time-series baseline
 - nested Query Graph only with explicit parser contracts
 - Execution Graph only with real provider-specific `EXPLAIN` evidence
 - Practice-result AI handoff
@@ -307,7 +324,7 @@ Shared-code mobile wrappers:
 
 ## Immediate Next Gate
 
-**Implement deterministic Explain without inventing business meaning or requiring an external AI provider.**
+**Implement the Line Result Visual only for safely ordered `time_series` results.**
 
 ## Key Documents
 
@@ -316,5 +333,6 @@ Shared-code mobile wrappers:
 - `HANDOFF.md`
 - `docs/coquery-bi-result-intelligence-2026-08-30.md`
 - `docs/coquery-query-graph-implementation-2026-09-02.md`
+- `docs/coquery-deterministic-explain-implementation-2026-09-02.md`
 - `docs/coquery-production-cloudflare-pwa-qa-2026-08-28.md`
 - `docs/coquery-ai-context-to-prompt-handoff-2026-08-28.md`
