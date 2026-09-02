@@ -28,6 +28,8 @@ jobs:
           python3 sql_cli/tests/test_result_intelligence.py
           python3 sql_cli/tests/test_practice_query_regression.py
           node app_shell/terminal_shell_prototype/practice_result_visual_smoke.js
+          node app_shell/terminal_shell_prototype/practice_query_flow_smoke.js
+          node app_shell/terminal_shell_prototype/practice_result_explain_smoke.js
           python3 skills/coquery-cli/scripts/coquery_agent.py verify
           python3 skills/coquery-cli/scripts/coquery_agent.py demo
           python3 app_shell/terminal_shell_prototype/practice_focus_smoke.py
