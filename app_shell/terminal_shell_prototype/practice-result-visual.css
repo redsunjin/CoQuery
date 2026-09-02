@@ -1,0 +1,112 @@
+.practice-result-bar-visual {
+  display: grid;
+  gap: 12px;
+  margin: 4px 0 2px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-soft);
+}
+
+.practice-result-bar-header {
+  display: grid;
+  gap: 4px;
+}
+
+.practice-result-bar-title {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.practice-result-bar-summary,
+.practice-result-bar-evidence {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.practice-result-bar-chart {
+  display: grid;
+  gap: 9px;
+}
+
+.practice-result-bar-row {
+  display: grid;
+  grid-template-columns: minmax(88px, 0.9fr) minmax(200px, 3fr) minmax(52px, auto);
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.practice-result-bar-label {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.practice-result-bar-track {
+  position: relative;
+  height: 24px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-raised);
+}
+
+.practice-result-bar-zero {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: var(--practice-bar-zero);
+  width: 1px;
+  background: var(--line-strong);
+  transform: translateX(-0.5px);
+}
+
+.practice-result-bar-fill {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  min-width: 0;
+  border-radius: 4px;
+  background: var(--text);
+  opacity: 0.72;
+}
+
+.practice-result-bar-fill.is-negative {
+  border: 1px solid var(--text);
+  background: transparent;
+  opacity: 0.9;
+}
+
+.practice-result-bar-value {
+  color: var(--text);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .practice-result-bar-visual {
+    padding: 12px;
+  }
+
+  .practice-result-bar-row {
+    grid-template-columns: minmax(72px, 0.8fr) minmax(140px, 2.2fr) minmax(46px, auto);
+    gap: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .practice-result-bar-fill,
+  .practice-result-bar-zero {
+    transition: none;
+  }
+}
