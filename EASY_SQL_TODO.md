@@ -50,6 +50,7 @@ Reference:
 
 - `docs/coquery-bi-result-intelligence-2026-08-30.md`
 - `docs/coquery-query-graph-implementation-2026-09-02.md`
+- `docs/coquery-deterministic-explain-implementation-2026-09-02.md`
 
 Product principle:
 
@@ -80,9 +81,12 @@ Implemented on active PR #18:
 - Query Graph preserves recognized SQL fragment text/order and ignores unsupported step kinds
 - Query Graph is explicitly labeled as logical transformation, not database execution order
 - final Result node uses actual returned `row_count`/rows only
-- Query Graph and Bar do not mutate canonical `columns`, `rows`, or `row_count`
-- PWA app-shell cache `coquery-pwa-v2` includes Table/Bar/Query Graph assets while `/api/*` remains uncached
-- executable Bar and Query Graph model smokes run inside the existing baseline gate
+- deterministic Explain rendering for SQL transformation, row semantics, view recommendation, and explanation boundary
+- Explain filters unsupported flow kinds and never treats physical execution-plan nodes as evidence
+- Explain has KR/EN copy and remains provider-free
+- Query Graph, Bar, and Explain do not mutate canonical `columns`, `rows`, or `row_count`
+- PWA app-shell cache `coquery-pwa-v3` includes Bar/Query Graph/Explain assets while `/api/*` remains uncached
+- executable Bar, Query Graph, and Explain model smokes run inside the baseline gate
 
 Tasks:
 
@@ -105,8 +109,10 @@ Tasks:
 - [x] label Query Graph clearly so it cannot be mistaken for an execution plan
 - [x] add textual/accessibility description for Query Graph
 - [x] add executable Query Graph regression smoke and PWA shell-cache checks
-- [ ] add deterministic Explain copy connecting SQL transformation + row meaning + visual recommendation
-- [ ] complete KR/EN result-intelligence reason copy instead of backend-English reason text
+- [x] add deterministic Explain copy connecting SQL transformation + row meaning + visual recommendation
+- [x] add explicit Explain boundary against business causality/hidden meaning/physical execution-plan inference
+- [x] add executable Explain smoke and PWA cache checks
+- [ ] complete KR/EN result-intelligence recommendation reason copy instead of backend-English reason text
 - [ ] add keyboard/accessibility baseline for future view tabs
 - [ ] keep exact raw result available in the detail panel as an explicit regression check
 - [ ] decide whether the local/advanced command runtime should attach the same additive metadata before the BI slice closes
@@ -119,6 +125,7 @@ Acceptance:
 - Query Graph contains only recognized SQL structure
 - Query Graph is never presented as physical runtime order/execution plan
 - Execution Graph is never shown without actual planner/executor evidence
+- Explain never invents business causality or hidden semantics
 - Table remains canonical evidence
 - BI enrichment does not mutate `columns`, `rows`, or `row_count`
 - existing practice catalog/query/grading/non-SELECT contracts remain green
@@ -294,4 +301,4 @@ Not complete:
 
 ## Current Next Action
 
-**Add deterministic Explain copy that connects recognized SQL transformation, row meaning when deterministically knowable, and the reason a Result Visual was or was not recommended.**
+**Add the deterministic Line Result Visual for safely ordered `time_series` results while keeping Table canonical and all regression gates green.**
