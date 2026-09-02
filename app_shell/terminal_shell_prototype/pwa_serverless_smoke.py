@@ -30,7 +30,7 @@ def main() -> int:
 
     require(APP / "index.html", 'rel="manifest" href="./manifest.webmanifest"')
     require(APP / "index.html", '<script src="./pwa-runtime.js"></script>')
-    require(APP / "service-worker.js", 'const CACHE_NAME = "coquery-pwa-v3"')
+    require(APP / "service-worker.js", 'const CACHE_NAME = "coquery-pwa-v4"')
     require(APP / "service-worker.js", '"./practice-result-visual.js"')
     require(APP / "service-worker.js", '"./practice-result-visual.css"')
     require(APP / "service-worker.js", '"./practice-query-flow.js"')

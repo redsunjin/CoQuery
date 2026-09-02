@@ -19,6 +19,7 @@ def main() -> int:
     focus_css = ROOT / "practice-focus.css"
     visual_js = ROOT / "practice-result-visual.js"
     visual_css = ROOT / "practice-result-visual.css"
+    visual_smoke = ROOT / "practice_result_visual_smoke.js"
     flow_js = ROOT / "practice-query-flow.js"
     flow_css = ROOT / "practice-query-flow.css"
     flow_smoke = ROOT / "practice_query_flow_smoke.js"
@@ -32,6 +33,7 @@ def main() -> int:
         focus_css,
         visual_js,
         visual_css,
+        visual_smoke,
         flow_js,
         flow_css,
         flow_smoke,
@@ -63,8 +65,13 @@ def main() -> int:
     assert_contains(focus_js, 'value === null')
     assert_contains(focus_js, 'result.data?.result_intelligence')
     assert_contains(visual_js, "buildPracticeBarModel")
+    assert_contains(visual_js, "buildPracticeLineModel")
     assert_contains(visual_js, 'intelligence.shape !== "category_measure"')
     assert_contains(visual_js, 'intelligence.recommended_visual !== "bar"')
+    assert_contains(visual_js, 'intelligence.shape !== "time_series"')
+    assert_contains(visual_js, 'intelligence.recommended_visual !== "line"')
+    assert_contains(visual_js, "isSafelyOrderedTemporal")
+    assert_contains(visual_js, 'figure.className = "practice-result-line-visual"')
     assert_contains(visual_js, 'tableWrap.querySelector(".practice-result-table-scroll")')
     assert_contains(visual_js, 'point.value < 0')
     assert_contains(visual_js, 'width_percent: width')
@@ -85,6 +92,9 @@ def main() -> int:
     assert_contains(visual_css, ".practice-result-bar-visual")
     assert_contains(visual_css, ".practice-result-bar-zero")
     assert_contains(visual_css, ".practice-result-bar-fill.is-negative")
+    assert_contains(visual_css, ".practice-result-line-visual")
+    assert_contains(visual_css, ".practice-result-line-path")
+    assert_contains(visual_css, ".practice-result-line-point")
     assert_contains(visual_css, "@media (prefers-reduced-motion: reduce)")
     assert_contains(flow_css, ".practice-query-flow-track")
     assert_contains(flow_css, ".practice-query-flow-node:not(:last-child)::after")
@@ -94,6 +104,7 @@ def main() -> int:
     assert_contains(explain_css, "@media (prefers-reduced-motion: reduce)")
     assert_contains(focus_css, "@media (max-width: 760px)")
 
+    subprocess.run(["node", str(visual_smoke)], cwd=ROOT, check=True)
     subprocess.run(["node", str(flow_smoke)], cwd=ROOT, check=True)
     subprocess.run(["node", str(explain_smoke)], cwd=ROOT, check=True)
 
