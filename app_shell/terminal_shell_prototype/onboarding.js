@@ -169,6 +169,23 @@ document.querySelectorAll("[data-lang]").forEach((button) => {
   });
 });
 
+function loadPracticeResultVisualAssets() {
+  if (!document.querySelector('link[data-practice-result-visual-style]')) {
+    const style = document.createElement("link");
+    style.rel = "stylesheet";
+    style.href = "./practice-result-visual.css";
+    style.dataset.practiceResultVisualStyle = "true";
+    document.head.appendChild(style);
+  }
+
+  if (!document.querySelector('script[data-practice-result-visual-script]')) {
+    const script = document.createElement("script");
+    script.src = "./practice-result-visual.js";
+    script.dataset.practiceResultVisualScript = "true";
+    document.body.appendChild(script);
+  }
+}
+
 function loadPracticeFocusAssets() {
   if (!document.querySelector('link[data-practice-focus-style]')) {
     const style = document.createElement("link");
@@ -178,12 +195,17 @@ function loadPracticeFocusAssets() {
     document.head.appendChild(style);
   }
 
-  if (!document.querySelector('script[data-practice-focus-script]')) {
-    const script = document.createElement("script");
-    script.src = "./practice-focus.js";
-    script.dataset.practiceFocusScript = "true";
-    document.body.appendChild(script);
+  const existing = document.querySelector('script[data-practice-focus-script]');
+  if (existing) {
+    loadPracticeResultVisualAssets();
+    return;
   }
+
+  const script = document.createElement("script");
+  script.src = "./practice-focus.js";
+  script.dataset.practiceFocusScript = "true";
+  script.addEventListener("load", loadPracticeResultVisualAssets, { once: true });
+  document.body.appendChild(script);
 }
 
 function loadExpandedCurriculumAsset() {
