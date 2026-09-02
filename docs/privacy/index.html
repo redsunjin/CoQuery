@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Privacy Policy - CoQuery</title>
-    <meta name="description" content="Privacy Policy for the CoQuery iOS app.">
+    <title>개인정보 처리방침 - CoQuery</title>
+    <meta name="description" content="CoQuery iOS 앱의 개인정보 처리방침입니다.">
     <style>
       :root {
         color-scheme: light dark;
@@ -52,7 +52,12 @@
         padding: clamp(24px, 5vw, 44px);
       }
 
-      nav {
+      .page-header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: center;
+        justify-content: space-between;
         margin-bottom: 28px;
       }
 
@@ -60,6 +65,16 @@
       a {
         color: var(--accent);
         font-weight: 700;
+      }
+
+      .language-switch {
+        display: flex;
+        gap: 12px;
+      }
+
+      .language-switch a[aria-current="page"] {
+        color: var(--fg);
+        text-decoration: none;
       }
 
       h1 {
@@ -93,59 +108,143 @@
   </head>
   <body>
     <main>
-      <section class="page" aria-labelledby="title">
-        <nav aria-label="Site navigation">
-          <a href="../">CoQuery</a>
-        </nav>
-        <h1 id="title">Privacy Policy</h1>
-        <p class="meta">Last updated: July 10, 2026</p>
+      <section class="page">
+        <header class="page-header">
+          <nav aria-label="Site navigation">
+            <a href="../">CoQuery</a>
+          </nav>
+          <nav class="language-switch" aria-label="Language">
+            <a href="?lang=ko" data-policy-language-link="ko">한국어</a>
+            <a href="?lang=en" data-policy-language-link="en">English</a>
+          </nav>
+        </header>
 
-        <h2>Overview</h2>
-        <p>
-          CoQuery is a SQL practice app for iPhone and iPad. The first
-          TestFlight build is Training Mode only and uses bundled sample data.
-        </p>
+        <article data-policy-lang="ko">
+          <h1>개인정보 처리방침</h1>
+          <p class="meta">최종 업데이트: 2026년 7월 10일</p>
 
-        <h2>Data Collection</h2>
-        <p>
-          The first iOS Training build does not collect personal data from the app.
-          It does not require an account, ask for production database credentials,
-          require an API key, or include advertising or tracking SDKs.
-        </p>
+          <h2>개요</h2>
+          <p>
+            CoQuery는 iPhone 및 iPad용 SQL 연습 앱입니다. 첫 TestFlight 빌드는
+            학습 모드 전용이며, 앱에 포함된 샘플 데이터를 사용합니다.
+          </p>
 
-        <h2>Local Device Data</h2>
-        <p>
-          The app may store practice attempts and UI preferences locally on the
-          device so testers can review their own practice flow. This local data is
-          not sent to CoQuery by the first iOS Training build.
-        </p>
+          <h2>개인정보 수집</h2>
+          <p>
+            첫 iOS 학습 빌드는 앱에서 개인정보를 수집하지 않습니다. 계정 생성을
+            요구하지 않으며, 운영 데이터베이스 자격 증명이나 API 키를 요청하지
+            않고, 광고 또는 추적 SDK를 포함하지 않습니다.
+          </p>
 
-        <h2>Production Databases</h2>
-        <p>
-          The first iOS Training build is not a production database client. It does
-          not connect to production databases and does not request production
-          database credentials.
-        </p>
+          <h2>기기 내 로컬 데이터</h2>
+          <p>
+            앱은 테스터가 자신의 학습 흐름을 다시 확인할 수 있도록 연습 기록과
+            화면 설정을 기기에 로컬로 저장할 수 있습니다. 이 로컬 데이터는 첫
+            iOS 학습 빌드에서 CoQuery로 전송되지 않습니다.
+          </p>
 
-        <h2>AI Providers</h2>
-        <p>
-          The first iOS Training build does not require provider-backed AI feedback.
-          If a future build adds provider-backed features, this privacy policy and
-          App Store privacy responses must be reviewed before submission.
-        </p>
+          <h2>운영 데이터베이스</h2>
+          <p>
+            첫 iOS 학습 빌드는 운영 데이터베이스 클라이언트가 아닙니다. 운영
+            데이터베이스에 연결하지 않으며 운영 데이터베이스 자격 증명을
+            요청하지 않습니다.
+          </p>
 
-        <h2>Contact</h2>
-        <p>
-          For support, use the contact email configured in the app's TestFlight or
-          App Store listing.
-        </p>
+          <h2>AI 제공자</h2>
+          <p>
+            첫 iOS 학습 빌드는 제공자 기반 AI 피드백을 필요로 하지 않습니다.
+            이후 빌드에 제공자 기반 기능이 추가되면, 제출 전에 이 개인정보
+            처리방침과 App Store 개인정보 응답을 검토합니다.
+          </p>
 
-        <h2>Changes</h2>
-        <p>
-          If app data practices change, this policy and the App Store Connect
-          privacy responses will be updated before submitting a new build.
-        </p>
+          <h2>문의</h2>
+          <p>
+            지원이 필요하면 앱의 TestFlight 또는 App Store 등록 정보에 설정된
+            문의 이메일을 이용해 주세요.
+          </p>
+
+          <h2>변경 사항</h2>
+          <p>
+            앱의 데이터 처리 방식이 변경되면 새 빌드를 제출하기 전에 이
+            개인정보 처리방침과 App Store Connect 개인정보 응답을 업데이트합니다.
+          </p>
+        </article>
+
+        <article data-policy-lang="en" hidden>
+          <h1>Privacy Policy</h1>
+          <p class="meta">Last updated: July 10, 2026</p>
+
+          <h2>Overview</h2>
+          <p>
+            CoQuery is a SQL practice app for iPhone and iPad. The first
+            TestFlight build is Training Mode only and uses bundled sample data.
+          </p>
+
+          <h2>Data Collection</h2>
+          <p>
+            The first iOS Training build does not collect personal data from the app.
+            It does not require an account, ask for production database credentials,
+            require an API key, or include advertising or tracking SDKs.
+          </p>
+
+          <h2>Local Device Data</h2>
+          <p>
+            The app may store practice attempts and UI preferences locally on the
+            device so testers can review their own practice flow. This local data is
+            not sent to CoQuery by the first iOS Training build.
+          </p>
+
+          <h2>Production Databases</h2>
+          <p>
+            The first iOS Training build is not a production database client. It does
+            not connect to production databases and does not request production
+            database credentials.
+          </p>
+
+          <h2>AI Providers</h2>
+          <p>
+            The first iOS Training build does not require provider-backed AI feedback.
+            If a future build adds provider-backed features, this privacy policy and
+            App Store privacy responses must be reviewed before submission.
+          </p>
+
+          <h2>Contact</h2>
+          <p>
+            For support, use the contact email configured in the app's TestFlight or
+            App Store listing.
+          </p>
+
+          <h2>Changes</h2>
+          <p>
+            If app data practices change, this policy and the App Store Connect
+            privacy responses will be updated before submitting a new build.
+          </p>
+        </article>
       </section>
     </main>
+    <script>
+      (() => {
+        const requestedLanguage = new URLSearchParams(window.location.search).get("lang");
+        const language =
+          requestedLanguage === "en" || requestedLanguage === "ko"
+            ? requestedLanguage
+            : navigator.language.toLowerCase().startsWith("ko")
+              ? "ko"
+              : "en";
+
+        document.documentElement.lang = language;
+        document.title = language === "ko" ? "개인정보 처리방침 - CoQuery" : "Privacy Policy - CoQuery";
+
+        document.querySelectorAll("[data-policy-lang]").forEach((section) => {
+          section.hidden = section.dataset.policyLang !== language;
+        });
+        document.querySelectorAll("[data-policy-language-link]").forEach((link) => {
+          link.setAttribute(
+            "aria-current",
+            link.dataset.policyLanguageLink === language ? "page" : "false"
+          );
+        });
+      })();
+    </script>
   </body>
 </html>
