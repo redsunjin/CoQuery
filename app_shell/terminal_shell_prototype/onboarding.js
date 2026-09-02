@@ -186,6 +186,28 @@ function loadPracticeResultVisualAssets() {
   }
 }
 
+function loadPracticeQueryFlowAssets() {
+  if (!document.querySelector('link[data-practice-query-flow-style]')) {
+    const style = document.createElement("link");
+    style.rel = "stylesheet";
+    style.href = "./practice-query-flow.css";
+    style.dataset.practiceQueryFlowStyle = "true";
+    document.head.appendChild(style);
+  }
+
+  if (!document.querySelector('script[data-practice-query-flow-script]')) {
+    const script = document.createElement("script");
+    script.src = "./practice-query-flow.js";
+    script.dataset.practiceQueryFlowScript = "true";
+    document.body.appendChild(script);
+  }
+}
+
+function loadPracticeResultIntelligenceAssets() {
+  loadPracticeResultVisualAssets();
+  loadPracticeQueryFlowAssets();
+}
+
 function loadPracticeFocusAssets() {
   if (!document.querySelector('link[data-practice-focus-style]')) {
     const style = document.createElement("link");
@@ -197,14 +219,14 @@ function loadPracticeFocusAssets() {
 
   const existing = document.querySelector('script[data-practice-focus-script]');
   if (existing) {
-    loadPracticeResultVisualAssets();
+    loadPracticeResultIntelligenceAssets();
     return;
   }
 
   const script = document.createElement("script");
   script.src = "./practice-focus.js";
   script.dataset.practiceFocusScript = "true";
-  script.addEventListener("load", loadPracticeResultVisualAssets, { once: true });
+  script.addEventListener("load", loadPracticeResultIntelligenceAssets, { once: true });
   document.body.appendChild(script);
 }
 
