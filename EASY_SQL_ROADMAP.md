@@ -39,6 +39,7 @@ References:
 
 - `docs/coquery-bi-result-intelligence-2026-08-30.md`
 - `docs/coquery-query-graph-implementation-2026-09-02.md`
+- `docs/coquery-deterministic-explain-implementation-2026-09-02.md`
 
 ## Current Verified Position
 
@@ -62,8 +63,11 @@ Active PR #18 result-understanding baseline now includes:
 - first lightweight Bar Result Visual for proven `category_measure`
 - visible Query Graph from recognized `flow_steps`
 - Query Graph labeled as logical SQL transformation, not database execution order
-- mobile horizontal overflow for Table and Query Graph without a React migration
-- PWA cache `coquery-pwa-v2` containing Bar + Query Graph assets
+- deterministic Explain covering recognized SQL transformation, conservative row meaning, view recommendation, and its own evidence boundary
+- Explain explicitly refuses business causality, hidden meaning, and physical execution-plan inference
+- KR/EN Explain copy without an external AI/provider
+- mobile-safe layouts without a React migration
+- PWA cache `coquery-pwa-v3` containing Bar + Query Graph + Explain assets while `/api/*` remains uncached
 
 This branch work is not yet merged or deployed to the durable production Worker.
 
@@ -148,6 +152,7 @@ Core rules:
 - ambiguous shapes fall back to Table
 - Query Graph contains only recognized SQL structure
 - Query Graph is not an execution-plan claim
+- Explain describes only what is supported by SQL/result metadata and never invents business causality
 - Execution Graph requires real database plan evidence
 - visualization recommendation explains why it was selected
 - no React migration in first slice
@@ -165,10 +170,12 @@ Proven on active PR #18:
 - Bar Result Visual for proven category + measure only
 - Query Graph renderer preserving recognized step order/text
 - Query Graph filters unsupported step kinds and never invents physical execution nodes
+- deterministic Explain renderer with conservative shape-based row semantics and KR/EN copy
+- Explain filters unsupported flow kinds and explicitly blocks business-causality/hidden-semantics/execution-plan claims
 - practice-query regression gate protecting catalog/query/grading/error contracts
-- executable Bar and Query Graph smokes
+- executable Bar, Query Graph, and Explain smokes
 - practice-focus and PWA/serverless smoke coverage protecting visible wiring and app-shell cache
-- baseline CI and separate PostgreSQL smoke green on implementation head `d30ce9f888db7b6bc2626ff2626fcf8eef0093c8`
+- baseline CI is green on Explain implementation head `b67f4d81ba955cc1cf6a30868b4135c58016f1f4`; PostgreSQL smoke remains the separate gate on branch updates
 
 Implementation order:
 
@@ -177,8 +184,8 @@ Implementation order:
 3. [done] real Table renderer in focused practice
 4. [done] lightweight Bar Result Visual for proven category + measure
 5. [done] Query Graph/Flow renderer as core learning view
-6. **deterministic Explain copy**
-7. Line/time-series Result Visual
+6. [done] deterministic Explain copy
+7. **Line/time-series Result Visual**
 8. nested Query Graph support only after explicit parser contracts
 9. Execution Graph only with real `EXPLAIN`-style evidence
 10. additional BI visuals only when ResultShape rules justify them
@@ -254,12 +261,13 @@ Core CI:
 - deterministic BI ResultShape contract tests
 - practice-query regression gate
 - executable Bar Result Visual smoke
-- executable Query Graph model smoke via `practice_focus_smoke.py`
-- practice-focus smoke including Table/Bar/Query Graph asset wiring
+- executable Query Graph model smoke
+- executable deterministic Explain smoke
+- practice-focus smoke including Table/Bar/Query Graph/Explain asset wiring
 - learning path smoke
 - curriculum smoke
 - user-flow QA smoke
-- PWA/serverless smoke including hosted result-intelligence wiring and `coquery-pwa-v2` shell assets
+- PWA/serverless smoke including hosted result-intelligence wiring and `coquery-pwa-v3` shell assets
 - separate PostgreSQL smoke
 
 Deployment verification:
@@ -285,6 +293,7 @@ Do not silently:
 - invent chart dimensions, targets, flow edges, geographic meaning, stage order, or execution nodes
 - replace or mutate canonical `columns`, `rows`, or `row_count` when adding derived BI metadata
 - teach Query Graph as if it were database physical execution plan
+- use Explain to invent causality, intent, or hidden business meaning
 - show Execution Graph without real planner/executor evidence
 
 ## Official Execution Loop
@@ -306,7 +315,7 @@ For each slice:
 
 Immediate implementation gate:
 
-**implement deterministic Explain that connects recognized SQL transformation, row meaning when deterministically knowable, and Result Visual recommendation reason without inventing business meaning or requiring an external AI provider.**
+**implement the deterministic Line Result Visual only for safely ordered `time_series` results, while Table remains canonical evidence and all regression gates stay green.**
 
 Execution direction:
 
