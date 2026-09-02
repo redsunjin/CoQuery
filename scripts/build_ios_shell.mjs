@@ -28,6 +28,7 @@ const html = read(join(sourceDir, "index.html"))
 
 write(join(distDir, "index.html"), html);
 cpSync(join(sourceDir, "styles.css"), join(distDir, "styles.css"));
+cpSync(join(sourceDir, "dialect-learning.js"), join(distDir, "dialect-learning.js"));
 cpSync(join(sourceDir, "app.js"), join(distDir, "app.js"));
 
 mkdirSync(join(distDir, "practice_packs"), { recursive: true });

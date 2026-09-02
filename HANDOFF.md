@@ -104,21 +104,22 @@ Current engine boundary:
 
 Do not mark MySQL examples as `verified` until a real MySQL environment exists.
 
-### Phase A implementation target
+### Phase A implementation — complete on Draft PR #19
 
-- deterministic `DialectLesson` data model
-- `DialectCatalog`
-- first four comparison topics
-  - string concatenation
-  - current date/time
-  - date arithmetic
-  - row limiting/commonality
-- PostgreSQL/MySQL/SQLite variants
-- KR/EN copy
-- optional `DB별 차이 보기` surface only when a relevant lesson exists
-- explicit verification-state badge
-- curriculum/problem mapping
-- deterministic catalog/mapping tests
+Implemented:
+
+- deterministic `DialectLesson` data model and versioned `DialectCatalog` in `app_shell/terminal_shell_prototype/dialect-learning.js`
+- first four comparison topics: string concatenation, current date/time, date arithmetic, and row limiting/commonality
+- PostgreSQL/MySQL/SQLite variants with KR/EN explanations
+- optional `DB별 차이 보기` surface in practice feedback only for mapped curriculum problems; the panel is closed by default
+- visible `common` / `reference` / `verified` badges
+- catalog mappings for the relevant customer-name, date, and `LIMIT` practice problems
+- deterministic catalog/mapping regression test at `app_shell/terminal_shell_prototype/dialect_learning_smoke.py`
+- SQLite examples labeled `verified` execute in that regression test; PostgreSQL remains reference-only in this content slice and MySQL remains reference-only with no runtime-support claim
+
+Still required before merge:
+
+- record successful `baseline` and `postgresql-smoke` CI runs on Draft PR #19
 
 Not in Phase A:
 

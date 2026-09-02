@@ -25,12 +25,14 @@ assert.equal(capacitorConfig.webDir, "dist/ios-shell");
 assertFile(join(distDir, "index.html"));
 assertFile(join(distDir, "app.js"));
 assertFile(join(distDir, "styles.css"));
+assertFile(join(distDir, "dialect-learning.js"));
 assertFile(runtimePath);
 assertFile(join(distDir, "practice_packs", "sql_basics.json"));
 
 const indexHtml = readFileSync(join(distDir, "index.html"), "utf8");
 assert.match(indexHtml, /<script type="module" src="\.\/ios-training-runtime\.js"><\/script>/);
 assert.match(indexHtml, /<script type="module" src="\.\/app\.js"><\/script>/);
+assert.match(indexHtml, /<script src="\.\/dialect-learning\.js"><\/script>/);
 assert.match(indexHtml, /viewport-fit=cover/);
 assert.match(indexHtml, /commandMenuToggle/);
 assert.match(indexHtml, /aria-expanded="false"/);
@@ -78,7 +80,7 @@ try {
   assert.equal(result.block_type, "practice_list");
   assert.deepEqual(result.actions, ["copy", "start_practice", "show_schema"]);
   assert.equal(result.data.selected_pack, "sql_basics");
-  assert.equal(result.data.problems.length, 5);
+  assert.equal(result.data.problems.length, 24);
   assert.equal(result.data.problems[0].id, "basic_select_customers");
   assert.match(result.cli_equivalent, /python main\.py --command practice_list/);
 

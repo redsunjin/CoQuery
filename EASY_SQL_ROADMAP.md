@@ -140,14 +140,15 @@ Rules:
 - MySQL remains `reference` until a real MySQL runtime/test baseline exists
 - do not build a general SQL transpiler in the first slice
 
-Phase A:
+Phase A — implemented on Draft PR #19:
 
-- deterministic DialectCatalog
-- first 4 high-value comparison topics
-- PostgreSQL/MySQL/SQLite variants
+- deterministic `DialectLesson` / `DialectCatalog` content contract
+- first 4 high-value comparison topics: string concatenation, current date/time, date arithmetic, and `LIMIT` commonality
+- PostgreSQL/MySQL/SQLite variants with explicit `common` / `reference` / `verified` state badges
 - KR/EN content
-- optional comparison card in practice feedback
-- catalog/problem-mapping tests
+- an optional, default-closed comparison card in practice feedback only for mapped problems
+- deterministic catalog/problem-mapping regression coverage, including SQLite execution for the `verified` examples
+- MySQL remains documented/reference-only; no MySQL runtime claim or `verified` state
 
 Reference:
 

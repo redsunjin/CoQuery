@@ -789,6 +789,117 @@ pre {
   color: var(--danger);
 }
 
+.dialect-comparison-actions {
+  margin-top: 12px;
+}
+
+.dialect-comparison-panel {
+  display: grid;
+  gap: 14px;
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #344d64;
+  border-radius: 10px;
+  background: #101b28;
+}
+
+.dialect-comparison-heading p,
+.dialect-copy-section p,
+.dialect-variant p,
+.dialect-mysql-boundary {
+  margin: 6px 0 0;
+  color: #d9dfe8;
+  line-height: 1.55;
+}
+
+.dialect-lesson {
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid #2c4257;
+}
+
+.dialect-lesson h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.dialect-copy-section {
+  display: grid;
+  gap: 2px;
+}
+
+.dialect-variants {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.dialect-variant {
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid #344d64;
+  border-radius: 8px;
+  background: #0c1520;
+}
+
+.dialect-variant-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.dialect-verification-state {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 720;
+  white-space: nowrap;
+}
+
+.dialect-verification-state.is-common {
+  background: #29394a;
+  color: #dce8f6;
+}
+
+.dialect-verification-state.is-reference {
+  background: var(--warn-soft);
+  color: #ffdf9d;
+}
+
+.dialect-verification-state.is-verified {
+  background: #1e493d;
+  color: #b7f4d6;
+}
+
+.dialect-sql {
+  margin: 10px 0 0;
+  padding: 9px;
+  overflow-x: auto;
+  border-radius: 6px;
+  background: #090e15;
+  color: #d6e8fa;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.dialect-variant p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.dialect-mysql-boundary {
+  padding-top: 12px;
+  border-top: 1px solid #2c4257;
+  color: #ffdf9d;
+  font-size: 12px;
+}
+
 .cli-line {
   margin-top: 12px;
   padding: 9px 10px;
@@ -1166,6 +1277,10 @@ html[data-app-mode="production_assist"] .mode-option.active {
 
   .practice-flow-actions {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dialect-variants {
     grid-template-columns: minmax(0, 1fr);
   }
 

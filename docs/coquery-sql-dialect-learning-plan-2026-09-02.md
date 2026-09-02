@@ -1,7 +1,7 @@
 # CoQuery SQL Dialect Learning Plan
 
 Date: 2026-09-02
-Status: Proposed implementation slice
+Status: Phase A implemented on Draft PR #19; awaiting CI and review
 Branch: `feat/sql-dialect-learning`
 
 ## 1. Why this exists
@@ -159,17 +159,18 @@ The two features can meet later, but they should stay separate in the first impl
 
 ### Phase A — learning contract and content baseline
 
-- add the dialect-learning data model
-- add 4 P0 comparison topics
-- add KR/EN copy
-- expose `DB별 차이 보기` only where a comparison exists
-- show verification state explicitly
-- add deterministic tests for the catalog and problem mapping
+- implemented deterministic `DialectLesson` / `DialectCatalog` content in `app_shell/terminal_shell_prototype/dialect-learning.js`
+- implemented 4 P0 comparison topics: string concatenation, current date/time, date arithmetic, and `LIMIT` commonality
+- implemented PostgreSQL/MySQL/SQLite variants and KR/EN copy
+- expose `DB별 차이 보기` only after grading a mapped practice problem; the comparison panel is closed by default
+- display `common`, `reference`, and `verified` badges for every variant
+- run deterministic catalog/mapping regression coverage in `app_shell/terminal_shell_prototype/dialect_learning_smoke.py`
+- execute every SQLite example labeled `verified` in that test
+- keep MySQL reference-only; the UI and test explicitly reject a MySQL `verified` claim
 
 ### Phase B — curriculum integration
 
-- map relevant problems to dialect lessons
-- add comparison cards to practice feedback
+- expand mappings or comparison coverage only from demonstrated learner gaps
 - track whether learners open comparisons only if product evidence later requires analytics
 
 ### Phase C — engine-backed verification

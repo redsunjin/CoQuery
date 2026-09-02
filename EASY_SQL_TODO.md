@@ -107,21 +107,27 @@ Phase A tasks:
 
 - [x] define product/learning contract
 - [x] define `common` / `reference` / `verified` truthfulness states
-- [ ] define deterministic `DialectLesson` data model
-- [ ] implement `DialectCatalog`
-- [ ] add first 4 P0 comparison topics
-  - [ ] string concatenation
-  - [ ] current date/time
-  - [ ] date arithmetic
-  - [ ] row limiting/commonality lesson
-- [ ] add PostgreSQL/MySQL/SQLite variants
-- [ ] add KR/EN copy
-- [ ] add `DB별 차이 보기` only when a relevant comparison exists
-- [ ] show verification state in the comparison UI
-- [ ] map comparison lessons to relevant curriculum problems
-- [ ] add deterministic catalog/mapping regression tests
-- [ ] keep MySQL examples at `reference` until a real MySQL runtime/test baseline exists
-- [ ] keep existing beginner flow unchanged when the comparison panel is closed
+- [x] define deterministic `DialectLesson` data model
+- [x] implement `DialectCatalog`
+- [x] add first 4 P0 comparison topics
+  - [x] string concatenation
+  - [x] current date/time
+  - [x] date arithmetic
+  - [x] row limiting/commonality lesson
+- [x] add PostgreSQL/MySQL/SQLite variants
+- [x] add KR/EN copy
+- [x] add `DB별 차이 보기` only when a relevant comparison exists
+- [x] show verification state in the comparison UI
+- [x] map comparison lessons to relevant curriculum problems
+- [x] add deterministic catalog/mapping regression tests
+- [x] keep MySQL examples at `reference` until a real MySQL runtime/test baseline exists
+- [x] keep existing beginner flow unchanged when the comparison panel is closed
+
+Phase A proof:
+
+- [x] `dialect_learning_smoke.py` asserts deterministic lesson order, KR/EN content, problem mappings, state labels, and no MySQL `verified` example
+- [x] the SQLite examples marked `verified` execute in the regression test
+- [ ] record the completed baseline and PostgreSQL CI runs on Draft PR #19
 
 Phase B:
 
