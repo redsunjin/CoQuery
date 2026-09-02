@@ -1,46 +1,121 @@
 # CoQuery BI Result Intelligence
 
-Date: 2026-08-30
-Status: product/UX baseline plus proven deterministic ResultShape classifier
+Date: 2026-09-02
+Status: product/UX baseline plus proven deterministic ResultShape/Table integration
 
-## Product decision
+## Product principle
 
-CoQuery should not treat a SQL result as only an Excel-like grid.
+CoQuery adopts the product principle:
 
-The result surface becomes:
+**SQL as Visual Data Transformation**
 
-`Table -> Visual -> Flow -> Explain`
+SQL can be taught as a declarative data-transformation expression: a user describes what data should be selected, filtered, related, grouped, aggregated, ordered, and returned. This is analogous to a mathematical expression in the sense that a compact symbolic statement produces a structured transformation and result.
 
-The table remains the evidence baseline. Visuals and explanations are derived views of the exact returned result and SQL structure.
+The analogy has a strict boundary:
 
-This keeps CoQuery aligned with its product journey:
+- SQL is **not** treated as a simple numeric function such as `y = f(x)`.
+- CoQuery treats SQL as a **relational/data transformation expression**.
+- Visualizations must represent evidence that can be defended from the SQL structure, returned rows, or an actual database execution plan.
+
+The product goal is therefore broader than an Excel-like result viewer:
+
+`SQL -> transformation understanding -> result understanding -> evidence`
+
+This keeps CoQuery aligned with:
 
 `Learn -> Practice -> Apply -> Assist`
 
-The goal is not to become a general-purpose BI dashboard. The goal is to help a learner or operator understand what the query result means, what shape the data has, and how the SQL produced it.
+## Three visual layers
 
-## Current gap
+CoQuery separates three different kinds of graph. They must never be presented as if they are the same thing.
 
-The current hosted practice result renders `practice_query` rows as JSON strings and truncates the visible preview to five rows.
+### 1. Query Graph — core learning experience
 
-That is sufficient for execution proof but weak for data understanding.
+Purpose: explain **what transformation the SQL describes**.
 
-The deterministic classification layer is now implemented and regression-tested, but it is not yet wired into `practice_query` output or the visible PWA result block.
+Example:
 
-## Result view contract
+`customers -> WHERE active = 1 -> GROUP BY region -> COUNT(*) -> ORDER BY count DESC -> result`
 
-Every supported query result may expose four views:
+Initial nodes/steps may include only explicitly recognized SQL structure:
 
-1. **Table** — exact rows/columns returned by the query.
-2. **Visual** — a recommended chart only when the result shape makes the recommendation defensible.
-3. **Flow** — the SQL transformation path, and later data-flow visuals such as Sankey when the returned schema explicitly represents source/target/value.
-4. **Explain** — plain-language explanation of the SQL operation and the result pattern.
+- FROM
+- JOIN
+- WHERE
+- GROUP BY
+- aggregate expressions (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`)
+- HAVING
+- ORDER BY
+- LIMIT
+
+Rules:
+
+- Query Graph is a semantic/learning representation, not a claim about physical database execution.
+- Unsupported clauses, nested queries, CTEs, window functions, or ambiguous syntax must not receive invented meaning.
+- Complex SQL may use nested/sub-graphs later; until supported, show the recognized portion and mark the rest unsupported/unknown.
+- Query Graph is a first-class learning surface, not merely decorative BI output.
+
+### 2. Result Visual — BI interpretation of returned data
+
+Purpose: explain **what shape the returned data has**.
+
+Examples:
+
+- category + measure -> Bar
+- ordered time + measure -> Line
+- explicit part-to-whole -> Ring/Pie
+- two row-level numeric measures -> Scatter
+- explicit ordered stage + value -> Funnel
+- exact source/target/value -> Sankey
+
+Rules:
+
+- Result Visual is derived from the exact returned rows/columns.
+- Table remains canonical evidence.
+- A chart is recommended only when `ResultShape` can defend the mapping.
+- No chart is selected merely because numeric values exist.
+
+### 3. Execution Graph — database execution evidence
+
+Purpose: explain **how a specific database actually planned/executed the query**.
+
+Examples may later include provider-specific plan nodes such as scans, joins, aggregates, and sorts.
+
+Rules:
+
+- Execution Graph must be backed by an actual plan source such as `EXPLAIN`/equivalent evidence.
+- Never infer an execution graph from SQL text alone.
+- Query Graph and Execution Graph may look similar but answer different questions and must use different labels.
+- Execution Graph is a later product slice; it is not part of the current first BI implementation.
+
+## Ordering/meaning boundary
+
+CoQuery must keep these concepts distinct:
+
+1. **SQL text/surface** — the statement the learner wrote.
+2. **Query Graph** — CoQuery's recognized logical transformation representation for learning.
+3. **Execution Graph** — the database's actual planner/executor evidence.
+
+Do not teach a Query Graph as if it were the physical runtime order. Do not label an inferred sequence as an execution plan.
+
+## Result surface contract
+
+The result surface remains:
+
+`Table | Visual | Flow | Explain`
+
+Definitions:
+
+1. **Table** — exact rows/columns returned by the query; canonical evidence.
+2. **Visual** — Result Visual selected only for a defensible result shape.
+3. **Flow** — Query Graph first; returned-data flow such as Sankey when the result explicitly exposes source/target/value.
+4. **Explain** — plain-language explanation connecting SQL structure, row meaning, and recommendation reason.
+
+Flow is promoted to a **core learning experience**. It should help a learner see SQL as a transformation rather than memorize syntax in isolation.
 
 Fallback rule:
 
-**When the result shape is ambiguous, default to Table and explain why no chart was selected.**
-
-The user must always be able to return to the exact Table evidence.
+**When a result shape or SQL structure is ambiguous, prefer Table and/or a partial recognized Query Graph, and state what is unknown.**
 
 ## Deterministic ResultShape classifier
 
@@ -74,7 +149,7 @@ Outputs:
 - `column_profiles`
 - `flow_steps`
 
-Supported/proven shapes in the current classifier:
+Supported/proven shapes:
 
 - `single_metric`
 - `category_measure`
@@ -101,53 +176,46 @@ Supported/proven shapes in the current classifier:
 | single current numeric value | Table | none | Gauge is not inferred without an explicit target/range |
 | mixed/raw/incomplete/too-wide result | Table | none | Table is the truthful default |
 
-No chart is selected solely because numeric values exist.
-
 Zero remains a valid numeric value. Null values are not silently converted to zero; ambiguous/incomplete chart candidates fall back to Table.
 
-## SQL transformation Flow
+## Query Graph contract
 
-Flow has two meanings and they remain distinct.
+The current classifier already derives conservative `flow_steps`. The visible Query Graph renderer will use those exact recognized steps as its first contract.
 
-### A. SQL reasoning flow — classifier metadata implemented
+Initial renderer rules:
 
-Example:
+- render one node/step only when the parser recognized it
+- preserve the original recognized clause text for inspectability
+- visually distinguish source (`FROM`/`JOIN`), filter, grouping/aggregation, ordering/limit, and result without inventing hidden operations
+- provide a textual alternative for accessibility
+- allow the learner to return to the original SQL and Table evidence
+- label the view **Query Flow/Query Graph**, not Execution Plan
 
-`customers -> WHERE active = 1 -> GROUP BY region -> COUNT(*) -> ORDER BY count DESC -> result`
+Later extensions may support nested structures for:
 
-The current conservative parser records only explicitly recognized fragments:
+- subqueries
+- CTEs
+- set operations
+- window functions
 
-- FROM
-- JOIN
-- WHERE
-- GROUP BY
-- aggregate expressions (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`)
-- HAVING
-- ORDER BY
-- LIMIT
+These are not to be simulated before explicit parser support exists.
 
-Unsupported syntax is not assigned invented meaning.
+## Returned-data flow contract
 
-The visible Flow renderer remains a later step in this PR slice.
+If the result itself has an exact `source`, `target`, `value` contract, the classifier returns `source_target_flow` and may recommend Sankey/Flow.
 
-### B. Returned-data flow — renderer later
-
-If the result itself has an exact `source`, `target`, `value` contract, the classifier returns `source_target_flow` and recommends Sankey/Flow.
-
-The actual Sankey renderer is deferred until the first Table/Bar result surface is stable.
-
-Do not confuse this with the SQL reasoning flow.
+This is a Result Visual/data-flow view and must not be confused with Query Graph.
 
 ## Explain contract
 
-Explain should answer four compact questions:
+Explain answers four compact questions:
 
-1. What did this SQL do?
+1. What transformation did this SQL describe?
 2. What does each result row represent?
-3. Why was this visual selected or not selected?
+3. Why was this visual/flow selected or not selected?
 4. What should the learner inspect next?
 
-The deterministic first slice can explain common clauses and result shapes. AI augmentation may come later, but the base explanation must remain useful without a provider.
+The deterministic baseline must remain useful without an AI provider. AI augmentation may come later but cannot replace the evidence-backed explanation contract.
 
 ## Bklit UI reference decision
 
@@ -157,9 +225,9 @@ Reference repository:
 
 Useful visual patterns include Bar, Line, Area, Pie/Ring, Scatter, Funnel, Gauge, Choropleth, and Sankey.
 
-Licensing boundary from the upstream repository:
+Licensing boundary:
 
-- chart components are MIT-licensed
+- chart components are MIT-licensed upstream
 - Bklit Studio is proprietary and must not be reused or redistributed as part of CoQuery
 
 Architecture boundary:
@@ -167,100 +235,86 @@ Architecture boundary:
 - current CoQuery PWA is plain HTML/CSS/JavaScript
 - Bklit chart components are React-based and rely on React/visx-style dependencies
 
-Therefore the first slice **does not add React or directly install the Bklit component registry**.
+Therefore the current slice does **not** add React or directly install the Bklit component registry.
 
-Use Bklit as a design/reference library first. After the result-intelligence contract is proven, evaluate either:
+Use Bklit as a visual/product reference first. After the contract is proven, evaluate either:
 
 1. lightweight native SVG/Canvas rendering for the small chart subset CoQuery needs, or
 2. a deliberate frontend architecture change that can host selected MIT chart components without forking the product.
 
 A React migration must not be smuggled into a chart feature.
 
-## First implementation slice
+## Current implementation status
 
-Boundary:
+Completed on active PR #18:
 
-`practice_query result -> classify -> Table | Visual recommendation | SQL Flow | Explain`
+- deterministic `ResultShape` classifier + tests
+- conservative SQL `flow_steps` extraction
+- additive hosted `practice_query` result-intelligence metadata
+- real column/row Table renderer in focused practice
+- truthful `NULL`/zero handling
+- recommendation name/reason above the Table
+- practice/query/grading/non-SELECT regression gate
+- practice-focus/PWA smoke protection
+- baseline and PostgreSQL smoke green on the implementation head
 
-Completed proof:
+Not yet implemented:
 
-- deterministic ResultShape module
-- category+measure -> Bar recommendation
-- ambiguous result -> Table fallback
-- ordered time-series -> Line recommendation; unsafe order -> Table
-- explicit part-to-whole, numeric relationship, stage funnel, and source/target/value classification
-- single metric does not infer Gauge
-- zero/null/category-count guardrails
-- deterministic/non-mutating classifier behavior
-- conservative SQL flow-step extraction
-- classifier contracts run in baseline CI
-- no external AI call
-- no React dependency
+- lightweight Bar renderer
+- visible Query Graph/Flow renderer
+- deterministic Explain view
+- Line/time-series renderer
+- Execution Graph backed by database plan evidence
 
-Still required for the first visible result slice:
+## Implementation order
 
-- wire ResultShape metadata into `practice_query`
-- Table view renders real columns/rows instead of JSON-string rows
-- recommendation reason appears in the result block
-- exact raw result remains inspectable
-- first chart renderer may be limited to Bar
-- visible SQL Flow and deterministic Explain follow after Table/Bar contract is stable
+The order balances fast visible value with the new core learning principle:
 
-## Suggested UI placement
-
-Inside the existing result block:
-
-`Table | Visual | Flow | Explain`
-
-Default selection policy:
-
-- raw/detail-heavy record result -> Table
-- high-confidence aggregate/time result -> Visual
-- learning task focused on SQL construction -> Table or Flow, with recommendation badge
-
-The interface should show a small label such as:
-
-`Recommended: Bar · region is a category and count is numeric`
-
-This makes the visualization choice teachable rather than magical.
+1. [done] `ResultShape` classifier + contract tests
+2. [done] hosted `practice_query` metadata integration
+3. [done] real Table renderer
+4. lightweight Bar renderer for proven `category_measure`
+5. **Query Graph/Flow renderer as a core learning view**
+6. deterministic Explain copy
+7. Line/time-series Result Visual
+8. nested Query Graph support only when parser contracts are added
+9. Execution Graph research/implementation only with real `EXPLAIN`-style evidence
+10. evaluate additional Bklit-inspired visuals only when result-shape rules require them
 
 ## Safety and truthfulness
 
-- visualization is derived from the returned result only
-- never fabricate missing measures, targets, geography, stage order, or flow edges
-- zero is a valid value, not missing data
-- null/missing values remain visible in Table and must not be silently converted to zero
+- Table is always available as canonical result evidence
+- Result Visual is derived only from returned data
+- Query Graph is derived only from explicitly recognized SQL structure
+- Execution Graph requires actual database plan evidence
+- never fabricate missing measures, targets, geography, stage order, flow edges, or execution nodes
+- zero is valid data, not missingness
+- null/missing values remain visible and are never silently converted to zero
 - chart sampling/truncation must be explicit
-- Table remains the canonical evidence view
+- unsupported SQL structure stays unsupported/unknown
 - no automatic external data sharing
-- Production Assist data remains subject to its existing safety/export boundary
+- Production Assist remains subject to existing safety/export boundaries
 
 ## Accessibility baseline
 
 - Table is always available
-- chart has a textual summary
+- charts and graphs have textual summaries
 - recommendations are not communicated by color alone
-- keyboard-accessible view tabs
+- future view tabs are keyboard-accessible
+- Query Graph nodes have readable text equivalents
 - reduced-motion safe by default
 
-## Acceptance criteria for this product slice
+## Acceptance criteria
 
 1. Same rows/SQL produce the same classification and recommendation.
-2. Unsupported/ambiguous shapes fall back to Table.
+2. Unsupported/ambiguous result shapes fall back to Table.
 3. The chart recommendation includes a plain-language reason.
-4. SQL Flow contains only clauses explicitly recognized from the query.
-5. Table data is not altered by Visual/Flow/Explain.
-6. No new AI/provider requirement is introduced.
-7. No React migration is introduced by this slice.
-8. Regression coverage protects the classifier and fallback behavior.
-
-## Current implementation order
-
-1. [done] `ResultShape` classifier + contract tests
-2. wire classifier metadata into `practice_query`
-3. real Table renderer
-4. Bar renderer for `category_measure`
-5. SQL clause Flow renderer
-6. deterministic Explain copy
-7. Line/time-series support
-8. evaluate additional Bklit-inspired visuals only when result-shape rules require them
+4. Query Graph contains only explicitly recognized SQL structure.
+5. Query Graph is never labeled as a physical execution plan.
+6. Execution Graph is not shown without real planner/executor evidence.
+7. Table data is not altered by Visual/Flow/Explain.
+8. Zero/null semantics remain truthful.
+9. No new AI/provider requirement is introduced.
+10. No React migration is introduced by this slice.
+11. Regression coverage protects existing practice/query/grading behavior.
+12. Learners can distinguish SQL text, Query Graph, Result Visual, and later Execution Graph.
