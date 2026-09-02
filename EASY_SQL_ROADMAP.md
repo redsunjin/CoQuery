@@ -35,9 +35,10 @@ Three visual layers are explicitly separated:
 
 Table remains canonical evidence. Query Graph must not be presented as a physical execution plan.
 
-Reference:
+References:
 
 - `docs/coquery-bi-result-intelligence-2026-08-30.md`
+- `docs/coquery-query-graph-implementation-2026-09-02.md`
 
 ## Current Verified Position
 
@@ -52,14 +53,17 @@ Verified and merged:
 - next-incomplete-problem navigation
 - user-flow regression smoke
 
-Active PR #18 result-view baseline now includes:
+Active PR #18 result-understanding baseline now includes:
 
 - deterministic ResultShape classification
 - additive hosted `practice_query` result-intelligence metadata
-- a real column/row Table in focused practice instead of the visible JSON-string row preview
-- visible recommendation metadata while Table remains the evidence baseline
+- real column/row Table instead of visible JSON-string row preview
 - truthful `NULL` and numeric-zero rendering
-- mobile horizontal overflow handling without a React migration
+- first lightweight Bar Result Visual for proven `category_measure`
+- visible Query Graph from recognized `flow_steps`
+- Query Graph labeled as logical SQL transformation, not database execution order
+- mobile horizontal overflow for Table and Query Graph without a React migration
+- PWA cache `coquery-pwa-v2` containing Bar + Query Graph assets
 
 This branch work is not yet merged or deployed to the durable production Worker.
 
@@ -71,7 +75,7 @@ This branch work is not yet merged or deployed to the durable production Worker.
 - optional provider infrastructure remains available
 - PostgreSQL remains a narrow experimental track with smoke proof
 - MySQL is not part of the working baseline
-- `sql_cli/result_intelligence.py` provides the deterministic classifier and conservative Query Graph `flow_steps`
+- `sql_cli/result_intelligence.py` provides deterministic ResultShape classification and conservative Query Graph `flow_steps`
 - `sql_cli/result_integration.py` attaches derived metadata without mutating canonical result fields
 
 ### Product distribution
@@ -99,7 +103,7 @@ PR #16 merge commit:
 
 - `5752cd24142da60496e42b66e35d1a546e4a0c06`
 
-Browser/device installation QA remains separate and is not implied by the automated deployment proof.
+Browser/device installation QA remains separate and is not implied by automated deployment proof.
 
 ## Active Priority Stack
 
@@ -138,7 +142,7 @@ Later, separately:
 Core rules:
 
 - deterministic first; no LLM required
-- Table is always available and remains the evidence baseline
+- Table is always available and remains evidence baseline
 - Query Graph/Flow is a first-class learning view
 - high-confidence result shapes may recommend a chart
 - ambiguous shapes fall back to Table
@@ -146,30 +150,34 @@ Core rules:
 - Query Graph is not an execution-plan claim
 - Execution Graph requires real database plan evidence
 - visualization recommendation explains why it was selected
-- no React migration in the first slice
+- no React migration in first slice
 
-Bklit UI remains a design/component reference for chart patterns such as Bar, Line, Funnel, Sankey, Gauge, and Choropleth. Current CoQuery is plain HTML/CSS/JS, so direct React registry adoption is deferred until a deliberate frontend architecture decision.
+Bklit UI remains a design/component reference for Bar, Line, Funnel, Sankey, Gauge, Choropleth and related patterns. Current CoQuery is plain HTML/CSS/JS; direct React registry adoption is deferred until a deliberate architecture decision.
 
 Proven on active PR #18:
 
 - deterministic `ResultShape` module: `sql_cli/result_intelligence.py`
-- executable contract coverage: `sql_cli/tests/test_result_intelligence.py`
+- executable classifier contracts: `sql_cli/tests/test_result_intelligence.py`
 - conservative recognized SQL `flow_steps`
 - additive integration helper: `sql_cli/result_integration.py`
 - hosted Worker wiring for successful `practice_query` responses
-- real Table renderer in `practice-focus.js`/`practice-focus.css`
+- real Table renderer in focused practice
+- Bar Result Visual for proven category + measure only
+- Query Graph renderer preserving recognized step order/text
+- Query Graph filters unsupported step kinds and never invents physical execution nodes
 - practice-query regression gate protecting catalog/query/grading/error contracts
-- practice-focus and PWA/serverless smoke coverage protecting the visible Table and hosted wiring
-- baseline CI and separate PostgreSQL smoke green on the implementation head
+- executable Bar and Query Graph smokes
+- practice-focus and PWA/serverless smoke coverage protecting visible wiring and app-shell cache
+- baseline CI and separate PostgreSQL smoke green on implementation head `d30ce9f888db7b6bc2626ff2626fcf8eef0093c8`
 
 Implementation order:
 
 1. [done] ResultShape classifier + contract tests
 2. [done] hosted `practice_query` metadata integration
 3. [done] real Table renderer in focused practice
-4. lightweight Bar Result Visual for proven category + measure
-5. **Query Graph/Flow renderer as a core learning view**
-6. deterministic Explain copy
+4. [done] lightweight Bar Result Visual for proven category + measure
+5. [done] Query Graph/Flow renderer as core learning view
+6. **deterministic Explain copy**
 7. Line/time-series Result Visual
 8. nested Query Graph support only after explicit parser contracts
 9. Execution Graph only with real `EXPLAIN`-style evidence
@@ -192,7 +200,7 @@ Core modules:
 - PromptPreview
 - HandoffAdapter
 
-No new backend is required for the first slice.
+No new backend is required for first slice.
 
 Reference:
 
@@ -202,7 +210,7 @@ Reference:
 
 After hosted PWA behavior and browser/device evidence are stable:
 
-- validate the minimal wrapper choice
+- validate minimal wrapper choice
 - keep shared Web/PWA source canonical
 - create thin iOS and Android wrappers
 - prove simulator/emulator flows
@@ -215,7 +223,7 @@ Preferred direction remains a thin Capacitor-style wrapper, subject to implement
 
 - nested Query Graph support for subqueries/CTEs/window constructs after parser contracts exist
 - Execution Graph research and provider-specific `EXPLAIN` contracts
-- additional BI visuals only when ResultShape rules justify them
+- Line/time-series and additional BI visuals only when ResultShape rules justify them
 - Practice-result AI handoff
 - system share / selectable external AI destination
 - My Data bridge
@@ -245,11 +253,13 @@ Core CI:
 - CLI/core verification
 - deterministic BI ResultShape contract tests
 - practice-query regression gate
-- practice focus smoke including canonical Table markers
+- executable Bar Result Visual smoke
+- executable Query Graph model smoke via `practice_focus_smoke.py`
+- practice-focus smoke including Table/Bar/Query Graph asset wiring
 - learning path smoke
 - curriculum smoke
 - user-flow QA smoke
-- PWA/serverless smoke including hosted result-intelligence wiring
+- PWA/serverless smoke including hosted result-intelligence wiring and `coquery-pwa-v2` shell assets
 - separate PostgreSQL smoke
 
 Deployment verification:
@@ -264,17 +274,17 @@ The active BI integration is currently verified by branch CI, not yet by a new d
 
 Do not silently:
 
-- split the canonical PWA into separate native product implementations
+- split canonical PWA into separate native product implementations
 - make external AI mandatory for SQL generation or result interpretation
 - automatically send data to an AI
 - expose Production Assist data through AI handoff before ExportPolicy proof
 - describe automated HTTP proof as completed browser/device/install QA
 - broaden PostgreSQL/MySQL support claims without new proof
-- turn the BI result slice into an undeclared React migration
-- reuse or redistribute Bklit Studio; only the upstream MIT chart-component boundary is eligible for later technical evaluation
+- turn BI result slice into an undeclared React migration
+- reuse or redistribute Bklit Studio; only upstream MIT chart-component boundary is eligible for later technical evaluation
 - invent chart dimensions, targets, flow edges, geographic meaning, stage order, or execution nodes
 - replace or mutate canonical `columns`, `rows`, or `row_count` when adding derived BI metadata
-- teach Query Graph as if it were the database's physical execution plan
+- teach Query Graph as if it were database physical execution plan
 - show Execution Graph without real planner/executor evidence
 
 ## Official Execution Loop
@@ -283,9 +293,9 @@ For each slice:
 
 1. confirm current `main`
 2. create a branch
-3. document the scope and proof boundary
+3. document scope and proof boundary
 4. add regression/contract tests where practical
-5. implement the smallest valid change
+5. implement smallest valid change
 6. keep baseline CI green
 7. keep PostgreSQL smoke truthful when relevant
 8. record exactly what was verified and skipped
@@ -296,7 +306,7 @@ For each slice:
 
 Immediate implementation gate:
 
-**add the first lightweight Bar Result Visual for proven `category_measure` results while keeping Table canonical; then implement the Query Graph/Flow renderer as the next core learning view.**
+**implement deterministic Explain that connects recognized SQL transformation, row meaning when deterministically knowable, and Result Visual recommendation reason without inventing business meaning or requiring an external AI provider.**
 
 Execution direction:
 
