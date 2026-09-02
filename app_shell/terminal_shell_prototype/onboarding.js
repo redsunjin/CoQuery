@@ -203,9 +203,27 @@ function loadPracticeQueryFlowAssets() {
   }
 }
 
+function loadPracticeResultExplainAssets() {
+  if (!document.querySelector('link[data-practice-result-explain-style]')) {
+    const style = document.createElement("link");
+    style.rel = "stylesheet";
+    style.href = "./practice-result-explain.css";
+    style.dataset.practiceResultExplainStyle = "true";
+    document.head.appendChild(style);
+  }
+
+  if (!document.querySelector('script[data-practice-result-explain-script]')) {
+    const script = document.createElement("script");
+    script.src = "./practice-result-explain.js";
+    script.dataset.practiceResultExplainScript = "true";
+    document.body.appendChild(script);
+  }
+}
+
 function loadPracticeResultIntelligenceAssets() {
   loadPracticeResultVisualAssets();
   loadPracticeQueryFlowAssets();
+  loadPracticeResultExplainAssets();
 }
 
 function loadPracticeFocusAssets() {
