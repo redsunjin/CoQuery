@@ -1,4 +1,4 @@
-const CACHE_NAME = "coquery-pwa-v2";
+const CACHE_NAME = "coquery-pwa-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -12,6 +12,8 @@ const APP_SHELL = [
   "./practice-result-visual.js",
   "./practice-query-flow.css",
   "./practice-query-flow.js",
+  "./practice-result-explain.css",
+  "./practice-result-explain.js",
   "./learning-path.css",
   "./learning-path.js",
   "./curriculum-expansion.js",
