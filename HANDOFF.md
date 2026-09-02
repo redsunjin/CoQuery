@@ -1,7 +1,7 @@
 # CoQuery Handoff
 
 Date: 2026-09-02
-Status: Durable Cloudflare production deployment proven; PR #18 now has ResultShape classification + hosted metadata integration + canonical practice Table; first Bar renderer is next
+Status: Durable Cloudflare production deployment proven; PR #18 has ResultShape + hosted Table integration; `SQL as Visual Data Transformation` is now the product principle
 
 ## Product Definition
 
@@ -17,11 +17,27 @@ Canonical product distribution:
 
 The shared Web/PWA product logic remains canonical. Native wrappers must stay thin.
 
-Approved result-understanding direction:
+### Product principle
 
-`Table -> Visual -> Flow -> Explain`
+**SQL as Visual Data Transformation**
 
-Table remains the canonical evidence view. Visual/Flow/Explain are derived, explainable views of the same query result and SQL structure.
+CoQuery treats SQL as a declarative relational/data transformation expression that can be understood visually. The mathematical-formula analogy is useful only as a learning metaphor: SQL is not reduced to a simple numeric function.
+
+Approved result surface:
+
+`Table | Visual | Flow | Explain`
+
+Three visual layers are separate contracts:
+
+1. **Query Graph** — recognized SQL transformation structure; a core learning experience.
+2. **Result Visual** — BI interpretation derived from exact returned rows.
+3. **Execution Graph** — actual database planner/executor evidence; later slice and never inferred from SQL text alone.
+
+Table remains canonical result evidence. Query Graph must never be labeled as a physical execution plan.
+
+Reference:
+
+- `docs/coquery-bi-result-intelligence-2026-08-30.md`
 
 ## Merged Product History
 
@@ -115,14 +131,6 @@ This remains a release-evidence track and must be completed before native wrappe
 
 ## BI Result Intelligence — Active PR #18
 
-Approved result surface:
-
-`Table | Visual | Flow | Explain`
-
-First boundary:
-
-`practice_query result -> classify -> Table | Visual recommendation | SQL Flow | Explain`
-
 ### ResultShape classifier — implemented and tested
 
 Files:
@@ -133,7 +141,7 @@ Files:
 Proven deterministic behavior:
 
 - category + numeric measure -> Bar recommendation when category labels are stable and bounded
-- temporal + numeric measure -> Line only when the returned temporal sequence is safely ordered
+- temporal + numeric measure -> Line only when returned temporal order is safely chartable
 - explicit share/percentage forming a complete total -> Ring recommendation
 - two non-identifier numeric observation fields -> Scatter recommendation
 - explicit stage + numeric value + SQL `ORDER BY` -> Funnel recommendation
@@ -156,7 +164,7 @@ Behavior:
 
 - successful hosted `practice_query` responses receive additive `data.result_intelligence`
 - `columns`, `rows`, `row_count`, actions, mode context, grading behavior, and structured non-SELECT errors remain protected
-- the integration helper copies the result/data mapping before attaching metadata, so the raw result object is not mutated
+- integration copies result/data mappings before attaching metadata
 - failed practice-query results are not rewritten
 
 ### Canonical focused-practice Table — implemented and tested
@@ -170,46 +178,82 @@ Files:
 
 Behavior:
 
-- the visible five-row JSON-string preview is hidden in focused practice
-- a real HTML table renders the returned columns and all rows in the current response
-- Table remains the canonical result evidence even when `result_intelligence` recommends Bar/Line/etc.
-- recommendation name/reason is shown above the Table
-- `NULL` is rendered as `NULL`; zero remains `0`
+- visible five-row JSON-string preview is hidden in focused practice
+- a real HTML table renders returned columns and all rows in the current response
+- Table remains canonical evidence even when ResultShape recommends a chart
+- recommendation name/reason is shown above Table
+- `NULL` renders as `NULL`; zero remains `0`
 - numeric cells use tabular alignment and mobile widths use horizontal scrolling
 - no React dependency or external AI/provider call is introduced
 
-Latest implementation verification before document-only currentization:
+### Query Graph — promoted to core learning view
 
-- baseline: success
-- PostgreSQL smoke: success
+Concept:
 
-The documentation commits trigger CI again; merge remains blocked until the latest branch head is green.
+`SQL text -> Query Graph -> result`
 
-First implementation sequence:
+Example:
+
+`customers -> WHERE active = 1 -> GROUP BY region -> COUNT(*) -> ORDER BY count DESC -> result`
+
+Initial Query Graph renderer must use only the already-recognized `flow_steps` contract.
+
+Rules:
+
+- show only recognized SQL structure
+- preserve recognized clause text for inspectability
+- unsupported nested/advanced syntax remains unsupported/unknown
+- label the view Query Flow/Query Graph, not Execution Plan
+- provide a textual alternative for accessibility
+- do not claim physical runtime order
+
+Later parser-backed extensions may support subqueries, CTEs, set operations, and window functions.
+
+### Result Visual — separate BI layer
+
+Bar/Line/Ring/Scatter/Funnel/Sankey represent returned-data shape, not SQL execution.
+
+The next Result Visual implementation is a lightweight Bar chart for high-confidence `category_measure` only.
+
+### Execution Graph — later evidence-driven layer
+
+Execution Graph answers a different question: how a specific database planned/executed the query.
+
+Rules:
+
+- requires real `EXPLAIN`/equivalent planner evidence
+- never infer from SQL text alone
+- use provider-specific plan contracts later
+- visually/verbally distinguish it from Query Graph
+
+This is not part of the current first BI slice.
+
+## Current implementation sequence
 
 1. [done] deterministic `ResultShape` classifier + contract tests
 2. [done] hosted `practice_query` metadata integration
 3. [done] real focused-practice Table renderer
-4. lightweight Bar renderer for clear category + measure results
-5. SQL clause Flow renderer
+4. lightweight Bar Result Visual for clear category + measure results
+5. **Query Graph/Flow renderer as a core learning view**
 6. deterministic Explain copy
-7. Line/time-series support after the contract is stable
+7. Line/time-series Result Visual
+8. nested Query Graph support only with explicit parser contracts
+9. Execution Graph only with real `EXPLAIN`-style evidence
 
 Truthfulness rules:
 
 - Table is always available
-- ambiguous results fall back to Table
+- ambiguous result shapes fall back to Table
+- Query Graph contains only recognized SQL structure
+- Query Graph is not a physical execution-plan claim
+- Execution Graph requires real plan evidence
 - recommendation must state why it was selected
-- no target/geography/stage order/flow edge may be inferred when not explicit
+- no target/geography/stage order/flow edge/execution node may be invented
 - zero is data, not missingness
 - null remains null unless a transformation is explicit
 - no external AI/provider is required for the first slice
 - no undeclared React migration
 - derived BI metadata must not mutate canonical query evidence
-
-Reference:
-
-- `docs/coquery-bi-result-intelligence-2026-08-30.md`
 
 ## Bklit UI Reference Boundary
 
@@ -238,7 +282,7 @@ Architecture boundary:
 - current CoQuery PWA is plain HTML/CSS/JavaScript
 - Bklit components are React-based and depend on React/visx-style packages
 
-Therefore the active BI slice uses Bklit as a product/design/component reference only. Direct component adoption or React migration requires a separate explicit architecture decision.
+Therefore the active BI slice uses Bklit as a product/design reference only. Direct component adoption or React migration requires a separate explicit architecture decision.
 
 ## AI Direction — Approved, Deferred Behind BI First Slice
 
@@ -274,7 +318,7 @@ Keep these rules:
 - data visible in CoQuery is not automatically approved for external AI sharing
 - allowlist/minimum extraction first
 - API keys, secrets, tokens, passwords, credentials, DB URIs, personal information, and unknown-permission production data are excluded by default
-- show the exact outgoing body before any clipboard/share/open side effect
+- show the exact outgoing body before clipboard/share/open side effect
 - require explicit user action for every handoff side effect
 - no automatic paste/send, login delegation, answer retrieval, or AI-generated SQL auto-execution
 - Production Assist handoff remains OFF until ExportPolicy/external-sharing rights are separately proven
@@ -283,7 +327,7 @@ Keep these rules:
 
 After durable PWA/browser proof:
 
-- validate a thin Capacitor-style wrapper against the current toolchain and store rules
+- validate a thin Capacitor-style wrapper against current toolchain/store rules
 - create iOS and Android wrappers without duplicating learning/business logic
 - keep native-specific work limited to packaging, icons/splash, clipboard/share adapters, permissions, and store metadata
 
@@ -312,11 +356,11 @@ Browser/device PWA QA evidence remains open in parallel.
 
 BI Result Intelligence:
 
-`practice_query -> ResultShape -> Table | Visual | Flow | Explain`
+`SQL -> Query Graph + Result Visual + Table evidence`
 
 Immediate implementation:
 
-`proven category_measure -> lightweight Bar renderer`, while Table remains canonical evidence.
+`proven category_measure -> lightweight Bar Result Visual`, then `recognized flow_steps -> Query Graph`.
 
 ### P0-3
 
@@ -333,6 +377,8 @@ Shared-code mobile wrappers:
 
 ### P1
 
+- nested Query Graph parser/rendering contracts
+- provider-specific `EXPLAIN` research and Execution Graph contract
 - additional BI visuals after shape rules prove the need
 - Practice-result AI handoff
 - system share / selectable AI destination
@@ -358,7 +404,7 @@ Shared-code mobile wrappers:
 
 ## Immediate Next Gate
 
-**Add the first lightweight Bar renderer for high-confidence `category_measure` results, with Table retained as canonical evidence and all regression gates green.**
+**Add the first lightweight Bar Result Visual for high-confidence `category_measure` results while Table remains canonical; then implement Query Graph/Flow from recognized `flow_steps` as the next core learning view.**
 
 Execution direction:
 
