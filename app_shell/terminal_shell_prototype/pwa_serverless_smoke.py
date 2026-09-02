@@ -36,7 +36,10 @@ def main() -> int:
     require(ROOT / "cloudflare_worker.py", 'HOSTED_COMMANDS = {')
     require(ROOT / "cloudflare_worker.py", 'args["no_record"] = True')
     require(ROOT / "cloudflare_worker.py", 'hosted_command_unavailable')
+    require(ROOT / "cloudflare_worker.py", 'enrich_practice_query_result')
+    require(ROOT / "cloudflare_worker.py", 'if command == "practice_query"')
     require(ROOT / "cloudflare_worker.py", 'return await self.env.ASSETS.fetch(request)')
+    require(ROOT / "sql_cli" / "result_integration.py", 'data["result_intelligence"] = classify_result')
     require(APP / ".assetsignore", "*.py")
 
     bundle_script = ROOT / "scripts" / "prepare_cloudflare_bundle.py"
