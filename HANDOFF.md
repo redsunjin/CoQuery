@@ -1,7 +1,7 @@
 # CoQuery Handoff
 
-Date: 2026-08-28
-Status: Learning/PWA baseline merged through PR #14; durable Cloudflare production deploy harness active on `ops/cloudflare-production-deploy`
+Date: 2026-09-02
+Status: Production PWA deployed; SQL Dialect Learning planning/implementation slice active on `feat/sql-dialect-learning`
 
 ## Product Definition
 
@@ -26,10 +26,32 @@ The shared Web/PWA product logic remains canonical. Native wrappers must stay th
 - PR #12 — learner-flow QA and next-problem navigation
 - PR #13 — installable PWA + Cloudflare Python Worker scaffold
 - PR #14 — isolated deployment bundle + real temporary Cloudflare hosted proof
+- PR #15 — durable production deployment workflow + PWA QA harness
+- PR #16 — hardened production hosted-API verification
 
-Latest `main` after PR #14:
+Latest `main` before this branch:
 
-- `2f06ba761eb869c65f91a03f7588ec2d363e1173`
+- `5752cd24142da60496e42b66e35d1a546e4a0c06`
+
+## Production PWA Baseline
+
+Durable Worker:
+
+- `https://coquery-pwa.edu-public-app.workers.dev`
+
+Automated production workflow has verified:
+
+- Worker deployment/startup
+- `/api/health`
+- PWA HTML shell
+- standalone manifest
+- 24-problem practice listing
+- SQL execution
+- grading
+
+The production verification retry handles short deployment-propagation delay for the hosted practice API.
+
+Interactive browser/device evidence remains a separate QA gate.
 
 ## Verified Learner/Product Baseline
 
@@ -46,73 +68,84 @@ Baseline CI contains dedicated checks for:
 - PWA/serverless contract
 - PostgreSQL smoke as a separate narrow experimental proof
 
-## Cloudflare Hosted Proof — Completed
+## SQL Dialect Learning — Active Slice
 
-A real authentication-free temporary Cloudflare Worker was deployed and verified over the public network.
+Branch:
 
-Verified:
-
-- Worker deployment/startup
-- `/api/health` HTTP 200
-- PWA HTML shell
-- valid standalone manifest
-- 24-problem `practice_list`
-- SQL execution
-- correct grading
-
-Deployment uses an explicit generated bundle created by:
-
-- `scripts/prepare_cloudflare_bundle.py`
-
-Do not return to repository-wide Worker module discovery. The temporary proof already demonstrated that repository-wide discovery can accidentally include virtual environments and local tooling.
+- `feat/sql-dialect-learning`
 
 Reference:
 
-- `docs/coquery-cloudflare-temporary-deploy-proof-2026-08-28.md`
-- `docs/coquery-pwa-cloudflare-serverless-2026-08-28.md`
+- `docs/coquery-sql-dialect-learning-plan-2026-09-02.md`
 
-## Durable Cloudflare Production Gate — Active
+Approved product principle:
 
-Active branch:
+> Teach common SQL first, then reveal database-specific differences only when they help the learner.
 
-- `ops/cloudflare-production-deploy`
+Proposed learner flow:
 
-Prepared:
+`Problem -> Write SQL -> Run/Grade -> DB별 차이 보기 -> PostgreSQL | MySQL | SQLite`
 
-- `.github/workflows/cloudflare-production-deploy.yml`
-- manual `workflow_dispatch` only
-- GitHub `production` environment
-- credential presence check before deploy
-- reuse of the isolated bundle builder
-- durable `pywrangler deploy`
-- post-deploy health verification
-- post-deploy PWA shell/manifest verification
-- post-deploy hosted practice verification
-- regression checks that production deployment does not use the temporary-account flow
-- browser/device QA checklist
+The comparison layer is optional. It must not add database-specific complexity to the default beginner path.
 
-Reference:
+### Truthfulness states
 
-- `docs/coquery-production-cloudflare-pwa-qa-2026-08-28.md`
+Each comparison must declare one of:
 
-Required GitHub Actions secrets:
+- `common` — no material dialect difference for the lesson
+- `reference` — documented comparison, not executed by CoQuery against that engine
+- `verified` — behavior proven by an actual CoQuery test/smoke environment
 
-- `CLOUDFLARE_ACCOUNT_ID`
-- `CLOUDFLARE_API_TOKEN`
+Current engine boundary:
 
-These values are not in the repository and must never be committed.
+- SQLite — working practice baseline
+- PostgreSQL — narrow experimental/runtime smoke path
+- MySQL — reference-only for this slice; no working runtime baseline
 
-Current durable deployment blocker:
+Do not mark MySQL examples as `verified` until a real MySQL environment exists.
 
-- the two Cloudflare secrets are not yet available to the GitHub workflow in this session
+### Phase A implementation target
 
-Once configured, manually run `cloudflare-production-deploy`. The run must return a durable Worker URL and pass all automated post-deploy checks before browser/device QA starts.
+- deterministic `DialectLesson` data model
+- `DialectCatalog`
+- first four comparison topics
+  - string concatenation
+  - current date/time
+  - date arithmetic
+  - row limiting/commonality
+- PostgreSQL/MySQL/SQLite variants
+- KR/EN copy
+- optional `DB별 차이 보기` surface only when a relevant lesson exists
+- explicit verification-state badge
+- curriculum/problem mapping
+- deterministic catalog/mapping tests
 
-## Browser/PWA QA Required After Durable Deploy
+Not in Phase A:
 
-The automated HTTP proof is not a substitute for interactive browser evidence.
+- general SQL transpiler
+- automatic conversion of arbitrary SQL between engines
+- broad PostgreSQL/MySQL compatibility claims
+- replacing SQLite as practice baseline
 
-Required checks:
+## Result Intelligence / BI Direction
+
+Separate but complementary product direction:
+
+`Table | Chart | Flow | Explain`
+
+SQL Dialect Learning answers:
+
+**"Would the SQL syntax/behavior differ in another database?"**
+
+Result Intelligence answers:
+
+**"What does this result mean and how should it be interpreted?"**
+
+Keep these concerns separate in their first implementations.
+
+## Browser/PWA QA Still Required
+
+Required interactive checks:
 
 1. open public URL without login
 2. Home -> first problem -> SQL -> grade -> next problem
@@ -124,17 +157,13 @@ Required checks:
 8. verify `/api/*` does not use stale service-worker cache
 9. verify install/add-to-home-screen behavior where supported
 
-Target PWA baseline evidence should cover:
+Target PWA evidence:
 
 - desktop PWA-capable browser
 - iOS Safari/Add to Home Screen
 - Android Chrome/install flow
 
-This is PWA evidence, not yet native App Store/Play Store wrapper evidence.
-
 ## AI Direction — Approved, Not Yet Implemented
-
-Rule/local-knowledge behavior is still the deterministic baseline, but open-ended user meaning cannot be completely resolved by rules.
 
 Approved pattern:
 
@@ -200,14 +229,7 @@ Do not broaden PostgreSQL/MySQL/JPA claims without new verification evidence.
 
 ### P0-1
 
-Durable Cloudflare/PWA release gate:
-
-1. configure `CLOUDFLARE_ACCOUNT_ID`
-2. configure `CLOUDFLARE_API_TOKEN`
-3. run `cloudflare-production-deploy`
-4. record durable URL/run/head
-5. execute browser/device PWA QA
-6. currentize roadmap/TODO/HANDOFF with actual evidence
+Interactive browser/device PWA QA.
 
 ### P0-2
 
@@ -222,17 +244,17 @@ Shared-code mobile wrappers:
 - iOS
 - Android
 
-### P1
+### P1-1 — Active parallel learning-quality slice
 
-- Practice-result AI handoff
-- system share / selectable AI destination
-- My Data bridge
-- learner-feedback-driven curriculum refinement
+SQL Dialect Learning:
 
-### P2
+`common SQL -> optional DB comparison -> PostgreSQL | MySQL | SQLite`
 
-- constrained Production Assist AI handoff after export-rights proof
-- optional cross-device progress sync
+### P1-2
+
+Result Intelligence:
+
+`Table | Chart | Flow | Explain`
 
 ## Official Harness Rules
 
@@ -248,18 +270,15 @@ Shared-code mobile wrappers:
 
 ## Immediate Next Gate
 
-**Configure the two Cloudflare GitHub Actions secrets and run the manual production deployment workflow.**
+On `feat/sql-dialect-learning`:
 
-Execution history:
-
-`learning UX -> PWA/serverless -> hosted proof -> durable PWA QA -> AI validation handoff -> iOS/Android wrappers`
+**Implement Phase A with a deterministic dialect catalog, four comparison lessons, curriculum mapping, and an optional comparison surface that leaves the default beginner flow unchanged.**
 
 ## Key Documents
 
 - `EASY_SQL_ROADMAP.md`
 - `EASY_SQL_TODO.md`
 - `HANDOFF.md`
-- `docs/coquery-pwa-cloudflare-serverless-2026-08-28.md`
-- `docs/coquery-cloudflare-temporary-deploy-proof-2026-08-28.md`
+- `docs/coquery-sql-dialect-learning-plan-2026-09-02.md`
 - `docs/coquery-production-cloudflare-pwa-qa-2026-08-28.md`
 - `docs/coquery-ai-context-to-prompt-handoff-2026-08-28.md`
