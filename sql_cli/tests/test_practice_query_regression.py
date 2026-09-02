@@ -4,10 +4,9 @@
 This test intentionally protects the behavior that BI Result Intelligence must not break:
 - practice catalog remains available
 - practice_query preserves columns/rows/row_count and app-facing metadata
+- BI metadata is additive and does not mutate canonical result evidence
 - correct grading still succeeds without recording a learner attempt
 - invalid/non-SELECT SQL still fails through the existing structured error contract
-
-The BI layer may add derived metadata later, but these baseline fields remain canonical evidence.
 """
 
 from __future__ import annotations
@@ -19,6 +18,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from sql_cli.command_api import run_command
+from sql_cli.result_integration import enrich_practice_query_result
 
 
 def require(condition: bool, message: str) -> None:
@@ -53,6 +53,21 @@ def main() -> int:
     require(query["data"]["sql"] == sql, "practice_query must preserve submitted SQL")
     require(query["data"]["mode_context"]["mode"] == "training", "training mode context changed")
 
+    raw_columns = list(query["data"]["columns"])
+    raw_rows = [dict(row) for row in query["data"]["rows"]]
+    raw_row_count = query["data"]["row_count"]
+    enriched = enrich_practice_query_result(query, {"sql": sql})
+    intelligence = enriched["data"].get("result_intelligence") or {}
+    require(intelligence.get("shape") == "category_measure", "category + measure classification changed")
+    require(intelligence.get("recommended_view") == "visual", "category + measure should recommend Visual")
+    require(intelligence.get("recommended_visual") == "bar", "category + measure should recommend Bar")
+    require(intelligence.get("dimensions") == ["region"], "dimension classification changed")
+    require(intelligence.get("measures") == ["customer_count"], "measure classification changed")
+    require("result_intelligence" not in query["data"], "BI enrichment must not mutate the raw result data mapping")
+    require(enriched["data"]["columns"] == raw_columns, "BI enrichment altered canonical columns")
+    require(enriched["data"]["rows"] == raw_rows, "BI enrichment altered canonical rows")
+    require(enriched["data"]["row_count"] == raw_row_count, "BI enrichment altered canonical row_count")
+
     grade_sql = "SELECT id, name, region FROM customers ORDER BY id"
     grade = run_command(
         "practice_grade",
@@ -69,6 +84,7 @@ def main() -> int:
     require(invalid["ok"] is False, "non-SELECT practice SQL must remain blocked")
     require(invalid["error"]["code"] == "practice_sql_not_select", "structured non-SELECT error contract changed")
     require(invalid["block_type"] == "practice_query_result", "failed practice_query block type changed")
+    require(enrich_practice_query_result(invalid, {"sql": "DELETE FROM customers"}) is invalid, "failed results must not be rewritten")
 
     print("practice-query regression gate: ok")
     return 0
