@@ -49,6 +49,7 @@ Reference:
 Reference:
 
 - `docs/coquery-bi-result-intelligence-2026-08-30.md`
+- `docs/coquery-query-graph-implementation-2026-09-02.md`
 
 Product principle:
 
@@ -66,24 +67,22 @@ Product surface:
 
 Current boundary:
 
-`practice_query result -> classify -> Table | Result Visual recommendation | Query Graph/Flow | Explain`
+`practice_query result -> classify -> Table | Result Visual | Query Graph/Flow | Explain`
 
-Classifier baseline completed on active PR #18:
+Implemented on active PR #18:
 
-- `sql_cli/result_intelligence.py`
-- `sql_cli/tests/test_result_intelligence.py`
-- baseline CI executes the classifier contracts
-
-Hosted integration completed on active PR #18:
-
-- `sql_cli/result_integration.py` attaches additive `result_intelligence` metadata without mutating raw result data
-- `cloudflare_worker.py` enriches successful hosted `practice_query` responses
-- focused practice UI replaces visible JSON-string preview with a real column/row table
-- all returned rows from the current query response are rendered
-- `NULL` remains `NULL`; numeric zero remains `0`
-- recommendation metadata is shown above the canonical Table result
-- mobile table overflow is handled without React
-- `sql_cli/tests/test_practice_query_regression.py` protects existing learner/query/grading contracts
+- deterministic ResultShape classifier + regression contracts
+- additive hosted `practice_query` result-intelligence metadata
+- real column/row Table renderer; `NULL` and zero preserved truthfully
+- lightweight Bar Result Visual for proven `category_measure` only
+- Bar uses exact returned order and refuses null/non-numeric/ambiguous results
+- visible Query Graph renderer from recognized `flow_steps`
+- Query Graph preserves recognized SQL fragment text/order and ignores unsupported step kinds
+- Query Graph is explicitly labeled as logical transformation, not database execution order
+- final Result node uses actual returned `row_count`/rows only
+- Query Graph and Bar do not mutate canonical `columns`, `rows`, or `row_count`
+- PWA app-shell cache `coquery-pwa-v2` includes Table/Bar/Query Graph assets while `/api/*` remains uncached
+- executable Bar and Query Graph model smokes run inside the existing baseline gate
 
 Tasks:
 
@@ -99,18 +98,17 @@ Tasks:
 - [x] replace JSON-string row preview with a real column/row Table renderer in focused practice
 - [x] add recommendation reason to the result block
 - [x] keep zero/null handling truthful in the Table renderer
-- [x] verify no external AI/provider call is required in the rendered result flow
 - [x] document `SQL as Visual Data Transformation` product principle
 - [x] explicitly separate Query Graph / Result Visual / Execution Graph
-- [x] make Query Graph/Flow a first-class learning view in the roadmap
-- [ ] add first lightweight Bar Result Visual without React migration
-- [ ] add visible Query Graph/Flow renderer from recognized `flow_steps`
-- [ ] label Query Graph clearly so it cannot be mistaken for an execution plan
-- [ ] add textual alternative for Query Graph accessibility
+- [x] add first lightweight Bar Result Visual without React migration
+- [x] add visible Query Graph/Flow renderer from recognized `flow_steps`
+- [x] label Query Graph clearly so it cannot be mistaken for an execution plan
+- [x] add textual/accessibility description for Query Graph
+- [x] add executable Query Graph regression smoke and PWA shell-cache checks
 - [ ] add deterministic Explain copy connecting SQL transformation + row meaning + visual recommendation
+- [ ] complete KR/EN result-intelligence reason copy instead of backend-English reason text
+- [ ] add keyboard/accessibility baseline for future view tabs
 - [ ] keep exact raw result available in the detail panel as an explicit regression check
-- [ ] complete KR/EN result-intelligence copy instead of backend-English reason text
-- [ ] add keyboard/accessibility baseline for view tabs
 - [ ] decide whether the local/advanced command runtime should attach the same additive metadata before the BI slice closes
 
 Acceptance:
@@ -296,4 +294,4 @@ Not complete:
 
 ## Current Next Action
 
-**Add the first lightweight Bar Result Visual for proven `category_measure` results while Table remains canonical; then implement the Query Graph/Flow renderer as the next core learning view.**
+**Add deterministic Explain copy that connects recognized SQL transformation, row meaning when deterministically knowable, and the reason a Result Visual was or was not recommended.**
