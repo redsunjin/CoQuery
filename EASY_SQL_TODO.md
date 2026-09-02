@@ -1,7 +1,7 @@
 # CoQuery Todo List
 
-Version: product baseline 2026-09-02
-Last Updated: 2026-09-02
+Version: product baseline 2026-09-03
+Last Updated: 2026-09-03
 
 ## Active Priorities
 
@@ -11,25 +11,23 @@ Completed:
 
 - [x] PR #13 PWA/serverless scaffold merged
 - [x] PR #14 temporary hosted proof + isolated deployment harness merged
-- [x] PR #15 durable production workflow + PWA QA contract merged
+- [x] PR #15 production deployment workflow + PWA QA harness merged
 - [x] PR #16 production API verification hardening merged
 - [x] PWA manifest / service worker / browser-local progress
 - [x] Cloudflare Python Worker practice API
-- [x] durable production Worker created
+- [x] durable Worker deployment
 - [x] production `/api/health` proof
 - [x] production PWA shell/manifest proof
 - [x] production hosted practice API proof
-- [x] deployment verification tolerates short propagation windows without masking non-retryable failures
+- [x] isolated deployment bundle
+- [x] production post-deploy health/PWA/practice checks
+- [x] deployment-propagation retry for hosted practice verification
 
-Durable Worker:
+Durable URL:
 
 - `https://coquery-pwa.edu-public-app.workers.dev`
 
-Successful production workflow:
-
-- run `33160202910`
-
-Remaining browser/device evidence:
+Remaining interactive QA:
 
 - [ ] Home -> problem bank -> solve -> grade -> next problem
 - [ ] verify progress across browser reload/relaunch
@@ -44,91 +42,67 @@ Reference:
 
 - `docs/coquery-production-cloudflare-pwa-qa-2026-08-28.md`
 
-### P0-2. BI Result Intelligence — active
+### P0-2. BI Result Intelligence — active Draft PR #18
 
-Reference:
+References:
 
 - `docs/coquery-bi-result-intelligence-2026-08-30.md`
 - `docs/coquery-query-graph-implementation-2026-09-02.md`
 - `docs/coquery-deterministic-explain-implementation-2026-09-02.md`
 - `docs/coquery-line-result-visual-implementation-2026-09-02.md`
+- `docs/coquery-recommendation-reason-localization-2026-09-02.md`
 
 Product principle:
 
 **SQL as Visual Data Transformation**
 
-Three visual layers:
-
-1. **Query Graph** — recognized SQL transformation structure; core learning experience.
-2. **Result Visual** — BI view derived from exact returned rows.
-3. **Execution Graph** — actual database plan evidence; later slice and never inferred from SQL text alone.
-
 Product surface:
 
 `Table | Visual | Flow | Explain`
 
-Current boundary:
+Three visual layers:
 
-`practice_query result -> classify -> Table | Result Visual | Query Graph/Flow | Explain`
+1. Query Graph — recognized logical SQL transformation structure.
+2. Result Visual — BI view derived from exact returned rows.
+3. Execution Graph — actual database plan evidence only; never inferred from SQL text.
 
-Implemented on active PR #18:
+Implemented on PR #18:
 
-- deterministic ResultShape classifier + regression contracts
-- additive hosted `practice_query` result-intelligence metadata
-- real column/row Table renderer; `NULL` and zero preserved truthfully
-- lightweight Bar Result Visual for proven `category_measure` only
-- deterministic Line Result Visual for safely ordered `time_series` only
-- Line preserves exact returned order, repeats the safe temporal-order guard in the frontend, and never infers elapsed-time distance from point spacing
-- Bar and Line both keep Table as canonical exact-value evidence
-- visible Query Graph renderer from recognized `flow_steps`
-- Query Graph preserves recognized SQL fragment text/order and ignores unsupported step kinds
-- Query Graph is explicitly labeled as logical transformation, not database execution order
-- final Result node uses actual returned `row_count`/rows only
-- deterministic Explain rendering for SQL transformation, row semantics, view recommendation, and explanation boundary
-- Explain filters unsupported flow kinds and never treats physical execution-plan nodes as evidence
-- Explain has KR/EN copy and remains provider-free
-- Query Graph, Result Visuals, and Explain do not mutate canonical `columns`, `rows`, or `row_count`
-- PWA app-shell cache `coquery-pwa-v4` carries the current Bar/Line visual module plus Query Graph/Explain assets while `/api/*` remains uncached
-- executable Bar/Line, Query Graph, and Explain model smokes run inside the baseline gate
+- [x] deterministic ResultShape classifier + regression contracts
+- [x] conservative SQL `flow_steps`
+- [x] hosted `practice_query` additive result-intelligence metadata
+- [x] real column/row Table renderer
+- [x] preserve `NULL` and zero truthfully
+- [x] Bar Result Visual only for proven `category_measure`
+- [x] Line Result Visual only for safely ordered `time_series`
+- [x] Line preserves exact returned order and does not infer elapsed-time spacing
+- [x] visible Query Graph/Flow from recognized SQL steps only
+- [x] explicit Query Graph boundary against execution-plan semantics
+- [x] deterministic Explain
+- [x] Explain boundary against business causality/hidden meaning/physical execution inference
+- [x] deterministic KR/EN recommendation-reason localization
+- [x] Korean UI no longer reuses backend-English `reason` as learner-facing copy
+- [x] executable Bar/Line, Query Graph, Explain/localization smokes
+- [x] no React migration
+- [x] no external AI requirement
+- [x] synchronize PR #18 with current main, retaining merged SQL Dialect Learning and privacy-policy work
+- [x] combined PWA cache contract includes BI assets + `dialect-learning.js`
 
-Tasks:
+Next BI tasks:
 
-- [x] define `ResultShape` contract
-- [x] add deterministic classifier tests
-- [x] classify category + measure results
-- [x] classify time-series candidates
-- [x] classify source/target/value only when explicit
-- [x] fall back to `tabular`/Table for ambiguous results
-- [x] cover single metric, part-to-whole, numeric relationship, ordered stage, zero/null, category-count guardrails, and deterministic/non-mutating behavior
-- [x] derive conservative SQL flow steps from explicitly recognized clauses
-- [x] wire ResultShape metadata into hosted `practice_query` output
-- [x] replace JSON-string row preview with a real column/row Table renderer in focused practice
-- [x] add recommendation reason to the result block
-- [x] keep zero/null handling truthful in the Table renderer
-- [x] document `SQL as Visual Data Transformation` product principle
-- [x] explicitly separate Query Graph / Result Visual / Execution Graph
-- [x] add first lightweight Bar Result Visual without React migration
-- [x] add visible Query Graph/Flow renderer from recognized `flow_steps`
-- [x] label Query Graph clearly so it cannot be mistaken for an execution plan
-- [x] add textual/accessibility description for Query Graph
-- [x] add executable Query Graph regression smoke and PWA shell-cache checks
-- [x] add deterministic Explain copy connecting SQL transformation + row meaning + visual recommendation
-- [x] add explicit Explain boundary against business causality/hidden meaning/physical execution-plan inference
-- [x] add executable Explain smoke and PWA cache checks
-- [x] add deterministic Line Result Visual only for safely ordered `time_series`
-- [x] preserve exact temporal return order and reject unordered/stale Line metadata in the frontend
-- [x] disclose that Line horizontal spacing represents returned sequence, not inferred elapsed-time distance
-- [x] add Line regression coverage without weakening Bar regression coverage
-- [ ] complete KR/EN result-intelligence recommendation reason copy instead of backend-English reason text
-- [ ] add keyboard/accessibility baseline for future view tabs
-- [ ] keep exact raw result available in the detail panel as an explicit regression check
-- [ ] decide whether the local/advanced command runtime should attach the same additive metadata before the BI slice closes
+- [ ] define keyboard/focus semantics for future `Table | Visual | Flow | Explain` switching
+- [ ] define tab vs arrow-key behavior and selected-state semantics
+- [ ] keep no-JS/no-chart Table fallback usable
+- [ ] add accessibility regression smoke for view switching before exposing tabs
+- [ ] keep exact raw result available as explicit evidence regression check
+- [ ] decide whether local/advanced command runtime should attach the same additive metadata before closing the first BI slice
 
 Acceptance:
 
 - same rows/SQL => same classification
 - ambiguous result => Table
 - chart recommendation always explains why
+- localization does not alter classification decisions
 - Bar renders only proven category + measure results
 - Line renders only safely ordered time-series results
 - Line does not sort returned rows or infer elapsed-time distance
@@ -139,29 +113,12 @@ Acceptance:
 - Table remains canonical evidence
 - BI enrichment does not mutate `columns`, `rows`, or `row_count`
 - existing practice catalog/query/grading/non-SELECT contracts remain green
-- no React dependency is added in the first slice
-- no external AI requirement is added
-
-Regression proof for the Line implementation commit:
-
-- commit `6e0802ef35d7e376d7e2f7580cad1af5a4d3b9fa`
-- `baseline` ✅
-- `postgresql-smoke` ✅
-
-Bklit reference boundary:
-
-- use `bklit/bklit-ui` as chart/BI design reference
-- upstream chart components are MIT-licensed
-- Bklit Studio is proprietary and is not reusable/redistributable
-- direct component adoption is deferred because current CoQuery is plain HTML/CSS/JS and Bklit components are React-based
 
 ### P0-3. AI Context-to-Prompt Handoff — first implementation slice
 
 Reference:
 
 - `docs/coquery-ai-context-to-prompt-handoff-2026-08-28.md`
-
-Starts after the BI first slice unless explicitly reprioritized.
 
 First boundary:
 
@@ -188,10 +145,8 @@ Acceptance:
 - same input/version/language => same body
 - unknown stays unknown
 - zero is not treated as missing
-- source/timestamps/limitations remain explicit
 - sensitive or unknown-permission fields are excluded
-- copied revision equals reviewed preview revision
-- clipboard side effect requires explicit user action
+- clipboard/share side effect requires explicit user action
 - CoQuery never claims an external AI received the prompt
 
 ### P0-4. iOS / Android wrapper baseline
@@ -210,48 +165,73 @@ After durable PWA/browser proof:
 
 Do not fork learning/business logic into separate native implementations.
 
-## P1
+## P1 — Learning Quality
 
-### Query Graph / Execution Graph expansion
+### P1-1. SQL Dialect Learning — Phase A merged in PR #19
 
-Only after the first Query Graph renderer is proven:
+Reference:
 
-- [ ] support nested Query Graph structures for subqueries/CTEs only with explicit parser contracts
-- [ ] add window/set-operation graph semantics only with deterministic coverage
+- `docs/coquery-sql-dialect-learning-plan-2026-09-02.md`
+
+Product rule:
+
+`common SQL first -> optional DB별 차이 보기 -> PostgreSQL | MySQL | SQLite`
+
+Phase A:
+
+- [x] deterministic `DialectLesson` / `DialectCatalog`
+- [x] string concatenation comparison
+- [x] current date/time comparison
+- [x] date arithmetic comparison
+- [x] row limiting/commonality lesson
+- [x] PostgreSQL/MySQL/SQLite variants
+- [x] KR/EN copy
+- [x] optional default-closed comparison UI only for mapped problems
+- [x] `common` / `reference` / `verified` state labels
+- [x] deterministic catalog/problem-mapping regression tests
+- [x] SQLite execution proof for examples labeled `verified`
+- [x] MySQL stays `reference`; no runtime-support claim
+- [x] PR #19 merged into main
+
+Future dialect tasks:
+
+- [ ] expand comparison coverage only from demonstrated learner gaps
+- [ ] add additional lessons only where useful
+- [ ] expand PostgreSQL `verified` coverage only with executed proof
+- [ ] establish a MySQL runtime/test baseline before any MySQL `verified` badge
+
+Explicit non-goals:
+
+- [ ] no general SQL transpiler
+- [ ] no arbitrary SQL automatic cross-engine conversion
+- [ ] no claim of broad PostgreSQL/MySQL compatibility
+- [ ] no replacement of SQLite as the practice baseline
+
+### P1-2. Query Graph / Execution Graph expansion
+
+- [ ] nested Query Graph for subqueries/CTEs only after explicit parser contracts
+- [ ] window/set-operation graph semantics only with deterministic coverage
 - [ ] research provider-specific `EXPLAIN` contracts
 - [ ] define Execution Graph evidence schema
-- [ ] ensure Execution Graph is labeled separately from Query Graph
+- [ ] keep Execution Graph labeled separately from Query Graph
 
-### BI expansion
+### P1-3. Additional BI visuals
 
-Only after the first ResultShape contract is proven:
+Only when ResultShape rules justify them:
 
-- [x] Line/time-series renderer
-- [ ] part-to-whole Ring/Pie when the total is explicit
+- [ ] Ring/Pie for explicit part-to-whole results
 - [ ] Scatter for true numeric observation pairs
 - [ ] Funnel for explicit ordered stages
 - [ ] Sankey for explicit source/target/value results
-- [ ] Gauge only with an explicit target/range
+- [ ] Gauge only with explicit target/range
 - [ ] Choropleth only with a supported geography contract
 
-### AI handoff expansion
+### Other P1
 
-- [ ] Practice-result handoff
-- [ ] system share
-- [ ] user-selectable external AI destination
-- [ ] copy + open failure-safe behavior
-
-### My Data bridge
-
-- [ ] define sample-to-user-data transition
-- [ ] preserve beginner-first surface
-- [ ] preserve Production Assist safety gates
-
-### Learning quality
-
-- [ ] collect real learner feedback on the 24-problem path
-- [ ] improve schema/data preview based on evidence
-- [ ] add scenario packs only when gaps are demonstrated
+- [ ] Practice-result AI handoff
+- [ ] system share / selectable external AI destination
+- [ ] My Data bridge
+- [ ] learner-feedback-driven curriculum refinement
 
 ## P2
 
@@ -266,22 +246,8 @@ Default OFF until:
 
 ### Cross-device learner sync
 
-Only when product evidence requires it:
-
-- [ ] decide D1/KV/account requirement
+- [ ] decide D1/KV/account requirement only when product evidence requires it
 - [ ] keep no-login browser-local mode usable
-
-## Completed August 2026 Product Work
-
-- [x] PR #8 first-run learning Home
-- [x] PR #9 focused practice workspace
-- [x] PR #10 learning path/progress
-- [x] PR #11 24-problem curriculum
-- [x] PR #12 learner-flow QA
-- [x] PR #13 PWA/serverless scaffold
-- [x] PR #14 Cloudflare temporary hosted proof + deployment harness
-- [x] PR #15 durable production deployment workflow + PWA QA gate
-- [x] PR #16 production API verification hardening + successful production proof
 
 ## Existing Engineering Baseline Retained
 
@@ -299,23 +265,24 @@ Only when product evidence requires it:
 Not complete:
 
 - [ ] broad PostgreSQL parity
-- [ ] working MySQL baseline
+- [ ] working MySQL runtime baseline
 - [ ] JPQL runtime
 - [ ] unrestricted production-grade NL-to-SQL
 
 ## Execution Rules
 
 1. branch + Draft PR
-2. no direct `main` implementation commits
-3. preserve existing contracts unless the slice explicitly changes them
-4. RED -> minimum implementation -> GREEN where practical
-5. baseline CI stays green
-6. PostgreSQL smoke stays truthful when part of the gate
-7. record skipped and completed validation explicitly
-8. merge only after explicit approval
-9. currentize roadmap/TODO/HANDOFF after material baseline changes
-10. prefer one cohesive implementation commit per logical slice; documentation-only currentization may be separate when it follows verified CI
+2. synchronize with current `main` before continuing when the base has moved materially
+3. no direct `main` implementation commits from the active slice
+4. preserve existing contracts unless the slice explicitly changes them
+5. RED -> minimum implementation -> GREEN where practical
+6. baseline CI stays green
+7. PostgreSQL smoke stays truthful when part of the gate
+8. record skipped and completed validation explicitly
+9. merge only after explicit approval
+10. currentize roadmap/TODO/HANDOFF after material baseline changes
+11. prefer one cohesive implementation commit per logical slice; documentation-only currentization may follow after verified CI
 
 ## Current Next Action
 
-**Localize the remaining result-intelligence recommendation reason text into deterministic KR/EN copy before adding more BI chart types.**
+**Implement the keyboard/accessibility baseline for future `Table | Visual | Flow | Explain` view switching before adding more BI chart types.**
