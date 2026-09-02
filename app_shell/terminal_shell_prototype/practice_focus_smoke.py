@@ -22,8 +22,23 @@ def main() -> int:
     flow_js = ROOT / "practice-query-flow.js"
     flow_css = ROOT / "practice-query-flow.css"
     flow_smoke = ROOT / "practice_query_flow_smoke.js"
+    explain_js = ROOT / "practice-result-explain.js"
+    explain_css = ROOT / "practice-result-explain.css"
+    explain_smoke = ROOT / "practice_result_explain_smoke.js"
 
-    for path in (onboarding, focus_js, focus_css, visual_js, visual_css, flow_js, flow_css, flow_smoke):
+    for path in (
+        onboarding,
+        focus_js,
+        focus_css,
+        visual_js,
+        visual_css,
+        flow_js,
+        flow_css,
+        flow_smoke,
+        explain_js,
+        explain_css,
+        explain_smoke,
+    ):
         if not path.exists():
             raise AssertionError(f"missing practice focus asset: {path.name}")
 
@@ -33,6 +48,8 @@ def main() -> int:
     assert_contains(onboarding, "practice-result-visual.js")
     assert_contains(onboarding, "practice-query-flow.css")
     assert_contains(onboarding, "practice-query-flow.js")
+    assert_contains(onboarding, "practice-result-explain.css")
+    assert_contains(onboarding, "practice-result-explain.js")
     assert_contains(onboarding, 'script.addEventListener("load", loadPracticeResultIntelligenceAssets')
     assert_contains(focus_js, 'appShell.dataset.practiceFocus = enabled ? "true" : "false"')
     assert_contains(focus_js, "MutationObserver")
@@ -56,6 +73,10 @@ def main() -> int:
     assert_contains(flow_js, 'step.text.trim()')
     assert_contains(flow_js, 'figure.className = "practice-query-flow"')
     assert_contains(flow_js, "This is not the database execution order")
+    assert_contains(explain_js, "buildPracticeExplainModel")
+    assert_contains(explain_js, "RECOGNIZED_FLOW_KINDS")
+    assert_contains(explain_js, "does not infer business causality")
+    assert_contains(explain_js, 'section.className = "practice-result-explain"')
     assert_contains(focus_css, '.app-shell[data-practice-focus="true"]')
     assert_contains(focus_css, ".practice-focus-block")
     assert_contains(focus_css, ".practice-support-actions")
@@ -68,9 +89,13 @@ def main() -> int:
     assert_contains(flow_css, ".practice-query-flow-track")
     assert_contains(flow_css, ".practice-query-flow-node:not(:last-child)::after")
     assert_contains(flow_css, "@media (prefers-reduced-motion: reduce)")
+    assert_contains(explain_css, ".practice-result-explain")
+    assert_contains(explain_css, ".practice-result-explain-body.is-sql")
+    assert_contains(explain_css, "@media (prefers-reduced-motion: reduce)")
     assert_contains(focus_css, "@media (max-width: 760px)")
 
     subprocess.run(["node", str(flow_smoke)], cwd=ROOT, check=True)
+    subprocess.run(["node", str(explain_smoke)], cwd=ROOT, check=True)
 
     print("practice focus smoke: ok")
     return 0
