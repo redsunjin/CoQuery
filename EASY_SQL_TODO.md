@@ -50,31 +50,40 @@ Reference:
 
 - `docs/coquery-bi-result-intelligence-2026-08-30.md`
 
+Product principle:
+
+**SQL as Visual Data Transformation**
+
+Three visual layers:
+
+1. **Query Graph** — recognized SQL transformation structure; core learning experience.
+2. **Result Visual** — BI view derived from exact returned rows.
+3. **Execution Graph** — actual database plan evidence; later slice and never inferred from SQL text alone.
+
 Product surface:
 
 `Table | Visual | Flow | Explain`
 
-First boundary:
+Current boundary:
 
-`practice_query result -> classify -> Table | Visual recommendation | SQL Flow | Explain`
+`practice_query result -> classify -> Table | Result Visual recommendation | Query Graph/Flow | Explain`
 
-Classifier baseline completed on the active branch:
+Classifier baseline completed on active PR #18:
 
 - `sql_cli/result_intelligence.py`
 - `sql_cli/tests/test_result_intelligence.py`
 - baseline CI executes the classifier contracts
 
-Hosted integration completed on the active PR #18 branch:
+Hosted integration completed on active PR #18:
 
 - `sql_cli/result_integration.py` attaches additive `result_intelligence` metadata without mutating raw result data
 - `cloudflare_worker.py` enriches successful hosted `practice_query` responses
-- focused practice UI replaces the visible JSON-string preview with a real column/row table
-- all returned rows from the current query response are rendered; the old five-row JSON preview is hidden
-- `NULL` remains visible as `NULL`; numeric zero remains `0`
+- focused practice UI replaces visible JSON-string preview with a real column/row table
+- all returned rows from the current query response are rendered
+- `NULL` remains `NULL`; numeric zero remains `0`
 - recommendation metadata is shown above the canonical Table result
-- mobile table overflow is handled without introducing React
-- `sql_cli/tests/test_practice_query_regression.py` protects the existing learner/query/grading contract and additive enrichment boundary
-- existing practice-focus and PWA/serverless smoke checks protect the table enhancement and hosted wiring
+- mobile table overflow is handled without React
+- `sql_cli/tests/test_practice_query_regression.py` protects existing learner/query/grading contracts
 
 Tasks:
 
@@ -91,12 +100,17 @@ Tasks:
 - [x] add recommendation reason to the result block
 - [x] keep zero/null handling truthful in the Table renderer
 - [x] verify no external AI/provider call is required in the rendered result flow
-- [ ] add first lightweight Bar renderer without React migration
-- [ ] add SQL clause Flow renderer for supported SELECT clauses
-- [ ] add deterministic Explain copy
+- [x] document `SQL as Visual Data Transformation` product principle
+- [x] explicitly separate Query Graph / Result Visual / Execution Graph
+- [x] make Query Graph/Flow a first-class learning view in the roadmap
+- [ ] add first lightweight Bar Result Visual without React migration
+- [ ] add visible Query Graph/Flow renderer from recognized `flow_steps`
+- [ ] label Query Graph clearly so it cannot be mistaken for an execution plan
+- [ ] add textual alternative for Query Graph accessibility
+- [ ] add deterministic Explain copy connecting SQL transformation + row meaning + visual recommendation
 - [ ] keep exact raw result available in the detail panel as an explicit regression check
-- [ ] complete KR/EN result-intelligence reason copy instead of backend-English reason text
-- [ ] add keyboard/accessibility baseline for future view tabs
+- [ ] complete KR/EN result-intelligence copy instead of backend-English reason text
+- [ ] add keyboard/accessibility baseline for view tabs
 - [ ] decide whether the local/advanced command runtime should attach the same additive metadata before the BI slice closes
 
 Acceptance:
@@ -104,10 +118,12 @@ Acceptance:
 - same rows/SQL => same classification
 - ambiguous result => Table
 - chart recommendation always explains why
-- SQL Flow never invents an unsupported clause/meaning
-- Table remains the canonical evidence view
+- Query Graph contains only recognized SQL structure
+- Query Graph is never presented as physical runtime order/execution plan
+- Execution Graph is never shown without actual planner/executor evidence
+- Table remains canonical evidence
 - BI enrichment does not mutate `columns`, `rows`, or `row_count`
-- existing practice catalog/query/grading/non-SELECT error contracts remain green
+- existing practice catalog/query/grading/non-SELECT contracts remain green
 - no React dependency is added in the first slice
 - no external AI requirement is added
 
@@ -174,6 +190,16 @@ After durable PWA/browser proof:
 Do not fork learning/business logic into separate native implementations.
 
 ## P1
+
+### Query Graph / Execution Graph expansion
+
+Only after the first Query Graph renderer is proven:
+
+- [ ] support nested Query Graph structures for subqueries/CTEs only with explicit parser contracts
+- [ ] add window/set-operation graph semantics only with deterministic coverage
+- [ ] research provider-specific `EXPLAIN` contracts
+- [ ] define Execution Graph evidence schema
+- [ ] ensure Execution Graph is labeled separately from Query Graph
 
 ### BI expansion
 
@@ -270,4 +296,4 @@ Not complete:
 
 ## Current Next Action
 
-**Add the first lightweight Bar renderer for proven `category_measure` results while keeping Table as canonical evidence and the full regression gate green.**
+**Add the first lightweight Bar Result Visual for proven `category_measure` results while Table remains canonical; then implement the Query Graph/Flow renderer as the next core learning view.**
