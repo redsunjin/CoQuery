@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-"use strict";
 
-const { buildPracticeBarModel } = require("./practice-result-visual.js");
+await import("./practice-result-visual.js");
+const { buildPracticeBarModel } = globalThis.coqueryPracticeResultVisual || {};
 
 function requireCondition(condition, message) {
   if (!condition) {
@@ -12,6 +12,8 @@ function requireCondition(condition, message) {
 function near(actual, expected, tolerance = 0.0001) {
   return Math.abs(actual - expected) <= tolerance;
 }
+
+requireCondition(typeof buildPracticeBarModel === "function", "Bar visual model export is unavailable");
 
 const positiveResult = {
   ok: true,
