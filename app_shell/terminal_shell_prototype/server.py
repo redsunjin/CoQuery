@@ -20,6 +20,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from sql_cli.command_api import run_command  # noqa: E402
+from sql_cli.result_integration import enrich_practice_query_result  # noqa: E402
 
 
 def _json_bytes(payload: dict[str, Any]) -> bytes:
@@ -114,6 +115,8 @@ class TerminalShellHandler(SimpleHTTPRequestHandler):
             if not isinstance(args, dict) or not isinstance(context, dict):
                 raise ValueError("args and context must be JSON objects")
             result = run_command(command, args=args, context=context)
+            if command == "practice_query":
+                result = enrich_practice_query_result(result, args)
             self._send_json(200 if result.get("ok") else 400, result)
         except json.JSONDecodeError as exc:
             self._send_json(
