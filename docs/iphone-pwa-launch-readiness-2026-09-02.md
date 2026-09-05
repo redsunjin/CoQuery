@@ -1,7 +1,7 @@
 # CoQuery iPhone + PWA Launch Readiness
 
-Date: 2026-09-04
-Status: TestFlight and public-PWA infrastructure are prepared, but neither channel is ready to be called launched.
+Date: 2026-09-05
+Status: The public PWA beta is deployed on a durable `workers.dev` URL. TestFlight remains prepared but not uploaded; custom-domain and device QA are still required before a broader launch claim.
 
 ## Product Boundary
 
@@ -19,7 +19,7 @@ Production Assist, user database connections, provider configuration, and multi-
 | Track | Evidence already present | Release blocker |
 | --- | --- | --- |
 | iPhone / TestFlight | Capacitor iOS project, bundled SQLite execute/grade runtime, device-local attempt history, iPhone simulator proof, App Store copy/screenshots/icon, support and privacy pages, and a signing-free Xcode 26.6 / iOS 26.5 Release build | Apple team/signing, archive upload, and real-device iPhone/iPad offline full-flow proof are outstanding. |
-| Public PWA | Cloudflare Worker + Static Assets implementation, temporary public deployment proof, production deployment workflow, manifest and service worker | Target Cloudflare account credentials, durable deployment, custom-domain decision, TLS/device/install/offline QA, and recorded production evidence are outstanding. |
+| Public PWA | Cloudflare Worker + Static Assets, durable production deployment, manifest/service worker, and automated health/shell/practice verification | Custom-domain decision, TLS/device/install/offline QA, raster install icons, and recorded interactive browser/device evidence remain outstanding. |
 
 ## Changes Applied in This Pass
 
@@ -27,6 +27,7 @@ Production Assist, user database connections, provider configuration, and multi-
 - The iOS local Training Runtime now loads before the classic shell scripts, preserving their shared browser globals.
 - The iOS package now bundles a local SQLite WASM engine. It executes and grades all 24 bundled SQL problems without an API request, rejects non-SELECT statements, and stores attempts and wrong notes in device-local storage.
 - The iOS package smoke test verifies the SQLite assets, a valid query, non-SELECT rejection, wrong-note creation, relaunch persistence, and correct grading for the full 24-problem pack.
+- The iOS local shell now also computes the same deterministic result shape, recommended visual, SQL flow, and explanation metadata used by the current PWA result view.
 - The Xcode marketing version is aligned with the existing App Store Connect metadata draft (`0.8.0`).
 - The shared home screen now links to the published privacy policy, which also gives the PWA a visible privacy route.
 
@@ -78,8 +79,8 @@ Apple references: [new app record](https://developer.apple.com/help/app-store-co
 - [ ] Create a target Cloudflare account and identify its account ID.
 - [ ] Create a least-privilege, account-owned CI token restricted to this account. The current workflow needs Worker script deployment permission; add route/domain permission only if the deployment workflow will manage the custom domain itself.
 - [ ] Add `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` as GitHub Actions secrets in the protected `production` environment. Never commit either value.
-- [ ] Manually run `.github/workflows/cloudflare-production-deploy.yml`; it stages the isolated Worker bundle, deploys it, then verifies health, shell, manifest, and known practice grading.
-- [ ] Record the durable `workers.dev` URL, workflow run URL, commit SHA, and results. The 2026-08-28 temporary URL is not a production endpoint.
+- [x] Manually run `.github/workflows/cloudflare-production-deploy.yml`; it stages the isolated Worker bundle, deploys it, then verifies health, shell, manifest, and known practice grading.
+- [x] Record the durable `workers.dev` URL, workflow run URL, commit SHA, and results: [Worker beta](https://coquery-pwa.edu-public-app.workers.dev), [run 33948547355](https://github.com/redsunjin/CoQuery/actions/runs/33948547355), `efd351e8b82c4352cdac8eae7a7773b088160a3e` (2026-09-05). Deployment, health, PWA shell/manifest, hosted practice listing, query execution, and grading all passed.
 
 ### 2. Attach the production domain and HTTPS
 
@@ -103,10 +104,10 @@ Cloudflare references: [production routes and domains](https://developers.cloudf
 
 ## Release Order
 
-1. Finish and real-device-verify the iOS local execute/grade runtime.
-2. Configure Apple signing and release an internal TestFlight build.
-3. Configure Cloudflare production secrets, deploy the durable Worker, and perform browser/device PWA QA.
-4. Choose and attach the canonical PWA domain, then complete HTTPS and install validation.
+1. Perform browser/device PWA beta QA against the deployed durable Worker.
+2. Choose and attach the canonical PWA domain, then complete HTTPS and install validation.
+3. Complete real-device iPhone/iPad offline-flow proof and configure Apple signing.
+4. Release an internal TestFlight build, collect feedback, and synchronize feedback fixes with the shared PWA.
 5. Submit the first external TestFlight build only after the app loop, privacy answers, metadata, and real-device evidence are complete.
 
-Until those steps are complete, describe CoQuery as “launch preparation complete with temporary PWA proof and an iOS shell,” not as a publicly launched iPhone app or PWA.
+Until those steps are complete, describe CoQuery as “public PWA beta available with an iOS shell ready for signing,” not as a broadly launched iPhone app or fully validated PWA.

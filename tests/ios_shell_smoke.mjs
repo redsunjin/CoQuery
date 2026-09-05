@@ -22,27 +22,43 @@ assert.equal(capacitorConfig.appId, "app.coquery.training");
 assert.equal(capacitorConfig.appName, "CoQuery");
 assert.equal(capacitorConfig.webDir, "dist/ios-shell");
 
-assertFile(join(distDir, "index.html"));
-assertFile(join(distDir, "app.js"));
-assertFile(join(distDir, "styles.css"));
-assertFile(join(distDir, "onboarding.css"));
-assertFile(join(distDir, "practice-focus.css"));
-assertFile(join(distDir, "learning-path.css"));
-assertFile(join(distDir, "onboarding.js"));
-assertFile(join(distDir, "practice-focus.js"));
-assertFile(join(distDir, "learning-path.js"));
-assertFile(join(distDir, "curriculum-expansion.js"));
+for (const asset of [
+  "index.html",
+  "app.js",
+  "styles.css",
+  "onboarding.css",
+  "practice-focus.css",
+  "practice-query-flow.css",
+  "practice-result-explain.css",
+  "practice-result-views.css",
+  "practice-result-visual.css",
+  "learning-path.css",
+  "dialect-learning.js",
+  "onboarding.js",
+  "practice-focus.js",
+  "practice-query-flow.js",
+  "practice-result-explain.js",
+  "practice-result-views.js",
+  "practice-result-visual.js",
+  "learning-path.js",
+  "curriculum-expansion.js",
+  "sql-wasm.js",
+  "sql-wasm.wasm",
+]) {
+  assertFile(join(distDir, asset));
+}
 assertFile(runtimePath);
 assertFile(join(distDir, "practice_packs", "sql_basics.json"));
-assertFile(join(distDir, "sql-wasm.js"));
-assertFile(join(distDir, "sql-wasm.wasm"));
 
 const indexHtml = readFileSync(join(distDir, "index.html"), "utf8");
 assert.match(indexHtml, /<script src="\.\/sql-wasm\.js"><\/script>/);
 assert.match(indexHtml, /<script src="\.\/ios-training-runtime\.js"><\/script>/);
+assert.match(indexHtml, /<script src="\.\/practice-result-views\.js"><\/script>/);
+assert.match(indexHtml, /<script src="\.\/dialect-learning\.js"><\/script>/);
 assert.match(indexHtml, /<script src="\.\/app\.js"><\/script>/);
 assert.match(indexHtml, /<script src="\.\/onboarding\.js"><\/script>/);
 assert.doesNotMatch(indexHtml, /pwa-runtime\.js/);
+assert.match(indexHtml, /practice-result-views\.css/);
 assert.match(indexHtml, /https:\/\/redsunjin\.github\.io\/CoQuery\/privacy\//);
 assert.match(indexHtml, /id="privacyPolicyLink"/);
 assert.match(indexHtml, /privacy\/\?lang=ko/);
@@ -56,9 +72,10 @@ assert.match(indexHtml, /<h1 data-i18n="appTitle">CoQuery<\/h1>/);
 assert.match(indexHtml, /hidden/);
 assert.ok(
   indexHtml.indexOf("sql-wasm.js") < indexHtml.indexOf("ios-training-runtime.js") &&
-    indexHtml.indexOf("ios-training-runtime.js") < indexHtml.indexOf("./app.js") &&
+    indexHtml.indexOf("ios-training-runtime.js") < indexHtml.indexOf("practice-result-views.js") &&
+    indexHtml.indexOf("practice-result-views.js") < indexHtml.indexOf("./app.js") &&
     indexHtml.indexOf("./app.js") < indexHtml.indexOf("./onboarding.js"),
-  "SQLite, local runtime, app shell, and onboarding scripts should load in dependency order"
+  "SQLite, local runtime, result views, app shell, and onboarding scripts should load in dependency order"
 );
 
 const appJs = readFileSync(join(distDir, "app.js"), "utf8");
@@ -128,16 +145,14 @@ const localRuntime = createLocalRuntime();
 
 const query = await localRuntime.postCommand(
   "practice_query",
-  { sql: "SELECT id, name FROM customers WHERE region = 'Seoul' ORDER BY id", limit: 10 },
+  { sql: "SELECT region, COUNT(*) AS customer_count FROM customers GROUP BY region ORDER BY region", limit: 10 },
   {}
 );
 assert.equal(query.ok, true);
 assert.equal(query.block_type, "practice_query_result");
-assert.deepEqual(Array.from(query.data.columns), ["id", "name"]);
-assert.deepEqual(JSON.parse(JSON.stringify(query.data.rows)), [
-  { id: 1, name: "Aster Foods" },
-  { id: 3, name: "Core Manufacturing" },
-]);
+assert.deepEqual(Array.from(query.data.columns), ["region", "customer_count"]);
+assert.equal(query.data.result_intelligence.shape, "category_measure");
+assert.equal(query.data.result_intelligence.recommended_visual, "bar");
 
 const writeRejected = await localRuntime.postCommand("practice_query", { sql: "DELETE FROM customers" }, {});
 assert.equal(writeRejected.ok, false);

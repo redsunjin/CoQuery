@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 from workers import Response, WorkerEntrypoint
 
 from sql_cli.command_api import run_command
+from sql_cli.result_integration import enrich_practice_query_result
 
 
 HOSTED_COMMANDS = {
@@ -105,6 +106,8 @@ class Default(WorkerEntrypoint):
                     args["mode"] = "static"
 
                 result = run_command(command, args=args, context=context)
+                if command == "practice_query":
+                    result = enrich_practice_query_result(result, args)
                 return _json_response(result, 200 if result.get("ok") else 400)
             except Exception as exc:
                 return _json_response(

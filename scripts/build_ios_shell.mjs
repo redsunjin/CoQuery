@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sourceDir = join(root, "app_shell", "terminal_shell_prototype");
 const runtimeSourcePath = join(root, "app_shell", "ios_training_shell", "src", "trainingRuntime.ts");
+const resultIntelligencePath = join(root, "app_shell", "ios_training_shell", "src", "resultIntelligence.ts");
 const packPath = join(root, "practice_packs", "sql_basics.json");
 const sqlJsDistDir = join(root, "node_modules", "sql.js", "dist");
 const distDir = join(root, "dist", "ios-shell");
@@ -12,11 +13,19 @@ const shellAssets = [
   "styles.css",
   "onboarding.css",
   "practice-focus.css",
+  "practice-query-flow.css",
+  "practice-result-explain.css",
+  "practice-result-views.css",
+  "practice-result-visual.css",
   "learning-path.css",
   "coquery-icon.svg",
   "app.js",
   "onboarding.js",
   "practice-focus.js",
+  "practice-query-flow.js",
+  "practice-result-explain.js",
+  "practice-result-views.js",
+  "practice-result-visual.js",
   "learning-path.js",
   "curriculum-expansion.js",
 ];
@@ -34,16 +43,18 @@ mkdirSync(distDir, { recursive: true });
 
 const html = read(join(sourceDir, "index.html"))
   .replace('value="provider_list_presets"', 'value="practice_list"')
-  .replace('    <script src="./pwa-runtime.js"></script>\n', "")
   .replace(
-    '    <script src="./app.js"></script>',
-    '    <script src="./sql-wasm.js"></script>\n    <script src="./ios-training-runtime.js"></script>\n    <script src="./app.js"></script>'
+    '    <script src="./pwa-runtime.js"></script>\n',
+    '    <link rel="stylesheet" href="./practice-result-views.css" />\n    <script src="./sql-wasm.js"></script>\n    <script src="./ios-training-runtime.js"></script>\n    <script src="./practice-result-views.js"></script>\n'
   );
 
 write(join(distDir, "index.html"), html);
 for (const asset of shellAssets) {
   cpSync(join(sourceDir, asset), join(distDir, asset));
 }
+// Keep this explicit: the dialect lesson catalog is an optional runtime
+// dependency that must be present in the offline iOS shell as well.
+cpSync(join(sourceDir, "dialect-learning.js"), join(distDir, "dialect-learning.js"));
 
 mkdirSync(join(distDir, "practice_packs"), { recursive: true });
 cpSync(packPath, join(distDir, "practice_packs", "sql_basics.json"));
@@ -51,8 +62,9 @@ cpSync(join(sqlJsDistDir, "sql-wasm.js"), join(distDir, "sql-wasm.js"));
 cpSync(join(sqlJsDistDir, "sql-wasm.wasm"), join(distDir, "sql-wasm.wasm"));
 
 const practicePack = JSON.parse(read(packPath));
+const resultIntelligenceSource = read(resultIntelligencePath);
 const runtimeSource = read(runtimeSourcePath);
-const runtimeOutput = runtimeSource
+const runtimeOutput = `${resultIntelligenceSource}\n\n${runtimeSource}`
   .replace("__COQUERY_SQL_BASICS_PACK__", JSON.stringify(practicePack))
   .replaceAll("export async function ", "async function ")
   .replaceAll("export function ", "function ")

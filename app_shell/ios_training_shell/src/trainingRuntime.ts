@@ -415,8 +415,14 @@ export function createTrainingRuntime(options = {}) {
       const limit = parseLimit(args.limit ?? context.limit, 50);
       const submittedSql = ensureSelect(args.sql ?? context.sql);
       const result = executeSelect(SQL, pack, submittedSql, limit);
+      const resultIntelligence = classifyPracticeResult(result.columns, result.rows, submittedSql);
       return enrich(
-        { ok: true, command: "practice_query", data: { pack_id: pack.id, dataset_id: pack.dataset?.id, sql: submittedSql, limit, ...result }, error: null },
+        {
+          ok: true,
+          command: "practice_query",
+          data: { pack_id: pack.id, dataset_id: pack.dataset?.id, sql: submittedSql, limit, ...result, result_intelligence: resultIntelligence },
+          error: null,
+        },
         args,
         context
       );

@@ -135,6 +135,20 @@ const i18n = {
     expectedIssue: "예상 문제",
     staticFeedback: "정적 피드백",
     retryPractice: "다시 풀기",
+    dialectComparisonAction: "DB별 차이 보기",
+    hideDialectComparison: "DB별 차이 숨기기",
+    dialectComparisonTitle: "DB별 SQL 차이",
+    dialectComparisonIntro: "먼저 공통 SQL 개념을 확인한 다음, 같은 의도를 각 DB에서 어떻게 표현하는지 비교해 보세요.",
+    dialectCommonIdea: "공통 개념",
+    dialectWhyItDiffers: "왜 다를까요?",
+    dialectSqlByEngine: "DB별 문법",
+    dialectStateCommon: "공통",
+    dialectStateReference: "참고",
+    dialectStateVerified: "검증됨",
+    dialectEnginePostgresql: "PostgreSQL",
+    dialectEngineMysql: "MySQL",
+    dialectEngineSqlite: "SQLite",
+    dialectMysqlBoundary: "MySQL 예시는 문서 기반 비교용입니다. CoQuery가 MySQL을 실행하거나 지원한다는 뜻은 아닙니다.",
     aiFeedback: "AI 생성 피드백",
     requestAiFeedback: "AI 피드백 요청",
     trainingModeOnly: "Training Mode 전용",
@@ -262,6 +276,20 @@ const i18n = {
     expectedIssue: "Expected issue",
     staticFeedback: "Static feedback",
     retryPractice: "Retry",
+    dialectComparisonAction: "Compare DB syntax",
+    hideDialectComparison: "Hide DB syntax comparison",
+    dialectComparisonTitle: "Database SQL differences",
+    dialectComparisonIntro: "Start with the common SQL idea, then compare how each database expresses the same intent.",
+    dialectCommonIdea: "Common idea",
+    dialectWhyItDiffers: "Why it differs",
+    dialectSqlByEngine: "Syntax by database",
+    dialectStateCommon: "Common",
+    dialectStateReference: "Reference",
+    dialectStateVerified: "Verified",
+    dialectEnginePostgresql: "PostgreSQL",
+    dialectEngineMysql: "MySQL",
+    dialectEngineSqlite: "SQLite",
+    dialectMysqlBoundary: "MySQL examples are documented comparisons only. They do not mean CoQuery runs or supports MySQL.",
     aiFeedback: "AI-generated feedback",
     requestAiFeedback: "Request AI feedback",
     trainingModeOnly: "Training Mode only",
@@ -647,6 +675,92 @@ function practiceProblemFromWrongNote(note = {}) {
     concepts: Array.isArray(note.concepts) ? note.concepts : [],
     hint: note.hint || "",
   };
+}
+
+function dialectLessonsForProblem(problemId) {
+  const catalog = globalThis.CoQueryDialectLearning;
+  if (!catalog || typeof catalog.lessonsForProblem !== "function") {
+    return [];
+  }
+  return catalog.lessonsForProblem(problemId);
+}
+
+function dialectEngineLabel(engine) {
+  const key = {
+    postgresql: "dialectEnginePostgresql",
+    mysql: "dialectEngineMysql",
+    sqlite: "dialectEngineSqlite",
+  }[engine];
+  return key ? t(key) : engine;
+}
+
+function dialectVerificationLabel(state) {
+  const key = {
+    common: "dialectStateCommon",
+    reference: "dialectStateReference",
+    verified: "dialectStateVerified",
+  }[state];
+  return key ? t(key) : state;
+}
+
+function dialectComparisonMarkup(problemId) {
+  const lessons = dialectLessonsForProblem(problemId);
+  if (!lessons.length) {
+    return "";
+  }
+
+  const lessonMarkup = lessons
+    .map((lesson) => {
+      const copy = lesson.copy?.[currentLanguage] || lesson.copy?.en;
+      if (!copy) {
+        return "";
+      }
+      const variants = (copy.variants || [])
+        .map((variant) => {
+          const state = variant.verificationState || "reference";
+          return `<article class="dialect-variant" data-dialect-engine="${escapeHtml(variant.engine)}">
+            <div class="dialect-variant-head">
+              <strong>${escapeHtml(dialectEngineLabel(variant.engine))}</strong>
+              <span class="dialect-verification-state ${escapeHtml(`is-${state}`)}">${escapeHtml(
+                dialectVerificationLabel(state)
+              )}</span>
+            </div>
+            <pre class="dialect-sql"><code>${escapeHtml(variant.sql)}</code></pre>
+            <p>${escapeHtml(variant.explanation)}</p>
+          </article>`;
+        })
+        .join("");
+      return `<article class="dialect-lesson" data-dialect-lesson="${escapeHtml(lesson.id)}">
+        <h3>${escapeHtml(copy.concept)}</h3>
+        <div class="dialect-copy-section">
+          <span class="section-label">${escapeHtml(t("dialectCommonIdea"))}</span>
+          <p><strong>${escapeHtml(copy.intent)}</strong> ${escapeHtml(copy.commonExplanation)}</p>
+        </div>
+        <div class="dialect-copy-section">
+          <span class="section-label">${escapeHtml(t("dialectWhyItDiffers"))}</span>
+          <p>${escapeHtml(copy.whyItDiffers)}</p>
+        </div>
+        <div class="dialect-copy-section">
+          <span class="section-label">${escapeHtml(t("dialectSqlByEngine"))}</span>
+          <div class="dialect-variants">${variants}</div>
+        </div>
+      </article>`;
+    })
+    .join("");
+
+  return `<div class="practice-flow-actions dialect-comparison-actions">
+      <button class="ghost-button dialect-comparison-toggle" type="button" data-dialect-toggle aria-expanded="false">${escapeHtml(
+        t("dialectComparisonAction")
+      )}</button>
+    </div>
+    <section class="dialect-comparison-panel" data-dialect-panel hidden aria-label="${escapeHtml(t("dialectComparisonTitle"))}">
+      <div class="dialect-comparison-heading">
+        <span class="section-label">${escapeHtml(t("dialectComparisonTitle"))}</span>
+        <p>${escapeHtml(t("dialectComparisonIntro"))}</p>
+      </div>
+      ${lessonMarkup}
+      <p class="dialect-mysql-boundary">${escapeHtml(t("dialectMysqlBoundary"))}</p>
+    </section>`;
 }
 
 function wrongNoteCard(note = {}, index = 0) {
@@ -1332,7 +1446,8 @@ function summarizeResult(result) {
         )}</span></div>
       </div>
       <div class="cli-line">${escapeHtml(result.data?.feedback || "")}</div>
-      ${wrongNote ? `<div class="block-grid">${wrongNoteCard(wrongNote, 0)}</div>` : ""}`;
+      ${wrongNote ? `<div class="block-grid">${wrongNoteCard(wrongNote, 0)}</div>` : ""}
+      ${dialectComparisonMarkup(result.data?.problem?.id)}`;
   }
 
   if (result.command === "practice_attempts") {
@@ -1649,6 +1764,21 @@ function bindPracticeFlow(block) {
   updatePracticePreview(form);
 }
 
+function bindDialectComparison(block) {
+  block.querySelectorAll("[data-dialect-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const panel = button.closest(".terminal-block")?.querySelector("[data-dialect-panel]");
+      if (!panel) {
+        return;
+      }
+      const expanded = button.getAttribute("aria-expanded") !== "true";
+      button.setAttribute("aria-expanded", expanded ? "true" : "false");
+      button.textContent = expanded ? t("hideDialectComparison") : t("dialectComparisonAction");
+      panel.hidden = !expanded;
+    });
+  });
+}
+
 function bindWrongNoteButtons(block) {
   block.querySelectorAll("[data-retry-practice]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -1757,6 +1887,7 @@ function renderBlock(block, result) {
   bindProviderListButtons(block);
   bindPracticeButtons(block);
   bindPracticeFlow(block);
+  bindDialectComparison(block);
   bindWrongNoteButtons(block);
   bindProductionButtons(block);
 }

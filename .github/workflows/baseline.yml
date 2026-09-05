@@ -25,10 +25,18 @@ jobs:
         run: |
           python3 main.py --help
           python3 sql_cli/tests/test_core.py
+          python3 sql_cli/tests/test_result_intelligence.py
+          python3 sql_cli/tests/test_practice_query_regression.py
+          python3 app_shell/terminal_shell_prototype/practice_local_result_intelligence_smoke.py
+          node app_shell/terminal_shell_prototype/practice_result_visual_smoke.js
+          node app_shell/terminal_shell_prototype/practice_query_flow_smoke.js
+          node app_shell/terminal_shell_prototype/practice_result_explain_smoke.js
+          node app_shell/terminal_shell_prototype/practice_result_views_smoke.js
           python3 skills/coquery-cli/scripts/coquery_agent.py verify
           python3 skills/coquery-cli/scripts/coquery_agent.py demo
           python3 app_shell/terminal_shell_prototype/practice_focus_smoke.py
           python3 app_shell/terminal_shell_prototype/learning_path_smoke.py
           python3 app_shell/terminal_shell_prototype/curriculum_smoke.py
+          python3 app_shell/terminal_shell_prototype/dialect_learning_smoke.py
           python3 app_shell/terminal_shell_prototype/user_flow_qa_smoke.py
           python3 app_shell/terminal_shell_prototype/pwa_serverless_smoke.py
