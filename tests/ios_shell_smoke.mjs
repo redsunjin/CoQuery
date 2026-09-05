@@ -34,8 +34,11 @@ assertFile(join(distDir, "learning-path.js"));
 assertFile(join(distDir, "curriculum-expansion.js"));
 assertFile(runtimePath);
 assertFile(join(distDir, "practice_packs", "sql_basics.json"));
+assertFile(join(distDir, "sql-wasm.js"));
+assertFile(join(distDir, "sql-wasm.wasm"));
 
 const indexHtml = readFileSync(join(distDir, "index.html"), "utf8");
+assert.match(indexHtml, /<script src="\.\/sql-wasm\.js"><\/script>/);
 assert.match(indexHtml, /<script src="\.\/ios-training-runtime\.js"><\/script>/);
 assert.match(indexHtml, /<script src="\.\/app\.js"><\/script>/);
 assert.match(indexHtml, /<script src="\.\/onboarding\.js"><\/script>/);
@@ -52,9 +55,10 @@ assert.match(indexHtml, /aria-controls="detailPanel"/);
 assert.match(indexHtml, /<h1 data-i18n="appTitle">CoQuery<\/h1>/);
 assert.match(indexHtml, /hidden/);
 assert.ok(
-  indexHtml.indexOf("ios-training-runtime.js") < indexHtml.indexOf("./app.js") &&
+  indexHtml.indexOf("sql-wasm.js") < indexHtml.indexOf("ios-training-runtime.js") &&
+    indexHtml.indexOf("ios-training-runtime.js") < indexHtml.indexOf("./app.js") &&
     indexHtml.indexOf("./app.js") < indexHtml.indexOf("./onboarding.js"),
-  "local runtime, app shell, and onboarding scripts should load in dependency order"
+  "SQLite, local runtime, app shell, and onboarding scripts should load in dependency order"
 );
 
 const appJs = readFileSync(join(distDir, "app.js"), "utf8");
@@ -103,7 +107,73 @@ assert.equal(result.data.problems.length, 24);
 assert.equal(result.data.problems[0].id, "basic_select_customers");
 assert.match(result.cli_equivalent, /python main\.py --command practice_list/);
 
-const staticFeedback = await runtime.postCommand(
+const { default: initSqlJs } = await import("sql.js");
+const storageValues = new Map();
+const localStorage = {
+  getItem(key) {
+    return storageValues.get(key) ?? null;
+  },
+  setItem(key, value) {
+    storageValues.set(key, String(value));
+  },
+};
+const sqlJsDistDir = join(root, "node_modules", "sql.js", "dist");
+const createLocalRuntime = () =>
+  runtimeContext.createTrainingRuntime({
+    initSqlJs,
+    locateFile: (file) => join(sqlJsDistDir, file),
+    storage: localStorage,
+  });
+const localRuntime = createLocalRuntime();
+
+const query = await localRuntime.postCommand(
+  "practice_query",
+  { sql: "SELECT id, name FROM customers WHERE region = 'Seoul' ORDER BY id", limit: 10 },
+  {}
+);
+assert.equal(query.ok, true);
+assert.equal(query.block_type, "practice_query_result");
+assert.deepEqual(Array.from(query.data.columns), ["id", "name"]);
+assert.deepEqual(JSON.parse(JSON.stringify(query.data.rows)), [
+  { id: 1, name: "Aster Foods" },
+  { id: 3, name: "Core Manufacturing" },
+]);
+
+const writeRejected = await localRuntime.postCommand("practice_query", { sql: "DELETE FROM customers" }, {});
+assert.equal(writeRejected.ok, false);
+assert.equal(writeRejected.error.code, "practice_sql_not_select");
+
+const wrongGrade = await localRuntime.postCommand(
+  "practice_grade",
+  { problem_id: "basic_select_customers", sql: "SELECT id, name FROM customers ORDER BY id" },
+  {}
+);
+assert.equal(wrongGrade.ok, true);
+assert.equal(wrongGrade.block_type, "practice_grade");
+assert.equal(wrongGrade.data.correct, false);
+assert.equal(wrongGrade.data.attempt_recorded, true);
+assert.match(wrongGrade.data.wrong_note.expected_issue, /region/);
+
+const persistedRuntime = createLocalRuntime();
+const persistedAttempts = await persistedRuntime.postCommand("practice_attempts", { limit: 5 }, {});
+assert.equal(persistedAttempts.ok, true);
+assert.equal(persistedAttempts.data.attempt_count, 1);
+assert.equal(persistedAttempts.data.attempts[0].correct, false);
+assert.match(persistedAttempts.data.attempts[0].wrong_note.expected_issue, /region/);
+
+const practicePack = readJson(join(root, "practice_packs", "sql_basics.json"));
+for (const problem of practicePack.problems) {
+  const grade = await persistedRuntime.postCommand(
+    "practice_grade",
+    { problem_id: problem.id, sql: problem.expected_sql, no_record: true },
+    {}
+  );
+  assert.equal(grade.ok, true, `${problem.id} should execute in the iOS SQLite runtime`);
+  assert.equal(grade.data.correct, true, `${problem.id} expected SQL should grade correctly`);
+  assert.equal(grade.data.attempt_recorded, false);
+}
+
+const staticFeedback = await persistedRuntime.postCommand(
   "practice_feedback",
   { problem_id: "basic_select_customers", sql: "SELECT id, name FROM customers ORDER BY id" },
   {}
@@ -116,7 +186,7 @@ assert.equal(staticFeedback.data.feedback.ai_generated, false);
 assert.equal(staticFeedback.data.provider_feedback_allowed, false);
 assert.match(staticFeedback.data.expected_issue, /region/);
 
-const providerBlocked = await runtime.postCommand(
+const providerBlocked = await persistedRuntime.postCommand(
   "practice_feedback",
   {
     problem_id: "basic_select_customers",

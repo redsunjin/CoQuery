@@ -6,6 +6,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sourceDir = join(root, "app_shell", "terminal_shell_prototype");
 const runtimeSourcePath = join(root, "app_shell", "ios_training_shell", "src", "trainingRuntime.ts");
 const packPath = join(root, "practice_packs", "sql_basics.json");
+const sqlJsDistDir = join(root, "node_modules", "sql.js", "dist");
 const distDir = join(root, "dist", "ios-shell");
 const shellAssets = [
   "styles.css",
@@ -36,7 +37,7 @@ const html = read(join(sourceDir, "index.html"))
   .replace('    <script src="./pwa-runtime.js"></script>\n', "")
   .replace(
     '    <script src="./app.js"></script>',
-    '    <script src="./ios-training-runtime.js"></script>\n    <script src="./app.js"></script>'
+    '    <script src="./sql-wasm.js"></script>\n    <script src="./ios-training-runtime.js"></script>\n    <script src="./app.js"></script>'
   );
 
 write(join(distDir, "index.html"), html);
@@ -46,6 +47,8 @@ for (const asset of shellAssets) {
 
 mkdirSync(join(distDir, "practice_packs"), { recursive: true });
 cpSync(packPath, join(distDir, "practice_packs", "sql_basics.json"));
+cpSync(join(sqlJsDistDir, "sql-wasm.js"), join(distDir, "sql-wasm.js"));
+cpSync(join(sqlJsDistDir, "sql-wasm.wasm"), join(distDir, "sql-wasm.wasm"));
 
 const practicePack = JSON.parse(read(packPath));
 const runtimeSource = read(runtimeSourcePath);

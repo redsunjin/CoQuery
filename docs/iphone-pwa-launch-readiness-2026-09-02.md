@@ -1,6 +1,6 @@
 # CoQuery iPhone + PWA Launch Readiness
 
-Date: 2026-09-02
+Date: 2026-09-04
 Status: TestFlight and public-PWA infrastructure are prepared, but neither channel is ready to be called launched.
 
 ## Product Boundary
@@ -18,14 +18,15 @@ Production Assist, user database connections, provider configuration, and multi-
 
 | Track | Evidence already present | Release blocker |
 | --- | --- | --- |
-| iPhone / TestFlight | Capacitor iOS project, iPhone/iPad simulator proof, local practice-list/help/feedback adapter, App Store copy/screenshots/icon, support and privacy pages, and a signing-free Xcode 26.6 / iOS 26.5 Release build | The bundled iOS runtime does not yet implement local `practice_query` or `practice_grade`, so the advertised solve-and-grade loop cannot complete offline. Apple team/signing, archive upload, and real-device proof are also outstanding. |
+| iPhone / TestFlight | Capacitor iOS project, bundled SQLite execute/grade runtime, device-local attempt history, iPhone simulator proof, App Store copy/screenshots/icon, support and privacy pages, and a signing-free Xcode 26.6 / iOS 26.5 Release build | Apple team/signing, archive upload, and real-device iPhone/iPad offline full-flow proof are outstanding. |
 | Public PWA | Cloudflare Worker + Static Assets implementation, temporary public deployment proof, production deployment workflow, manifest and service worker | Target Cloudflare account credentials, durable deployment, custom-domain decision, TLS/device/install/offline QA, and recorded production evidence are outstanding. |
 
 ## Changes Applied in This Pass
 
 - The iOS build now copies every script and stylesheet that the learning flow loads dynamically. It no longer starts the PWA service-worker runtime inside the native WebView.
 - The iOS local Training Runtime now loads before the classic shell scripts, preserving their shared browser globals.
-- The iOS package smoke test verifies those assets, the runtime registration, the full 24-problem pack, the privacy-policy link, and iOS version `0.8.0`.
+- The iOS package now bundles a local SQLite WASM engine. It executes and grades all 24 bundled SQL problems without an API request, rejects non-SELECT statements, and stores attempts and wrong notes in device-local storage.
+- The iOS package smoke test verifies the SQLite assets, a valid query, non-SELECT rejection, wrong-note creation, relaunch persistence, and correct grading for the full 24-problem pack.
 - The Xcode marketing version is aligned with the existing App Store Connect metadata draft (`0.8.0`).
 - The shared home screen now links to the published privacy policy, which also gives the PWA a visible privacy route.
 
@@ -33,13 +34,13 @@ Production Assist, user database connections, provider configuration, and multi-
 
 ### 1. Complete the local training runtime — blocking implementation gate
 
-- [ ] Add a local SQLite-compatible executor (JS/WASM or native Capacitor bridge) to `app_shell/ios_training_shell/src/trainingRuntime.ts`.
-- [ ] Implement `practice_query` and `practice_grade` using the bundled `sql_basics` pack; reject non-SELECT SQL and keep attempts local.
-- [ ] Make `practice_attempts` persist across relaunches, rather than remaining only in the current in-memory adapter instance.
-- [ ] Add parity tests for correct query, incorrect query, grade result, wrong-note creation, and relaunch persistence.
-- [ ] On an iPhone and an iPad, complete Home → problem → SQL → run → grade → next problem with networking disabled.
+- [x] Add a local SQLite-compatible executor (JS/WASM or native Capacitor bridge) to `app_shell/ios_training_shell/src/trainingRuntime.ts`.
+- [x] Implement `practice_query` and `practice_grade` using the bundled `sql_basics` pack; reject non-SELECT SQL and keep attempts local.
+- [x] Make `practice_attempts` persist across relaunches, rather than remaining only in the current in-memory adapter instance.
+- [x] Add parity tests for correct query, incorrect query, grade result, wrong-note creation, relaunch persistence, and all 24 expected SQL answers.
+- [ ] On physical iPhone and iPad devices, complete Home → problem → SQL → run → grade → next problem with networking disabled.
 
-The current TypeScript adapter is intentionally a shell: its supported-command list omits `practice_query` and `practice_grade`. Do not upload an external TestFlight build claiming the full practice loop until this gate passes.
+The bundled runtime confines the first-release practice loop to the included sample dataset and local device history. Do not claim real-device offline proof until the final physical iPhone and iPad checks pass.
 
 ### 2. Apple Developer and Xcode
 
