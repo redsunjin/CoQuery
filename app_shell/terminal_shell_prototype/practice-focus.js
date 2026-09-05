@@ -8,6 +8,9 @@ const practiceFocusCopy = {
     ready: "SQL을 작성한 뒤 실행해 보세요.",
     nextProblem: "다음 문제",
     reviewPath: "학습경로 보기",
+    resultTable: "쿼리 결과",
+    recommendation: "추천",
+    evidenceTable: "표는 원본 결과를 그대로 보여주는 기준 화면입니다.",
   },
   en: {
     hintShow: "Show hint",
@@ -18,6 +21,9 @@ const practiceFocusCopy = {
     ready: "Write your SQL, then run it.",
     nextProblem: "Next problem",
     reviewPath: "View learning path",
+    resultTable: "Query result",
+    recommendation: "Recommended",
+    evidenceTable: "The table remains the canonical view of the returned result.",
   },
 };
 
@@ -165,6 +171,137 @@ function refreshPracticeFocusCopy(block = document.querySelector(".practice-focu
   }
 }
 
+function practiceResultCellText(value) {
+  if (value === null) {
+    return "NULL";
+  }
+  if (value === undefined) {
+    return "";
+  }
+  if (typeof value === "object") {
+    return JSON.stringify(value);
+  }
+  return String(value);
+}
+
+function practiceResultRecommendationName(intelligence = {}) {
+  const visual = intelligence.recommended_visual;
+  if (visual) {
+    return visual.charAt(0).toUpperCase() + visual.slice(1);
+  }
+  return "Table";
+}
+
+function refreshPracticeQueryTableCopy(block) {
+  if (!block) {
+    return;
+  }
+  const result = block.__result || {};
+  const rowCount = Array.isArray(result.data?.rows) ? result.data.rows.length : Number(result.data?.row_count || 0);
+  const caption = block.querySelector("[data-practice-result-caption]");
+  if (caption) {
+    caption.textContent = `${practiceFocusText("resultTable")} · ${rowCount}`;
+  }
+
+  const recommendation = block.querySelector("[data-practice-result-recommendation]");
+  if (recommendation) {
+    const intelligence = result.data?.result_intelligence || {};
+    const view = practiceResultRecommendationName(intelligence);
+    const reason = intelligence.reason ? ` · ${intelligence.reason}` : "";
+    recommendation.textContent = `${practiceFocusText("recommendation")}: ${view}${reason}`;
+  }
+
+  const evidence = block.querySelector("[data-practice-result-evidence]");
+  if (evidence) {
+    evidence.textContent = practiceFocusText("evidenceTable");
+  }
+}
+
+function enhancePracticeQueryTable(block) {
+  if (!block || block.dataset.practiceResultTableEnhanced === "true") {
+    return;
+  }
+  const result = block.__result;
+  if (!result?.ok || result.command !== "practice_query") {
+    return;
+  }
+
+  const columns = Array.isArray(result.data?.columns) ? result.data.columns : [];
+  const rows = Array.isArray(result.data?.rows) ? result.data.rows : [];
+  if (!columns.length) {
+    return;
+  }
+
+  block.dataset.practiceResultTableEnhanced = "true";
+
+  const oldGrid = block.querySelector(":scope > .block-grid");
+  if (oldGrid) {
+    oldGrid.hidden = true;
+  }
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "practice-result-table-wrap";
+  wrapper.dataset.practiceResultTable = "true";
+
+  const recommendation = document.createElement("div");
+  recommendation.className = "practice-result-recommendation";
+  recommendation.dataset.practiceResultRecommendation = "true";
+
+  const evidence = document.createElement("div");
+  evidence.className = "practice-result-evidence";
+  evidence.dataset.practiceResultEvidence = "true";
+
+  const scroller = document.createElement("div");
+  scroller.className = "practice-result-table-scroll";
+
+  const table = document.createElement("table");
+  table.className = "practice-result-table";
+
+  const caption = document.createElement("caption");
+  caption.dataset.practiceResultCaption = "true";
+  table.appendChild(caption);
+
+  const thead = document.createElement("thead");
+  const headRow = document.createElement("tr");
+  columns.forEach((column) => {
+    const th = document.createElement("th");
+    th.scope = "col";
+    th.textContent = String(column);
+    headRow.appendChild(th);
+  });
+  thead.appendChild(headRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  rows.forEach((row) => {
+    const tr = document.createElement("tr");
+    columns.forEach((column) => {
+      const td = document.createElement("td");
+      const value = row?.[column];
+      td.textContent = practiceResultCellText(value);
+      if (value === null) {
+        td.classList.add("is-null");
+      } else if (typeof value === "number") {
+        td.classList.add("is-number");
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  scroller.appendChild(table);
+  wrapper.append(recommendation, evidence, scroller);
+
+  const summary = block.querySelector(":scope > .block-summary");
+  if (summary) {
+    summary.insertAdjacentElement("afterend", wrapper);
+  } else {
+    block.appendChild(wrapper);
+  }
+
+  refreshPracticeQueryTableCopy(block);
+}
+
 function enhancePracticeStart(block) {
   if (!block || block.dataset.practiceFocusEnhanced === "true") {
     return;
@@ -296,6 +433,10 @@ function enhancePracticeFeedback(block, command) {
   }
   hideTerminalChrome(block);
 
+  if (command === "practice_query") {
+    enhancePracticeQueryTable(block);
+  }
+
   if (command === "practice_grade") {
     addPracticeGradeNavigation(block);
     requestAnimationFrame(() => block.scrollIntoView({ behavior: "smooth", block: "nearest" }));
@@ -345,6 +486,7 @@ languageButtons.forEach((button) => {
         if (buttons[0]) buttons[0].textContent = practiceFocusText("nextProblem");
         if (buttons[1]) buttons[1].textContent = practiceFocusText("reviewPath");
       });
+      document.querySelectorAll(".practice-query-result").forEach(refreshPracticeQueryTableCopy);
     }, 0);
   });
 });

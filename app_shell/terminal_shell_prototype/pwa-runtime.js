@@ -85,6 +85,24 @@
     return networkCommand(command, args, context);
   };
 
+  function loadResultViewAccessibilityAssets() {
+    if (!document.querySelector('link[data-practice-result-views-style]')) {
+      const style = document.createElement("link");
+      style.rel = "stylesheet";
+      style.href = "./practice-result-views.css";
+      style.dataset.practiceResultViewsStyle = "true";
+      document.head.appendChild(style);
+    }
+    if (!document.querySelector('script[data-practice-result-views-script]')) {
+      const script = document.createElement("script");
+      script.src = "./practice-result-views.js";
+      script.dataset.practiceResultViewsScript = "true";
+      document.body.appendChild(script);
+    }
+  }
+
+  loadResultViewAccessibilityAssets();
+
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("./service-worker.js").catch((error) => {

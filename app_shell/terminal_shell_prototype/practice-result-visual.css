@@ -1,0 +1,191 @@
+.practice-result-bar-visual,
+.practice-result-line-visual {
+  display: grid;
+  gap: 12px;
+  margin: 4px 0 2px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-soft);
+}
+
+.practice-result-bar-header,
+.practice-result-line-header {
+  display: grid;
+  gap: 4px;
+}
+
+.practice-result-bar-title,
+.practice-result-line-title {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.practice-result-bar-summary,
+.practice-result-bar-evidence,
+.practice-result-line-summary,
+.practice-result-line-evidence {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.practice-result-bar-chart {
+  display: grid;
+  gap: 9px;
+}
+
+.practice-result-bar-row {
+  display: grid;
+  grid-template-columns: minmax(88px, 0.9fr) minmax(200px, 3fr) minmax(52px, auto);
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.practice-result-bar-label {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.practice-result-bar-track {
+  position: relative;
+  height: 24px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-raised);
+}
+
+.practice-result-bar-zero {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: var(--practice-bar-zero);
+  width: 1px;
+  background: var(--line-strong);
+  transform: translateX(-0.5px);
+}
+
+.practice-result-bar-fill {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  min-width: 0;
+  border-radius: 4px;
+  background: var(--text);
+  opacity: 0.72;
+}
+
+.practice-result-bar-fill.is-negative {
+  border: 1px solid var(--text);
+  background: transparent;
+  opacity: 0.9;
+}
+
+.practice-result-bar-value {
+  color: var(--text);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.practice-result-line-chart-shell {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 10px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.practice-result-line-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2px 0 22px;
+  color: var(--muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.practice-result-line-plot {
+  min-width: 0;
+}
+
+.practice-result-line-svg {
+  display: block;
+  width: 100%;
+  height: 220px;
+  overflow: visible;
+  border-bottom: 1px solid var(--line);
+}
+
+.practice-result-line-path {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.78;
+}
+
+.practice-result-line-point {
+  fill: var(--panel-raised);
+  stroke: var(--text);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.practice-result-line-x-axis {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 6px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.practice-result-line-x-axis span {
+  overflow: hidden;
+  max-width: 48%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .practice-result-bar-visual,
+  .practice-result-line-visual {
+    padding: 12px;
+  }
+
+  .practice-result-bar-row {
+    grid-template-columns: minmax(72px, 0.8fr) minmax(140px, 2.2fr) minmax(46px, auto);
+    gap: 8px;
+  }
+
+  .practice-result-line-chart-shell {
+    gap: 7px;
+  }
+
+  .practice-result-line-svg {
+    height: 190px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .practice-result-bar-fill,
+  .practice-result-bar-zero,
+  .practice-result-line-path,
+  .practice-result-line-point {
+    transition: none;
+  }
+}

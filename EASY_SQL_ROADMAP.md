@@ -1,7 +1,7 @@
 # CoQuery Roadmap
 
-Version: product baseline 2026-09-02
-Last Updated: 2026-09-02
+Version: product baseline 2026-09-03
+Last Updated: 2026-09-03
 
 ## Product Definition
 
@@ -17,11 +17,46 @@ The canonical product surface is one shared Web/PWA codebase distributed as:
 
 Native applications must reuse the shared product logic instead of forking the learning flow.
 
+### Product principle: SQL as Visual Data Transformation
+
+CoQuery treats SQL as a declarative relational/data transformation expression that can be understood visually.
+
+The mathematical-formula analogy is useful as a learning metaphor, but SQL is not reduced to a simple numeric function.
+
+Approved result-understanding surface:
+
+`Table | Visual | Flow | Explain`
+
+Three visual layers are explicitly separated:
+
+1. **Query Graph** — what transformation the SQL describes; core learning experience.
+2. **Result Visual** — what shape the exact returned data has; BI interpretation.
+3. **Execution Graph** — how a database actually plans/executes the query; requires real `EXPLAIN`-style evidence and is never inferred from SQL text alone.
+
+Table remains canonical evidence. Query Graph must not be presented as a physical execution plan.
+
+References:
+
+- `docs/coquery-bi-result-intelligence-2026-08-30.md`
+- `docs/coquery-query-graph-implementation-2026-09-02.md`
+- `docs/coquery-deterministic-explain-implementation-2026-09-02.md`
+- `docs/coquery-line-result-visual-implementation-2026-09-02.md`
+- `docs/coquery-recommendation-reason-localization-2026-09-02.md`
+
 ## Current Verified Position
 
-### Product UX
+### Current main
 
-Verified and merged:
+Current `main` baseline at branch synchronization:
+
+- `1b329e23b167fe53a54c8afbec70e3f1ef604d0e`
+
+Main now includes:
+
+- PR #19 — SQL Dialect Learning Phase A merged (`6fe26c83cd97bf3498ca5be1ef986f07668ec19b`)
+- Korean privacy-policy update (`1b329e23b167fe53a54c8afbec70e3f1ef604d0e`)
+
+### Product UX already merged
 
 - learning-first Home
 - focused SQL practice workspace
@@ -29,64 +64,123 @@ Verified and merged:
 - 24-problem curriculum
 - next-incomplete-problem navigation
 - user-flow regression smoke
+- SQL Dialect Learning Phase A from PR #19
+
+### BI Result Intelligence — active Draft PR #18
+
+PR #18 remains Draft and unmerged. Its result-understanding baseline includes:
+
+- deterministic ResultShape classification
+- additive hosted `practice_query` result-intelligence metadata
+- real column/row Table instead of visible JSON-string row preview
+- truthful `NULL` and numeric-zero rendering
+- Bar Result Visual for proven `category_measure`
+- Line Result Visual only for safely ordered `time_series`
+- Line preserves exact returned temporal order and never infers elapsed-time distance from horizontal spacing
+- visible Query Graph from recognized `flow_steps`
+- Query Graph labeled as logical SQL transformation, not database execution order
+- deterministic Explain covering recognized SQL transformation, conservative row meaning, view recommendation, and its own evidence boundary
+- deterministic KR/EN recommendation-reason localization without learner-facing reuse of backend-English `reason`
+- no external AI/provider dependency for result interpretation
+- no React migration
+
+The PR #18 branch is synchronized with the current main before further BI work. The combined PWA shell cache is `coquery-pwa-v5`, carrying both the merged dialect-learning asset and the active BI result-understanding assets while `/api/*` remains uncached.
 
 ### SQL / data engine
 
 - SQLite remains the working practice baseline
 - built-in practice sandbox is working
 - natural-language SQL remains assistive and local/rule-first where covered
-- optional provider infrastructure remains available
 - PostgreSQL remains a narrow experimental/runtime-smoke track
 - MySQL does not yet have a working runtime baseline
+- `sql_cli/result_intelligence.py` provides deterministic ResultShape classification and conservative Query Graph `flow_steps`
+- `sql_cli/result_integration.py` attaches derived metadata without mutating canonical result fields
 
 ### Product distribution
 
-Merged:
+Merged distribution work:
 
 - PR #13 — installable PWA + Cloudflare Python Worker scaffold
 - PR #14 — isolated Worker bundle + real temporary Cloudflare deployment proof
-- PR #15 — durable production deployment workflow + PWA QA harness
-- PR #16 — production API verification hardened for deployment propagation delay
+- PR #15 — durable Cloudflare production deployment workflow + PWA QA contract
+- PR #16 — hardened post-deploy practice API verification
 
-Latest merged baseline before this branch:
-
-- `5752cd24142da60496e42b66e35d1a546e4a0c06`
-
-Durable public Worker:
+Durable production Worker:
 
 - `https://coquery-pwa.edu-public-app.workers.dev`
 
-Verified by production workflow:
+Successful durable production workflow proof remains:
 
-- Worker deployment/startup
-- `/api/health`
-- PWA shell and manifest
-- 24-problem practice listing
-- SQL execution
-- grading
+- run `33160202910`
+- deployment: success
+- `/api/health`: success
+- PWA shell/manifest: success
+- hosted practice API: success
 
-Interactive browser/device installation QA is still separate from the automated HTTP proof.
+The active PR #18 changes have not yet been merged or redeployed to the durable production Worker.
 
 ## Active Priority Stack
 
-### P0-A. Browser/device PWA release QA
+### P0-A. Browser/device PWA QA — release evidence
 
-Automated production deployment is proven. Remaining release-quality evidence:
+Remaining release-quality evidence:
 
-1. Home -> problem bank -> solve -> grade -> next problem
-2. progress persistence across reload/relaunch
-3. offline cached-shell behavior
-4. explicit network-required behavior for SQL execution
-5. `/api/*` not served from stale service-worker cache
-6. desktop PWA installation where supported
-7. iOS Safari Add to Home Screen baseline
-8. Android Chrome install/add-to-home-screen baseline
+- Home -> problem -> execute/grade -> next problem
+- progress persistence across reload/relaunch
+- explicit offline-shell/network-required behavior
+- `/api/*` not served from stale service-worker cache
+- desktop PWA install where supported
+- iOS Safari Add to Home Screen
+- Android Chrome install/add-to-home-screen
 
 Reference:
 
 - `docs/coquery-production-cloudflare-pwa-qa-2026-08-28.md`
 
-### P0-B. AI Context-to-Prompt Handoff — first slice
+### P0-B. BI Result Intelligence — active product slice
+
+Product model:
+
+`SQL text -> Query Graph -> returned rows -> Result Visual -> Explain`
+
+Later, separately:
+
+`database plan evidence -> Execution Graph`
+
+Core rules:
+
+- deterministic first; no LLM required
+- Table is always available and remains evidence baseline
+- Query Graph/Flow is a first-class learning view
+- high-confidence result shapes may recommend a chart
+- ambiguous shapes fall back to Table
+- Bar is limited to proven category + numeric measure results
+- Line is limited to safely ordered temporal + numeric measure results
+- Line never sorts rows or invents elapsed-time spacing semantics
+- Query Graph contains only recognized SQL structure
+- Query Graph is not an execution-plan claim
+- Explain/localization describes only supported SQL/result metadata and never invents business causality
+- Execution Graph requires real database plan evidence
+- no React migration in the first slice
+
+Proven on active PR #18:
+
+1. [done] ResultShape classifier + contract tests
+2. [done] hosted `practice_query` metadata integration
+3. [done] real Table renderer in focused practice
+4. [done] lightweight Bar Result Visual
+5. [done] Query Graph/Flow renderer
+6. [done] deterministic Explain
+7. [done] Line/time-series Result Visual
+8. [done] deterministic KR/EN recommendation-reason localization
+9. **next: keyboard/accessibility baseline for future view switching**
+10. nested Query Graph only after explicit parser contracts
+11. Execution Graph only with real `EXPLAIN`-style evidence
+12. additional BI visuals only when ResultShape rules justify them
+
+### P0-C. AI Context-to-Prompt Handoff — first slice
+
+Starts after the BI first slice unless an explicit priority decision changes the gate.
 
 First implementation boundary:
 
@@ -107,11 +201,11 @@ Reference:
 
 - `docs/coquery-ai-context-to-prompt-handoff-2026-08-28.md`
 
-### P0-C. iOS / Android wrapper baseline
+### P0-D. iOS / Android wrapper baseline
 
-After hosted PWA behavior is stable:
+After hosted PWA behavior and browser/device evidence are stable:
 
-- validate the minimal wrapper choice
+- validate minimal wrapper choice
 - keep shared Web/PWA source canonical
 - create thin iOS and Android wrappers
 - prove simulator/emulator flows
@@ -122,7 +216,9 @@ Preferred direction remains a thin Capacitor-style wrapper, subject to implement
 
 ## P1 — Learning Quality Expansion
 
-### P1-A. SQL Dialect Learning — approved parallel slice
+### P1-A. SQL Dialect Learning — Phase A merged
+
+PR #19 is merged into main.
 
 Purpose:
 
@@ -132,37 +228,40 @@ Learner surface:
 
 `Problem -> Run/Grade -> DB별 차이 보기 -> PostgreSQL | MySQL | SQLite`
 
-Rules:
+Merged Phase A includes:
 
-- do not turn the beginner curriculum into a PostgreSQL/MySQL course
-- explain intent before syntax
-- label examples as `common`, `reference`, or `verified`
-- MySQL remains `reference` until a real MySQL runtime/test baseline exists
-- do not build a general SQL transpiler in the first slice
-
-Phase A — implemented on Draft PR #19:
-
-- deterministic `DialectLesson` / `DialectCatalog` content contract
-- first 4 high-value comparison topics: string concatenation, current date/time, date arithmetic, and `LIMIT` commonality
-- PostgreSQL/MySQL/SQLite variants with explicit `common` / `reference` / `verified` state badges
+- deterministic `DialectLesson` / `DialectCatalog`
+- string concatenation, current date/time, date arithmetic, and `LIMIT` commonality lessons
+- PostgreSQL/MySQL/SQLite variants with `common` / `reference` / `verified` badges
 - KR/EN content
-- an optional, default-closed comparison card in practice feedback only for mapped problems
-- deterministic catalog/problem-mapping regression coverage, including SQLite execution for the `verified` examples
-- MySQL remains documented/reference-only; no MySQL runtime claim or `verified` state
+- optional default-closed comparison card only for mapped problems
+- deterministic catalog/problem-mapping regression coverage
+- SQLite execution proof for examples labeled `verified`
+- MySQL remains reference-only; no MySQL runtime-support claim
 
 Reference:
 
 - `docs/coquery-sql-dialect-learning-plan-2026-09-02.md`
 
-### P1-B. Result Intelligence / BI interpretation
+Future dialect work:
 
-Direction under product design:
+- expand comparison coverage only from demonstrated learner gaps
+- expand PostgreSQL `verified` coverage only where the smoke environment executes the behavior
+- establish a MySQL runtime/test baseline before any MySQL `verified` badge
+- do not build a general SQL transpiler without a separate product decision
 
-`Table | Chart | Flow | Explain`
+### P1-B. BI expansion after first slice
 
-This answers what a query result means, while SQL Dialect Learning answers how equivalent SQL can differ by database engine. Keep the two concepts separate in the first implementation.
+Only when ResultShape rules justify them:
 
-### Other P1 items
+- Ring/Pie for explicit part-to-whole results
+- Scatter for true numeric observation pairs
+- Funnel for explicit ordered stages
+- Sankey for explicit source/target/value results
+- Gauge only with explicit target/range
+- Choropleth only with a supported geography contract
+
+### Other P1
 
 - Practice-result AI handoff
 - system share / selectable external AI destination
@@ -175,7 +274,7 @@ This answers what a query result means, while SQL Dialect Learning answers how e
 - optional cross-device progress sync
 - broader engine-backed dialect verification only when runtime environments justify it
 
-## Completed Product History — August 2026
+## Completed Product History
 
 - PR #8 — first-run learning Home
 - PR #9 — focused practice workspace
@@ -184,47 +283,61 @@ This answers what a query result means, while SQL Dialect Learning answers how e
 - PR #12 — learner-flow QA and next-problem navigation
 - PR #13 — PWA + Cloudflare serverless scaffold
 - PR #14 — real temporary Cloudflare deployment proof and isolated deployment harness
-- PR #15 — production deployment + PWA QA harness
-- PR #16 — hardened production API verification
+- PR #15 — durable production deployment workflow and PWA QA gate
+- PR #16 — production API verification hardening
+- PR #19 — SQL Dialect Learning Phase A
 
 ## Verification Baseline
 
-Core CI:
+Core CI after synchronizing PR #18 with main must include both tracks:
 
 - CLI/core verification
-- practice focus smoke
+- deterministic BI ResultShape contract tests
+- practice-query regression gate
+- executable Bar + Line Result Visual smoke
+- executable Query Graph model smoke
+- executable deterministic Explain/localization smoke
+- practice-focus smoke including Table/Bar/Line/Query Graph/Explain wiring
 - learning path smoke
 - curriculum smoke
+- SQL dialect learning smoke
 - user-flow QA smoke
-- PWA/serverless smoke
+- PWA/serverless smoke including combined `coquery-pwa-v5` assets
 - separate PostgreSQL smoke
 
-Deployment verification:
+Deployment verification remains separate:
 
 - temporary Cloudflare remote proof workflow
-- production Cloudflare workflow
+- durable production workflow
 - post-deploy health/PWA/practice API checks
 
 ## Scope Locks
 
 Do not silently:
 
-- split the canonical PWA into separate native product implementations
-- make external AI mandatory for SQL generation
+- split canonical PWA into separate native product implementations
+- make external AI mandatory for SQL generation or result interpretation
 - automatically send data to an AI
 - expose Production Assist data through AI handoff before ExportPolicy proof
-- describe HTTP proof as completed browser/device/install QA
+- describe automated HTTP proof as completed browser/device/install QA
 - broaden PostgreSQL/MySQL support claims without new proof
 - present reference dialect examples as engine-verified
 - make DB-specific syntax mandatory in beginner lessons
+- turn BI result work into an undeclared React migration
+- reuse or redistribute Bklit Studio; only the upstream MIT chart-component boundary is eligible for later technical evaluation
+- invent chart dimensions, targets, flow edges, geographic meaning, stage order, elapsed-time spacing, or execution nodes
+- replace or mutate canonical `columns`, `rows`, or `row_count` when adding derived BI metadata
+- teach Query Graph as if it were a database physical execution plan
+- use Explain/localization to invent causality, intent, or hidden business meaning
+- show Execution Graph without real planner/executor evidence
 
 ## Official Execution Loop
 
 For each slice:
 
 1. confirm current `main`
-2. create a branch
-3. document the scope and proof boundary
+2. create or synchronize the working branch
+3. document scope and proof boundary
 4. add regression/contract tests where practical
 5. implement the smallest valid change
 6. keep baseline CI green
@@ -232,15 +345,12 @@ For each slice:
 8. record exactly what was verified and skipped
 9. merge only after explicit approval
 10. currentize `EASY_SQL_ROADMAP.md`, `EASY_SQL_TODO.md`, and `HANDOFF.md`
+11. prefer one cohesive implementation commit per logical slice; documentation-only currentization may follow after verified CI
 
-## Current Decision Gate
+## Next Decision Gate
 
-Active parallel work is allowed when it does not destabilize P0 release work.
+Immediate BI gate after branch synchronization:
 
-Current execution tracks:
+**define and implement the keyboard/accessibility baseline for future `Table | Visual | Flow | Explain` view switching before adding more chart types.**
 
-`PWA QA -> AI validation handoff -> mobile wrappers`
-
-and
-
-`SQL learning quality -> dialect comparison -> result intelligence`
+Browser/device PWA QA remains an open release-evidence track in parallel.

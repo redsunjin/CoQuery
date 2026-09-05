@@ -169,6 +169,63 @@ document.querySelectorAll("[data-lang]").forEach((button) => {
   });
 });
 
+function loadPracticeResultVisualAssets() {
+  if (!document.querySelector('link[data-practice-result-visual-style]')) {
+    const style = document.createElement("link");
+    style.rel = "stylesheet";
+    style.href = "./practice-result-visual.css";
+    style.dataset.practiceResultVisualStyle = "true";
+    document.head.appendChild(style);
+  }
+
+  if (!document.querySelector('script[data-practice-result-visual-script]')) {
+    const script = document.createElement("script");
+    script.src = "./practice-result-visual.js";
+    script.dataset.practiceResultVisualScript = "true";
+    document.body.appendChild(script);
+  }
+}
+
+function loadPracticeQueryFlowAssets() {
+  if (!document.querySelector('link[data-practice-query-flow-style]')) {
+    const style = document.createElement("link");
+    style.rel = "stylesheet";
+    style.href = "./practice-query-flow.css";
+    style.dataset.practiceQueryFlowStyle = "true";
+    document.head.appendChild(style);
+  }
+
+  if (!document.querySelector('script[data-practice-query-flow-script]')) {
+    const script = document.createElement("script");
+    script.src = "./practice-query-flow.js";
+    script.dataset.practiceQueryFlowScript = "true";
+    document.body.appendChild(script);
+  }
+}
+
+function loadPracticeResultExplainAssets() {
+  if (!document.querySelector('link[data-practice-result-explain-style]')) {
+    const style = document.createElement("link");
+    style.rel = "stylesheet";
+    style.href = "./practice-result-explain.css";
+    style.dataset.practiceResultExplainStyle = "true";
+    document.head.appendChild(style);
+  }
+
+  if (!document.querySelector('script[data-practice-result-explain-script]')) {
+    const script = document.createElement("script");
+    script.src = "./practice-result-explain.js";
+    script.dataset.practiceResultExplainScript = "true";
+    document.body.appendChild(script);
+  }
+}
+
+function loadPracticeResultIntelligenceAssets() {
+  loadPracticeResultVisualAssets();
+  loadPracticeQueryFlowAssets();
+  loadPracticeResultExplainAssets();
+}
+
 function loadPracticeFocusAssets() {
   if (!document.querySelector('link[data-practice-focus-style]')) {
     const style = document.createElement("link");
@@ -178,12 +235,17 @@ function loadPracticeFocusAssets() {
     document.head.appendChild(style);
   }
 
-  if (!document.querySelector('script[data-practice-focus-script]')) {
-    const script = document.createElement("script");
-    script.src = "./practice-focus.js";
-    script.dataset.practiceFocusScript = "true";
-    document.body.appendChild(script);
+  const existing = document.querySelector('script[data-practice-focus-script]');
+  if (existing) {
+    loadPracticeResultIntelligenceAssets();
+    return;
   }
+
+  const script = document.createElement("script");
+  script.src = "./practice-focus.js";
+  script.dataset.practiceFocusScript = "true";
+  script.addEventListener("load", loadPracticeResultIntelligenceAssets, { once: true });
+  document.body.appendChild(script);
 }
 
 function loadExpandedCurriculumAsset() {
