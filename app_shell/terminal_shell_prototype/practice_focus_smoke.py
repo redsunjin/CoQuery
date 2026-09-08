@@ -87,6 +87,8 @@ def main() -> int:
     assert_contains(focus_css, '.app-shell[data-practice-focus="true"]')
     assert_contains(focus_css, ".practice-focus-block")
     assert_contains(focus_css, ".practice-support-actions")
+    assert_contains(focus_css, "#homeButton")
+    assert_contains(focus_css, "min-width: 0")
     assert_contains(focus_css, ".practice-result-table-scroll")
     assert_contains(focus_css, ".practice-result-table td.is-null")
     assert_contains(visual_css, ".practice-result-bar-visual")

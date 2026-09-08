@@ -402,6 +402,134 @@ function t(key) {
   return i18n[currentLanguage]?.[key] || i18n.en[key] || key;
 }
 
+const practiceKoreanCopy = {
+  basic_select_customers: {
+    title: "모든 고객 조회",
+    prompt: "고객 ID, 이름, 지역을 ID 순으로 반환하세요.",
+    hint: "customers 테이블에서 요청한 열만 선택하세요.",
+  },
+  customer_names_segments: {
+    title: "고객 이름과 세그먼트 보기",
+    prompt: "모든 고객의 이름과 세그먼트를 ID 순으로 반환하세요.",
+    hint: "customers 테이블에서 name과 segment만 반환하세요.",
+  },
+  orders_chronological: {
+    title: "날짜순 주문 목록",
+    prompt: "주문 ID, 주문일, 상태를 주문일이 빠른 순으로 반환하세요.",
+    hint: "order_date를 오름차순으로 정렬하세요.",
+  },
+  ticket_priority_list: {
+    title: "지원 티켓 우선순위 확인",
+    prompt: "티켓 ID, 우선순위, 상태를 티켓 ID 순으로 반환하세요.",
+    hint: "support_tickets 테이블에 요청한 열이 모두 있습니다.",
+  },
+  largest_orders: {
+    title: "가장 큰 주문 세 건 찾기",
+    prompt: "주문 ID와 총액을 총액이 큰 순으로 세 건 반환하세요.",
+    hint: "total_amount를 내림차순으로 정렬한 뒤 세 건으로 제한하세요.",
+  },
+  paid_large_orders: {
+    title: "고액 결제 주문 찾기",
+    prompt: "총액이 100000 이상인 결제 완료 주문의 주문 ID, 고객 ID, 총액을 총액이 큰 순으로 반환하세요.",
+    hint: "status와 total_amount 조건을 함께 필터링하세요.",
+  },
+  open_high_tickets: {
+    title: "열린 고우선순위 티켓 찾기",
+    prompt: "열려 있는 고우선순위 티켓의 티켓 ID와 고객 ID를 티켓 ID 순으로 반환하세요.",
+    hint: "support_tickets에서 priority와 status를 모두 필터링하세요.",
+  },
+  seoul_customers: {
+    title: "서울 고객 찾기",
+    prompt: "서울 고객의 고객 ID, 이름, 세그먼트를 ID 순으로 반환하세요.",
+    hint: "region 열로 고객을 필터링하세요.",
+  },
+  march_orders: {
+    title: "3월 주문 찾기",
+    prompt: "2026년 3월에 접수된 주문의 주문 ID, 주문일, 총액을 날짜순으로 반환하세요.",
+    hint: "시작일은 포함하고 4월 시작일은 제외하는 날짜 조건을 사용하세요.",
+  },
+  paid_or_pending_orders: {
+    title: "진행 중인 주문 찾기",
+    prompt: "결제 완료 또는 대기 중인 주문의 주문 ID와 상태를 ID 순으로 반환하세요.",
+    hint: "허용된 두 상태를 OR로 연결하세요.",
+  },
+  selected_regions: {
+    title: "서울·부산 고객 찾기",
+    prompt: "서울 또는 부산 고객의 고객 ID, 이름, 지역을 ID 순으로 반환하세요.",
+    hint: "두 지역 값에는 IN을 사용하세요.",
+  },
+  customer_name_contains: {
+    title: "고객 이름 검색",
+    prompt: "이름에 'in' 글자 순서가 포함된 고객의 고객 ID와 이름을 ID 순으로 반환하세요.",
+    hint: "텍스트 앞뒤에 와일드카드를 넣어 LIKE를 사용하세요.",
+  },
+  paid_order_customers: {
+    title: "결제 주문과 고객 연결",
+    prompt: "결제 완료 주문의 고객 이름, 주문 ID, 총액을 주문 ID 순으로 반환하세요.",
+    hint: "customers.id와 orders.customer_id를 JOIN하세요.",
+  },
+  order_customer_regions: {
+    title: "주문에 고객 지역 연결",
+    prompt: "모든 주문의 주문 ID, 고객 이름, 고객 지역을 주문 ID 순으로 반환하세요.",
+    hint: "orders.customer_id와 customers.id를 연결하세요.",
+  },
+  ticket_customer_names: {
+    title: "티켓에 고객 이름 연결",
+    prompt: "모든 지원 티켓의 티켓 ID, 고객 이름, 우선순위, 상태를 티켓 ID 순으로 반환하세요.",
+    hint: "support_tickets.customer_id와 customers.id를 연결하세요.",
+  },
+  paid_order_segments: {
+    title: "결제 주문의 고객 세그먼트 보기",
+    prompt: "결제 완료 주문의 주문 ID, 고객 이름, 고객 세그먼트, 총액을 주문 ID 순으로 반환하세요.",
+    hint: "orders와 customers를 JOIN한 뒤 orders.status를 필터링하세요.",
+  },
+  open_tickets_customer_regions: {
+    title: "열린 티켓 고객의 지역 찾기",
+    prompt: "열린 티켓의 티켓 ID, 고객 이름, 고객 지역을 반환하세요.",
+    hint: "티켓과 고객을 JOIN하고 support_tickets.status를 필터링하세요.",
+  },
+  paid_orders_by_region: {
+    title: "지역별 결제 주문 요약",
+    prompt: "지역별 결제 주문 수와 결제 총액을 지역 순으로 반환하세요.",
+    hint: "customers와 orders를 JOIN하고 결제 완료 주문만 필터링한 뒤 지역별로 그룹화하세요.",
+  },
+  order_count_by_status: {
+    title: "상태별 주문 수 세기",
+    prompt: "주문 상태와 각 상태의 주문 수를 상태 순으로 반환하세요.",
+    hint: "상태별로 그룹화하고 주문 ID를 세세요.",
+  },
+  paid_total_by_customer: {
+    title: "고객별 결제 총액 계산",
+    prompt: "결제 완료 주문이 있는 고객의 이름과 결제 총액을 총액이 큰 순으로 반환하세요.",
+    hint: "customers와 orders를 JOIN하고, 결제 완료 주문을 남긴 뒤 고객별로 그룹화해 total_amount를 합산하세요.",
+  },
+  ticket_count_by_priority: {
+    title: "우선순위별 티켓 수 세기",
+    prompt: "티켓 우선순위와 각 우선순위의 티켓 수를 우선순위 순으로 반환하세요.",
+    hint: "support_tickets를 우선순위별로 그룹화하고 ID를 세세요.",
+  },
+  monthly_paid_sales: {
+    title: "월별 결제 매출 요약",
+    prompt: "결제 완료 주문이 있는 각 월의 월(YYYY-MM), 주문 수, 결제 총액을 월 순으로 반환하세요.",
+    hint: "substr(order_date, 1, 7)로 월을 만들고, 결제 주문만 필터링해 집계하세요.",
+  },
+  high_value_paid_customers: {
+    title: "고액 결제 고객 찾기",
+    prompt: "결제 주문 총액이 200000 이상인 고객의 이름과 결제 총액을 총액이 큰 순으로 반환하세요.",
+    hint: "고객별 결제 주문을 집계하고 SUM(total_amount)에 HAVING을 사용하세요.",
+  },
+  open_support_load_by_region: {
+    title: "지역별 열린 지원 티켓 수 확인",
+    prompt: "열린 지원 티켓이 있는 지역의 지역명과 티켓 수를 티켓 수 내림차순, 지역 오름차순으로 반환하세요.",
+    hint: "티켓과 고객을 JOIN하고 열린 티켓만 필터링한 뒤 지역별로 그룹화해 티켓 ID를 세세요.",
+  },
+};
+
+function localizedPracticeProblem(problem = {}) {
+  const localized = currentLanguage === "ko" ? practiceKoreanCopy[problem.id] : null;
+  return localized ? { ...problem, ...localized } : problem;
+}
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -1336,6 +1464,7 @@ function summarizeResult(result) {
     const rows = (result.data?.problems || [])
       .slice(0, 6)
       .map((problem) => {
+        const displayProblem = localizedPracticeProblem(problem);
         const concepts = (problem.concepts || []).join(",");
         return `<div class="preset-row practice-problem-row"
           data-pack-id="${escapeHtml(packId)}"
@@ -1346,9 +1475,9 @@ function summarizeResult(result) {
           data-problem-hint="${escapeHtml(problem.hint || "")}"
           data-problem-concepts="${escapeHtml(concepts)}">
           <span class="practice-problem-copy">
-            <strong>${escapeHtml(problem.title || problem.id)}</strong>
+            <strong>${escapeHtml(displayProblem.title || problem.id)}</strong>
             <span class="preset-meta">${escapeHtml(problem.id)} · ${escapeHtml(problem.difficulty || "practice")}</span>
-            <span>${escapeHtml(problem.prompt || "")}</span>
+            <span>${escapeHtml(displayProblem.prompt || "")}</span>
           </span>
           <span class="preset-row-actions">
             <button class="mini-button practice-start-button" type="button">${escapeHtml(t("practiceOpenProblem"))}</button>
@@ -1364,11 +1493,12 @@ function summarizeResult(result) {
 
   if (result.command === "practice_start") {
     const problem = result.data?.problem || {};
+    const displayProblem = localizedPracticeProblem(problem);
     const packId = result.data?.packId || "sql_basics";
     const initialSql = result.data?.initialSql || "";
     const concepts = (problem.concepts || []).map((concept) => `<span class="pill">${escapeHtml(concept)}</span>`).join("");
     return `<p class="block-summary">${escapeHtml(t("practiceStart"))}: <strong>${escapeHtml(
-      problem.title || problem.id || "practice"
+      displayProblem.title || problem.id || "practice"
     )}</strong></p>
       <form class="practice-flow-form" data-practice-form data-problem-id="${escapeHtml(
         problem.id || "basic_select_customers"
@@ -1379,10 +1509,10 @@ function summarizeResult(result) {
             ${concepts}
           </div>
           <div class="section-label">${escapeHtml(t("practiceProblemPrompt"))}</div>
-          <p>${escapeHtml(problem.prompt || "")}</p>
+          <p>${escapeHtml(displayProblem.prompt || "")}</p>
           ${
-            problem.hint
-              ? `<div class="practice-hint"><strong>${escapeHtml(t("practiceHint"))}</strong><span>${escapeHtml(problem.hint)}</span></div>`
+            displayProblem.hint
+              ? `<div class="practice-hint"><strong>${escapeHtml(t("practiceHint"))}</strong><span>${escapeHtml(displayProblem.hint)}</span></div>`
               : ""
           }
         </div>
@@ -1663,6 +1793,34 @@ function updatePracticePreview(form) {
   }
 }
 
+function replacePracticeSupportResult(command) {
+  for (let index = renderedBlocks.length - 1; index >= 0; index -= 1) {
+    const candidate = renderedBlocks[index];
+    if (candidate.__result?.command !== command) {
+      continue;
+    }
+    if (candidate === selectedBlock) {
+      selectedBlock = null;
+      selectedResult = null;
+    }
+    candidate.remove();
+    renderedBlocks.splice(index, 1);
+  }
+}
+
+async function runPracticeSupportCommand(button, command, args) {
+  if (button.disabled) {
+    return;
+  }
+  button.disabled = true;
+  replacePracticeSupportResult(command);
+  try {
+    await runParsedCommand({ command, args, context: { mode: "training" } });
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function bindPracticeButtons(block) {
   block.querySelectorAll(".practice-problem-row .practice-start-button").forEach((button) => {
     button.addEventListener("click", () => {
@@ -1706,15 +1864,27 @@ function bindPracticeFlow(block) {
 
   const schemaButton = form.querySelector(".practice-schema-button");
   if (schemaButton) {
-    schemaButton.addEventListener("click", () => {
-      runParsedCommand({ command: "practice_schema", args: { pack: packId }, context: { mode: "training" } });
+    schemaButton.addEventListener("click", async () => {
+      try {
+        await runPracticeSupportCommand(schemaButton, "practice_schema", { pack: packId });
+      } catch (error) {
+        setStatus(error.message || t("commandFailed"), "error");
+      }
     });
   }
 
   const attemptsButton = form.querySelector(".practice-attempts-button");
   if (attemptsButton) {
-    attemptsButton.addEventListener("click", () => {
-      runParsedCommand({ command: "practice_attempts", args: { pack: packId, problem_id: problemId, limit: 5 }, context: { mode: "training" } });
+    attemptsButton.addEventListener("click", async () => {
+      try {
+        await runPracticeSupportCommand(attemptsButton, "practice_attempts", {
+          pack: packId,
+          problem_id: problemId,
+          limit: 5,
+        });
+      } catch (error) {
+        setStatus(error.message || t("commandFailed"), "error");
+      }
     });
   }
 
@@ -1754,6 +1924,7 @@ function bindPracticeFlow(block) {
           { pack: packId, problem_id: problemId, limit: 5 },
           { mode: "training" }
         );
+        replacePracticeSupportResult("practice_attempts");
         addBlock(attemptsResult);
       }
     } catch (error) {

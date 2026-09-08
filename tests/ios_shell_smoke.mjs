@@ -88,10 +88,16 @@ assert.match(appJs, /AI-generated feedback/);
 assert.match(appJs, /documentTitle: "CoQuery"/);
 assert.match(appJs, /function setDetailOpen\(open\)/);
 assert.match(appJs, /detailBackdrop\?\.addEventListener\("click"/);
+assert.match(appJs, /const practiceKoreanCopy =/);
+assert.match(appJs, /모든 고객 조회/);
+assert.match(appJs, /function localizedPracticeProblem\(problem = \{\}\)/);
+assert.match(appJs, /function replacePracticeSupportResult\(command\)/);
+assert.match(appJs, /async function runPracticeSupportCommand\(button, command, args\)/);
 
 const stylesCss = readFileSync(join(distDir, "styles.css"), "utf8");
 const onboardingCss = readFileSync(join(distDir, "onboarding.css"), "utf8");
 const onboardingJs = readFileSync(join(distDir, "onboarding.js"), "utf8");
+const practiceFocusCss = readFileSync(join(distDir, "practice-focus.css"), "utf8");
 assert.match(stylesCss, /--safe-area-top:\s*env\(safe-area-inset-top, 0px\)/);
 assert.match(stylesCss, /--safe-area-bottom:\s*env\(safe-area-inset-bottom, 0px\)/);
 assert.match(stylesCss, /min-height:\s*calc\(60px \+ var\(--safe-area-top\)\)/);
@@ -106,6 +112,8 @@ assert.match(onboardingJs, /privacyPolicyLink\.href/);
 assert.match(stylesCss, /--panel-overlay:\s*#24261f;/);
 assert.match(stylesCss, /\.detail-backdrop\s*\{[^}]*background:\s*rgba\(2, 3, 2, 0\.58\);/s);
 assert.match(stylesCss, /\.detail-panel\s*\{[^}]*border-radius:\s*18px 18px 0 0;/s);
+assert.match(practiceFocusCss, /#homeButton\s*\{[^}]*min-width:\s*44px;[^}]*min-height:\s*44px;/s);
+assert.match(practiceFocusCss, /\.practice-support-actions \.ghost-button\s*\{[^}]*min-width:\s*0;/s);
 
 const runtimeSource = readFileSync(runtimePath, "utf8");
 assert.doesNotMatch(runtimeSource, /\bexport\s+(?:async\s+)?(?:function|const)\b/);
