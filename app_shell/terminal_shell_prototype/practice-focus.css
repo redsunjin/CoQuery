@@ -16,8 +16,8 @@
 }
 
 .app-shell[data-practice-focus="true"] .terminal-header {
-  grid-template-columns: 1fr auto;
-  padding-inline: 24px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding-inline: max(24px, var(--safe-area-left)) max(24px, var(--safe-area-right));
 }
 
 .app-shell[data-practice-focus="true"] .window-controls,
@@ -28,6 +28,17 @@
 .app-shell[data-practice-focus="true"] .header-center {
   justify-self: start;
   text-align: left;
+  min-width: 0;
+}
+
+.app-shell[data-practice-focus="true"] .header-actions {
+  flex-shrink: 0;
+}
+
+.app-shell[data-practice-focus="true"] #homeButton {
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
 }
 
 .app-shell[data-practice-focus="true"] .header-center h1 {
@@ -52,6 +63,7 @@
 .practice-feedback-block {
   width: min(100%, 860px);
   max-width: 860px;
+  min-width: 0;
 }
 
 .practice-focus-block {
@@ -270,11 +282,16 @@
 
 @media (max-width: 760px) {
   .app-shell[data-practice-focus="true"] .terminal-header {
-    padding-inline: 14px;
+    gap: 8px;
+    padding: var(--safe-area-top) max(12px, var(--safe-area-right)) 0 max(12px, var(--safe-area-left));
+  }
+
+  .app-shell[data-practice-focus="true"] .header-actions {
+    gap: 8px;
   }
 
   .app-shell[data-practice-focus="true"] .terminal-scroll {
-    padding: 18px 12px 40px;
+    padding: 16px max(12px, var(--safe-area-right)) calc(32px + var(--safe-area-bottom)) max(12px, var(--safe-area-left));
   }
 
   .practice-focus-block,
@@ -283,7 +300,12 @@
   }
 
   .practice-focus-block {
-    padding: 16px;
+    padding: 14px;
+  }
+
+  .practice-focus-problem {
+    min-width: 0;
+    padding: 14px;
   }
 
   .practice-title-summary {
@@ -304,6 +326,9 @@
   }
 
   .practice-focus-block .practice-support-actions .ghost-button {
+    min-width: 0;
+    padding-inline: 8px;
+    font-size: 13px;
     width: 100%;
   }
 

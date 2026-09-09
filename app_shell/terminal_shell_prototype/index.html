@@ -57,7 +57,14 @@
               <button class="lang-button active" type="button" data-lang="ko">KR</button>
               <button class="lang-button" type="button" data-lang="en">EN</button>
             </div>
-            <button class="ghost-button detail-toggle" type="button" id="detailToggle" data-i18n="detailsButton">상세</button>
+            <button
+              class="ghost-button detail-toggle"
+              type="button"
+              id="detailToggle"
+              aria-controls="detailPanel"
+              aria-expanded="false"
+              data-i18n="detailsButton"
+            >상세</button>
           </div>
         </header>
 
@@ -117,6 +124,15 @@
                 <button class="ghost-button" type="button" id="problemBankButton" data-home-copy="problemBank">문제 선택</button>
                 <button class="ghost-button" type="button" id="advancedWorkspaceButton" data-home-copy="advanced">고급 기능</button>
               </div>
+              <p class="learning-home-privacy">
+                <a
+                  id="privacyPolicyLink"
+                  href="https://redsunjin.github.io/CoQuery/privacy/?lang=ko"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-home-copy="privacy"
+                >개인정보 처리방침</a>
+              </p>
               <div class="learning-home-proof" aria-label="학습 흐름">
                 <div class="learning-proof-item">
                   <strong data-home-copy="step1Title">1. 문제를 읽고</strong>
@@ -187,10 +203,24 @@
             <span data-provider-status-summary>AI 제공자 선택 안 됨</span>
           </div>
           <button class="primary-button" type="submit" data-i18n="runButton">실행</button>
-          <button class="ghost-button drawer-button" type="button" id="drawerButton" data-i18n="panelButton">패널</button>
+          <button
+            class="ghost-button drawer-button"
+            type="button"
+            id="drawerButton"
+            aria-controls="detailPanel"
+            aria-expanded="false"
+            data-i18n="panelButton"
+          >패널</button>
         </form>
       </main>
 
+      <button
+        class="detail-backdrop"
+        type="button"
+        id="detailBackdrop"
+        aria-label="닫기"
+        data-i18n-attr="aria-label:closeButton"
+      ></button>
       <aside class="detail-panel" id="detailPanel" aria-label="명령 상세" data-i18n-attr="aria-label:commandDetailsLabel">
         <div class="panel-header">
           <div>

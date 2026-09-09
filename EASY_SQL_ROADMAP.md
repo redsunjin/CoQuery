@@ -66,9 +66,9 @@ Main now includes:
 - user-flow regression smoke
 - SQL Dialect Learning Phase A from PR #19
 
-### BI Result Intelligence — active Draft PR #18
+### BI Result Intelligence — merged PR #18
 
-PR #18 remains Draft and unmerged. Its result-understanding baseline includes:
+PR #18 is merged. Its result-understanding baseline includes:
 
 - deterministic ResultShape classification
 - additive hosted `practice_query` result-intelligence metadata
@@ -84,7 +84,7 @@ PR #18 remains Draft and unmerged. Its result-understanding baseline includes:
 - no external AI/provider dependency for result interpretation
 - no React migration
 
-The PR #18 branch is synchronized with the current main before further BI work. The combined PWA shell cache is `coquery-pwa-v5`, carrying both the merged dialect-learning asset and the active BI result-understanding assets while `/api/*` remains uncached.
+The combined PWA shell cache is `coquery-pwa-v5`, carrying both the merged dialect-learning asset and the BI result-understanding assets while `/api/*` remains uncached.
 
 ### SQL / data engine
 
@@ -111,13 +111,13 @@ Durable production Worker:
 
 Successful durable production workflow proof remains:
 
-- run `33160202910`
+- [run 33948547355](https://github.com/redsunjin/CoQuery/actions/runs/33948547355) on `efd351e8b82c4352cdac8eae7a7773b088160a3e`
 - deployment: success
 - `/api/health`: success
 - PWA shell/manifest: success
 - hosted practice API: success
 
-The active PR #18 changes have not yet been merged or redeployed to the durable production Worker.
+PR #18 is merged and included in the durable production Worker deployment.
 
 ## Active Priority Stack
 
@@ -163,7 +163,7 @@ Core rules:
 - Execution Graph requires real database plan evidence
 - no React migration in the first slice
 
-Proven on active PR #18:
+Proven on merged PR #18:
 
 1. [done] ResultShape classifier + contract tests
 2. [done] hosted `practice_query` metadata integration

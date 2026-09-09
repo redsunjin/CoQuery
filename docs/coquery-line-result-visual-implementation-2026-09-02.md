@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented on active Draft PR #18 (`feat/bi-result-intelligence`).
+Implemented and merged in PR #18 (`feat/bi-result-intelligence`).
 
 This slice adds the first time-series visual while preserving the existing product principle:
 

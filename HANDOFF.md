@@ -1,7 +1,18 @@
 # CoQuery Handoff
 
-Date: 2026-09-03
-Status: Production PWA baseline proven; SQL Dialect Learning Phase A is merged in PR #19; Draft PR #18 contains the active BI result-understanding slice and has been synchronized with current main before further work.
+## TestFlight UX audit — 2026-09-09
+
+- Audit/fix branch: `codex/testflight-ux-audit-2026-09-09`, based on build 3 source `a2bbdfb`.
+- App Store Connect screenshot feedback: four receipts (three on build 1, one on build 2), inspected directly.
+- Fixed hidden CLI/action chrome overriding the learning flow, Home text vertical alignment, and loss of practice controls/draft SQL on language changes.
+- Existing Korean hints and duplicate schema/attempt prevention verified. Browser checks at 402px and 320px, iOS shell smoke, practice-focus smoke, and full RC verification passed; iOS assets synchronized.
+- No new TestFlight upload or group assignment performed. Physical-device confirmation remains required. Build 3 had no test group at inspection time.
+- Evidence and remaining copy/advanced-workspace issues: `docs/testflight-ux-audit-2026-09-09.md`.
+
+The earlier handoff below is retained as historical context.
+
+Date: 2026-09-05
+Status: Production PWA beta redeployed with the merged BI result-understanding slice; iOS shell is synchronized to the same deterministic result contract. Interactive PWA/device and Apple-signing gates remain.
 
 ## Product Definition
 
@@ -35,22 +46,15 @@ Table remains canonical evidence.
 
 ## Current Main / Branch State
 
-Current `main` at synchronization:
+Current `main` at deployment:
 
-- `1b329e23b167fe53a54c8afbec70e3f1ef604d0e`
+- `efd351e8b82c4352cdac8eae7a7773b088160a3e`
 
 Important main changes since the original PR #18 base:
 
 - PR #19 merged SQL Dialect Learning Phase A (`6fe26c83cd97bf3498ca5be1ef986f07668ec19b`)
 - Korean privacy-policy update (`1b329e23b167fe53a54c8afbec70e3f1ef604d0e`)
-
-Draft PR #18:
-
-- branch: `feat/bi-result-intelligence`
-- remains unmerged
-- synchronized with current main before the next BI implementation step
-
-The synchronization intentionally preserves both tracks rather than choosing one side of the former conflict.
+- PR #18 — BI Result Intelligence (`efd351e8b82c4352cdac8eae7a7773b088160a3e`)
 
 ## Merged Product History
 
@@ -63,6 +67,7 @@ The synchronization intentionally preserves both tracks rather than choosing one
 - PR #14 — isolated deployment bundle + real temporary Cloudflare hosted proof
 - PR #15 — durable production deployment workflow + PWA QA harness
 - PR #16 — hardened production hosted-API verification
+- PR #18 — BI Result Intelligence
 - PR #19 — SQL Dialect Learning Phase A
 
 ## Durable Cloudflare Production Baseline
@@ -73,7 +78,7 @@ Durable Worker:
 
 Successful production workflow:
 
-- run `33160202910`
+- [run 33948547355](https://github.com/redsunjin/CoQuery/actions/runs/33948547355) on `efd351e8b82c4352cdac8eae7a7773b088160a3e`
 
 Verified automatically on the durable Worker:
 
@@ -85,7 +90,7 @@ Verified automatically on the durable Worker:
 - SQL execution
 - grading
 
-The active PR #18 BI changes are branch-CI work and have not yet been merged/redeployed to the durable Worker.
+PR #18 BI changes are merged and included in this durable Worker deployment.
 
 Interactive browser/device evidence remains a separate QA gate.
 
@@ -121,7 +126,7 @@ Truthfulness boundary:
 - no general SQL transpiler
 - no arbitrary automatic cross-engine conversion
 
-## BI Result Intelligence — Active Draft PR #18
+## BI Result Intelligence — Merged PR #18
 
 References:
 

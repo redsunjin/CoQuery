@@ -191,6 +191,7 @@ function problemActionCopy(progress) {
 }
 
 function renderLearningPathProblem(problem, packId) {
+  const displayProblem = typeof localizedPracticeProblem === "function" ? localizedPracticeProblem(problem) : problem;
   const concepts = (problem.concepts || [])
     .map((concept) => `<span class="learning-concept">${learningPathEscape(concept)}</span>`)
     .join("");
@@ -206,8 +207,8 @@ function renderLearningPathProblem(problem, packId) {
           <span class="learning-difficulty">${learningPathEscape(problem.difficulty || "practice")}</span>
           ${attempts}
         </div>
-        <h4>${learningPathEscape(problem.title || problem.id)}</h4>
-        <p>${learningPathEscape(problem.prompt || "")}</p>
+        <h4>${learningPathEscape(displayProblem.title || problem.id)}</h4>
+        <p>${learningPathEscape(displayProblem.prompt || "")}</p>
         <div class="learning-concepts">${concepts}</div>
       </div>
       <button class="${progress.completed ? "ghost-button" : "primary-button"} learning-problem-start" type="button">

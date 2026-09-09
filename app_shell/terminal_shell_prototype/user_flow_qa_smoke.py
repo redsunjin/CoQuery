@@ -27,7 +27,7 @@ def main() -> int:
         "async function openPracticeLearningPath()",
         'setLearningPathMode(true)',
         "async function startNextPracticeProblem(currentProblemId)",
-        '"practice_schema", "practice_attempts", "practice_feedback"',
+        '"practice_query", "practice_grade", "practice_schema", "practice_attempts", "practice_feedback"',
         "addPracticeGradeNavigation(block)",
         'result.data?.correct !== true',
     )

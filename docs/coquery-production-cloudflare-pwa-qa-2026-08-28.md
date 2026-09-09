@@ -1,7 +1,7 @@
 # CoQuery Durable Cloudflare + PWA QA Gate
 
-Date: 2026-08-28
-Status: production deploy harness prepared; durable account credentials not yet configured in GitHub
+Date: 2026-09-05
+Status: durable Worker beta deployed; interactive browser/device QA and custom-domain work remain
 
 ## Purpose
 
@@ -141,14 +141,16 @@ After durable deployment, update `HANDOFF.md`, `EASY_SQL_ROADMAP.md`, and `EASY_
 
 Do not replace missing evidence with assumptions.
 
-## Current blocker
+## Current gate
 
-The workflow is prepared but cannot deploy to the user's durable Cloudflare account until the repository has both GitHub Actions secrets:
+The durable deployment completed on 2026-09-05:
 
-- `CLOUDFLARE_ACCOUNT_ID`
-- `CLOUDFLARE_API_TOKEN`
+- Worker: `https://coquery-pwa.edu-public-app.workers.dev`
+- workflow: [run 33948547355](https://github.com/redsunjin/CoQuery/actions/runs/33948547355)
+- source commit: `efd351e8b82c4352cdac8eae7a7773b088160a3e`
+- automated deployment, health, shell, manifest, hosted practice listing, SQL execution, and grading checks: passed
 
-Once those are configured, manually run `cloudflare-production-deploy` and record the generated durable Worker URL.
+The next release gate is interactive browser/device evidence, followed by the explicit custom-domain and install-icon decisions. Keep the existing least-privilege secrets in the protected GitHub environment; never record their values here.
 
 ## Official references
 

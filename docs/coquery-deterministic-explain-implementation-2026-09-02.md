@@ -1,7 +1,7 @@
 # CoQuery Deterministic Explain Implementation
 
 Date: 2026-09-02
-Status: implemented on active PR #18; branch CI verification required before merge
+Status: implemented and merged in PR #18; branch CI and production deployment verification passed
 
 ## Product role
 

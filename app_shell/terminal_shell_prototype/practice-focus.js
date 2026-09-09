@@ -302,7 +302,7 @@ function enhancePracticeQueryTable(block) {
   refreshPracticeQueryTableCopy(block);
 }
 
-function enhancePracticeStart(block) {
+function enhancePracticeStart(block, { focusEditor = true } = {}) {
   if (!block || block.dataset.practiceFocusEnhanced === "true") {
     return;
   }
@@ -369,7 +369,7 @@ function enhancePracticeStart(block) {
   refreshPracticeFocusCopy(block);
 
   const textarea = form.querySelector('textarea[name="sql"]');
-  requestAnimationFrame(() => textarea?.focus());
+  if (focusEditor) requestAnimationFrame(() => textarea?.focus());
 }
 
 function addPracticeGradeNavigation(block) {
@@ -474,6 +474,19 @@ if (terminalScroll) {
 }
 
 homeButton?.addEventListener("click", () => setPracticeFocusMode(false));
+// Language changes replace block contents without adding a new terminal block.
+document.addEventListener("coquery:blocks-rerendered", ({ detail }) => {
+  if (!detail.block || appShell?.dataset.practiceFocus !== "true") return;
+  enhancePracticeStart(detail.block, { focusEditor: false });
+  const editor = detail.block.querySelector("textarea");
+  if (editor) editor.value = detail.sql;
+  const hint = detail.block.querySelector(".practice-hint");
+  if (hint) hint.hidden = !detail.hintOpen;
+  const toggle = detail.block.querySelector(".practice-hint-toggle");
+  toggle?.setAttribute("aria-expanded", String(detail.hintOpen));
+  refreshPracticeFocusCopy(detail.block);
+  detail.feedback.forEach((block) => enhancePracticeFeedback(block, practiceCommandForBlock(block)));
+});
 problemBankButton?.addEventListener("click", () => setPracticeFocusMode(false));
 advancedWorkspaceButton?.addEventListener("click", () => setPracticeFocusMode(false));
 

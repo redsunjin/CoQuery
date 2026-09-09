@@ -296,6 +296,7 @@
   }
 
   requestAnimationFrame(enhanceExistingPracticeExplain);
+  document.addEventListener("coquery:blocks-rerendered", () => requestAnimationFrame(enhanceExistingPracticeExplain));
   document.querySelectorAll("[data-lang]").forEach((button) => {
     button.addEventListener("click", () => {
       setTimeout(() => {

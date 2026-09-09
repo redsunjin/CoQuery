@@ -1,6 +1,6 @@
 # CoQuery Result View Accessibility Baseline — 2026-09-03
 
-Status: implemented on Draft PR #18
+Status: implemented and merged in PR #18
 
 ## Goal
 

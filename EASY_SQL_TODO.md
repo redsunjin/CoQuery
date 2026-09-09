@@ -42,7 +42,7 @@ Reference:
 
 - `docs/coquery-production-cloudflare-pwa-qa-2026-08-28.md`
 
-### P0-2. BI Result Intelligence — active Draft PR #18
+### P0-2. BI Result Intelligence — merged PR #18
 
 References:
 
@@ -66,7 +66,7 @@ Three visual layers:
 2. Result Visual — BI view derived from exact returned rows.
 3. Execution Graph — actual database plan evidence only; never inferred from SQL text.
 
-Implemented on PR #18:
+Implemented and merged on PR #18:
 
 - [x] deterministic ResultShape classifier + regression contracts
 - [x] conservative SQL `flow_steps`

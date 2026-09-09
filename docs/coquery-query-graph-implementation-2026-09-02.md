@@ -1,7 +1,7 @@
 # CoQuery Query Graph Implementation
 
 Date: 2026-09-02
-Status: implemented on Draft PR #18 branch; implementation CI verified; roadmap/TODO/HANDOFF currentized
+Status: implemented and merged in PR #18; implementation CI verified and deployed to the durable PWA Worker
 
 ## Product principle
 

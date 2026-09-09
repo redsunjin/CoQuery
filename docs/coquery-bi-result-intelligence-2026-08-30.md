@@ -1,7 +1,7 @@
 # CoQuery BI Result Intelligence
 
 Date: 2026-09-02
-Status: active PR #18 baseline with Table + Bar Result Visual + Query Graph implemented
+Status: merged PR #18 baseline with Table + Bar Result Visual + Query Graph implemented
 
 ## Product decision
 
