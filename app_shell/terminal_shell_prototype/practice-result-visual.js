@@ -471,6 +471,7 @@
   }
 
   requestAnimationFrame(enhanceExistingPracticeVisuals);
+  document.addEventListener("coquery:blocks-rerendered", () => requestAnimationFrame(enhanceExistingPracticeVisuals));
   document.querySelectorAll("[data-lang]").forEach((button) => {
     button.addEventListener("click", () => {
       requestAnimationFrame(() => {

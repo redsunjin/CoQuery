@@ -1,5 +1,16 @@
 # CoQuery Handoff
 
+## TestFlight UX audit — 2026-09-09
+
+- Audit/fix branch: `codex/testflight-ux-audit-2026-09-09`, based on build 3 source `a2bbdfb`.
+- App Store Connect screenshot feedback: four receipts (three on build 1, one on build 2), inspected directly.
+- Fixed hidden CLI/action chrome overriding the learning flow, Home text vertical alignment, and loss of practice controls/draft SQL on language changes.
+- Existing Korean hints and duplicate schema/attempt prevention verified. Browser checks at 402px and 320px, iOS shell smoke, practice-focus smoke, and full RC verification passed; iOS assets synchronized.
+- No new TestFlight upload or group assignment performed. Physical-device confirmation remains required. Build 3 had no test group at inspection time.
+- Evidence and remaining copy/advanced-workspace issues: `docs/testflight-ux-audit-2026-09-09.md`.
+
+The earlier handoff below is retained as historical context.
+
 Date: 2026-09-05
 Status: Production PWA beta redeployed with the merged BI result-understanding slice; iOS shell is synchronized to the same deterministic result contract. Interactive PWA/device and Apple-signing gates remain.
 

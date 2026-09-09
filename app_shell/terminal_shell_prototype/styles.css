@@ -306,6 +306,17 @@ pre {
   white-space: nowrap;
 }
 
+/* Layout declarations must not reveal controls/content hidden by the UI flow. */
+.app-shell [hidden] {
+  display: none !important;
+}
+
+.home-button {
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
 .header-actions {
   display: inline-flex;
   justify-content: flex-end;

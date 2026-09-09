@@ -2095,9 +2095,21 @@ function selectBlock(block, result) {
 }
 
 function rerenderBlocks() {
+  const practiceBlock = document.querySelector(".practice-focus-block");
+  const practiceState = {
+    block: practiceBlock,
+    sql: practiceBlock?.querySelector("textarea")?.value || "",
+    hintOpen: practiceBlock?.querySelector(".practice-hint")?.hidden === false,
+    feedback: [...document.querySelectorAll(".practice-feedback-block")],
+  };
   renderedBlocks.forEach((block) => {
+    // These flags describe DOM that renderBlock is about to replace.
+    Object.keys(block.dataset).filter((key) => key.endsWith("Enhanced")).forEach((key) => {
+      delete block.dataset[key];
+    });
     renderBlock(block, block.__result);
   });
+  document.dispatchEvent(new CustomEvent("coquery:blocks-rerendered", { detail: practiceState }));
   if (selectedBlock && selectedResult) {
     selectBlock(selectedBlock, selectedResult);
   }
