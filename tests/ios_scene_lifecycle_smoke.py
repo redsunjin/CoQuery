@@ -18,8 +18,8 @@ assert "UIMainStoryboardFile" not in info, "The scene must own the main storyboa
 storyboard = ET.parse(app / "Base.lproj" / (config["UISceneStoryboardFile"] + ".storyboard")).getroot()
 controller = storyboard.find(".//viewController[@id='%s']" % storyboard.attrib["initialViewController"])
 assert controller is not None
-assert controller.attrib["customClass"] == "CAPBridgeViewController"
-assert controller.attrib["customModule"] == "Capacitor"
+assert controller.attrib["customClass"] == "AdaptiveBridgeViewController"
+assert controller.attrib["customModule"] == "App"
 delegate = (app / "AppDelegate.swift").read_text()
 assert "class SceneDelegate: UIResponder, UIWindowSceneDelegate" in delegate
 assert "var window: UIWindow?" in delegate
@@ -30,3 +30,8 @@ assert "continue userActivity: NSUserActivity" in delegate
 project = (root / "ios/App/App.xcodeproj/project.pbxproj").read_text()
 assert "AppDelegate.swift in Sources" in project
 print("iOS scene lifecycle: manifest, Capacitor storyboard, compiled delegate and cold/warm link routing contracts passed.")
+
+assert "class AdaptiveBridgeViewController: CAPBridgeViewController" in delegate
+assert "viewSafeAreaInsetsDidChange" in delegate
+assert "reservedRegions(kind: .division)" in delegate
+assert "if #available(iOS 27.1, *)" in delegate

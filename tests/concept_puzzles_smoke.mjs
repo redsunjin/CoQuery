@@ -26,7 +26,7 @@ assert.equal(coverage(find('U3'),{...fresh(),rules:[{min:2,newOnly:true},{min:3,
 const assets=['concept-puzzle-catalog.js','concept-puzzles.js','concept-puzzles.css','community-demo.html','community-demo.js','community-demo.css'];
 const worker=readFileSync(new URL('service-worker.js',app),'utf8');
 const build=readFileSync(new URL('../scripts/build_ios_shell.mjs',import.meta.url),'utf8');
-for(const a of assets){assert.ok(existsSync(new URL(a,app)));assert.ok((worker.includes(`"./${a}"`) || worker.includes(`"./${a}?v=12"`) || worker.includes(`"./${a}?v=13"`)));assert.ok(build.includes(`"${a}"`))}
+for(const a of assets){assert.ok(existsSync(new URL(a,app)));assert.ok((worker.includes(`"./${a}"`) || worker.includes(`"./${a}?v=12"`) || worker.includes(`"./${a}?v=13"`) || worker.includes(`"./${a}?v=15"`)));assert.ok(build.includes(`"${a}"`))}
 const demo=readFileSync(new URL('community-demo.html',app),'utf8');assert.ok(!demo.includes('pwa-runtime.js'));assert.ok(!demo.includes('src="./app.js"'));
 console.log('Concept puzzles: 9 fixed specs, boundary/joins, 24 rule alternatives, coverage and web/iOS asset contracts passed.');
 

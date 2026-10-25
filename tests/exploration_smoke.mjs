@@ -106,6 +106,7 @@ function surface(blocked = false) {
   const liveStatus = { textContent: "" };
   const inert = { focus() {}, scrollIntoView() {}, scrollTo() {}, remove() {} };
   const host = {
+    dataset: {},
     hidden: true,
     innerHTML: "",
     addEventListener(k, v) {
@@ -154,6 +155,7 @@ function surface(blocked = false) {
   };
   const c = vm.createContext({
     document: doc,
+    window: { addEventListener() {} },
     localStorage: storage,
     setLearningHomeMode() {},
   });
@@ -217,4 +219,44 @@ assert.match(temp.host.innerHTML, /현재 탭에서만 유지/);
 assert.doesNotMatch(temp.host.innerHTML, /이 기기에 퍼즐과 설명을 저장/);
 console.log(
   "exploration UI contracts: incomplete progress, escaped labels, changed-result invalidation, saved replay, blocked storage passed",
+);
+
+const { foldColumns } = ctx.CoqueryExploration;
+const geo = {
+  width: 951,
+  height: 669,
+  divisions: [{ x: 455.5, y: 0, width: 40, height: 669 }],
+};
+assert.deepEqual(plain(foldColumns(geo, { left: 20, width: 847 }, 951)), {
+  left: 435.5,
+  gap: 40,
+});
+assert.deepEqual(plain(foldColumns(geo, { left: 40, width: 1694 }, 1902)), {
+  left: 871,
+  gap: 80,
+});
+assert.equal(foldColumns(geo, { left: 200, width: 600 }, 951), null);
+assert.equal(
+  foldColumns({ ...geo, divisions: [] }, { left: 20, width: 847 }, 951),
+  null,
+);
+assert.equal(
+  foldColumns(
+    { ...geo, divisions: [{ x: 0, y: 300, width: 951, height: 40 }] },
+    { left: 20, width: 847 },
+    951,
+  ),
+  null,
+);
+const intact = JSON.stringify(ui.state()),
+  markup = ui.host.innerHTML;
+ui.click("layout");
+assert.equal(ui.host.dataset.sequential, "true");
+assert.equal(ui.host.innerHTML, markup);
+assert.equal(JSON.stringify(ui.state()), intact);
+ui.change({ field: "stage" }, "4");
+assert.equal(ui.state().stage, 4);
+assert.equal(ui.host.dataset.stage, "4");
+console.log(
+  "adaptive contracts: fold coordinates, CSS scale, small-pane fallback and layout-only state preservation passed",
 );

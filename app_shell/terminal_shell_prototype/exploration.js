@@ -106,7 +106,26 @@
   function sqlFor(rows, mode) {
     return `WITH items(id, condition_1, condition_2) AS (VALUES\n${rows.map((x) => `  ('${x.id}', ${+x.a}, ${+x.b})`).join(",\n")}\n)\nSELECT id FROM items\nWHERE condition_1 = 1 ${mode.toUpperCase()} condition_2 = 1\nORDER BY id;`;
   }
-  root.CoqueryExploration = { fresh, restore, evaluate, same, sqlFor, VERSION };
+  function foldColumns(g, rect, viewportWidth) {
+    if (!g?.width || !rect?.width || !viewportWidth) return null;
+    const division = g.divisions?.find(
+      (r) => r.height > g.height / 2 && r.width > 0,
+    );
+    if (!division) return null;
+    const ratio = viewportWidth / g.width;
+    const left = division.x * ratio - rect.left,
+      gap = division.width * ratio;
+    return left >= 280 && rect.width - left - gap >= 280 ? { left, gap } : null;
+  }
+  root.CoqueryExploration = {
+    fresh,
+    restore,
+    evaluate,
+    same,
+    sqlFor,
+    foldColumns,
+    VERSION,
+  };
   if (typeof document === "undefined") return;
   const host = document.getElementById("explorationLearning"),
     shell = document.querySelector(".app-shell");
@@ -156,7 +175,16 @@
   function invalidateProject() {
     state.project.checked = false;
     state.project.saved = false;
-    host.querySelector("#exploreResult")?.remove();
+    const resultPanel = host.querySelector("#exploreResult");
+    if (resultPanel)
+      resultPanel.innerHTML =
+        "<h3>다시 실험해 보세요.</h3><p>조건을 바꿔 이전 결과를 지웠습니다.</p>";
+    const preview = host.querySelector("#projectPreview");
+    if (preview)
+      preview.innerHTML = selection(state.project.rows, state.project, [
+        state.project.aLabel,
+        state.project.bLabel,
+      ]);
     host.querySelector("#projectSaved")?.remove();
     announce("퍼즐을 수정했습니다. 다시 예상·실행한 뒤 저장하세요.");
   }
@@ -176,7 +204,8 @@
     return `<p class="concept-muted">남을 항목을 먼저 골라 보세요. 아무것도 고르지 않는 예상도 실험할 수 있습니다.</p><div class="concept-cards">${rows.map((x) => `<button type="button" id="explore-card-${x.id}" class="concept-card" data-explore="select" data-value="${x.id}" aria-pressed="${a.selected.includes(x.id)}"><strong>${esc(x.name)}</strong><span>${esc(labels[0])}: ${x.a ? "예" : "아니요"}<br>${esc(labels[1])}: ${x.b ? "예" : "아니요"}</span></button>`).join("")}</div>`;
   }
   function result(rows, a, mode, labels) {
-    if (!a.checked) return "";
+    if (!a.checked)
+      return `<section id="exploreResult" class="explore-empty"><h3>실험의 근거</h3><p>먼저 예상한 뒤 실험하세요. 결과는 실행한 뒤에 표시합니다.</p></section>`;
     const actual = evaluate(rows, mode);
     return `<section class="concept-result" id="exploreResult"><h3 tabindex="-1" id="exploreResultHeading">${same(a.selected, actual) ? "예상과 결과가 같아요." : "차이를 발견했어요. 다시 살펴보세요."}</h3><p>내 예상: ${esc(a.selected.map((id) => rows.find((x) => x.id === id)?.name).join(" · ") || "없음")}<br>실제: ${esc(
       rows
@@ -186,25 +215,26 @@
     )}</p><p class="concept-notice">입력 ${rows.length}개 → ${esc(rule(mode))} → 결과 ${actual.length}개</p><table class="concept-table"><caption>각 항목이 남거나 빠진 근거</caption><thead><tr><th scope="col">항목</th><th scope="col">${esc(labels[0])}</th><th scope="col">${esc(labels[1])}</th><th scope="col">결과</th></tr></thead><tbody>${rows.map((x) => `<tr><th scope="row">${esc(x.name)}</th><td>${x.a ? "예" : "아니요"}</td><td>${x.b ? "예" : "아니요"}</td><td>${actual.includes(x.id) ? "포함" : "제외"}</td></tr>`).join("")}</tbody></table><p class="concept-muted">두 조건의 참·거짓으로 계산했습니다. 예상 일치는 이해도 평가가 아닙니다.</p></section>`;
   }
   let experiment = "guided";
+  let sequential = false;
   function render(focus = false) {
     const s = state,
       p = s.project;
-    let body = `<div class="concept-toolbar">${btn("홈", "home")}${btn("SQL 학습", "sql-learning")}${btn("조건·관계·규칙 문제 선택", "bank")}</div><p class="concept-kicker">조건 탐구 · 한국어 · 내부 베타</p><h2 id="exploreHeading" tabindex="-1">${stages[s.stage]}${s.stage === 0 ? " — 함께 필요한 조건, 하나면 되는 조건" : ""}</h2><nav class="explore-steps" aria-label="탐구 단계">${stages.map((x, i) => `<button type="button" data-explore="stage" data-value="${i}" ${s.stage === i ? 'aria-current="step"' : ""}>${i + 1}. ${x}</button>`).join("")}</nav>`;
+    let body = `<div class="concept-toolbar">${btn("홈", "home")}${btn("SQL 학습", "sql-learning")}${btn("조건·관계·규칙 문제 선택", "bank")}${btn(sequential ? "나란히 보기" : "이어 보기", "layout")}</div><p class="concept-kicker">조건 탐구 · 한국어 · 내부 베타</p><h2 id="exploreHeading" tabindex="-1">${stages[s.stage]}${s.stage === 0 ? " — 함께 필요한 조건, 하나면 되는 조건" : ""}</h2><label class="explore-step-picker">현재 단계 ${s.stage + 1}/6<select id="explore-stage-picker" aria-label="탐구 단계 선택" data-field="stage">${stages.map((name, i) => `<option value="${i}" ${i === s.stage ? "selected" : ""}>${i + 1}. ${name}</option>`).join("")}</select></label><nav class="explore-steps" aria-label="탐구 단계">${stages.map((x, i) => `<button type="button" data-explore="stage" data-value="${i}" ${s.stage === i ? 'aria-current="step"' : ""}>${i + 1}. ${x}</button>`).join("")}</nav>`;
     if (s.stage === 0)
       body += `<p>‘빨강 <strong>그리고</strong> 원’과 ‘빨강 <strong>또는</strong> 원’은 같은 카드를 남길까요?</p><p>그리고는 두 조건이 모두 필요합니다. 또는은 하나만 맞아도 되고, 둘 다 맞아도 됩니다.</p><p class="concept-notice">먼저 카드로 확인하고, 책 고르기에 적용한 뒤 나만의 조건 퍼즐을 만듭니다. SQL·AI 설정은 필요하지 않습니다. 언제든 단계를 오가며 고칠 수 있습니다.</p>`;
     if (s.stage === 1) {
       const a = s[experiment],
         mode = experiment === "guided" ? "and" : "or";
-      body += `<div class="concept-toolbar">${btn("안내형: 그리고", "experiment", "guided")}${btn("독립형: 또는", "experiment", "independent")}</div><h3>${experiment === "guided" ? "안내형 · 빨강 그리고 원" : "독립형 · 빨강 또는 원"}</h3><p>${experiment === "guided" ? "빨강인 것부터 보고, 그중 원인 것만 남겨 보세요." : "안내 없이 예상하세요. 두 조건을 모두 만족하는 카드도 포함할까요?"}</p>${selection(cards, a, ["빨강", "원"])}${btn("예상과 결과 비교", "run", "", true)}${result(cards, a, mode, ["빨강", "원"])}<p>기록: 안내형 ${s.guided.checked ? "실험함" : "미실험"} · 독립형 ${s.independent.checked ? "실험함" : "미실험"}</p>`;
+      body += `<div class="concept-toolbar">${btn("안내형: 그리고", "experiment", "guided")}${btn("독립형: 또는", "experiment", "independent")}</div><h3>${experiment === "guided" ? "안내형 · 빨강 그리고 원" : "독립형 · 빨강 또는 원"}</h3><p>${experiment === "guided" ? "빨강인 것부터 보고, 그중 원인 것만 남겨 보세요." : "안내 없이 예상하세요. 두 조건을 모두 만족하는 카드도 포함할까요?"}</p><div class="explore-workbench"><section class="explore-editor" aria-label="예상과 조작">${selection(cards, a, ["빨강", "원"])}${btn("예상과 결과 비교", "run", "", true)}</section><section class="explore-evidence" aria-label="결과와 근거">${result(cards, a, mode, ["빨강", "원"])}</section></div><p>기록: 안내형 ${s.guided.checked ? "실험함" : "미실험"} · 독립형 ${s.independent.checked ? "실험함" : "미실험"}</p>`;
     }
     if (s.stage === 2)
       body += `<p>“빨강이면 모두 ‘빨강 그리고 원’에 남는다”라는 주장을 깨는 카드를 찾아보세요.</p><div class="concept-cards">${cards.map((x) => `<button type="button" class="concept-card" data-explore="counter" data-value="${x.id}" aria-pressed="${s.counter === x.id}">${x.id} · ${x.a ? "빨강" : "파랑"} · ${x.b ? "원" : "네모"}</button>`).join("")}</div>${btn("반례 확인", "check-counter", "", true)}${s.counterChecked ? `<p class="concept-notice">${s.counter === "B" ? "B는 빨강이지만 원이 아닙니다. 빨강만으로 충분하다는 주장을 깨는 반례입니다." : s.counter === "A" ? "A는 두 조건을 모두 만족합니다. 주장을 깨려면 빨강인데도 제외되는 카드를 찾아보세요." : "이 카드는 빨강이 아닙니다. 주장에 포함된 빨강 카드 중에서 찾아보세요."}</p>` : ""}`;
     if (s.stage === 3)
       body += `<label>그리고와 또는의 차이를 내 말로 설명하기<textarea id="explore-notes" data-note="notes" maxlength="1500" placeholder="왜 B는 그리고에서 빠지고 또는에 남나요? 둘 다 맞는 A는요?">${esc(s.notes)}</textarea></label><p>스스로 확인: 두 조건 모두 / 하나 이상 / 둘 다 맞는 경우 / 반례를 포함했나요?</p><p class="concept-muted">입력은 자동 보존합니다. 문장의 길이나 특정 단어로 이해를 채점하지 않습니다. 별도 검토자가 아직 평가하지 않았습니다.</p>`;
     if (s.stage === 4)
-      body += `<p>도서관에서 <strong>이야기책 또는 짧은 책</strong>을 찾습니다. 카드에서 쓴 규칙을 새로운 상황에 적용해 보세요.</p><label>비교할 조건<select id="explore-transfer-mode" data-field="transfer-mode"><option value="or" ${s.transfer.mode === "or" ? "selected" : ""}>이야기책 또는 짧은 책</option><option value="and" ${s.transfer.mode === "and" ? "selected" : ""}>이야기책 그리고 짧은 책</option></select></label>${selection(books, s.transfer, ["이야기책", "짧은 책"])}${btn("책 선택 실험", "run", "", true)}${result(books, s.transfer, s.transfer.mode, ["이야기책", "짧은 책"])}<label>처음 카드와 같은 점·달라진 점은 무엇인가요?<textarea data-note="transfer" maxlength="1500">${esc(s.transfer.notes)}</textarea></label>`;
+      body += `<p>도서관에서 <strong>이야기책 또는 짧은 책</strong>을 찾습니다. 카드에서 쓴 규칙을 새로운 상황에 적용해 보세요.</p><div class="explore-workbench"><section class="explore-editor" aria-label="새 상황 예상과 조작"><label>비교할 조건<select id="explore-transfer-mode" data-field="transfer-mode"><option value="or" ${s.transfer.mode === "or" ? "selected" : ""}>이야기책 또는 짧은 책</option><option value="and" ${s.transfer.mode === "and" ? "selected" : ""}>이야기책 그리고 짧은 책</option></select></label>${selection(books, s.transfer, ["이야기책", "짧은 책"])}${btn("책 선택 실험", "run", "", true)}</section><section class="explore-evidence" aria-label="새 상황 결과와 설명">${result(books, s.transfer, s.transfer.mode, ["이야기책", "짧은 책"])}<label>처음 카드와 같은 점·달라진 점은 무엇인가요?<textarea data-note="transfer" maxlength="1500">${esc(s.transfer.notes)}</textarea></label></section></div>`;
     if (s.stage === 5)
-      body += `<p>두 조건과 네 항목을 직접 바꿔 다른 사람이 예상해 볼 퍼즐을 만드세요. 빈 결과·모두 선택도 허용됩니다. 자유 문장은 실행 코드가 되지 않습니다.</p><label>퍼즐 제목<input data-project="title" maxlength="80" value="${esc(p.title)}"></label><div class="concept-tables"><label>조건 1 이름<input data-project="aLabel" maxlength="80" value="${esc(p.aLabel)}"></label><label>조건 2 이름<input data-project="bLabel" maxlength="80" value="${esc(p.bLabel)}"></label></div><label>규칙<select data-field="project-mode"><option value="and" ${p.mode === "and" ? "selected" : ""}>두 조건 모두 (그리고)</option><option value="or" ${p.mode === "or" ? "selected" : ""}>하나 이상 (또는)</option></select></label><fieldset><legend>항목별 조건을 바꾸기</legend>${p.rows.map((x, i) => `<div class="explore-edit-row"><label>${x.id} 이름<input data-row="${i}" data-prop="name" maxlength="80" value="${esc(x.name)}"></label><label class="concept-check"><input type="checkbox" aria-label="${x.id} · ${esc(p.aLabel)}" data-row="${i}" data-prop="a" ${x.a ? "checked" : ""}> 조건 1: 예</label><label class="concept-check"><input type="checkbox" aria-label="${x.id} · ${esc(p.bLabel)}" data-row="${i}" data-prop="b" ${x.b ? "checked" : ""}> 조건 2: 예</label></div>`).join("")}</fieldset>${btn("편집한 조건으로 예상 시작", "preview")}<div id="projectPreview">${selection(p.rows, p, [p.aLabel, p.bLabel])}</div>${btn("내 퍼즐 다시 실행", "run", "", true)}${result(p.rows, p, p.mode, [p.aLabel, p.bLabel])}<label>이 규칙의 의도와 반례 · 바꾸면 달라질 점<textarea data-note="project" maxlength="1500">${esc(p.notes)}</textarea></label><div class="concept-toolbar">${btn("퍼즐과 설명 저장", "save-project")}${btn("저장한 퍼즐 다시 풀기", "replay")}${btn("내 탐구 기록 삭제", "delete")}</div>${p.saved ? `<p id="projectSaved">${persistent ? "이 기기에" : "현재 탭에만 임시로"} 퍼즐과 설명을 저장했습니다. 위에서 수정하고 다시 실행할 수 있습니다.</p>` : ""}`;
+      body += `<p>두 조건과 네 항목을 직접 바꿔 다른 사람이 예상해 볼 퍼즐을 만드세요. 빈 결과·모두 선택도 허용됩니다. 자유 문장은 실행 코드가 되지 않습니다.</p><div class="explore-workbench"><section class="explore-editor" aria-label="퍼즐 편집"><label>퍼즐 제목<input data-project="title" maxlength="80" value="${esc(p.title)}"></label><div class="concept-tables"><label>조건 1 이름<input data-project="aLabel" maxlength="80" value="${esc(p.aLabel)}"></label><label>조건 2 이름<input data-project="bLabel" maxlength="80" value="${esc(p.bLabel)}"></label></div><label>규칙<select data-field="project-mode"><option value="and" ${p.mode === "and" ? "selected" : ""}>두 조건 모두 (그리고)</option><option value="or" ${p.mode === "or" ? "selected" : ""}>하나 이상 (또는)</option></select></label><fieldset><legend>항목별 조건을 바꾸기</legend>${p.rows.map((x, i) => `<div class="explore-edit-row"><label>${x.id} 이름<input data-row="${i}" data-prop="name" maxlength="80" value="${esc(x.name)}"></label><label class="concept-check"><input type="checkbox" aria-label="${x.id} · ${esc(p.aLabel)}" data-row="${i}" data-prop="a" ${x.a ? "checked" : ""}> 조건 1: 예</label><label class="concept-check"><input type="checkbox" aria-label="${x.id} · ${esc(p.bLabel)}" data-row="${i}" data-prop="b" ${x.b ? "checked" : ""}> 조건 2: 예</label></div>`).join("")}</fieldset>${btn("편집한 조건으로 예상 시작", "preview")}</section><section class="explore-evidence" aria-label="퍼즐 미리보기와 결과"><h3>풀어 보기</h3><div id="projectPreview">${selection(p.rows, p, [p.aLabel, p.bLabel])}</div>${btn("내 퍼즐 다시 실행", "run", "", true)}${result(p.rows, p, p.mode, [p.aLabel, p.bLabel])}<label>이 규칙의 의도와 반례 · 바꾸면 달라질 점<textarea data-note="project" maxlength="1500">${esc(p.notes)}</textarea></label><div class="concept-toolbar">${btn("퍼즐과 설명 저장", "save-project")}${btn("저장한 퍼즐 다시 풀기", "replay")}${btn("내 탐구 기록 삭제", "delete")}</div>${p.saved ? `<p id="projectSaved">${persistent ? "이 기기에" : "현재 탭에만 임시로"} 퍼즐과 설명을 저장했습니다. 위에서 수정하고 다시 실행할 수 있습니다.</p>` : ""}</section></div>`;
     body += `<div class="concept-toolbar">${s.stage > 0 ? btn("이전 단계", "stage", s.stage - 1) : ""}${s.stage < 5 ? btn("다음: " + stages[s.stage + 1], "next", "", true) : btn("새 상황에서 다시 탐구", "stage", 4)}</div><details class="explore-record"><summary>내 탐구 기록 · 평가 전</summary><ul><li>안내형: ${s.guided.checked ? "실험함" : "미실험"}</li><li>독립형: ${s.independent.checked ? "실험함" : "미실험"}</li><li>반례: ${s.counterChecked ? "확인 시도함" : "미시도"}</li><li>자기 설명: ${s.notes.trim() ? "기록함" : "미기록"}</li><li>전이: ${s.transfer.checked ? "실험함" : "미실험"} / 설명 ${s.transfer.notes.trim() ? "기록함" : "미기록"}</li><li>창작: ${p.saved ? "저장함" : "편집 중 또는 미시작"}</li></ul><p>단계를 열거나 다음으로 이동한 것은 숙달·학습 완료가 아닙니다.</p></details><div class="concept-toolbar">${btn(help ? "도움 닫기" : "막혔을 때 도움", "help")}${btn(sql ? "SQL 표현 닫기" : "같은 규칙을 SQL로 보기", "sql")}</div>`;
     if (help)
       body += `<aside class="concept-notice"><h3>지금 생각할 질문</h3><p>${["조건 하나만 맞는 항목과 둘 다 맞는 항목을 찾아보세요.", "선택을 바꾸어도 괜찮습니다. 실제 표에서 예상과 다른 행을 찾아보세요.", "빨강이지만 원이 아닌 카드를 찾아보세요.", "B와 A를 예로 들어 두 규칙을 비교해 보세요.", "이야기책이면서 짧기도 한 책은 두 규칙에서 어떻게 될까요?", "조건 하나만 맞는 항목을 만들고 그리고·또는의 결과를 비교해 보세요."][s.stage]}</p><p>기기에 내장된 안내입니다. AI나 다른 사람에게 보내지 않습니다.</p></aside>`;
@@ -222,11 +252,33 @@
     }
     body += `<p id="exploreStatus" role="status">${esc(status)}</p><p id="exploreStorage" class="concept-muted" role="status">${persistent ? "기록은 이 브라우저/기기에만 보존됩니다." : "저장소를 사용할 수 없어 현재 탭에서만 유지합니다. 탭을 닫으면 사라집니다."} 서버 전송·기기 간 동기화는 없습니다. 실제 초보자·학생의 이해와 학습 효과는 미검증입니다.</p>`;
     host.innerHTML = body;
+    host.dataset.stage = String(s.stage);
+    host.dataset.workbench = String([1, 4, 5].includes(s.stage));
+    host.dataset.sequential = String(sequential);
+    updateGeometry();
     if (focus) {
       host.querySelector("#exploreHeading").focus({ preventScroll: true });
       document.getElementById("terminalScroll")?.scrollTo(0, 0);
     }
   }
+  function updateGeometry() {
+    const g = window.coqueryWindowGeometry;
+    const bench = host.querySelector(".explore-workbench");
+    host.dataset.foldSplit = "false";
+    if (!g || !bench || !g.width) return;
+    const columns = foldColumns(
+      g,
+      bench.getBoundingClientRect(),
+      window.innerWidth,
+    );
+    if (columns) {
+      host.style.setProperty("--fold-left", columns.left + "px");
+      host.style.setProperty("--fold-gap", columns.gap + "px");
+      host.dataset.foldSplit = "true";
+    }
+  }
+  window.addEventListener?.("coquery:geometry", updateGeometry);
+  window.addEventListener?.("resize", updateGeometry);
   function go(n) {
     state.stage = n;
     if (!state.visited.includes(n)) state.visited.push(n);
@@ -239,6 +291,12 @@
     if (!b) return;
     const a = b.dataset.explore,
       v = b.dataset.value;
+    if (a === "layout") {
+      sequential = !sequential;
+      host.dataset.sequential = String(sequential);
+      b.textContent = sequential ? "나란히 보기" : "이어 보기";
+      return;
+    }
     if (a === "home") {
       close();
       document.getElementById("explorationButton").focus();
@@ -399,6 +457,10 @@
   });
   host.addEventListener("change", (e) => {
     const t = e.target;
+    if (t.dataset.field === "stage") {
+      go(Number(t.value));
+      return;
+    }
     if (t.dataset.field === "transfer-mode") {
       state.transfer.mode = t.value;
       state.transfer.checked = false;
