@@ -4,12 +4,23 @@ const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 function btn(label,action,kind='primary',disabled=false){return `<button type="button" class="${kind==='primary'?'primary-button':'ghost-button'}" onclick="${action}" ${disabled?'disabled':''}>${label}</button>`}
 function table(headers,rows){return `<table class="concept-table"><thead><tr>${headers.map(x=>`<th scope="col">${esc(x)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(x=>`<td>${esc(x)}</td>`).join('')}</tr>`).join('')}</tbody></table>`}
 function shell(body){return `<section class="workspace">${body}</section>`}
-function render(){const id=document.activeElement?.id;app.innerHTML=community();if(id)document.getElementById(id)?.focus({preventScroll:true})}
+function render(){
+const previous=document.activeElement,id=previous?.id,wasInside=app.contains(previous);
+app.innerHTML=community();
+const retained=id&&document.getElementById(id);
+if(retained)retained.focus({preventScroll:true});
+else if(wasInside){
+const target=app.querySelector('[role="alert"], [role="status"]')||app.querySelector('h3')||app.querySelector('h2');
+if(target){target.setAttribute('tabindex','-1');target.focus()}
+}
+const currentStep=app.querySelector('.c-steps .current');
+if(currentStep)currentStep.setAttribute('aria-current','step');
+}
 function newCommunity(){return {checkOutcome:'success',checkState:'idle',qState:'draft',answerOutcome:'success',answerState:'idle',answerDraft:null,summaryOutcome:'success',summaryState:'idle',closed:false,reportDelay:false,appealDelay:false,step:0,scenario:'neutral',question:'가상 동아리에서 2점 이상 규칙은 신규 참여자를 늘릴까요?',kind:'가설',scope:'가상 신청자 4명: 가 3점 기존, 나 3점 신규, 다 2점 신규, 라 1점 신규',checked:false,accepted:false,published:false,answers:[],pending:null,summary:false,confirmed:false,report:null,appeal:null,log:[],error:''}}
 let c=newCommunity();
 const demos={neutral:'가상 동아리에서 2점 이상 규칙은 신규 참여자를 늘릴까요?',tone:'이 규칙을 고른 사람은 생각이 없는 것 아닌가요?',privacy:'가상 예시: 학생의 이름·학교·연락처를 공개하고 규칙의 영향을 물어보고 싶어요.'};
 function eventLog(actor,action){c.log.push({id:c.log.length+1,actor,action});c.error=''}
-function communityStep(n){c.step=n;c.error='';render();window.scrollTo(0,0)}
+function communityStep(n){c.step=n;c.error='';window.scrollTo(0,0);render()}
 function loadScenario(v){c.scenario=v;c.question=demos[v];c.checked=false;c.accepted=false;render()}
 function runCheck(){if(!c.question.trim()||!c.scope.trim()){c.error='검토할 질문과 범위를 입력해 주세요.';render();return}c.originalQuestion=c.question;if(c.checkOutcome!=='success'){c.checkState=c.checkOutcome;eventLog('AI 모의 검사',c.checkOutcome==='failed'?'검사 실패':'검사 대기');communityStep(1);return}c.checkState='ready';c.checked=true;eventLog('AI 모의 검사','선택한 시나리오의 고정 검사 결과 제시');communityStep(1)}
 function acceptRewrite(){c.question=demos.neutral;c.accepted=true;eventLog('작성자','중립적 표현·개인정보 제외 제안 수락');render()}

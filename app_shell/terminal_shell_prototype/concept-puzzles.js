@@ -57,7 +57,7 @@
     html+=`<div class="concept-toolbar"><button class="primary-button" type="submit">예상과 결과 확인</button>${button(a.hint?"힌트 닫기":"힌트","hint")}</div></form>${a.hint?`<p class="concept-notice">${esc(p.hint)}</p>`:""}`;
     if(a.checked) {
       const r=api.evaluate(p,a);const same=p.type==="condition"?a.selected.length===r.length&&r.every(x=>a.selected.includes(x)):p.type==="relation"?Number(a.prediction)===r.length:Number(a.total)===r.selected.length&&Number(a.newcomers)===r.newcomers;
-      html+=`<section id="conceptResult" class="concept-result" aria-live="polite"><h3>${same?"예상과 결과가 같아요.":"차이를 발견했어요."}</h3>`;
+      html+=`<section id="conceptResult" class="concept-result" aria-live="polite"><h3 id="conceptResultHeading" tabindex="-1">${same?"예상과 결과가 같아요.":"차이를 발견했어요."}</h3>`;
       if(p.type==="condition")html+=table(["내 예상","실제 결과"],[[a.selected.join(" · ")||"없음",r.join(" · ")||"없음"]]);
       if(p.type==="relation")html+=`<p>내 예상 ${esc(a.prediction)}행 / 실제 ${r.length}행</p>${table(["회원","책"],r)}`;
       if(p.type==="rule")html+=`<p>내 예상 ${esc(a.total)}명 / 신규 ${esc(a.newcomers)}명</p><p>실제 ${r.selected.map(x=>x.name).join(" · ")||"없음"} · ${r.selected.length}명 / 신규 ${r.newcomers}명</p><p class="concept-notice">${r.ok?"이 데이터에서 목표를 충족합니다.":"목표 또는 정원 조건을 충족하지 못했습니다."}</p><p>발견한 대안 ${a.rules.length}개</p><ul>${a.rules.map(x=>`<li>${x.min}점 이상${x.newOnly?" · 신규만":""}</li>`).join("")}</ul>`;
@@ -96,6 +96,8 @@
       const r=api.evaluate(p,a);if(p.type==="rule"&&r.ok&&!a.rules.some(x=>x.min===a.min&&x.newOnly===a.newOnly))a.rules.push({min:a.min,newOnly:a.newOnly});
     }
     save();render();
+    const resultTarget=event.target.id==="conceptExplanation"?host.querySelector("#conceptRecorded"):host.querySelector("#conceptResultHeading");
+    if(resultTarget){resultTarget.setAttribute("tabindex","-1");resultTarget.scrollIntoView({block:"center"});resultTarget.focus({preventScroll:true});}
   });
   document.getElementById("conceptPuzzlesButton")?.addEventListener("click",open);
   // Existing home/SQL commands must be able to close the optional surface.
