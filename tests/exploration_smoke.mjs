@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
+import initSqlJs from "sql.js";
 const source = readFileSync(
   new URL(
     "../app_shell/terminal_shell_prototype/exploration.js",
@@ -10,7 +11,9 @@ const source = readFileSync(
 );
 const ctx = vm.createContext({});
 vm.runInContext(source, ctx);
-const { fresh, restore, evaluate, same } = ctx.CoqueryExploration;
+const SQL = await initSqlJs();
+const sqlite = new SQL.Database();
+const { fresh, restore, evaluate, same, sqlFor } = ctx.CoqueryExploration;
 const plain = (x) => JSON.parse(JSON.stringify(x));
 assert.deepEqual(plain(evaluate(fresh().project.rows, "and")), ["A"]);
 assert.deepEqual(plain(evaluate(fresh().project.rows, "or")), ["A", "B", "C"]);
@@ -30,8 +33,14 @@ for (let mask = 0; mask < 256; mask++) {
       )
       .map((x) => x.id);
     assert.deepEqual(plain(evaluate(rows, mode)), expected);
+    const query = sqlFor(rows, mode);
+    assert.ok(query.includes("\n"));
+    assert.ok(!query.includes("\\n"));
+    const actual = sqlite.exec(query)[0]?.values.map((row) => row[0]) || [];
+    assert.deepEqual(actual, expected);
   }
 }
+sqlite.close();
 const s = fresh();
 s.stage = 5;
 s.notes = "두 조건을 비교";
@@ -87,7 +96,7 @@ assert.match(
 );
 assert.doesNotMatch(source, /\bfetch\(|\beval\(|new Function/);
 console.log(
-  "exploration: 512 rule evaluations, restoration, draft/saved separation and bundle contracts passed",
+  "exploration: 512 rule evaluations and real SQLite SQL examples, restoration, draft/saved separation and bundle contracts passed",
 );
 // Exercise UI event handlers without a browser; browser observations remain separate.
 function surface(blocked = false) {

@@ -103,7 +103,10 @@
       : [];
     return s;
   }
-  root.CoqueryExploration = { fresh, restore, evaluate, same, VERSION };
+  function sqlFor(rows, mode) {
+    return `WITH items(id, condition_1, condition_2) AS (VALUES\n${rows.map((x) => `  ('${x.id}', ${+x.a}, ${+x.b})`).join(",\n")}\n)\nSELECT id FROM items\nWHERE condition_1 = 1 ${mode.toUpperCase()} condition_2 = 1\nORDER BY id;`;
+  }
+  root.CoqueryExploration = { fresh, restore, evaluate, same, sqlFor, VERSION };
   if (typeof document === "undefined") return;
   const host = document.getElementById("explorationLearning"),
     shell = document.querySelector(".app-shell");
@@ -215,7 +218,7 @@
               ? "or"
               : "and";
       const rows = s.stage === 4 ? books : s.stage === 5 ? p.rows : cards;
-      body += `<aside class="concept-notice"><h3>선택 경로 · SQL로 같은 조건 표현하기</h3><p>condition_1과 condition_2는 위 표의 예/아니요를 1/0으로 옮긴 값입니다. 아래 SQL은 표현 예시이며 이 화면에서 SQL 엔진으로 실행한 결과는 아닙니다.</p><pre class="explore-sql">${esc(`WITH items(id, condition_1, condition_2) AS (VALUES\n${rows.map((x) => `  ('${x.id}', ${+x.a}, ${+x.b})`).join(",\n")}\n)\nSELECT id FROM items\nWHERE condition_1 = 1 ${mode.toUpperCase()} condition_2 = 1\nORDER BY id;`)}</pre>${btn("기존 SQL 학습 시작 / 이어서하기", "sql-learning")}<p>SQL 학습 후 홈에서 조건 탐구를 다시 열면 기록한 단계로 돌아옵니다.</p></aside>`;
+      body += `<aside class="concept-notice"><h3>선택 경로 · SQL로 같은 조건 표현하기</h3><p>condition_1과 condition_2는 위 표의 예/아니요를 1/0으로 옮긴 값입니다. 아래 SQL은 표현 예시이며 이 화면에서 SQL 엔진으로 실행한 결과는 아닙니다.</p><pre class="explore-sql">${esc(sqlFor(rows, mode))}</pre>${btn("기존 SQL 학습 시작 / 이어서하기", "sql-learning")}<p>SQL 학습 후 홈에서 조건 탐구를 다시 열면 기록한 단계로 돌아옵니다.</p></aside>`;
     }
     body += `<p id="exploreStatus" role="status">${esc(status)}</p><p id="exploreStorage" class="concept-muted" role="status">${persistent ? "기록은 이 브라우저/기기에만 보존됩니다." : "저장소를 사용할 수 없어 현재 탭에서만 유지합니다. 탭을 닫으면 사라집니다."} 서버 전송·기기 간 동기화는 없습니다. 실제 초보자·학생의 이해와 학습 효과는 미검증입니다.</p>`;
     host.innerHTML = body;

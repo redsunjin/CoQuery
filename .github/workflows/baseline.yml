@@ -21,6 +21,15 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Set up Node for SQL example execution
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install locked JavaScript dependencies
+        run: npm ci
+
       - name: Verify baseline CLI and tests
         run: |
           python3 tests/ios_scene_lifecycle_smoke.py
