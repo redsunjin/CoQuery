@@ -246,6 +246,7 @@ const communityCss = readFileSync(join(distDir, "community-demo.css"), "utf8");
 assert.match(communityHtml, /viewport-fit=cover/);
 assert.match(communityCss, /padding: calc\(16px \+ var\(--safe-area-top\)\)/);
 assert.match(communityCss, /flex-wrap: wrap/);
+assert.match(communityCss, /\.demo-header a \{[^}]*min-width:44px;min-height:44px;/);
 
 assert.match(readFileSync(join(distDir, "concept-puzzles.css"), "utf8"), /\.concept-learning textarea \{ font-size:16px;/);
 console.log("ios shell smoke passed");
