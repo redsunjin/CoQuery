@@ -12,6 +12,13 @@ const distDir = join(root, "dist", "ios-shell");
 const shellAssets = [
   "styles.css",
   "onboarding.css",
+  "concept-puzzles.css",
+  "concept-puzzle-catalog.js",
+  "concept-puzzles.js",
+  "community-demo.html",
+  "community-demo.css",
+  "community-demo.js",
+
   "practice-focus.css",
   "practice-query-flow.css",
   "practice-result-explain.css",

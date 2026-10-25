@@ -68,17 +68,37 @@
     const safeArgs = { ...args };
     if (command === "practice_grade") safeArgs.no_record = true;
 
-    const response = await fetch("/api/commands/run", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ command, args: safeArgs, context }),
-    });
-    const result = await response.json();
+    let result;
+    try {
+      const response = await fetch("/api/commands/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command, args: safeArgs, context }),
+      });
+      result = await response.json();
+    } catch {
+      // A cached learning shell can open offline; never fabricate SQL results.
+      return {
+        ok: false, command, block_type: "command_result", actions: ["copy"],
+        cli_equivalent: command, data: {},
+        error: { code: "network_unavailable", message: document.documentElement.lang === "en"
+          ? "The SQL service is unavailable. Reconnect and retry. Concept puzzles remain available offline."
+          : "SQL 서버에 연결할 수 없습니다. 연결 후 다시 시도하세요. 개념 퍼즐은 오프라인에서도 사용할 수 있습니다." },
+      };
+    }
     if (command === "practice_grade") saveGradeAttempt(result, args);
     return result;
   }
 
   window.coqueryCommandRuntime = window.coqueryCommandRuntime || {};
+  window.coqueryCommandRuntime.getSessions = async () => {
+    try {
+      const response = await fetch("/api/sessions");
+      return await response.json();
+    } catch {
+      return { sessions: [] };
+    }
+  };
   window.coqueryCommandRuntime.initialCommand = window.coqueryCommandRuntime.initialCommand || "practice_list";
   window.coqueryCommandRuntime.postCommand = async (command, args = {}, context = {}) => {
     if (command === "practice_attempts") return localAttemptsResult(args);

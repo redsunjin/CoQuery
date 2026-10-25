@@ -1,9 +1,16 @@
-const CACHE_NAME = "coquery-pwa-v6";
+const CACHE_NAME = "coquery-pwa-v7";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./onboarding.css",
+  "./concept-puzzles.css",
+  "./concept-puzzle-catalog.js",
+  "./concept-puzzles.js",
+  "./community-demo.html",
+  "./community-demo.css",
+  "./community-demo.js",
+
   "./app.js",
   "./onboarding.js",
   "./practice-focus.css",
@@ -48,14 +55,20 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (request.mode === "navigate") {
+    // The simulation is a separate document, not a route of the SQL shell.
+    const pageKey = url.pathname.endsWith("/community-demo.html")
+      ? "./community-demo.html"
+      : "./index.html";
     event.respondWith(
       fetch(request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", copy));
+        .then(async (response) => {
+          if (response.ok) {
+            const cache = await caches.open(CACHE_NAME);
+            await cache.put(pageKey, response.clone());
+          }
           return response;
         })
-        .catch(() => caches.match("./index.html"))
+        .catch(() => caches.match(pageKey))
     );
     return;
   }

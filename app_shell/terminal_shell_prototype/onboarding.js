@@ -6,6 +6,7 @@ const homeButton = document.getElementById("homeButton");
 const learningHomeCopy = {
   ko: {
     home: "홈",
+    conceptPuzzles: "개념 퍼즐 9개",
     title: "데이터로 직접 확인하며 SQL을 배워보세요.",
     copy: "별도 DB 연결이나 AI 설정 없이 샘플 데이터로 바로 시작할 수 있습니다. 첫 문제를 풀고, 필요할 때 실제 데이터와 고급 기능으로 확장하세요.",
     firstProblem: "첫 문제 시작하기",
@@ -21,6 +22,7 @@ const learningHomeCopy = {
   },
   en: {
     home: "Home",
+    conceptPuzzles: "Concept puzzles (Korean)",
     title: "Learn SQL by checking real data results.",
     copy: "Start immediately with built-in sample data—no database connection or AI setup required. Solve the first problem, then expand into your own data and advanced tools when you need them.",
     firstProblem: "Start first problem",
