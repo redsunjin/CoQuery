@@ -36,3 +36,10 @@ context.document.getElementById=()=>({closest:()=>details,setAttribute(){},focus
 sourceHandler({target:{closest:()=>({getAttribute:()=> '#source-A1'})}});
 assert.equal(details.open,true);assert.equal(focused,true);
 console.log('Draft cancellation preserves the stage and summary; source links open details and focus the source.');
+
+context.document.getElementById=()=>app;
+run("c=newCommunity();c.step=4;c.answers=[{id:'A1',claim:'첫 주장'},{id:'A2',claim:'두 번째 주장'}];fileReport({preventDefault(){},target:{target:'A2',reason:'인신공격·괴롭힘',detail:'  '}})");
+assert.equal(run('c.report'),null);assert.equal(run('c.reportDraft.target'),'A2');assert.equal(run('c.reportDraft.reason'),'인신공격·괴롭힘');
+assert.match(app.innerHTML,/<option value="A2" selected>/);assert.match(app.innerHTML,/<option selected>인신공격·괴롭힘/);
+run("fileReport({preventDefault(){},target:{...c.reportDraft,detail:'다시 작성한 이유'}})");assert.equal(run('c.report.target'),'A2');assert.equal(run('c.report.reason'),'인신공격·괴롭힘');
+console.log('Report validation preserves non-default target/reason and resubmits to the intended answer.');
