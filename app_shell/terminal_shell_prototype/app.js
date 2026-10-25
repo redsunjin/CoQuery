@@ -1532,7 +1532,7 @@ function summarizeResult(result) {
         <div class="practice-flow-actions">
           <button class="primary-button" type="submit" data-practice-submit>${escapeHtml(t("practiceSubmit"))}</button>
         </div>
-        <div class="practice-status" data-practice-status>${escapeHtml(t("practiceFlowSummary"))}</div>
+        <div class="practice-status" data-practice-status role="status" aria-atomic="true" tabindex="-1">${escapeHtml(t("practiceFlowSummary"))}</div>
       </form>`;
   }
 
@@ -1893,6 +1893,7 @@ function bindPracticeFlow(block) {
     const sql = textarea?.value.trim() || "";
     if (!sql) {
       setStatus(t("practiceSqlPlaceholder"), "error");
+      status?.focus();
       return;
     }
 
@@ -1929,6 +1930,9 @@ function bindPracticeFlow(block) {
       }
     } catch (error) {
       setStatus(error.message, "error");
+    } finally {
+      // New result blocks must not leave screen-reader focus before the verdict.
+      if (status?.getClientRects().length) status.focus();
     }
   });
 
