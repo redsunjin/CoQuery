@@ -4,6 +4,8 @@ CoQuery currently provides a verified SQLite-first CLI baseline.
 Phase 5 multi-DB support is now early experimental and is not complete.
 
 Repository: `https://github.com/redsunjin/CoQuery`
+
+Public introduction and deployment index: [소개 사이트·배포·자산 인덱스](docs/coquery-public-site-index.md).
 Visibility: `PUBLIC` as verified on 2026-04-23.
 Current release checkpoint: PR #4 (`Harden CoQuery release candidate shell`) merged into `main` at `20e5d8f`.
 Latest recorded GitHub Actions `baseline` and `postgresql-smoke` runs succeeded on 2026-07-09 for commit `20e5d8f`.
