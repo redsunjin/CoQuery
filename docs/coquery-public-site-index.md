@@ -43,3 +43,7 @@ Trip119·myquant-lite와 같은 서비스별 폴더 구조를 사용한다. 소�
 - [9월 TestFlight 화면 점검](testflight-ux-audit-2026-09-09.md)
 - [PR #22 개념 퍼즐 기획](https://github.com/redsunjin/CoQuery/pull/22)
 - 로컬 검토 패키지: `outputs/coquery-appstore-2026-10-25/README.md`. outputs는 이번 제작 산출물이며 공개 사이트의 유지보수 원본이 아니다.
+
+## 제품 전환 후속 변경안 (미배포)
+
+2026-10-25: [제품 전환 감사](product/transition-audit-2026-10-25.ko.md), [공식 소개·지원 원문 기준 변경안](product/public-site-proposal/README.md), [스토어 초안](product/store-copy-draft.ko.md)을 준비했다. 제품 저장소에 둔 검토 자료이며 공개 사이트 원본을 수정/배포한 것이 아니다. 연결된 조건 탐구는 현재 TestFlight 0.8.0(7)에 포함되지 않는다. 기존 앱 개인정보 정책은 유지한다.

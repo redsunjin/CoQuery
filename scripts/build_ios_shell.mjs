@@ -15,6 +15,7 @@ const shellAssets = [
   "concept-puzzles.css",
   "concept-puzzle-catalog.js",
   "concept-puzzles.js",
+  "exploration.js",
   "community-demo.html",
   "community-demo.css",
   "community-demo.js",
