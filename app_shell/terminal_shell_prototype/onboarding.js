@@ -6,39 +6,41 @@ const homeButton = document.getElementById("homeButton");
 const learningHomeCopy = {
   ko: {
     home: "홈",
-    conceptPuzzles: "개념 퍼즐 9개",
-    title: "데이터로 직접 확인하며 SQL을 배워보세요.",
-    copy: "별도 DB 연결이나 AI 설정 없이 샘플 데이터로 바로 시작할 수 있습니다. 첫 문제를 풀고, 필요할 때 실제 데이터와 고급 기능으로 확장하세요.",
-    firstProblem: "첫 문제 시작하기",
-    problemBank: "문제 선택",
-    advanced: "고급 기능",
+    exploration: "조건 탐구 시작 / 이어가기",
+    conceptPuzzles: "조건·관계·규칙 문제 선택",
+    title: "조건을 바꾸고, 생각을 확인해 보세요.",
+    copy: "SQL을 몰라도 시작할 수 있습니다. 예상하고, 반례를 찾고, 나만의 규칙을 만들어 보세요. 현재는 학습 효과를 검증 중인 내부 베타입니다.",
+    firstProblem: "SQL 학습 시작 / 이어가기",
+    problemBank: "SQL 문제 선택",
+    advanced: "데이터 작업 도구",
     intro: "서비스 소개",
     support: "고객 지원",
     privacy: "개인정보 처리방침",
-    step1Title: "1. 문제를 읽고",
-    step1Copy: "실제 업무와 비슷한 데이터 질문에서 시작합니다.",
-    step2Title: "2. SQL을 실행하고",
-    step2Copy: "내장 샘플 DB에서 결과를 바로 확인합니다.",
-    step3Title: "3. 피드백을 받기",
-    step3Copy: "채점, 힌트, 오답 노트로 다음 문제까지 이어갑니다.",
+    step1Title: "1. 예상하고 실험하기",
+    step1Copy: "조건에 따라 남을 항목을 먼저 골라 보세요.",
+    step2Title: "2. 반례로 설명 다듬기",
+    step2Copy: "예상과 다른 이유를 찾고 새 상황에 적용하세요.",
+    step3Title: "3. 나만의 규칙 만들기",
+    step3Copy: "직접 만든 퍼즐을 저장하고 다시 실험하세요.",
   },
   en: {
     home: "Home",
-    conceptPuzzles: "Concept puzzles (Korean)",
-    title: "Learn SQL by checking real data results.",
-    copy: "Start immediately with built-in sample data—no database connection or AI setup required. Solve the first problem, then expand into your own data and advanced tools when you need them.",
-    firstProblem: "Start first problem",
-    problemBank: "Choose a problem",
+    exploration: "Explore conditions (Korean)",
+    conceptPuzzles: "Conditions, relations & rules (Korean)",
+    title: "Change a condition. Test your thinking.",
+    copy: "Predict, find counterexamples and build your own rules without SQL. This internal beta has not been validated for learning effectiveness. Exploration content is in Korean.",
+    firstProblem: "Start / resume SQL",
+    problemBank: "Choose a SQL problem",
     advanced: "Advanced tools",
     intro: "About CoQuery",
     support: "Support",
     privacy: "Privacy Policy",
-    step1Title: "1. Read a problem",
-    step1Copy: "Begin with a concrete data question similar to real work.",
-    step2Title: "2. Run SQL",
-    step2Copy: "Check the result immediately against the built-in sample database.",
-    step3Title: "3. Get feedback",
-    step3Copy: "Use grading, hints, and wrong notes to continue learning.",
+    step1Title: "1. Predict and experiment",
+    step1Copy: "Choose what you expect a rule to keep.",
+    step2Title: "2. Explain a counterexample",
+    step2Copy: "Revise your explanation and apply it to a new situation.",
+    step3Title: "3. Create your own rule",
+    step3Copy: "Save your puzzle, replay it and revise it.",
   },
 };
 
@@ -311,13 +313,13 @@ loadLearningPathAssets();
       summary: "처음이라면: 사용법과 세 가지 시작 방법", title: "어떤 방식으로 시작할까요?",
       paths: ["개념부터 이해하기", "SQL 연습하기", "함께 검토하는 과정 보기"], done: "안내 읽음 · 접기",
       read: "안내를 읽었습니다. 필요할 때 언제든 다시 펼칠 수 있습니다.", unavailable: "이 기기에 읽음 표시를 저장하지 못했습니다. 안내는 계속 볼 수 있습니다.",
-      concept: ["SQL을 몰라도 조건·관계·규칙을 직접 비교할 수 있습니다.", ["개념 퍼즐 목록에서 C1 ‘두 조건을 모두 만족하기’를 여세요.", "결과를 먼저 예상하고 카드를 선택한 뒤 실험하세요.", "예상과 실제 결과를 비교하세요. 조건이나 규칙을 바꾸며 반례도 확인하세요.", "‘내 말로 설명하기’에 이유를 쓰고 기록하세요. SQL 학습 홈으로 돌아올 수 있습니다."], "기록은 이 브라우저/기기에만 저장됩니다. 설명 기록은 숙달 평가가 아니며 기기 간 동기화되지 않습니다.", "개념 퍼즐 열기"],
+      concept: ["SQL을 몰라도 조건·관계·규칙을 직접 비교할 수 있습니다.", ["‘조건 탐구 시작 / 이어가기’를 누르세요. 그리고·또는의 차이부터 시작합니다.", "안내형 그리고와 독립형 또는을 각각 예상·실험하세요.", "주장을 깨는 반례를 고르고 내 말로 설명한 뒤 책 선택에 적용하세요.", "나만의 조건·항목·규칙을 바꾸고 실행·저장하세요. SQL 학습 후 홈에서 이어갈 수 있습니다."], "기록은 이 브라우저/기기에만 저장됩니다. 설명 기록은 숙달 평가가 아니며 기기 간 동기화되지 않습니다.", "조건 탐구 열기"],
       sql: ["샘플 데이터로 SQL을 실행하고 결과를 확인합니다. DB·AI 설정 없이 시작합니다.", ["SQL 학습을 시작하거나 아직 풀지 않은 문제를 이어서 여세요.", "문제와 힌트를 읽고 테이블 이름을 확인하세요. 첫 문제의 열은 id, name, region입니다.", "SQL을 작성해 ‘실행하고 확인하기’를 누르세요. 오류가 나면 열 이름과 조건을 고쳐 다시 실행하세요.", "정답 여부와 실제 행을 확인하고 표·흐름·해설을 비교한 뒤 다음 문제로 이동하세요."], "정답은 해당 문제의 결과 비교입니다. 학습 효과나 다른 상황에서의 이해를 보장하지 않습니다.", "SQL 학습 시작 / 이어서하기"],
       community: ["질문을 함께 검토하고 이의를 제기하는 과정을 모의 데이터로 체험합니다.", ["모의 질문을 작성하고 사실·의견·창의적 가설 중 성격을 구분하세요. 개인정보는 쓰지 마세요.", "AI 사전 검사와 중립적 표현 제안을 살펴보세요. 실패·대기·취소도 선택할 수 있습니다.", "사람 검토 단계를 거친 뒤 주장·근거·반례·대안을 담아 답하고 요약의 출처를 확인하세요.", "신고와 항소를 체험하세요. 모의 검토자 판단도 실제 제재나 다른 사람에게 전달되지 않습니다."], "실제 AI·서버·다른 참여자와 연결되지 않습니다. 입력은 공개되지 않으며 페이지를 새로 열면 모의 체험이 초기화됩니다.", "참여형 모의 체험 열기"]
     },
     en: {
       summary: "New here? Explore three ways to start", title: "What would you like to try?", paths: ["Understand concepts", "Practice SQL", "Explore community review"], done: "Read · close guide", read: "Guide read. You can reopen it anytime.", unavailable: "Could not save the read marker on this device. The guide is still available.",
-      concept: ["Compare conditions, relationships and rules without SQL.", ["Open C1 from the concept puzzle list (Korean content).", "Predict the result, select cards and run an experiment.", "Compare your prediction with the result. Change rules and look for counterexamples.", "Write your own explanation and save it. Return with SQL learning home."], "Notes stay in this browser/device. A saved explanation is not a mastery assessment and does not sync across devices.", "Open concept puzzles"],
+      concept: ["Compare conditions, relationships and rules without SQL.", ["Start the conditions exploration (Korean content).", "Predict the result, select cards and run an experiment.", "Compare your prediction with the result. Change rules and look for counterexamples.", "Apply the rule to books, then create, save and replay your own puzzle."], "Notes stay in this browser/device. A saved explanation is not a mastery assessment and does not sync across devices.", "Open conditions exploration"],
       sql: ["Run SQL against sample data without database or AI setup.", ["Start SQL practice or continue with an unsolved problem.", "Read the task and hint. The first task uses id, name and region from customers.", "Write SQL and run it. Correct column names or conditions after an error, then retry.", "Check grading and actual rows. Compare Table, Flow and Explain, then continue."], "A correct result only verifies this task; it does not establish learning or transfer.", "Start / resume SQL"],
       community: ["Try collaborative review using mock data (Korean content).", ["Write a mock question and distinguish fact, opinion or creative hypothesis. Avoid personal data.", "Review the simulated AI check and wording suggestion. Try failure, waiting and cancellation.", "After simulated human review, answer with evidence, counterexamples and alternatives. Check summary sources.", "Try reporting and appealing. Simulated decisions do not sanction or notify anyone."], "No real AI, server or other participants are connected. Inputs are not published; reopening the page resets this demo.", "Open community demo"]
     }
@@ -343,7 +345,7 @@ loadLearningPathAssets();
     try { byId("learningGuideStatus").textContent = localStorage.getItem("coquery.guide.v1") === "read" ? c.read : ""; } catch { /* Guidance works without storage. */ }
   }
   guide.querySelectorAll("[data-guide-path]").forEach((button) => button.addEventListener("click", () => { path = button.dataset.guidePath; renderGuide(); }));
-  byId("learningGuideStart").addEventListener("click", () => byId(path === "sql" ? "firstProblemButton" : "conceptPuzzlesButton").click());
+  byId("learningGuideStart").addEventListener("click", () => byId(path === "sql" ? "firstProblemButton" : "explorationButton").click());
   byId("learningGuideDone").addEventListener("click", () => {
     const c = copy[document.documentElement.lang === "en" ? "en" : "ko"];
     try { localStorage.setItem("coquery.guide.v1", "read"); byId("learningGuideStatus").textContent = c.read; }

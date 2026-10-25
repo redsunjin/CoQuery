@@ -31,10 +31,10 @@
   function close() { shell.dataset.conceptOpen = "false"; host.hidden = true; document.getElementById("conceptPuzzlesButton")?.focus({preventScroll:true}); document.getElementById("terminalScroll")?.scrollTo(0,0); }
   function render(moveFocus = false) {
     const focused = document.activeElement?.id;
-    let content = `<div class="concept-toolbar">${button("SQL 학습 홈", "home")}${current ? button("9개 문제 선택", "list") : ""}${button("개념 기록 지우기", "reset")}</div>`;
+    let content = `<div class="concept-toolbar">${button("홈", "home") + button("조건 탐구 이어가기", "explore")}${current ? button("9개 문제 선택", "list") : ""}${button("개념 기록 지우기", "reset")}</div>`;
     content += `<p class="concept-kicker">개념 퍼즐 · 한국어 콘텐츠</p><h2 tabindex="-1" id="conceptHeading">${current ? esc(api.puzzles.find(x=>x.id===current).title) : "조건·관계·규칙을 직접 확인해 보세요."}</h2>`;
     if (!current) {
-      content += `<p class="concept-muted">SQL 문법 없이 시작하는 9문제입니다. 기존 SQL 학습은 ‘SQL 학습 홈’에서 계속할 수 있습니다.</p><nav class="concept-toolbar" aria-label="퍼즐 유형">${[["all","전체"],...Object.entries(types)].map(([id,t])=>button(t,"filter",id)).join("")}</nav><div class="concept-bank">`;
+      content += `<p class="concept-muted">SQL 문법 없이 시작하는 9문제입니다. 기존 SQL 학습은 홈에서 계속할 수 있습니다.</p><nav class="concept-toolbar" aria-label="퍼즐 유형">${[["all","전체"],...Object.entries(types)].map(([id,t])=>button(t,"filter",id)).join("")}</nav><div class="concept-bank">`;
       for (const p of api.puzzles.filter(p=>filter==="all"||p.type===filter)) {
         const a=records[p.id];
         const status = a?.recorded ? (api.coverage(p,a) ? "설명 기록 · 필수 실험 확인" : "설명 기록 · 추가 실험 필요") : a?.seen.length ? "실험 확인 · 설명 미기록" : "미시도";
@@ -70,6 +70,7 @@
     const b=event.target.closest("[data-concept-action]");if(!b)return;
     const action=b.dataset.conceptAction,v=b.dataset.value;
     if(action==="home"){close();return;}
+    if(action==="explore"){close();document.getElementById("explorationButton")?.click();return;}
     if(action==="reset"){records={};try{localStorage.removeItem(key);}catch{storageAvailable=false;}render(true);return;}
     if(action==="filter"){filter=v;render();return;}
     if(action==="list"){current=null;render(true);return;}
@@ -101,6 +102,6 @@
   });
   document.getElementById("conceptPuzzlesButton")?.addEventListener("click",open);
   // Existing home/SQL commands must be able to close the optional surface.
-  ["homeButton","firstProblemButton","problemBankButton","advancedWorkspaceButton"].forEach(id=>document.getElementById(id)?.addEventListener("click",()=>{shell.dataset.conceptOpen="false";host.hidden=true;}));
+  ["explorationButton","homeButton","firstProblemButton","problemBankButton","advancedWorkspaceButton"].forEach(id=>document.getElementById(id)?.addEventListener("click",()=>{shell.dataset.conceptOpen="false";host.hidden=true;}));
   window.coqueryConceptState=()=>({current,filter,records,storageAvailable});
 })();

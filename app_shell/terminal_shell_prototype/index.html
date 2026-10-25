@@ -11,8 +11,8 @@
     <link rel="icon" href="./coquery-icon.svg" type="image/svg+xml" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="stylesheet" href="./styles.css" />
-    <link rel="stylesheet" href="./onboarding.css?v=13" />
-    <link rel="stylesheet" href="./concept-puzzles.css" />
+    <link rel="stylesheet" href="./onboarding.css?v=14" />
+    <link rel="stylesheet" href="./concept-puzzles.css?v=13" />
   </head>
   <body>
     <div class="app-shell" data-detail-open="false" data-home-mode="true">
@@ -39,7 +39,7 @@
             <span></span>
           </div>
           <div class="header-center">
-            <div class="header-kicker" data-i18n="headerKicker">로컬 SQL 랩</div>
+            <div class="header-kicker" data-i18n="headerKicker">조건과 논리 탐구</div>
             <h1 data-i18n="appTitle">CoQuery</h1>
           </div>
           <div class="header-actions">
@@ -115,16 +115,17 @@
         <section class="terminal-scroll" id="terminalScroll" aria-label="터미널 명령 기록" data-i18n-attr="aria-label:terminalHistoryLabel">
           <section class="learning-home" aria-labelledby="learningHomeTitle">
             <div class="learning-home-inner">
-              <p class="learning-home-eyebrow">SQL PRACTICE LAB</p>
-              <h2 id="learningHomeTitle" data-home-copy="title">데이터로 직접 확인하며 SQL을 배워보세요.</h2>
+              <p class="learning-home-eyebrow">CONCEPT & LOGIC LAB</p>
+              <h2 id="learningHomeTitle" data-home-copy="title">조건을 바꾸고, 생각을 확인해 보세요.</h2>
               <p class="learning-home-copy" data-home-copy="copy">
-                별도 DB 연결이나 AI 설정 없이 샘플 데이터로 바로 시작할 수 있습니다. 첫 문제를 풀고, 필요할 때 실제 데이터와 고급 기능으로 확장하세요.
+                SQL을 몰라도 시작할 수 있습니다. 예상하고, 반례를 찾고, 나만의 규칙을 만들어 보세요. 현재는 학습 효과를 검증 중인 내부 베타입니다.
               </p>
               <div class="learning-home-actions" aria-label="시작 방법">
-                <button class="primary-button" type="button" id="firstProblemButton" data-home-copy="firstProblem">첫 문제 시작하기</button>
-                <button class="ghost-button" type="button" id="problemBankButton" data-home-copy="problemBank">문제 선택</button>
-                <button class="ghost-button" type="button" id="conceptPuzzlesButton" data-home-copy="conceptPuzzles">개념 퍼즐 9개</button>
-                <button class="ghost-button" type="button" id="advancedWorkspaceButton" data-home-copy="advanced">고급 기능</button>
+                <button class="primary-button" type="button" id="explorationButton" data-home-copy="exploration">조건 탐구 시작 / 이어가기</button>
+                <button class="ghost-button" type="button" id="firstProblemButton" data-home-copy="firstProblem">SQL 학습 시작 / 이어가기</button>
+                <button class="ghost-button" type="button" id="problemBankButton" data-home-copy="problemBank">SQL 문제 선택</button>
+                <button class="ghost-button" type="button" id="conceptPuzzlesButton" data-home-copy="conceptPuzzles">조건·관계·규칙 문제 선택</button>
+                <button class="ghost-button" type="button" id="advancedWorkspaceButton" data-home-copy="advanced">데이터 작업 도구</button>
               </div>
               <details class="learning-guide" id="learningGuide">
                 <summary id="learningGuideSummary">처음이라면: 사용법과 세 가지 시작 방법</summary>
@@ -172,6 +173,7 @@
             </div>
           </section>
 
+          <section id="explorationLearning" class="concept-learning" lang="ko" aria-label="조건 탐구" hidden></section>
           <section id="conceptLearning" class="concept-learning" lang="ko" aria-label="개념 퍼즐" hidden></section>
 
           <div class="welcome-block">
@@ -282,8 +284,9 @@
     <script src="./pwa-runtime.js"></script>
     <script src="./dialect-learning.js"></script>
     <script src="./app.js"></script>
-    <script src="./onboarding.js?v=13"></script>
+    <script src="./onboarding.js?v=14"></script>
     <script src="./concept-puzzle-catalog.js"></script>
-    <script src="./concept-puzzles.js"></script>
+    <script src="./concept-puzzles.js?v=13"></script>
+    <script src="./exploration.js?v=13"></script>
   </body>
 </html>

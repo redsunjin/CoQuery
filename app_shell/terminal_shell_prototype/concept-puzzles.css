@@ -44,3 +44,15 @@
   .concept-learning input,
   .concept-learning textarea { font-size:16px; }
 }
+
+.app-shell[data-exploration-open="true"] .terminal-scroll > :not(#explorationLearning) { display:none !important; }
+.app-shell[data-exploration-open="true"] #explorationLearning:not([hidden]) { display:block !important; }
+.explore-steps { display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 28px; }
+.explore-steps button { min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel-soft);color:var(--muted); }
+.explore-steps [aria-current] { border-color:var(--accent);color:var(--text);background:var(--accent-soft); }
+.explore-edit-row { display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;align-items:center; }
+.explore-sql { white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px; }
+#explorationLearning fieldset { min-width:0;border:1px solid var(--line);border-radius:8px; }
+#explorationLearning button:focus-visible { outline:2px solid var(--accent-strong);outline-offset:3px; }
+@media(max-width:760px) { .explore-edit-row { grid-template-columns:1fr;gap:0; } .explore-edit-row label { margin:10px 0; } }
+#explorationLearning .concept-cards { grid-template-columns:repeat(2,minmax(0,1fr)); }
