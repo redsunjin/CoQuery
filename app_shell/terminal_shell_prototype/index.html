@@ -12,6 +12,7 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./onboarding.css" />
+    <link rel="stylesheet" href="./concept-puzzles.css" />
   </head>
   <body>
     <div class="app-shell" data-detail-open="false" data-home-mode="true">
@@ -122,6 +123,7 @@
               <div class="learning-home-actions" aria-label="시작 방법">
                 <button class="primary-button" type="button" id="firstProblemButton" data-home-copy="firstProblem">첫 문제 시작하기</button>
                 <button class="ghost-button" type="button" id="problemBankButton" data-home-copy="problemBank">문제 선택</button>
+                <button class="ghost-button" type="button" id="conceptPuzzlesButton" data-home-copy="conceptPuzzles">개념 퍼즐 9개</button>
                 <button class="ghost-button" type="button" id="advancedWorkspaceButton" data-home-copy="advanced">고급 기능</button>
               </div>
               <p class="learning-home-privacy">
@@ -149,6 +151,8 @@
               </div>
             </div>
           </section>
+
+          <section id="conceptLearning" class="concept-learning" lang="ko" aria-label="개념 퍼즐" hidden></section>
 
           <div class="welcome-block">
             <div class="user-badge">CM</div>
@@ -259,5 +263,7 @@
     <script src="./dialect-learning.js"></script>
     <script src="./app.js"></script>
     <script src="./onboarding.js"></script>
+    <script src="./concept-puzzle-catalog.js"></script>
+    <script src="./concept-puzzles.js"></script>
   </body>
 </html>

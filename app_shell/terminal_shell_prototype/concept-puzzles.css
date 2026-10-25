@@ -1,0 +1,39 @@
+/* Keep concept learning within the existing dark CoQuery learning surface. */
+.concept-learning[hidden] { display:none !important; }
+.app-shell[data-concept-open="true"] .terminal-scroll > :not(#conceptLearning) { display:none !important; }
+.app-shell[data-concept-open="true"] #conceptLearning:not([hidden]) { display:block !important; }
+.concept-learning { width:min(920px,100%);margin:auto;padding:32px 28px 48px; }
+.concept-learning h2 { font-size:clamp(27px,4vw,40px);line-height:1.25;letter-spacing:-.025em;margin:16px 0; }
+.concept-kicker { color:var(--accent-strong);font-size:13px;font-weight:720; }
+.concept-muted { color:var(--muted);font-size:14px;line-height:1.65; }
+.concept-toolbar { display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0; }
+.concept-toolbar button { min-height:44px; }
+.concept-bank { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0; }
+.concept-problem { color:var(--text);text-align:left;background:var(--panel-raised);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:12px; }
+.concept-problem:hover,.concept-card:hover { border-color:var(--accent); }
+.concept-problem span { color:var(--accent-strong);font-size:12px; }
+.concept-problem strong { font-size:18px; }
+.concept-problem small { color:var(--muted);font-size:12px; }
+.concept-learning label { display:grid;gap:8px;margin:18px 0; }
+.concept-learning select,.concept-learning input,.concept-learning textarea { width:100%;min-width:0;max-width:100%;padding:10px 12px;background:var(--panel-soft);color:var(--text);border:1px solid var(--line-strong);border-radius:8px; }
+.concept-learning textarea { min-height:110px;resize:vertical; }
+.concept-learning .concept-check { display:flex;align-items:center; }
+.concept-check input { width:20px;height:20px;accent-color:var(--accent); }
+.concept-cards { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0; }
+.concept-card { min-height:100px;padding:14px;background:var(--panel-raised);border:2px solid var(--line);color:var(--text);border-radius:10px;display:grid;gap:12px; }
+.concept-card[aria-pressed="true"] { background:var(--accent-soft);border-color:var(--accent); }
+.concept-card[aria-pressed="true"] strong:after { content:" ✓";color:var(--accent-strong); }
+.concept-table { width:100%;border-collapse:collapse;margin:16px 0;font-size:14px; }
+.concept-table th,.concept-table td { text-align:left;border-bottom:1px solid var(--line);padding:10px 8px;overflow-wrap:anywhere; }
+.concept-table th { color:var(--muted); }
+.concept-tables { display:grid;grid-template-columns:1fr 1fr;gap:20px; }
+.concept-notice { border-left:3px solid var(--accent);background:var(--panel-soft);padding:16px;line-height:1.7; }
+.concept-result { margin:24px 0;border-top:1px solid var(--line);padding-top:18px; }
+.concept-result h3 { color:var(--accent-strong); }
+.concept-learning details { border-top:1px solid var(--line);padding:16px 0;margin:16px 0; }
+.concept-learning summary { cursor:pointer;font-weight:650; }
+.concept-simulation { margin:30px 0;padding:20px;border:1px solid var(--line);border-radius:12px;background:var(--panel-raised); }
+.concept-simulation p { color:var(--muted);font-size:14px; }
+.concept-simulation a { display:inline-flex;align-items:center;text-decoration:none;min-height:44px; }
+.concept-storage { border-top:1px solid var(--line);padding-top:18px; }
+@media(max-width:760px) { .concept-learning { padding:24px 18px 36px; } .concept-bank { grid-template-columns:1fr; } .concept-tables { grid-template-columns:1fr;gap:8px; } .concept-cards { gap:8px; } }
