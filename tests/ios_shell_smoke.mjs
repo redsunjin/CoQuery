@@ -240,4 +240,12 @@ assert.match(privacyPolicy, /data-policy-lang="en"/);
 assert.match(privacyPolicy, /개인정보 처리방침/);
 assert.match(privacyPolicy, /new URLSearchParams\(window\.location\.search\)/);
 
+
+const communityHtml = readFileSync(join(distDir, "community-demo.html"), "utf8");
+const communityCss = readFileSync(join(distDir, "community-demo.css"), "utf8");
+assert.match(communityHtml, /viewport-fit=cover/);
+assert.match(communityCss, /padding: calc\(16px \+ var\(--safe-area-top\)\)/);
+assert.match(communityCss, /flex-wrap: wrap/);
+
+assert.match(readFileSync(join(distDir, "concept-puzzles.css"), "utf8"), /\.concept-learning textarea \{ font-size:16px;/);
 console.log("ios shell smoke passed");

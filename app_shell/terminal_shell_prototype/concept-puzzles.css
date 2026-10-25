@@ -37,3 +37,10 @@
 .concept-simulation a { display:inline-flex;align-items:center;text-decoration:none;min-height:44px; }
 .concept-storage { border-top:1px solid var(--line);padding-top:18px; }
 @media(max-width:760px) { .concept-learning { padding:24px 18px 36px; } .concept-bank { grid-template-columns:1fr; } .concept-tables { grid-template-columns:1fr;gap:8px; } .concept-cards { gap:8px; } }
+
+/* Avoid iOS focus zoom for the concept and mock-community form fields. */
+@media (max-width:760px) {
+  .concept-learning select,
+  .concept-learning input,
+  .concept-learning textarea { font-size:16px; }
+}
