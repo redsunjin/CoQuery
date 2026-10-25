@@ -28,8 +28,8 @@ References checked on 2026-07-09:
 | --- | --- |
 | Version | 0.8.0 |
 | Copyright | 2026 CoQuery |
-| Support URL | `https://redsunjin.github.io/CoQuery/support/` (HTTP 200 verified 2026-07-11) |
-| Marketing URL | Optional; can be omitted for first TestFlight |
+| Support URL | `https://e3o-labs.github.io/coquery/support/` (HTTP 200 verified 2026-10-25) |
+| Marketing URL | `https://e3o-labs.github.io/coquery/` |
 | Privacy Policy URL | `https://redsunjin.github.io/CoQuery/privacy/` (HTTP 200 verified 2026-07-11) |
 
 ## Product Page Copy

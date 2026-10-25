@@ -64,12 +64,16 @@ assert.match(indexHtml, /<script src="\.\/ios-training-runtime\.js"><\/script>/)
 assert.match(indexHtml, /<script src="\.\/practice-result-views\.js"><\/script>/);
 assert.match(indexHtml, /<script src="\.\/dialect-learning\.js"><\/script>/);
 assert.match(indexHtml, /<script src="\.\/app\.js"><\/script>/);
-assert.match(indexHtml, /<script src="\.\/onboarding\.js\?v=13"><\/script>/);
+assert.match(indexHtml, /<script src="\.\/onboarding\.js\?v=14"><\/script>/);
 assert.doesNotMatch(indexHtml, /pwa-runtime\.js/);
 assert.doesNotMatch(indexHtml, /<link[^>]+rel="manifest"/);
 assert.match(indexHtml, /practice-result-views\.css/);
 assert.match(indexHtml, /https:\/\/redsunjin\.github\.io\/CoQuery\/privacy\//);
 assert.match(indexHtml, /id="privacyPolicyLink"/);
+assert.match(indexHtml, /id="serviceIntroLink" href="https:\/\/e3o-labs\.github\.io\/coquery\/"/);
+assert.match(indexHtml, /id="serviceSupportLink" href="https:\/\/e3o-labs\.github\.io\/coquery\/support\/"/);
+assert.match(indexHtml, /id="explorationButton"/);
+assert.match(indexHtml, /exploration\.js\?v=13/);
 assert.match(indexHtml, /privacy\/\?lang=ko/);
 assert.match(indexHtml, /viewport-fit=cover/);
 assert.match(indexHtml, /commandMenuToggle/);

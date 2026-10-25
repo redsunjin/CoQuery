@@ -42,7 +42,9 @@ Launch Goal 4: iOS TestFlight Shell Skeleton
 - GitHub Pages is enabled from `main` `/docs`.
 - Privacy Policy URL verified with HTTP 200 on 2026-07-11: `https://redsunjin.github.io/CoQuery/privacy/`
 - Support URL verified with HTTP 200 on 2026-07-11: `https://redsunjin.github.io/CoQuery/support/`
-- Marketing URL can be omitted for the first TestFlight registration unless a public landing page is available.
+- Marketing URL: `https://e3o-labs.github.io/coquery/`
+- Support URL: `https://e3o-labs.github.io/coquery/support/`
+- The app privacy policy remains `https://redsunjin.github.io/CoQuery/privacy/`; the new site privacy page covers the website.
 
 ## Repository Verification (2026-07-11)
 
