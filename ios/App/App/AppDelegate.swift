@@ -47,3 +47,33 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
 }
+
+// UIKit owns the window through a scene; Main keeps the existing Capacitor UI.
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+    var window: UIWindow?
+
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        forward(connectionOptions.urlContexts)
+        for activity in connectionOptions.userActivities {
+            _ = ApplicationDelegateProxy.shared.application(UIApplication.shared, continue: activity, restorationHandler: { _ in })
+        }
+    }
+
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        forward(URLContexts)
+    }
+
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        _ = ApplicationDelegateProxy.shared.application(UIApplication.shared, continue: userActivity, restorationHandler: { _ in })
+    }
+
+    private func forward(_ contexts: Set<UIOpenURLContext>) {
+        for context in contexts {
+            _ = ApplicationDelegateProxy.shared.application(UIApplication.shared, open: context.url, options: [
+                .sourceApplication: context.options.sourceApplication as Any,
+                .annotation: context.options.annotation as Any,
+                .openInPlace: context.options.openInPlace
+            ])
+        }
+    }
+}

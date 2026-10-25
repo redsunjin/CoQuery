@@ -65,6 +65,7 @@ assert.match(indexHtml, /<script src="\.\/dialect-learning\.js"><\/script>/);
 assert.match(indexHtml, /<script src="\.\/app\.js"><\/script>/);
 assert.match(indexHtml, /<script src="\.\/onboarding\.js"><\/script>/);
 assert.doesNotMatch(indexHtml, /pwa-runtime\.js/);
+assert.doesNotMatch(indexHtml, /<link[^>]+rel="manifest"/);
 assert.match(indexHtml, /practice-result-views\.css/);
 assert.match(indexHtml, /https:\/\/redsunjin\.github\.io\/CoQuery\/privacy\//);
 assert.match(indexHtml, /id="privacyPolicyLink"/);

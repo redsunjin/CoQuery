@@ -11,6 +11,7 @@ run_step() {
   "$@"
 }
 
+run_step "iOS scene lifecycle contracts" python3 tests/ios_scene_lifecycle_smoke.py
 run_step "concept puzzle contracts" node tests/concept_puzzles_smoke.mjs
 run_step "release candidate contract" python3 tests/rc_hardening_smoke.py
 run_step "core CLI and Command API tests" python3 sql_cli/tests/test_core.py
