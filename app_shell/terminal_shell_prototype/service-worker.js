@@ -1,9 +1,9 @@
-const CACHE_NAME = "coquery-pwa-v12";
+const CACHE_NAME = "coquery-pwa-v13";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
-  "./onboarding.css?v=11",
+  "./onboarding.css?v=13",
   "./concept-puzzles.css",
   "./concept-puzzle-catalog.js",
   "./concept-puzzles.js",
@@ -12,7 +12,7 @@ const APP_SHELL = [
   "./community-demo.js?v=12",
 
   "./app.js",
-  "./onboarding.js?v=11",
+  "./onboarding.js?v=13",
   "./practice-focus.css",
   "./practice-focus.js",
   "./practice-result-visual.css",

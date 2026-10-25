@@ -43,3 +43,10 @@ Trip119·myquant-lite와 같은 서비스별 폴더 구조를 사용한다. 소�
 - [9월 TestFlight 화면 점검](testflight-ux-audit-2026-09-09.md)
 - [PR #22 개념 퍼즐 기획](https://github.com/redsunjin/CoQuery/pull/22)
 - 로컬 검토 패키지: `outputs/coquery-appstore-2026-10-25/README.md`. outputs는 이번 제작 산출물이며 공개 사이트의 유지보수 원본이 아니다.
+
+## 앱·스토어 링크 정합성 확인 (2026-10-25)
+
+- App Store Connect 0.8.0 제출 준비 버전의 한국어·영어(미국) 지원 URL은 `https://e3o-labs.github.io/coquery/support/`, 마케팅 URL은 `https://e3o-labs.github.io/coquery/`로 이미 저장되어 있음을 실제 화면에서 확인했다. 이번 확인을 이 작업에서 새로 저장한 것으로 기록하지 않는다.
+- 앱 학습 홈에 같은 주소의 서비스 소개/About CoQuery와 고객 지원/Support 링크를 추가했다. 기존 홈 스타일과 학습 진도·시작 버튼을 유지한다.
+- 소개·지원 페이지의 정상 표시와 앱 지원 링크에서 실제 페이지 이동을 확인했다. 앱 개인정보 정책은 적용 범위가 다른 웹사이트 개인정보 안내로 교체하지 않았다.
+- 링크가 포함되기 전에 업로드한 TestFlight 0.8.0(6) 대신, 링크 변경을 포함한 0.8.0(7)을 새로 업로드한다. 공개 App Store 출시/심사 제출은 수행하지 않는다.
