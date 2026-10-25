@@ -13,3 +13,6 @@
     padding: calc(16px + var(--safe-area-top)) max(16px, var(--safe-area-right)) 16px max(16px, var(--safe-area-left));
   }
 }
+
+/* Give the home link a full touch target without changing its visual label. */
+.demo-header a { display:inline-flex;align-items:center;min-width:44px;min-height:44px; }
