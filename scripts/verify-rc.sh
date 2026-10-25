@@ -13,6 +13,7 @@ run_step() {
 
 run_step "iOS scene lifecycle contracts" python3 tests/ios_scene_lifecycle_smoke.py
 run_step "concept puzzle contracts" node tests/concept_puzzles_smoke.mjs
+run_step "community exception contracts" node tests/community_exception_smoke.mjs
 run_step "release candidate contract" python3 tests/rc_hardening_smoke.py
 run_step "core CLI and Command API tests" python3 sql_cli/tests/test_core.py
 run_step "terminal shell app smoke" python3 app_shell/terminal_shell_prototype/smoke.py

@@ -16,21 +16,21 @@ if(target){target.setAttribute('tabindex','-1');target.focus()}
 const currentStep=app.querySelector('.c-steps .current');
 if(currentStep)currentStep.setAttribute('aria-current','step');
 }
-function newCommunity(){return {checkOutcome:'success',checkState:'idle',qState:'draft',answerOutcome:'success',answerState:'idle',answerDraft:null,summaryOutcome:'success',summaryState:'idle',closed:false,reportDelay:false,appealDelay:false,step:0,scenario:'neutral',question:'가상 동아리에서 2점 이상 규칙은 신규 참여자를 늘릴까요?',kind:'가설',scope:'가상 신청자 4명: 가 3점 기존, 나 3점 신규, 다 2점 신규, 라 1점 신규',checked:false,accepted:false,published:false,answers:[],pending:null,summary:false,confirmed:false,report:null,appeal:null,log:[],error:''}}
+function newCommunity(){return {checkOutcome:'success',checkState:'idle',qState:'draft',answerOutcome:'success',answerState:'idle',answerDraft:null,summaryOutcome:'success',summaryState:'idle',closed:false,reportDelay:false,appealDelay:false,step:0,scenario:'neutral',question:'가상 동아리에서 2점 이상 규칙은 신규 참여자를 늘릴까요?',kind:'가설',scope:'가상 신청자 4명: 가 3점 기존, 나 3점 신규, 다 2점 신규, 라 1점 신규',checked:false,accepted:false,published:false,answers:[],pending:null,summary:false,confirmed:false,report:null,appeal:null,log:[],error:'',notice:''}}
 let c=newCommunity();
 const demos={neutral:'가상 동아리에서 2점 이상 규칙은 신규 참여자를 늘릴까요?',tone:'이 규칙을 고른 사람은 생각이 없는 것 아닌가요?',privacy:'가상 예시: 학생의 이름·학교·연락처를 공개하고 규칙의 영향을 물어보고 싶어요.'};
-function eventLog(actor,action){c.log.push({id:c.log.length+1,actor,action});c.error=''}
+function eventLog(actor,action){c.log.push({id:c.log.length+1,actor,action});c.error='';c.notice=''}
 function communityStep(n){c.step=n;c.error='';window.scrollTo(0,0);render()}
 function loadScenario(v){c.scenario=v;c.question=demos[v];c.checked=false;c.accepted=false;render()}
 function runCheck(){if(!c.question.trim()||!c.scope.trim()){c.error='검토할 질문과 범위를 입력해 주세요.';render();return}c.originalQuestion=c.question;if(c.checkOutcome!=='success'){c.checkState=c.checkOutcome;eventLog('AI 모의 검사',c.checkOutcome==='failed'?'검사 실패':'검사 대기');communityStep(1);return}c.checkState='ready';c.checked=true;eventLog('AI 모의 검사','선택한 시나리오의 고정 검사 결과 제시');communityStep(1)}
 function acceptRewrite(){c.question=demos.neutral;c.accepted=true;eventLog('작성자','중립적 표현·개인정보 제외 제안 수락');render()}
 function publishQuestion(){if(c.scenario==='privacy'&&!c.accepted){c.error='이 예시에서는 개인정보를 제외한 수정안을 먼저 선택해 주세요. 공개는 보류됩니다.';render();return}c.qState='published';c.published=true;eventLog('진행자 · 모의','질문 발행 승인');c.answers=[{id:'A1',kind:'사실',claim:'이 표에서는 2점 이상 규칙으로 가·나·다가 선택됩니다.',evidence:'가 3점, 나 3점, 다 2점이며 신규는 나·다 2명입니다.',counter:'주어진 4명의 가상 데이터에서만 확인했습니다.',alt:'신규이며 2점 이상으로 바꾸면 나·다만 선택됩니다.',hidden:false},{id:'A2',kind:'의견',claim:'신규 참가자를 더 포함하는 목표에는 2점 기준이 적절해 보입니다.',evidence:'기존 3점 기준보다 신규 선택 인원이 1명에서 2명으로 늘어납니다.',counter:'1점인 라는 여전히 제외됩니다. 목표 충족만으로 공정하다고 할 수 없습니다.',alt:'점수 외의 참여 기회를 별도로 마련하는 방안도 검토할 수 있습니다.',hidden:false}];communityStep(2)}
-function queueAnswer(e){e.preventDefault();const d=new FormData(e.target);c.pending={id:'A'+(c.answers.length+1),kind:d.get('kind'),claim:d.get('claim').trim(),evidence:d.get('evidence').trim(),counter:d.get('counter').trim(),alt:d.get('alt').trim(),hidden:false};c.answerState=c.answerOutcome==='success'?'waiting':c.answerOutcome;eventLog('참여자','구조화 답변 제출 · '+c.answerState);render()}
+function queueAnswer(e){e.preventDefault();const d=new FormData(e.target);if(!['claim','evidence','counter'].every(key=>String(d.get(key)||'').trim())){c.answerDraft=Object.fromEntries(['kind','claim','evidence','counter','alt'].map(key=>[key,d.get(key)||'']));c.error='주장·근거·반례를 공백 없이 입력해 주세요.';render();return}c.pending={id:'A'+(c.answers.length+1),kind:d.get('kind'),claim:d.get('claim').trim(),evidence:d.get('evidence').trim(),counter:d.get('counter').trim(),alt:d.get('alt').trim(),hidden:false};c.answerState=c.answerOutcome==='success'?'waiting':c.answerOutcome;eventLog('참여자','구조화 답변 제출 · '+c.answerState);render()}
 function approveAnswer(){if(!c.pending||['failed','pending'].includes(c.answerState))return;c.answerState='idle';c.answerDraft=null;c.summary=false;c.confirmed=false;c.answers.push(c.pending);c.pending=null;eventLog('진행자 · 모의','답변 발행 승인');render()}
 function makeSummary(){if(c.summaryOutcome!=='success'){c.summaryState=c.summaryOutcome;c.summary=false;eventLog('AI 모의 요약',c.summaryState==='failed'?'요약 실패':'요약 대기');communityStep(3);return}c.summaryState='ready';c.summary=true;c.confirmed=false;eventLog('AI 모의 요약','발행된 답변의 문장을 유형별로 배치 · 초안 생성');communityStep(3)}
-function fileReport(e){e.preventDefault();const d=new FormData(e.target);c.report={target:d.get('target'),reason:d.get('reason'),detail:d.get('detail').trim(),state:'접수',decision:''};c.confirmed=false;eventLog('신고자','R1 신고 접수 · 관련 요약 재검토 표시');render()}
+function fileReport(e){e.preventDefault();const d=new FormData(e.target);if(!String(d.get('detail')||'').trim()){c.error='신고 이유를 공백 없이 입력해 주세요.';render();return}c.report={target:d.get('target'),reason:d.get('reason'),detail:d.get('detail').trim(),state:'접수',decision:''};c.confirmed=false;eventLog('신고자','R1 신고 접수 · 관련 요약 재검토 표시');render()}
 function decideReport(hide){const a=c.answers.find(x=>x.id===c.report.target);a.hidden=hide;c.summary=false;c.confirmed=false;c.report.state='사람 검토 완료';c.report.decision=hide?'답변 임시 비공개':'위반을 확인하지 못함 · 답변 유지';eventLog('모더레이터 M1 · 모의',c.report.target+' / '+c.report.decision+' / 사유: '+c.report.reason);render()}
-function fileAppeal(e){e.preventDefault();c.appeal={text:new FormData(e.target).get('appeal').trim(),state:'독립 재심 대기',decision:''};eventLog('이의 신청자','AP1 항소 접수 · 원결정자와 다른 담당자에게 배정');render()}
+function fileAppeal(e){e.preventDefault();const text=String(new FormData(e.target).get('appeal')||'').trim();if(!text){c.error='항소 이유와 추가 맥락을 공백 없이 입력해 주세요.';render();return}c.appeal={text,state:'독립 재심 대기',decision:''};eventLog('이의 신청자','AP1 항소 접수 · 원결정자와 다른 담당자에게 배정');render()}
 function decideAppeal(reverse){const a=c.answers.find(x=>x.id===c.report.target);if(reverse)a.hidden=!a.hidden;c.appeal.state='독립 재심 완료';c.appeal.decision=reverse?'원결정 변경':'원결정 유지';c.summary=false;c.confirmed=false;eventLog('재심 담당자 M2 · 모의',c.appeal.decision+' · 근거 문맥 재검토 · 요약 초안 재생성 필요');render()}
 function field(label,name,placeholder,required=true){return `<label class="c-field">${label}<textarea name="${name}" maxlength="1000" placeholder="${placeholder}" ${required?'required':''}></textarea></label>`}
 function communityBase(){const labels=['질문 등록','AI 사전 검사','답변','요약','신고·항소'];let body=`<p class="eyebrow">참여형 검토 · 모의 체험</p><h2>질문을 함께 검토해 보세요.</h2><p class="muted">실제 AI·서버·다른 참여자는 연결되어 있지 않습니다. 버튼으로 작성자·진행자·검토자 역할을 바꿔 체험합니다.</p><ol class="c-steps" aria-label="참여 단계">${labels.map((t,i)=>`<li class="${c.step===i?'current':''}">${i+1}. ${t}</li>`).join('')}</ol>`;
@@ -79,9 +79,21 @@ else{html=html.replace('<button class="secondary" type="submit">답변 제출 ·
 html=html.replace('<div class="actions">'+btn('모의 요약 초안 만들기','makeSummary()','primary',!!c.pending),scenarioControl('summary-outcome','요약 응답 시나리오','summaryOutcome',c.summaryOutcome)+'<div class="actions">'+btn('모의 요약 초안 만들기','makeSummary()','primary',!!c.pending))}
 if(c.step===3){html=html.replace('<details><summary>모의 감사 이력',`<div class="actions">${btn(c.closed?'진행자: 회차 재개':'진행자: 회차 종료',c.closed?'reopenDiscussion()':'closeDiscussion()','secondary')}${btn('요약 확인 취소 · 답변으로','cancelSummary()','secondary')}</div><details><summary>모의 감사 이력`)}
 if(c.step===4&&c.report){let panel='';if(c.report.state==='접수'){panel+=`<p class="callout">${c.reportDelay?'검토가 지연되고 있습니다. 운영 시간에 사람이 처리합니다. 이 시뮬레이션은 처리 기한을 보장하지 않습니다.':'사람 검토 대기입니다. 신고 건수만으로 제재하지 않습니다.'}</p><div class="actions">${btn('검토 지연 체험',"c.reportDelay=true;eventLog('운영 모의','신고 검토 지연 안내');render()",'secondary')}${btn('신고 철회','withdrawReport()','secondary')}</div><p class="tiny">실제 중대한 안전 우려는 신고 철회 후에도 별도 검토가 필요합니다. 여기서는 무해한 모의 사건만 철회합니다.</p>`}if(c.appeal?.state==='독립 재심 대기')panel+=`<p class="callout">${c.appealDelay?'독립 재심 지연 · 원결정 상태 유지':'독립 재심 담당자 M2 배정 대기'}</p><div class="actions">${btn('재심 지연 체험',"c.appealDelay=true;eventLog('운영 모의','독립 재심 지연 안내');render()",'secondary')}${btn('항소 취소','cancelAppeal()','secondary')}</div>`;html=html.replace('<details><summary>모의 감사 이력',panel+'<details><summary>모의 감사 이력')}
+if(c.notice)html=html.replace('<details><summary>모의 감사 이력',`<p class="callout" role="status">${esc(c.notice)}</p><details><summary>모의 감사 이력`);
 return html}
-function preserveAnswerDraft(){const f=document.querySelector('form');const d=new FormData(f);c.answerDraft=Object.fromEntries(d);eventLog('작성자','답변 입력 취소 · 초안 보존');communityStep(3);c.summary=false;c.summaryState='idle';render()}
+function preserveAnswerDraft(){const f=document.querySelector('form');const d=new FormData(f);c.answerDraft=Object.fromEntries(d);eventLog('작성자','답변 입력 취소 · 초안 보존');c.notice='답변 초안을 보존했습니다. 같은 화면에서 계속 작성할 수 있습니다.';render()}
 
 
+// Keep the source link's destination available to keyboard and screen reader users.
+app.addEventListener("click",event=>{
+const link=event.target.closest('a[href^="#source-"]');
+if(!link)return;
+const source=document.getElementById(link.getAttribute("href").slice(1));
+if(!source)return;
+const details=source.closest("details");
+if(details)details.open=true;
+source.setAttribute("tabindex","-1");
+requestAnimationFrame(()=>source.focus({preventScroll:true}));
+});
 render();
 window.render_game_to_text=()=>JSON.stringify(c);window.advanceTime=()=>{};
