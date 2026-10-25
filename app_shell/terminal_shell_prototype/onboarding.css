@@ -172,3 +172,16 @@
     grid-template-columns: 1fr;
   }
 }
+
+.learning-guide { padding: 20px; border: 1px solid var(--border, #34342e); border-radius: 14px; background: var(--panel, #1e1e19); }
+.learning-guide summary { cursor: pointer; font-weight: 700; line-height: 1.6; }
+.learning-guide h3 { margin: 20px 0 14px; }
+.learning-guide p, .learning-guide li { line-height: 1.75; }
+.learning-guide ol { padding-inline-start: 24px; }
+.learning-guide li + li { margin-top: 10px; }
+.learning-guide [aria-pressed="true"] { outline: 2px solid var(--accent-strong, #bcb3ff); outline-offset: 2px; }
+.learning-guide-note { margin: 0; font-size: 13px; color: var(--text-muted, #b8b8ad); line-height: 1.7; }
+.learning-guide-note:empty { display: none; }
+.learning-guide [hidden] { display: none !important; }
+.learning-guide .learning-home-actions { margin-top: 16px; }
+.learning-guide a { text-decoration: none; }

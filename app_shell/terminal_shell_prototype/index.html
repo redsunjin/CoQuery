@@ -11,7 +11,7 @@
     <link rel="icon" href="./coquery-icon.svg" type="image/svg+xml" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="stylesheet" href="./styles.css" />
-    <link rel="stylesheet" href="./onboarding.css" />
+    <link rel="stylesheet" href="./onboarding.css?v=11" />
     <link rel="stylesheet" href="./concept-puzzles.css" />
   </head>
   <body>
@@ -126,6 +126,24 @@
                 <button class="ghost-button" type="button" id="conceptPuzzlesButton" data-home-copy="conceptPuzzles">개념 퍼즐 9개</button>
                 <button class="ghost-button" type="button" id="advancedWorkspaceButton" data-home-copy="advanced">고급 기능</button>
               </div>
+              <details class="learning-guide" id="learningGuide">
+                <summary id="learningGuideSummary">처음이라면: 사용법과 세 가지 시작 방법</summary>
+                <h3 id="learningGuideTitle">어떤 방식으로 시작할까요?</h3>
+                <div class="learning-home-actions" id="learningGuidePaths" aria-label="사용 안내 경로">
+                  <button type="button" class="ghost-button" data-guide-path="concept" aria-pressed="true">개념부터 이해하기</button>
+                  <button type="button" class="ghost-button" data-guide-path="sql" aria-pressed="false">SQL 연습하기</button>
+                  <button type="button" class="ghost-button" data-guide-path="community" aria-pressed="false">함께 검토하는 과정 보기</button>
+                </div>
+                <p id="learningGuidePurpose"></p>
+                <ol id="learningGuideSteps"><li></li><li></li><li></li><li></li></ol>
+                <p class="learning-guide-note" id="learningGuideLimit"></p>
+                <div class="learning-home-actions">
+                  <button type="button" class="primary-button" id="learningGuideStart"></button>
+                  <a class="primary-button" id="learningGuideDemo" href="./community-demo.html" hidden></a>
+                  <button type="button" class="ghost-button" id="learningGuideDone">안내 읽음 · 접기</button>
+                </div>
+              </details>
+              <p id="learningGuideStatus" role="status" class="learning-guide-note"></p>
               <p class="learning-home-privacy">
                 <a
                   id="privacyPolicyLink"
@@ -262,7 +280,7 @@
     <script src="./pwa-runtime.js"></script>
     <script src="./dialect-learning.js"></script>
     <script src="./app.js"></script>
-    <script src="./onboarding.js"></script>
+    <script src="./onboarding.js?v=11"></script>
     <script src="./concept-puzzle-catalog.js"></script>
     <script src="./concept-puzzles.js"></script>
   </body>
