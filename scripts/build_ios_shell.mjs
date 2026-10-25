@@ -49,6 +49,8 @@ rmSync(distDir, { recursive: true, force: true });
 mkdirSync(distDir, { recursive: true });
 
 const html = read(join(sourceDir, "index.html"))
+  // The native shell is installed by iOS, not through a PWA manifest.
+  .replace(/^[ \t]*<link rel="manifest"[^>]*>\r?\n/m, "")
   .replace('value="provider_list_presets"', 'value="practice_list"')
   .replace(
     '    <script src="./pwa-runtime.js"></script>\n',

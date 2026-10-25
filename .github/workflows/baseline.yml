@@ -23,6 +23,7 @@ jobs:
 
       - name: Verify baseline CLI and tests
         run: |
+          python3 tests/ios_scene_lifecycle_smoke.py
           python3 main.py --help
           python3 sql_cli/tests/test_core.py
           python3 sql_cli/tests/test_result_intelligence.py
