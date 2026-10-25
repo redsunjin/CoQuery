@@ -41,3 +41,22 @@ assert.equal(unavailable.ok,false);
 assert.equal(unavailable.error.code,'network_unavailable');
 assert.deepEqual(plain(unavailable.data),{});
 assert.deepEqual(plain(await offline.window.coqueryCommandRuntime.getSessions()),{sessions:[]});
+
+// Separate document navigation must never replace the cached SQL home.
+const handlers = {}, pages = new Map([["./index.html",new Response("SQL home")]]);
+const workerContext = vm.createContext({
+  URL, self: { addEventListener: (name,fn) => { handlers[name]=fn; } },
+  caches: { open: async () => ({ put: async (name,response) => pages.set(name,response) }), match: async name => pages.get(name) },
+  fetch: async () => new Response("simulation"),
+});
+vm.runInContext(worker,workerContext);
+let pending;
+handlers.fetch({ request:{url:"https://example.test/community-demo.html",method:"GET",mode:"navigate"},respondWith:value=>{pending=value} });
+await pending;
+assert.equal(await pages.get("./index.html").clone().text(),"SQL home");
+assert.equal(await pages.get("./community-demo.html").clone().text(),"simulation");
+workerContext.fetch=async()=>{throw new Error("offline")};
+handlers.fetch({ request:{url:"https://example.test/community-demo.html",method:"GET",mode:"navigate"},respondWith:value=>{pending=value} });
+assert.equal(await (await pending).clone().text(),"simulation");
+handlers.fetch({ request:{url:"https://example.test/",method:"GET",mode:"navigate"},respondWith:value=>{pending=value} });
+assert.equal(await (await pending).clone().text(),"SQL home");
