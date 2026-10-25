@@ -30,6 +30,7 @@ for (const asset of [
   "concept-puzzles.css",
   "concept-puzzle-catalog.js",
   "concept-puzzles.js",
+  "exploration.js",
   "community-demo.html",
   "community-demo.css",
   "community-demo.js",
@@ -63,7 +64,7 @@ assert.match(indexHtml, /<script src="\.\/ios-training-runtime\.js"><\/script>/)
 assert.match(indexHtml, /<script src="\.\/practice-result-views\.js"><\/script>/);
 assert.match(indexHtml, /<script src="\.\/dialect-learning\.js"><\/script>/);
 assert.match(indexHtml, /<script src="\.\/app\.js"><\/script>/);
-assert.match(indexHtml, /<script src="\.\/onboarding\.js\?v=11"><\/script>/);
+assert.match(indexHtml, /<script src="\.\/onboarding\.js\?v=13"><\/script>/);
 assert.doesNotMatch(indexHtml, /pwa-runtime\.js/);
 assert.doesNotMatch(indexHtml, /<link[^>]+rel="manifest"/);
 assert.match(indexHtml, /practice-result-views\.css/);

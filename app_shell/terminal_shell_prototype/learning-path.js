@@ -29,7 +29,7 @@ const learningPathCopy = {
   ko: {
     title: "SQL 기초 학습",
     subtitle: "순서대로 풀어도 되고, 필요한 개념부터 골라도 됩니다.",
-    progress: "전체 진행률",
+    progress: "SQL 연습 진행률",
     continue: "이어서 학습하기",
     review: "완료한 문제 복습하기",
     start: "시작하기",
@@ -51,7 +51,7 @@ const learningPathCopy = {
   en: {
     title: "SQL Basics Path",
     subtitle: "Follow the path in order or jump to the concept you need.",
-    progress: "Overall progress",
+    progress: "SQL practice progress",
     continue: "Continue learning",
     review: "Review completed problems",
     start: "Start",
