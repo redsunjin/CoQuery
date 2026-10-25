@@ -1,5 +1,6 @@
 import UIKit
 import Capacitor
+import WebKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -75,5 +76,77 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 .openInPlace: context.options.openInPlace
             ])
         }
+    }
+}
+
+// Publish actual window insets to the custom web UI; no screen/device assumptions.
+class AdaptiveBridgeViewController: CAPBridgeViewController {
+    private var lastGeometry = ""
+    private var geometryHandler: GeometryMessageHandler?
+
+    override func capacitorDidLoad() {
+        guard let content = webView?.configuration.userContentController else { return }
+        let handler = GeometryMessageHandler(owner: self)
+        geometryHandler = handler
+        content.add(handler, name: "coqueryGeometry")
+        let script = """
+        window.coqueryNativeLayout = function(g) {
+          window.coqueryWindowGeometry = g;
+          const root = document.documentElement;
+          if (!root || !g.width) return;
+          const ratio = window.innerWidth / g.width;
+          ['top','right','bottom','left'].forEach(function(edge) {
+            root.style.setProperty('--safe-area-' + edge, Math.max(0,g.insets[edge]*ratio) + 'px');
+          });
+          window.dispatchEvent(new CustomEvent('coquery:geometry', {detail:g}));
+        };
+        document.addEventListener('DOMContentLoaded',function() {
+          window.webkit.messageHandlers.coqueryGeometry.postMessage('ready');
+        });
+        """
+        content.addUserScript(WKUserScript(source: script, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        publishGeometry()
+    }
+
+    override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+        publishGeometry()
+    }
+
+    func publishGeometry(force: Bool = false) {
+        guard let webView = webView, webView.bounds.width > 0 else { return }
+        let inset = webView.safeAreaInsets
+        var divisions: [[String: CGFloat]] = []
+        if #available(iOS 27.1, *) {
+            divisions = webView.reservedRegions(kind: .division).map { region in
+                ["x": region.frame.minX, "y": region.frame.minY,
+                 "width": region.frame.width, "height": region.frame.height]
+            }
+        }
+        let geometry: [String: Any] = [
+            "width":webView.bounds.width,"height":webView.bounds.height,
+            "insets":["top":inset.top,"right":inset.right,"bottom":inset.bottom,"left":inset.left],
+            "divisions": divisions
+        ]
+        guard let data = try? JSONSerialization.data(withJSONObject:geometry,options:.sortedKeys),
+              let json = String(data:data,encoding:.utf8), force || json != lastGeometry else { return }
+        lastGeometry = json
+        webView.evaluateJavaScript("window.coqueryNativeLayout?.(\(json));",completionHandler:nil)
+        #if DEBUG
+        print("[CoQuery geometry] \(json)")
+        #endif
+    }
+}
+
+private class GeometryMessageHandler: NSObject, WKScriptMessageHandler {
+    weak var owner: AdaptiveBridgeViewController?
+    init(owner: AdaptiveBridgeViewController) { self.owner = owner }
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard message.frameInfo.isMainFrame, message.body as? String == "ready" else { return }
+        owner?.publishGeometry(force:true)
     }
 }

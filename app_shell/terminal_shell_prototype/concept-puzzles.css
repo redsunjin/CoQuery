@@ -56,3 +56,59 @@
 #explorationLearning button:focus-visible { outline:2px solid var(--accent-strong);outline-offset:3px; }
 @media(max-width:760px) { .explore-edit-row { grid-template-columns:1fr;gap:0; } .explore-edit-row label { margin:10px 0; } }
 #explorationLearning .concept-cards { grid-template-columns:repeat(2,minmax(0,1fr)); }
+
+/* One set of controls; geometry changes never rebuild the learning state. */
+#explorationLearning {
+  width:min(1440px,100%);
+  padding:24px max(20px,var(--safe-area-right)) 40px max(20px,var(--safe-area-left));
+  container-type:inline-size;
+}
+.explore-workbench { display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start; }
+.explore-editor,.explore-evidence { min-width:0; }
+.explore-evidence { border:1px solid var(--line);border-radius:12px;padding:20px;background:var(--panel-soft); }
+.explore-evidence .concept-result { margin:0;border:0;padding:0; }
+.explore-evidence h3 { margin-top:0; }
+.explore-step-picker { display:none !important; }
+#explorationLearning [data-explore="layout"] { margin-top:8px; }
+@container (min-width:760px) {
+  #explorationLearning[data-sequential="false"] .explore-workbench { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+}
+@media (max-height:600px) {
+  #explorationLearning { padding-top:12px; }
+  #explorationLearning > .concept-toolbar { margin:6px 0; }
+  #explorationLearning > .concept-kicker { display:none; }
+  #explorationLearning > h2 { font-size:24px;margin:8px 0; }
+  #explorationLearning .explore-steps { display:none; }
+  #explorationLearning .explore-step-picker { display:flex !important;align-items:center;gap:12px;margin:8px 0; }
+  .explore-step-picker select { width:auto;max-width:70%;padding:6px 10px; }
+  #explorationLearning .concept-cards { margin:12px 0; }
+  #explorationLearning .concept-card { min-height:76px;padding:10px;gap:6px; }
+  #explorationLearning [data-explore="layout"] { display:none; }
+}
+/* Insets are live window measurements, including native side controls. */
+.terminal-header { padding-left:max(20px,var(--safe-area-left));padding-right:max(20px,var(--safe-area-right)); }
+.learning-home { padding-left:max(20px,var(--safe-area-left));padding-right:max(20px,var(--safe-area-right)); }
+#explorationLearning[data-fold-split="true"][data-sequential="false"] .explore-workbench { grid-template-columns:var(--fold-left) minmax(0,1fr);column-gap:var(--fold-gap); }
+#explorationLearning[data-fold-split="true"] > .concept-toolbar,
+#explorationLearning[data-fold-split="true"] .explore-steps { max-width:var(--fold-left); }
+#explorationLearning[data-fold-split="true"][data-sequential="true"] .explore-workbench { max-width:var(--fold-left); }
+#explorationLearning[data-workbench="false"] { width:min(920px,100%); }
+#explorationLearning > p { max-width:75ch; }
+@media (max-height:600px) {
+  .app-shell[data-exploration-open="true"] .terminal-scroll { padding:8px; }
+  #explorationLearning > h2 { position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);margin:0; }
+  #explorationLearning .concept-toolbar { margin:6px 0; }
+  #explorationLearning h3 { margin:8px 0; }
+  #explorationLearning p { margin:8px 0; }
+}
+@media (max-height:600px) and (min-width:600px) {
+  #explorationLearning[data-stage="1"] .explore-step-picker { float:left;width:44%;margin-right:12px; }
+  #explorationLearning[data-stage="1"] > h3 { clear:both; }
+}
+@media (max-height:600px) { #explorationLearning { padding-top:8px; } }
+#explorationLearning[data-workbench="false"] [data-explore="layout"] { display:none; }
+@container (max-width:759px) { #explorationLearning [data-explore="layout"] { display:none; } }
+@media (max-height:600px) {
+  #explorationLearning .concept-card { font-size:13px;line-height:1.35;padding:6px;gap:4px; }
+  #explorationLearning .concept-card strong { font-size:14px; }
+}

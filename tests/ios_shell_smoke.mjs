@@ -73,7 +73,7 @@ assert.match(indexHtml, /id="privacyPolicyLink"/);
 assert.match(indexHtml, /id="serviceIntroLink" href="https:\/\/e3o-labs\.github\.io\/coquery\/"/);
 assert.match(indexHtml, /id="serviceSupportLink" href="https:\/\/e3o-labs\.github\.io\/coquery\/support\/"/);
 assert.match(indexHtml, /id="explorationButton"/);
-assert.match(indexHtml, /exploration\.js\?v=13/);
+assert.match(indexHtml, /exploration\.js\?v=15/);
 assert.match(indexHtml, /privacy\/\?lang=ko/);
 assert.match(indexHtml, /viewport-fit=cover/);
 assert.match(indexHtml, /commandMenuToggle/);
